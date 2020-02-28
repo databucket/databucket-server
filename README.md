@@ -1,2 +1,2 @@
 # databucket-app
-Databucket WEB application with API service
+Databucket GUI & API service
