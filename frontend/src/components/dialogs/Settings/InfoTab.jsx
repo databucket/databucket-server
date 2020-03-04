@@ -33,12 +33,22 @@ class InfoTab extends React.Component {
                 <img src={Logo} alt=''/>
                 <div
                     style={{
-                        position: 'absolute', left: '80%', top: '92%',
+                        position: 'absolute', left: '42%', top: '100%',
                         transform: 'translate(-50%, -50%)'
                     }}
                 >
-                    <Typography color='textSecondary'>Version: {this.state.version}</Typography>
-                    <Link target='_blank' href='https://www.databucket.pl' color="textSecondary" >www.databukcet.pl</Link>
+                    <Typography color='textSecondary'>Version: <b>{this.state.version}</b></Typography>
+                    <Link target='_blank' href='https://www.databucket.pl' color="textSecondary" >www.databucket.pl</Link>
+                </div>
+                <div
+                    style={{
+                        position: 'absolute', left: '72%', top: '100%',
+                        transform: 'translate(-50%, -50%)'
+                    }}
+                >
+                    <Link target='_blank' href='https://github.com/databucket/databucket-app' color="textSecondary" >Source code</Link><br />
+                    <Link target='_blank' href='https://github.com/databucket/databucket-app/issues' color="textSecondary" >Report a bug</Link><br />
+                    <Link target='_blank' href='https://github.com/databucket/databucket-app/blob/master/LICENSE' color="textSecondary" >Licence</Link>
                 </div>
             </div>
         );
