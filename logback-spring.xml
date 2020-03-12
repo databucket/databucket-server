@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs.log</file>
+        <append>true</append>
+        <encoder>
+          <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(:){faint} %m%n%wEx</pattern>
+        </encoder>
+    </appender>
+
+
+    <!--
+	<logger name="pl.databucket.web.service" level="DEBUG" />
+    <logger name="pl.databucket.web.controller" level="DEBUG" />
+	-->
+
+    <root level="INFO">
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
