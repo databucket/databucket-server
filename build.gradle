@@ -1,0 +1,40 @@
+plugins {
+  id 'java'
+  id 'org.springframework.boot' version '2.2.4.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+}
+
+group 'pl.databucket'
+version '2.2.5'
+
+sourceCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter'
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'org.springframework:spring-tx'
+  implementation 'mysql:mysql-connector-java'
+  implementation 'com.fasterxml.jackson.core:jackson-core'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+task buildFrontend(type: Exec) {
+  workingDir(rootDir.toString() + '/frontend')
+  commandLine 'npm', 'install'
+  commandLine 'npm', 'run', 'build'
+}
+
+task copyFrontend(type: Copy) {
+  from "frontend/build"
+  into "src/main/resources/static"
+}
+
+copyFrontend.dependsOn buildFrontend
+
+bootJar.dependsOn copyFrontend

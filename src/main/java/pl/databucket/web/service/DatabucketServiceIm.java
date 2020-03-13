@@ -75,9 +75,6 @@ public class DatabucketServiceIm implements DatabucketService {
 	@Autowired
 	private PlatformTransactionManager transactionManager;
 	
-	@Value("${databucket.database.name}")
-	private String databaseName;
-	
 	Logger logger = LoggerFactory.getLogger(DatabucketServiceIm.class);
 	
 	
