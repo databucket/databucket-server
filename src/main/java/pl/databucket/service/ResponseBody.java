@@ -1,4 +1,4 @@
-package pl.databucket.web.service;
+package pl.databucket.service;
 
 import java.util.Map;
 import java.util.List;

@@ -1,4 +1,4 @@
-package pl.databucket.web.service;
+package pl.databucket.service;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -58,13 +57,13 @@ import pl.databucket.exception.TagAlreadyExistsException;
 import pl.databucket.exception.UnexpectedException;
 import pl.databucket.exception.UnknownColumnException;
 import pl.databucket.exception.ViewAlreadyExistsException;
-import pl.databucket.web.database.C;
-import pl.databucket.web.database.COL;
-import pl.databucket.web.database.Condition;
-import pl.databucket.web.database.FieldValidator;
-import pl.databucket.web.database.Operator;
-import pl.databucket.web.database.Query;
-import pl.databucket.web.database.TAB;
+import pl.databucket.database.C;
+import pl.databucket.database.COL;
+import pl.databucket.database.Condition;
+import pl.databucket.database.FieldValidator;
+import pl.databucket.database.Operator;
+import pl.databucket.database.Query;
+import pl.databucket.database.TAB;
 
 @Service
 public class DatabucketServiceIm implements DatabucketService {
