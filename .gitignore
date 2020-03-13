@@ -39,3 +39,7 @@ yarn-error.log*
 /logs.log
 /.mvn/
 /.mvn/
+
+.gradle/
+
+src/main/resources/static

@@ -1,15 +1,12 @@
-# databucket-app
-Databucket GUI & API service
+<pre>
+    _____        _        _                _        _      ___  
+   |  __ \      | |      | |              | |      | |    |__ \ 
+   | |  | | __ _| |_ __ _| |__  _   _  ___| | _____| |_      ) |
+   | |  | |/ _` | __/ _` | '_ \| | | |/ __| |/ / _ \ __|    / / 
+   | |__| | (_| | || (_| | |_) | |_| | (__|   <  __/ |_    / /_ 
+   |_____/ \__,_|\__\__,_|_.__/ \__,_|\___|_|\_\___|\__|  |____|
+</pre>
 
-# Requirements: 
-- JAVA
-- Maven
-- NodeJS installed 
-- MySQL (MySQL server + workbench + notifier)
+# Databucket 2
 
-# How to run
-```java
-mvn clean install
-java -jar ./target/databucket-app-x.x.x.jar
-```
-
+Expose your test data to the world with REST API.
