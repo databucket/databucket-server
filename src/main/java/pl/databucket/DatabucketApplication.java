@@ -1,16 +1,14 @@
-package pl.databucket.web;
+package pl.databucket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import pl.databucket.web.service.DatabucketServiceIm;
+import pl.databucket.service.DatabucketServiceIm;
 
 @SpringBootApplication
 public class DatabucketApplication {
-	
-	
 	
 	public static void main(String[] args) {
 		Logger logger = LoggerFactory.getLogger(DatabucketServiceIm.class);

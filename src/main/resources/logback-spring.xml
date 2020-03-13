@@ -11,7 +11,7 @@
     </appender>
 
 
-    <logger name="pl.databucket.web.service" level="DEBUG" />
+    <logger name="pl.databucket.service" level="DEBUG" />
     <logger name="pl.databucket.web.controller" level="DEBUG" />
 
     <root level="INFO">

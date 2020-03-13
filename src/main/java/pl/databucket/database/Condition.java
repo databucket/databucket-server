@@ -1,4 +1,4 @@
-package pl.databucket.web.database;
+package pl.databucket.database;
 
 import java.util.ArrayList;
 import java.util.List;

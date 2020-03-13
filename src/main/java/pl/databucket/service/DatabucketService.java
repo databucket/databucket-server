@@ -1,4 +1,4 @@
-package pl.databucket.web.service;
+package pl.databucket.service;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -30,7 +30,7 @@ import pl.databucket.exception.TagAlreadyExistsException;
 import pl.databucket.exception.UnexpectedException;
 import pl.databucket.exception.UnknownColumnException;
 import pl.databucket.exception.ViewAlreadyExistsException;
-import pl.databucket.web.database.Condition;
+import pl.databucket.database.Condition;
 
 public interface DatabucketService {
 	

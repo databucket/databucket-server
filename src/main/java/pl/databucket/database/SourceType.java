@@ -1,4 +1,4 @@
-package pl.databucket.web.database;
+package pl.databucket.database;
 
 public enum SourceType {
 	
