@@ -24,10 +24,16 @@ dependencies {
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
 task buildFrontend(type: Exec) {
-  workingDir(rootDir.toString() + '/frontend')
-  commandLine 'npm', 'install'
-  commandLine 'npm', 'run', 'build'
+  workingDir 'frontend'
+
+  String npm = 'npm';
+  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    npm = 'npm.cmd'
+  }
+  commandLine npm, 'install'
+  commandLine npm, 'run', 'build'
 }
 
 task copyFrontend(type: Copy) {
