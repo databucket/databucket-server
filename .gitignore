@@ -41,5 +41,5 @@ yarn-error.log*
 /.mvn/
 
 .gradle/
-
+out
 src/main/resources/static
