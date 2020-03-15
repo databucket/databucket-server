@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/databucket
+    username: databucket
+    password: data1234!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    initialization-mode: always
