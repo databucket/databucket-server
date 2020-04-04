@@ -393,14 +393,14 @@ public class FieldValidator {
 	}
 
 	public static Integer validateIndex(Map<String, Object> map, boolean obligatory) throws IncorrectValueException, EmptyInputValueException {
-		if (map.containsKey(COL.INDEX)) {
+		if (map.containsKey(COL.INDEX) && map.get(COL.INDEX) != null) {
 			try {
 				int index = (int) map.get(COL.INDEX);
 				if (index > 0)
 					return index;
 				else
 					throw new IncorrectValueException("The '" + COL.INDEX + "' must be equal or grater then 0!");
-			} catch (NumberFormatException e) {
+			} catch (NumberFormatException | ClassCastException e) {
 				throw new IncorrectValueException("The '" + COL.INDEX + "' must be a natural number!");
 			}
 		} else {
