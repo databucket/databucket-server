@@ -507,9 +507,11 @@ class DatabucketMainDrawer extends React.Component {
     }
 
     createColumnLookup(items) {
-        var lookup = {};
-        for (var i = 0; i < items.length; i++) {
-            lookup[items[i].key] = items[i].text_value;
+        let lookup = {};
+        if (items != null) {
+            for (let i = 0; i < items.length; i++) {
+                lookup[items[i].key] = items[i].text_value;
+            }
         }
         return lookup;
     }
@@ -532,7 +534,7 @@ class DatabucketMainDrawer extends React.Component {
 
                 if (column.field === 'tag_id') {
                     column.lookup = tagsLookup;
-                } else if (column.def_values != null) {
+                } else if (column.def_values != null && column.def_values.items != null && column.def_values.items.length > 0) {
                     if (column.def_values.text_values) {
                         column.lookup = this.createColumnLookup(column.def_values.items);
                     } else {

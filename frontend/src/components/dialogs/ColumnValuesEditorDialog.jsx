@@ -90,7 +90,7 @@ export default class ColumnValuesEditorDialog extends React.Component {
     this.tableRef = React.createRef();
     this.state = {
       text_values: props.rowData.def_values != null ? props.rowData.def_values.text_values : true,
-      data: props.rowData.def_values != null ? props.rowData.def_values.items : [],
+      data: props.rowData.def_values != null && props.rowData.def_values.items != null ? props.rowData.def_values.items : [],
       title: "Column: " + props.rowData.title,
       open: false,
       columns: this.getColumns(props.rowData.def_values != null ? props.rowData.def_values.text_values : true)
