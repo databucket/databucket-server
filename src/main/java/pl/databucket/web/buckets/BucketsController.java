@@ -68,7 +68,7 @@ public class BucketsController {
       rb.setBucketId(bucketId);
       rb.setMessage("The bucket '" + bucketName + "' has been successfully created.");
       return new ResponseEntity<>(rb, HttpStatus.CREATED);
-    } catch (BucketAlreadyExistsException | ExceededMaximumNumberOfCharactersException | EmptyInputValueException e) {
+    } catch (BucketAlreadyExistsException | ExceededMaximumNumberOfCharactersException | EmptyInputValueException | IncorrectValueException e) {
       return customException(rb, e, HttpStatus.NOT_ACCEPTABLE);
     } catch (Exception ee) {
       return defaultException(rb, ee);

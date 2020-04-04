@@ -42,4 +42,5 @@ yarn-error.log*
 
 .gradle/
 out
+bin
 src/main/resources/static
