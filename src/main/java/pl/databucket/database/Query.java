@@ -406,7 +406,7 @@ public class Query {
 			if (value instanceof String) {
 				return "'" + value + "'";
 			} else
-				return (String) value;
+				return "" + value;
 		}
 
 		return null;
