@@ -38,19 +38,6 @@ public class ConfigurationController {
     }
   }
 
-  @GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<ResponseBody> getVersion() {
-    ResponseBody rb = new ResponseBody();
-
-    try {
-      rb.setVersion("2.2.5");
-      rb.setStatus(ResponseStatus.OK);
-      return ok(rb);
-    } catch (Exception ee) {
-      return defaultException(rb, ee);
-    }
-  }
-
   private ResponseEntity<ResponseBody> defaultException(ResponseBody rb, Exception e) {
     logger.error("ERROR:", e);
     rb.setStatus(ResponseStatus.FAILED);

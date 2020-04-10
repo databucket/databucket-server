@@ -8,6 +8,6 @@
                                                                 
 --------------------------------------------------------------------
 Application Name: Databucket
-Application Version: (v2.2.5)
+Application Version: (v2.2.6)
 Spring Boot Version:${spring-boot.formatted-version}
 --------------------------------------------------------------------
