@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, {forwardRef} from 'react';
 import MaterialTable from 'material-table';
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
@@ -17,6 +17,7 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
+import CloneIcon from '@material-ui/icons/ViewStream'
 import ColumnsEditorDialog from '../ColumnsEditorDialog';
 import Cookies from 'universal-cookie';
 
@@ -25,30 +26,32 @@ const BUCKET_DEFAULT = 'every';
 const CLASS_DEFAULT = 'none';
 
 const tableIcons = {
-    Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
-    Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
-    Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-    Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
-    DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-    Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
-    Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
-    Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
-    FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
-    LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
-    NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-    PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
-    ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-    Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
-    SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref} />),
-    ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
-    ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
+    Add: forwardRef((props, ref) => <AddBox {...props} ref={ref}/>),
+    Check: forwardRef((props, ref) => <Check {...props} ref={ref}/>),
+    Clear: forwardRef((props, ref) => <Clear {...props} ref={ref}/>),
+    Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref}/>),
+    DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref}/>),
+    Edit: forwardRef((props, ref) => <Edit {...props} ref={ref}/>),
+    Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref}/>),
+    Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref}/>),
+    FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref}/>),
+    LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref}/>),
+    NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref}/>),
+    PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref}/>),
+    ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref}/>),
+    Search: forwardRef((props, ref) => <Search {...props} ref={ref}/>),
+    SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref}/>),
+    ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref}/>),
+    ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref}/>),
 };
 
 function handleErrors(res) {
     if (res.ok) {
         return res.json();
     } else {
-        return res.json().then(err => { throw err; });
+        return res.json().then(err => {
+            throw err;
+        });
     }
 }
 
@@ -60,26 +63,42 @@ class ColumnsTab extends React.Component {
         this.pageSize = this.getLastPageSize();
         this.state = {
             columns: [
-                { title: 'Id', field: 'columns_id', type: 'numeric', editable: 'never', filtering: false },
-                { title: 'Name', field: 'columns_name' },
-                { title: 'Bucket', field: 'bucket_id', initialEditValue: BUCKET_DEFAULT, emptyValue: BUCKET_DEFAULT, lookup: props.bucketsLookup },
-                { title: 'Class', field: 'class_id', initialEditValue: CLASS_DEFAULT, emptyValue: CLASS_DEFAULT, lookup: props.classesLookup },
-                { title: 'Description', field: 'description' },
+                {title: 'Id', field: 'columns_id', type: 'numeric', editable: 'never', filtering: false},
+                {title: 'Name', field: 'columns_name'},
+                {
+                    title: 'Bucket',
+                    field: 'bucket_id',
+                    initialEditValue: BUCKET_DEFAULT,
+                    emptyValue: BUCKET_DEFAULT,
+                    lookup: props.bucketsLookup
+                },
+                {
+                    title: 'Class',
+                    field: 'class_id',
+                    initialEditValue: CLASS_DEFAULT,
+                    emptyValue: CLASS_DEFAULT,
+                    lookup: props.classesLookup
+                },
+                {title: 'Description', field: 'description'},
                 {
                     title: 'Configuration', field: 'columns', searchable: false, sorting: false, filtering: false,
-                    render: rowData => <MoreHoriz color='action' />,
-                    editComponent: props => <ColumnsEditorDialog title={this.getTitle(props.rowData)} json={props.rowData.columns} onChange={props.onChange} />
+                    render: rowData => <MoreHoriz color='action'/>,
+                    editComponent: props => <ColumnsEditorDialog title={this.getTitle(props.rowData)}
+                                                                 json={props.rowData.columns}
+                                                                 onChange={props.onChange}/>
                 },
                 {
                     title: 'Created at', field: 'created_at', type: 'datetime', editable: 'never', filtering: false,
-                    render: rowData => <div>{rowData != null ? rowData.created_at != null ? new Date(rowData.created_at).toLocaleString() : null : null}</div>,
+                    render: rowData =>
+                        <div>{rowData != null ? rowData.created_at != null ? new Date(rowData.created_at).toLocaleString() : null : null}</div>,
                 },
-                { title: 'Created by', field: 'created_by', editable: 'never' },
+                {title: 'Created by', field: 'created_by', editable: 'never'},
                 {
                     title: 'Updated at', field: 'updated_at', type: 'datetime', editable: 'never', filtering: false,
-                    render: rowData => <div>{rowData != null ? rowData.updated_at != null ? new Date(rowData.updated_at).toLocaleString() : null : null}</div>,
+                    render: rowData =>
+                        <div>{rowData != null ? rowData.updated_at != null ? new Date(rowData.updated_at).toLocaleString() : null : null}</div>,
                 },
-                { title: 'Updated by', field: 'updated_by', editable: 'never' },
+                {title: 'Updated by', field: 'updated_by', editable: 'never'},
             ],
             filtering: false
         };
@@ -104,13 +123,13 @@ class ColumnsTab extends React.Component {
         const current = new Date();
         const nextYear = new Date();
         nextYear.setFullYear(current.getFullYear() + 1);
-        cookies.set('last_page_size', pageSize, { path: window.location.href, expires: nextYear });
+        cookies.set('last_page_size', pageSize, {path: window.location.href, expires: nextYear});
     }
 
     convertNullsToNoneOrEvery(inputData) {
         for (var i = 0; i < inputData.length; i++) {
             let item = inputData[i];
-            
+
             if (item.class_id == null)
                 item.class_id = CLASS_DEFAULT;
             else
@@ -125,6 +144,41 @@ class ColumnsTab extends React.Component {
                 item.description = '';
         }
         return inputData;
+    }
+
+    cloneItem(rowData) {
+        let payload = JSON.parse(JSON.stringify(rowData))
+        if (payload.columns_name.length > 44)
+            payload.columns_name = payload.columns_name.substr(0, 44);
+        payload.columns_name = payload.columns_name + '-clone'
+
+        let url = window.API + '/columns?userName=' + window.USER;
+
+        if (payload.class_id !== CLASS_DEFAULT) {
+            payload.class_id = parseInt(payload.class_id);
+        } else
+            delete payload['class_id'];
+
+        if (payload.bucket_id !== BUCKET_DEFAULT)
+            payload.bucket_id = parseInt(payload.bucket_id);
+        else
+            delete payload['bucket_id'];
+
+        let result_ok = true;
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(error => {
+                result_ok = false;
+                window.alert(error.message);
+            });
+
+        return result_ok;
     }
 
     render() {
@@ -191,30 +245,44 @@ class ColumnsTab extends React.Component {
                     filtering: this.state.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
-                    headerStyle:{backgroundColor:'#eeeeee'},
-                    rowStyle: rowData => ({ backgroundColor: rowData.tableData.id % 2 === 1 ? '#fafafa' : '#FFF' })
+                    headerStyle: {backgroundColor: '#eeeeee'},
+                    rowStyle: rowData => ({backgroundColor: rowData.tableData.id % 2 === 1 ? '#fafafa' : '#FFF'})
                 }}
                 components={{
                     Container: props => <div {...props} />
                 }}
                 actions={[
                     {
-                        icon: () => <Refresh />,
+                        icon: () => <Refresh/>,
                         tooltip: 'Refresh',
                         isFreeAction: true,
-                        onClick: () => { this.tableRef.current !== null && this.tableRef.current.onQueryChange() }
+                        onClick: () => {
+                            this.tableRef.current !== null && this.tableRef.current.onQueryChange()
+                        }
                     },
                     {
-                        icon: () => <FilterList />,
+                        icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => {
-                            this.setState({ filtering: !this.state.filtering });
+                            this.setState({filtering: !this.state.filtering});
 
                             // after switch filtering off/on
                             if (this.tableRef.current.state.query.filters.length > 0) {
                                 if (this.tableRef.current)
                                     this.tableRef.current.onQueryChange()
+                            }
+                        }
+                    },
+                    {
+                        icon: () => <CloneIcon/>,
+                        tooltip: 'Clone',
+                        onClick: (event, rowData) => {
+                            let result = this.cloneItem(rowData);
+                            if (result) {
+                                setTimeout(() => {
+                                    this.tableRef.current !== null && this.tableRef.current.onQueryChange();
+                                }, 100);
                             }
                         }
                     }
@@ -231,7 +299,7 @@ class ColumnsTab extends React.Component {
                             } else
                                 delete payload['class_id'];
 
-                            if (payload.bucket_id !== BUCKET_DEFAULT) 
+                            if (payload.bucket_id !== BUCKET_DEFAULT)
                                 payload.bucket_id = parseInt(payload.bucket_id);
                             else
                                 delete payload['bucket_id'];
@@ -269,9 +337,9 @@ class ColumnsTab extends React.Component {
                                 payload.columns = newData.columns;
                                 changed = true;
                             }
-                            
+
                             if (oldData.bucket_id !== newData.bucket_id) {
-                                if (newData.bucket_id !== BUCKET_DEFAULT) 
+                                if (newData.bucket_id !== BUCKET_DEFAULT)
                                     payload.bucket_id = parseInt(newData.bucket_id);
                                 else
                                     payload.bucket_id = null;
@@ -322,7 +390,7 @@ class ColumnsTab extends React.Component {
                         new Promise((resolve, reject) => {
                             if (oldData.columns_id > 0) {
                                 let url = window.API + '/columns/' + oldData.columns_id + '?userName=' + window.USER;
-                                fetch(url, { method: 'DELETE' })
+                                fetch(url, {method: 'DELETE'})
                                     .then(handleErrors)
                                     .catch(error => {
                                         window.alert(error.message);

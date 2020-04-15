@@ -2,25 +2,10 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import Logo from '../../../images/logo.png';
+import {version} from '../../../../package.json';
+
 
 class InfoTab extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.getVersion();
-        this.state = {
-            version: null
-        };
-    }
-
-    getVersion() {
-        fetch(window.API + '/version')
-            .then(response => response.json())
-            .then(responseJson => responseJson.version)
-            .then(version => {
-                this.setState({ version: version });
-            })
-    }
 
     render() {
         return (
@@ -37,7 +22,7 @@ class InfoTab extends React.Component {
                         transform: 'translate(-50%, -50%)'
                     }}
                 >
-                    <Typography color='textSecondary'>Version: <b>{this.state.version}</b></Typography>
+                    <Typography color='textSecondary'>Version: <b>{version}</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="textSecondary" >www.databucket.pl</Link>
                 </div>
                 <div

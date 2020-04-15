@@ -17,6 +17,7 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
+import CloneIcon from '@material-ui/icons/ViewStream'
 import ConditionsEditorDialog from '../ConditionsEditorDialog';
 import Cookies from 'universal-cookie';
 
@@ -128,6 +129,41 @@ class FiltersTab extends React.Component {
         return inputData;
     }
 
+    cloneItem(rowData) {
+        let payload = JSON.parse(JSON.stringify(rowData))
+        if (payload.filter_name.length > 44)
+            payload.filter_name = payload.filter_name.substr(0, 44);
+        payload.filter_name = payload.filter_name + '-clone'
+
+        let url = window.API + '/filters?userName=' + window.USER;
+
+        if (payload.class_id !== CLASS_DEFAULT) {
+            payload.class_id = parseInt(payload.class_id);
+        } else
+            delete payload['class_id'];
+
+        if (payload.bucket_id !== BUCKET_DEFAULT)
+            payload.bucket_id = parseInt(payload.bucket_id);
+        else
+            delete payload['bucket_id'];
+
+        let result_ok = true;
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(error => {
+                result_ok = false;
+                window.alert(error.message);
+            });
+
+        return result_ok;
+    }
+
     render() {
         return (
             <MaterialTable
@@ -216,6 +252,18 @@ class FiltersTab extends React.Component {
                             if (this.tableRef.current.state.query.filters.length > 0) {
                                 if (this.tableRef.current)
                                     this.tableRef.current.onQueryChange()
+                            }
+                        }
+                    },
+                    {
+                        icon: () => <CloneIcon/>,
+                        tooltip: 'Clone',
+                        onClick: (event, rowData) => {
+                            let result = this.cloneItem(rowData);
+                            if (result) {
+                                setTimeout(() => {
+                                    this.tableRef.current !== null && this.tableRef.current.onQueryChange();
+                                }, 100);
                             }
                         }
                     }

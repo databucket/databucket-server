@@ -27,15 +27,4 @@ class ConfigurationControllerITSpec extends Specification {
         .andExpect(content().contentType(APPLICATION_JSON))
         .andExpect(jsonPath('$.title').value('Databucket'))
   }
-
-  def "should return app version"() {
-    when:
-    def result = mockMvc.perform(get('/api/version'))
-
-    then:
-    result
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
-        .andExpect(jsonPath('$.version').value('2.2.5'))
-  }
 }
