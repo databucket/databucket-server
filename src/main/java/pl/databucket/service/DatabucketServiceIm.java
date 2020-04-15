@@ -2050,8 +2050,11 @@ public class DatabucketServiceIm implements DatabucketService {
 
 		boolean setLock = (boolean) actions.get(C.SET_LOCK);
 		if (setLock) {
-			boolean locked = (boolean) actions.get(C.LOCK);
-			paramMap.put(COL.LOCKED, locked);
+			boolean lock = (boolean) actions.get(C.LOCK);
+			paramMap.put(COL.LOCKED, lock);
+
+			if (!lock)
+				paramMap.put(COL.LOCKED_BY, null);
 		}
 
 		boolean joinTags = usedTagNameColumn(conditions);
