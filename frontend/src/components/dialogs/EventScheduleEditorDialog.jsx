@@ -81,25 +81,25 @@ class EventScheduleEditorDialog extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    console.log(1);
+    // console.log(1);
     let newState = state;
     if (state.open === true && !state.initiated) {
-      console.log(2);
+      // console.log(2);
       let startDate = new Date();
       startDate.setHours(startDate.getHours() + 1);
       let endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1);
-      console.log(3);
+      // console.log(3);
       if (props.rowData.schedule == null)
         newState.schedule = { periodically: false, interval: { amount: 1, unit: 3 }, starts: startDate, enable_ends: false, ends: endDate };
       else
         newState.schedule = props.rowData.schedule;
 
-      console.log(4);
+      // console.log(4);
       newState.initiated = true;
       return newState;
     } else {
-      console.log(5);
+      // console.log(5);
       return newState;
     }
   }
@@ -161,7 +161,7 @@ class EventScheduleEditorDialog extends React.Component {
 
   render() {
     const { classes } = this.props;
-    console.log('render');
+    // console.log('render');
     return (
       <div>
         <Tooltip title='Schedule configuration'>
