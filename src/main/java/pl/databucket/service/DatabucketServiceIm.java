@@ -1755,7 +1755,7 @@ public class DatabucketServiceIm implements DatabucketService {
         String result = "";
 
         List<Condition> conditions = new ArrayList<Condition>();
-        conditions.add(new Condition(COL.COLUMNS_ID, Operator.equal, filterId));
+        conditions.add(new Condition(COL.FILTER_ID, Operator.equal, filterId));
         conditions.add(new Condition(COL.DELETED, Operator.equal, false));
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
