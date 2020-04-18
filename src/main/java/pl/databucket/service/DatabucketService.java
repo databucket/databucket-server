@@ -15,21 +15,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import pl.databucket.exception.BucketAlreadyExistsException;
-import pl.databucket.exception.ClassAlreadyExistsException;
-import pl.databucket.exception.ColumnsAlreadyExistsException;
-import pl.databucket.exception.EmptyInputValueException;
-import pl.databucket.exception.ExceededMaximumNumberOfCharactersException;
-import pl.databucket.exception.FilterAlreadyExistsException;
-import pl.databucket.exception.GroupAlreadyExistsException;
-import pl.databucket.exception.HarmlessException;
-import pl.databucket.exception.IncorrectValueException;
-import pl.databucket.exception.ItemAlreadyExistsException;
-import pl.databucket.exception.ItemDoNotExistsException;
-import pl.databucket.exception.TagAlreadyExistsException;
-import pl.databucket.exception.UnexpectedException;
-import pl.databucket.exception.UnknownColumnException;
-import pl.databucket.exception.ViewAlreadyExistsException;
+import pl.databucket.exception.*;
 import pl.databucket.database.Condition;
 
 public interface DatabucketService {
@@ -42,7 +28,7 @@ public interface DatabucketService {
 	
 	// ---- CLASSES ----
 	int createClass(String userName, String className, String description) throws ClassAlreadyExistsException, ExceededMaximumNumberOfCharactersException, EmptyInputValueException, Exception;
-	int deleteClass(Integer classId, String userName) throws ItemDoNotExistsException, UnknownColumnException;
+	int deleteClass(Integer classId, String userName) throws ItemDoNotExistsException, UnknownColumnException, ItemAlreadyUsedException;
 	Map<String, Object> getClasses(Optional<Integer> classId, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort, List<Condition> urlConditions) throws UnknownColumnException, DataAccessException, UnexpectedException;
 	void modifyClass(String userName, Integer classId, LinkedHashMap<String, Object> body)  throws ItemDoNotExistsException, ClassAlreadyExistsException, JsonProcessingException, IncorrectValueException, ExceededMaximumNumberOfCharactersException, DataAccessException, UnknownColumnException;
 		
@@ -50,25 +36,25 @@ public interface DatabucketService {
 	Map<String, Object> getBuckets(Optional<String> bucketName, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort, List<Condition> urlConditions) throws UnknownColumnException, DataAccessException;
 	List<Map<String, Object>> getStatistic(String bucketName) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException;
 	int createBucket(String createdBy, String bucketName, int index, String description, String icon, boolean history, Integer classId) throws BucketAlreadyExistsException, ExceededMaximumNumberOfCharactersException, EmptyInputValueException, Exception;
-	void deleteBucket(String bucketName, String userName) throws ItemDoNotExistsException, UnknownColumnException;
+	void deleteBucket(String bucketName, String userName) throws ItemDoNotExistsException, UnknownColumnException, ItemAlreadyUsedException;
 	void modifyBucket(String updatedBy, String bucketName, Map<String, Object> details) throws ItemDoNotExistsException, BucketAlreadyExistsException, JsonProcessingException, IncorrectValueException, ExceededMaximumNumberOfCharactersException, DataAccessException, UnknownColumnException;
 	
 	// ---- TAGS ----
 	Map<String, Object> getTags(Optional<String> bucketName, Optional<Integer> tagId, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort, List<Condition> urlConditions) throws ItemDoNotExistsException, UnknownColumnException;
 	int createTag(String createdBy, String tagName, Integer bucketId, String bucketName, String iconName, String description, Integer classId) throws ItemDoNotExistsException, JsonProcessingException, TagAlreadyExistsException, InvalidDataAccessApiUsageException, DataAccessException, UnknownColumnException;
-	int deleteTag(String userName, int tagId) throws UnknownColumnException;
+	int deleteTag(String userName, int tagId) throws UnknownColumnException, ItemDoNotExistsException, ItemAlreadyUsedException;
 	void modifyTag(String updatedBy, Integer tagId, String tagName, Integer bucketId, Integer classId, String description) throws TagAlreadyExistsException, JsonProcessingException, ItemDoNotExistsException, IncorrectValueException, ExceededMaximumNumberOfCharactersException, UnknownColumnException;
 	
 	// ---- COLUMNS ----
 	Map<String, Object> getColumns(Optional<String> bucketName, Optional<Integer> columnsId, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort, List<Condition> urlConditions) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException;
 	int createColumns(String columnsName, Integer bucketId, String createdBy, List<Map<String, Object>> columns, String description, Integer classId) throws ItemDoNotExistsException, JsonProcessingException, ColumnsAlreadyExistsException, UnknownColumnException;
-	int deleteColumns(String userName, int columnsId) throws ItemDoNotExistsException, UnknownColumnException;
+	int deleteColumns(String userName, int columnsId) throws ItemDoNotExistsException, UnknownColumnException, ItemAlreadyUsedException;
 	void modifyColumns(String updatedBy, Integer columnsId, String columnsName, Integer bucketId, Integer classId, String description, List<Map<String, Object>> columns) throws ItemDoNotExistsException, ExceededMaximumNumberOfCharactersException, UnexpectedException, ColumnsAlreadyExistsException, UnknownColumnException;
 	
 	// ---- FILTERS ----
 	Map<String, Object> getFilters(Optional<String> bucketName, Optional<Integer> filterId, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort, List<Condition> urlConditions) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException;
 	int createFilter(String filterName, Integer bucketId, String createdBy, List<Map<String, Object>> conditions, String description, Integer classId) throws ItemDoNotExistsException, JsonProcessingException, FilterAlreadyExistsException, UnknownColumnException;
-	int deleteFilter(String userName, int filterId) throws ItemDoNotExistsException, UnknownColumnException;
+	int deleteFilter(String userName, int filterId) throws ItemDoNotExistsException, UnknownColumnException, ItemAlreadyUsedException;
 	void modifyFilter(String updatedBy, Integer filterId, String filterName, Integer bucketId, Integer classId, String description, List<Map<String, Object>> conditions) throws ItemDoNotExistsException, ExceededMaximumNumberOfCharactersException, UnexpectedException, FilterAlreadyExistsException, UnknownColumnException;
 	
 	// ---- BUNDLES ----
@@ -90,7 +76,7 @@ public interface DatabucketService {
 		
 	// ---- TASK ----
 	int createTask(String taskName, Integer bucketId, Integer classId, String userName, String description,	Map<String, Object> configuration) throws ItemDoNotExistsException, JsonProcessingException, UnknownColumnException;
-	int deleteTask(String userName, int taskId) throws ItemDoNotExistsException, UnknownColumnException;
+	int deleteTask(String userName, int taskId) throws ItemDoNotExistsException, UnknownColumnException, ItemAlreadyUsedException;
 	Map<String, Object> getTasks(Optional<String> bucketName, Optional<Integer> taskId, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort, List<Condition> urlConditions) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException;
 	void modifyTask(String userName, Integer taskId, String taskName, Integer bucketId, Integer classId, String description, LinkedHashMap<String, Object> configuration) throws ItemDoNotExistsException, ExceededMaximumNumberOfCharactersException, UnexpectedException, UnknownColumnException;
 	
