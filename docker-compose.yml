@@ -1,0 +1,43 @@
+version: '3.2'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    environment:
+        - MYSQL_DATABASE=databucket
+        - MYSQL_USER=databucket
+        - MYSQL_PASSWORD=data1234!
+        - MYSQL_RANDOM_ROOT_PASSWORD=true
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+        - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - databucket-net
+  databucket-app:
+    image: databucket-app:2.2.6
+    container_name: databucket-app
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/databucket
+      - SPRING_DATASOURCE_DRIVERCLASSNAME=com.mysql.jdbc.Driver
+      - SPRING_DATASOURCE_USERNAME=databucket
+      - SPRING_DATASOURCE_PASSWORD=data1234!
+    ports:
+      - "8080:8080"
+    networks:
+      - databucket-net
+
+networks:
+  databucket-net:
+    driver: bridge
+
+
+

@@ -48,19 +48,20 @@ Installed below dependencies:
 
 ## Docker
 
-Create `databucket_mysql` docker container
+1. Build the image:
 
 ```
-docker run \
---name databucket_mysql \
--e MYSQL_DATABASE=databucket \
--e MYSQL_USER=databucket \
--e MYSQL_PASSWORD=data1234! \
--e MYSQL_RANDOM_ROOT_PASSWORD=true \
--p 3306:3306 \
---detach \
-mysql:8
+docker build -t databucket-app:2.2.6 .
 ```
+
+2. Adjust docker-compose.yml if needed (WARNING! user/pass/dbname hardcoded in provided example docker-compose.yml)
+
+3. Run with:
+
+```
+docker-compose up
+```
+
 
 ## Useful commands
 
