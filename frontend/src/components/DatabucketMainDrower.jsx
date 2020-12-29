@@ -392,31 +392,31 @@ class DatabucketMainDrawer extends React.Component {
     }
 
     fetchViews() {
-        return fetch(window.API + '/views')
+        return fetch(window.API + '/view')
             .then(response => response.json())
             .then(responseJson => responseJson.views);
     }
 
     fetchGroups() {
-        return fetch(window.API + '/groups')
+        return fetch(window.API + '/group')
             .then(response => response.json())
             .then(responseJson => responseJson.groups);
     }
 
     fetchClasses() {
-        return fetch(window.API + '/classes')
+        return fetch(window.API + '/class')
             .then(response => response.json())
             .then(responseJson => responseJson.classes);
     }
 
     fetchBuckets() {
-        return fetch(window.API + '/buckets?sort=index')
+        return fetch(window.API + '/bucket?sort=index')
             .then(response => response.json())
             .then(responseJson => responseJson.buckets);
     }
 
     fetchFilters() {
-        return fetch(window.API + '/filters')
+        return fetch(window.API + '/filter')
             .then(response => response.json())
             .then(responseJson => responseJson.filters);
     }
@@ -428,19 +428,19 @@ class DatabucketMainDrawer extends React.Component {
     }
 
     fetchTags() {
-        return fetch(window.API + '/tags')
+        return fetch(window.API + '/tag')
             .then(response => response.json())
             .then(responseJson => responseJson.tags);
     }
 
     fetchTasks() {
-        return fetch(window.API + '/tasks')
+        return fetch(window.API + '/task')
             .then(response => response.json())
             .then(responseJson => responseJson.tasks);
     }
 
     fetchEvents() {
-        return fetch(window.API + '/events')
+        return fetch(window.API + '/event')
             .then(response => response.json())
             .then(responseJson => responseJson.events);
     }

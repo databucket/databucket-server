@@ -63,7 +63,7 @@ class ColumnsTab extends React.Component {
         this.pageSize = this.getLastPageSize();
         this.state = {
             columns: [
-                {title: 'Id', field: 'columns_id', type: 'numeric', editable: 'never', filtering: false},
+                // {title: 'Id', field: 'columns_id', type: 'numeric', editable: 'never', filtering: false},
                 {title: 'Name', field: 'columns_name'},
                 {
                     title: 'Bucket',

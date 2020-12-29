@@ -19,8 +19,8 @@ import ViewColumn from '@material-ui/icons/ViewColumn';
 import RateReviewOutlined from '@material-ui/icons/RateReviewOutlined';
 import Refresh from '@material-ui/icons/Refresh';
 import Cookies from 'universal-cookie';
-import BundleDetailsDialog from './dialogs/BundleDetailsDialog';
-import BundleHistoryDialog from './dialogs/BundleHistoryDialog';
+import DataDetailsDialog from './dialogs/DataDetailsDialog';
+import DataHistoryDialog from './dialogs/DataHistoryDialog';
 import TaskExecutionEditorDialog from './dialogs/TaskExecutionEditorDialog';
 // import ImportIcon from '@material-ui/icons/ExitToApp';
 // import ExportIcon from '@material-ui/icons/OpenInNew'
@@ -63,10 +63,10 @@ class DatabucketTable extends React.Component {
         this.tableRef = React.createRef();
         this.pageSize = this.getLastPageSize();
         this.state = {
-            bundle: null,
+            dataRow: null,
             history: null,
-            openBundleDetailsDialog: false,
-            openBundleHistoryDialog: false,
+            openDataDetailsDialog: false,
+            openDataHistoryDialog: false,
             openTaskExecutionEditorDialog: false,
             filtering: false,
             bucket: props.selected.bucket,
@@ -194,33 +194,33 @@ class DatabucketTable extends React.Component {
         return column.source;
     }
 
-    getBundleId(data) {
-        let bundleIdColumn = this.state.columns.filter(c => (c.source === 'bundle_id'))[0];
-        return data[bundleIdColumn.field];
+    getDataRowId(data) {
+        let dataIdColumn = this.state.columns.filter(c => (c.source === 'data_id'))[0];
+        return data[dataIdColumn.field];
     }
 
-    // before add bundle
-    convertBundleBeforeAdd(inputBundle) {
-        var bundle = { properties: {} };
+    // before add data
+    convertDataBeforeAdd(inputDataRow) {
+        var dataRow = { properties: {} };
         var hasProperties = false;
         try {
-            for (var key in inputBundle) {
-                if (inputBundle.hasOwnProperty(key)) {
+            for (var key in inputDataRow) {
+                if (inputDataRow.hasOwnProperty(key)) {
                     let source = this.getColumnSource(key);
                     const fieldType = this.getFieldType(key);
                     if (fieldType === 'numeric') {
-                        bundle[source] = parseInt(inputBundle[key]);
+                        dataRow[source] = parseInt(inputDataRow[key]);
                     } else if (fieldType === 'datetime' || fieldType === 'date' || fieldType === 'time') {
-                        bundle[source] = this.toIsoString(inputBundle[key]);
+                        dataRow[source] = this.toIsoString(inputDataRow[key]);
                     } else {
-                        bundle[source] = inputBundle[key];
+                        dataRow[source] = inputDataRow[key];
                     }
 
                     if (source.startsWith('$')) {
                         hasProperties = true;
                         const path = source.substring(2);
-                        this.setJsonValueByPath(path, bundle[source], bundle.properties);
-                        delete bundle[source];
+                        this.setJsonValueByPath(path, dataRow[source], dataRow.properties);
+                        delete dataRow[source];
                     }
                 }
             }
@@ -229,34 +229,34 @@ class DatabucketTable extends React.Component {
         }
 
         if (!hasProperties)
-            delete bundle['properties'];
+            delete dataRow['properties'];
 
-        return bundle;
+        return dataRow;
     }
 
-    // before modify bundle
-    convertBundleBeforeModify(newBundle, oldBundle) {
-        const readOnlyColumns = ['bundle_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'locked_by'];
+    // before modify data
+    convertDataBeforeModify(newData, oldDataRow) {
+        const readOnlyColumns = ['data_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'locked_by'];
 
         var payload = { update_properties: {}, remove_properties: [] };
         var hasUpdateProperties = false;
         var hasRemoveProperties = false;
 
-        for (var key in newBundle) {
-            if (newBundle.hasOwnProperty(key)) {
+        for (var key in newData) {
+            if (newData.hasOwnProperty(key)) {
                 let source = this.getColumnSource(key);
                 if (readOnlyColumns.indexOf(source) < 0) {
-                    const newItem = newBundle[key];
-                    const oldItem = oldBundle[key];
+                    const newItem = newData[key];
+                    const oldItem = oldDataRow[key];
 
                     if (newItem !== oldItem) {
                         const fieldType = this.getFieldType(key);
                         if (newItem != null) {
                             let value = newItem;
                             if (fieldType === 'numeric')
-                                value = parseInt(newBundle[key]);
+                                value = parseInt(newData[key]);
                             else if (fieldType === 'datetime' || fieldType === 'date' || fieldType === 'time')
-                                value = this.toIsoString(newBundle[key]);
+                                value = this.toIsoString(newData[key]);
 
                             if (source.startsWith('$')) {
                                 payload.update_properties[source] = value;
@@ -295,31 +295,31 @@ class DatabucketTable extends React.Component {
         });
     }
 
-    showBundleDetailsDialog(bundle) {
+    showDataDetailsDialog(dataRow) {
         new Promise((resolve, reject) => {
-            const bundleId = this.getBundleId(bundle);
-            let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/' + bundleId;
+            const dataId = this.getDataRowId(dataRow);
+            let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/' + dataId;
 
             fetch(url)
                 .then(response => response.json())
                 .then(result => {
                     this.setState({
-                        bundle: result.bundles[0],
-                        openBundleDetailsDialog: true,
+                        dataRow: result.data[0],
+                        openDataDetailsDialog: true,
                     });
                     resolve();
                 });
         });
     }
 
-    onCloseBundleDetailsDialog(bundle, changed) {
+    onCloseDataDetailsDialog(dataRow, changed) {
         if (changed) {
             new Promise((resolve, reject) => {
                 const payload = {};
-                payload.properties = bundle.properties;
+                payload.properties = dataRow.properties;
                 let result_ok = true;
 
-                let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/' + bundle.bundle_id + '?userName=' + window.USER;
+                let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/' + dataRow.data_id + '?userName=' + window.USER;
                 fetch(url, {
                     method: 'PUT',
                     body: JSON.stringify(payload),
@@ -342,29 +342,29 @@ class DatabucketTable extends React.Component {
                     });
             });
         }
-        this.setState({ openBundleDetailsDialog: false });
+        this.setState({ openDataDetailsDialog: false });
     }
 
-    showBundleHistoryDialog(bundle) {
+    showDataHistoryDialog(rowData) {
         new Promise((resolve, reject) => {
-            const bundleId = this.getBundleId(bundle);
-            let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/' + bundleId + '/history';
+            const dataRowId = this.getDataRowId(rowData);
+            let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/' + dataRowId + '/history';
 
             fetch(url)
                 .then(response => response.json())
                 .then(result => {
                     this.setState({
-                        bundleId: bundleId,
+                        dataRowId: dataRowId,
                         history: result.history,
-                        openBundleHistoryDialog: true,
+                        openDataHistoryDialog: true,
                     });
                     resolve();
                 });
         });
     }
 
-    onCloseBundleHistoryDialog() {
-        this.setState({ openBundleHistoryDialog: false });
+    onCloseDataHistoryDialog() {
+        this.setState({ openDataHistoryDialog: false });
     }
 
     onCloseTaskExecutionEditorDialog() {
@@ -441,7 +441,7 @@ class DatabucketTable extends React.Component {
                                         this.setLastPageSize(query.pageSize);
                                     }
 
-                                    let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/custom?';
+                                    let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/custom?';
                                     url += 'limit=' + query.pageSize;
                                     url += '&page=' + (query.page + 1);
 
@@ -468,7 +468,7 @@ class DatabucketTable extends React.Component {
                                         .then(response => response.json())
                                         .then(result => {
                                             resolve({
-                                                data: result.bundles,
+                                                data: result.data,
                                                 page: result.page - 1,
                                                 totalCount: result.total,
                                             })
@@ -541,16 +541,16 @@ class DatabucketTable extends React.Component {
                             // },
                             rowData => ({
                                 icon: () => <RateReviewOutlined />,
-                                tooltip: 'Bundle details',
+                                tooltip: 'Data details',
                                 onClick: (event, rowData) => {
-                                    this.showBundleDetailsDialog(rowData);
+                                    this.showDataDetailsDialog(rowData);
                                 }
                             }),
                             rowData => ({
                                 icon: () => <History />,
-                                tooltip: 'Bundle history',
+                                tooltip: 'Data history',
                                 onClick: (event, rowData) => {
-                                    this.showBundleHistoryDialog(rowData);
+                                    this.showDataHistoryDialog(rowData);
                                 }
                             })
                         ]}
@@ -566,11 +566,11 @@ class DatabucketTable extends React.Component {
                         editable={{
                             onRowAdd: newData =>
                                 new Promise((resolve, reject) => {
-                                    const payload = this.convertBundleBeforeAdd(newData);
+                                    const payload = this.convertDataBeforeAdd(newData);
 
                                     payload.created_by = window.USER;
 
-                                    let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles?userName=' + window.USER;
+                                    let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data?userName=' + window.USER;
 
                                     let result_ok = true;
                                     fetch(url, {
@@ -592,18 +592,18 @@ class DatabucketTable extends React.Component {
                                 }),
                             onRowUpdate: (newData, oldData) =>
                                 new Promise((resolve, reject) => {
-                                    console.log(JSON.parse(JSON.stringify(newData)));
-                                    var payload = this.convertBundleBeforeModify(newData, oldData);
+                                    // console.log(JSON.parse(JSON.stringify(newData)));
+                                    var payload = this.convertDataBeforeModify(newData, oldData);
                                     let changed = false;
-                                    console.log(JSON.parse(JSON.stringify(newData)));
-                                    console.log(payload);
+                                    // console.log(JSON.parse(JSON.stringify(newData)));
+                                    // console.log(payload);
                                     if (Object.keys(payload).length > 0)
                                         changed = true;
 
                                     let result_ok = true;
                                     if (changed) {
-                                        const bundleId = this.getBundleId(newData);
-                                        let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/' + bundleId + '?userName=' + window.USER;
+                                        const dataRowId = this.getDataRowId(newData);
+                                        let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/' + dataRowId + '?userName=' + window.USER;
                                         fetch(url, {
                                             method: 'PUT',
                                             body: JSON.stringify(payload),
@@ -625,8 +625,8 @@ class DatabucketTable extends React.Component {
                                 }),
                             onRowDelete: oldData =>
                                 new Promise((resolve, reject) => {
-                                    const bundleId = this.getBundleId(oldData);
-                                    let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/' + bundleId;
+                                    const dataRowId = this.getDataRowId(oldData);
+                                    let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/' + dataRowId;
                                     fetch(url, { method: 'DELETE' })
                                         .then(handleErrors)
                                         .catch(error => {
@@ -637,18 +637,18 @@ class DatabucketTable extends React.Component {
                                 }),
                         }}
                     />
-                    <BundleDetailsDialog
-                        bundle={this.state.bundle}
-                        open={this.state.openBundleDetailsDialog}
-                        onChange={(bundle, changed) => this.onCloseBundleDetailsDialog(bundle, changed)} />
+                    <DataDetailsDialog
+                        dataRow={this.state.dataRow}
+                        open={this.state.openDataDetailsDialog}
+                        onChange={(dataRow, changed) => this.onCloseDataDetailsDialog(dataRow, changed)} />
 
-                    <BundleHistoryDialog
+                    <DataHistoryDialog
                         bucket={this.state.bucket}
-                        bundleId={this.state.bundleId}
+                        dataRowId={this.state.dataRowId}
                         history={this.state.history}
                         tags={this.state.tags}
-                        open={this.state.openBundleHistoryDialog}
-                        onClose={() => this.onCloseBundleHistoryDialog()} />
+                        open={this.state.openDataHistoryDialog}
+                        onClose={() => this.onCloseDataHistoryDialog()} />
 
                     <TaskExecutionEditorDialog
                         open={this.state.openTaskExecutionEditorDialog}

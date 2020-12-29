@@ -81,7 +81,7 @@ class EventsLogTab extends React.Component {
 
     clearLog() {
         new Promise((resolve, reject) => {
-            let url = window.API + '/events/log';
+            let url = window.API + '/event/log';
             fetch(url, { method: 'DELETE' })
                 .catch(error => {
                     window.alert(error.message);
@@ -132,7 +132,7 @@ class EventsLogTab extends React.Component {
                             this.setLastPageSize(query.pageSize);
                         } 
 
-                        let url = window.API + '/events/log?';
+                        let url = window.API + '/event/log?';
                         url += 'limit=' + query.pageSize;
                         url += '&page=' + (query.page + 1);
                         if (query.orderBy != null && query.orderBy.field != null)

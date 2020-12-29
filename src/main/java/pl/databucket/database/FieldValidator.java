@@ -1,30 +1,22 @@
 package pl.databucket.database;
 
-import static org.springframework.util.StringUtils.isEmpty;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import org.springframework.util.StringUtils;
 import pl.databucket.exception.EmptyInputValueException;
 import pl.databucket.exception.ExceededMaximumNumberOfCharactersException;
 import pl.databucket.exception.IncorrectValueException;
 import pl.databucket.exception.UnexpectedException;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static org.springframework.util.StringUtils.isEmpty;
+
 public class FieldValidator {
 
 	private final static int MAX_DESCRIPTION = 100;
-	private final static int MAX_CREATED_BY = 50;
-	private final static int MAX_UPDATED_BY = 50;
 	private final static int MAX_GROUP_NAME = 50;
 	private final static int MAX_CLASS_NAME = 50;
 	private final static int MAX_BUCKET_NAME = 50;
@@ -56,8 +48,7 @@ public class FieldValidator {
 
 	public static String validateIcon(Map<String, Object> map, boolean obligatory) throws EmptyInputValueException {
 		if (map.containsKey(COL.ICON_NAME)) {
-			String icon = (String) map.get(COL.ICON_NAME);
-			return icon;
+			return (String) map.get(COL.ICON_NAME);
 		} else {
 			if (obligatory)
 				throw new EmptyInputValueException(COL.ICON_NAME);
@@ -68,8 +59,7 @@ public class FieldValidator {
 
 	public static Boolean validateEventStatus(Map<String, Object> map, boolean obligatory) throws EmptyInputValueException {
 		if (map.containsKey(COL.ACTIVE)) {
-			Boolean status = (Boolean) map.get(COL.ACTIVE);
-			return status;
+			return (Boolean) map.get(COL.ACTIVE);
 		} else {
 			if (obligatory)
 				throw new EmptyInputValueException(COL.ACTIVE);
@@ -78,42 +68,12 @@ public class FieldValidator {
 		}
 	}
 
-	public static String validateCreatedBy(Map<String, Object> map, boolean obligatory) throws EmptyInputValueException, ExceededMaximumNumberOfCharactersException {
-		if (map.containsKey(COL.CREATED_BY)) {
-			String createdBy = (String) map.get(COL.CREATED_BY);
-			if (createdBy.length() > MAX_CREATED_BY) {
-				throw new ExceededMaximumNumberOfCharactersException(COL.CREATED_BY, createdBy, MAX_CREATED_BY);
-			} else
-				return createdBy;
-		} else {
-			if (obligatory)
-				throw new EmptyInputValueException(COL.CREATED_BY);
-			else
-				return null;
-		}
-	}
-
-	public static String validateUpdatedBy(Map<String, Object> map, boolean obligatory) throws EmptyInputValueException, ExceededMaximumNumberOfCharactersException {
-		if (map.containsKey(COL.UPDATED_BY)) {
-			String updatedBy = (String) map.get(COL.UPDATED_BY);
-			if (updatedBy.length() > MAX_UPDATED_BY) {
-				throw new ExceededMaximumNumberOfCharactersException(COL.UPDATED_BY, updatedBy, MAX_UPDATED_BY);
-			} else
-				return updatedBy;
-		} else {
-			if (obligatory)
-				throw new EmptyInputValueException(COL.UPDATED_BY);
-			else
-				return null;
-		}
-	}
-
 	public static String validateGroupName(Map<String, Object> map, boolean obligatory) throws IncorrectValueException, EmptyInputValueException, ExceededMaximumNumberOfCharactersException {
 		if (map.containsKey(COL.GROUP_NAME)) {
 			String bucketName = (String) map.get(COL.GROUP_NAME);
 			final Pattern pattern = Pattern.compile("[a-zA-Z0-9- ]+");
 		    if (!pattern.matcher(bucketName).matches()) {
-		        throw new IncorrectValueException("Invalid group name. The group name can contain (not diactric) letters, digits, dash character and space character.");
+		        throw new IncorrectValueException("Invalid group name. The group name can contain (not diacritic) letters, digits, dash character and space character.");
 		    } else if (bucketName.length() > MAX_GROUP_NAME) {
 		    	throw new ExceededMaximumNumberOfCharactersException(COL.GROUP_NAME, bucketName, MAX_GROUP_NAME);
 		    } else
@@ -144,10 +104,10 @@ public class FieldValidator {
 	}
 
 	public static List<Condition> validateFilter(String filter) throws IncorrectValueException {
-		List<Condition> filterList = new ArrayList<Condition>();
+		List<Condition> filterList = new ArrayList<>();
 		String[] filters = filter.split("\\)\\(");
 		for (String f : filters) {
-			Condition condition = null;
+			Condition condition;
 
 			if (f.startsWith("("))
 				f = f.substring(1);
@@ -161,21 +121,27 @@ public class FieldValidator {
 			String field = f.substring(0, first);
 			String operator = f.substring(first + 1, second);
 			String type = f.substring(second + 1, third);
-			String value = f.substring(third + 1, f.length());
+			String value = f.substring(third + 1);
 
-			if (type.equals("numeric"))
-				condition = new Condition(field, Operator.fromString(operator), Integer.parseInt(value));
-			else if (type.equals("boolean"))
-				condition = new Condition(field, Operator.fromString(operator), Boolean.parseBoolean(value));
-			else if (type.equals("numeric_array")) {
-				String[] items = value.split(",");
-				Integer[] ids = new Integer[items.length];
-				for (int i = 0; i < items.length; i++) {
-					ids[i] = Integer.parseInt(items[i]);
-				}
-				condition = new Condition(field, Operator.fromString(operator), new ArrayList<Integer>(Arrays.asList(ids)));
-			} else
-				condition = new Condition(field, Operator.fromString(operator), value);
+			switch (type) {
+				case "numeric":
+					condition = new Condition(field, Operator.fromString(operator), Integer.parseInt(value));
+					break;
+				case "boolean":
+					condition = new Condition(field, Operator.fromString(operator), Boolean.parseBoolean(value));
+					break;
+				case "numeric_array":
+					String[] items = value.split(",");
+					Integer[] ids = new Integer[items.length];
+					for (int i = 0; i < items.length; i++) {
+						ids[i] = Integer.parseInt(items[i]);
+					}
+					condition = new Condition(field, Operator.fromString(operator), new ArrayList<>(Arrays.asList(ids)));
+					break;
+				default:
+					condition = new Condition(field, Operator.fromString(operator), value);
+					break;
+			}
 
 			filterList.add(condition);
 		}
@@ -238,15 +204,15 @@ public class FieldValidator {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> validateEventSchedule(Map<String, Object> map, boolean obligatory, boolean validate) throws EmptyInputValueException, IncorrectValueException, ParseException {
+	public static Map<String, Object> validateEventSchedule(Map<String, Object> map, boolean obligatory, boolean validate) throws EmptyInputValueException, IncorrectValueException {
 		if (map.containsKey(COL.SCHEDULE)) {
 			Map<String, Object> schedule = (Map<String, Object>) map.get(COL.SCHEDULE);
 			Instant currentTime = Instant.now();
 
 			// Verify dates
 			boolean periodically = (boolean) schedule.get(C.PERIODICALLY);
+			Instant starts = getUTCDate((String) schedule.get(C.STARTS));
 			if (periodically) {
-				Instant starts = getUTCDate((String) schedule.get(C.STARTS));
 
 				if (!starts.isAfter(currentTime) && validate)
 					throw new IncorrectValueException("The 'Starts' must be in the future!");
@@ -259,7 +225,6 @@ public class FieldValidator {
 						throw new IncorrectValueException("The 'Ends' must be after the 'Starts'!");
 				}
 			} else {
-				Instant starts = getUTCDate((String) schedule.get(C.STARTS));
 
 				if (!starts.isAfter(currentTime) && validate)
 					throw new IncorrectValueException("The execution date and time must be in the future!");
@@ -275,7 +240,7 @@ public class FieldValidator {
 		}
 	}
 
-	private static Instant getUTCDate(String dateInString) throws ParseException {
+	private static Instant getUTCDate(String dateInString) {
 		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		LocalDateTime dt = LocalDateTime.parse(dateInString, fmt);
 		return dt.toInstant(ZoneOffset.UTC);
@@ -352,7 +317,7 @@ public class FieldValidator {
 	@SuppressWarnings("unchecked")
 	public static List<Condition> validateListOfConditions(Map<String, Object> map, boolean obligatory) throws EmptyInputValueException {
 		if (map.containsKey(COL.CONDITIONS)) {
-			List<Condition> conditions = new ArrayList<Condition>();
+			List<Condition> conditions = new ArrayList<>();
 			List<Map<String, Object>> conditionsMap = (List<Map<String, Object>>) map.get(COL.CONDITIONS);
 			for (Map<String, Object> conditionMap : conditionsMap)
 				conditions.add(new Condition(conditionMap));

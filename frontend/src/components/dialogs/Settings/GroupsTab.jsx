@@ -59,7 +59,7 @@ class GroupsTab extends React.Component {
         this.state = {
             bucketsLookup: props.bucketsLookup,
             columns: [
-                { title: 'Id', field: 'group_id', type: 'numeric', editable: 'never', filtering: false },
+                // { title: 'Id', field: 'group_id', type: 'numeric', editable: 'never', filtering: false},
                 { title: 'Name', field: 'group_name' },
                 {
                     title: 'Buckets', field: 'buckets',
@@ -92,7 +92,7 @@ class GroupsTab extends React.Component {
         } 
 
         return { columns: [
-            { title: 'Id', field: 'group_id', type: 'numeric', editable: 'never', filtering: false },
+            // { title: 'Id', field: 'group_id', type: 'numeric', editable: 'never', filtering: false },
             { title: 'Name', field: 'group_name' },
             {
                 title: 'Buckets', field: 'buckets',
@@ -162,7 +162,7 @@ class GroupsTab extends React.Component {
                             this.setLastPageSize(query.pageSize);
                         } 
 
-                        let url = window.API + '/groups?';
+                        let url = window.API + '/group?';
                         url += 'limit=' + query.pageSize;
                         url += '&page=' + (query.page + 1);
                         if (query.orderBy != null && query.orderBy.field != null)
@@ -236,7 +236,7 @@ class GroupsTab extends React.Component {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/groups?userName=' + window.USER;
+                            let url = window.API + '/group?userName=' + window.USER;
 
                             let result_ok = true;
                             fetch(url, {
@@ -284,7 +284,7 @@ class GroupsTab extends React.Component {
                             let result_ok = true;
 
                             if (changed) {
-                                let url = window.API + '/groups/' + oldData.group_id + '?userName=' + window.USER;
+                                let url = window.API + '/group/' + oldData.group_id + '?userName=' + window.USER;
                                 fetch(url, {
                                     method: 'PUT',
                                     body: JSON.stringify(payload),
@@ -307,7 +307,7 @@ class GroupsTab extends React.Component {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
-                                let url = window.API + '/groups/' + oldData.group_id + '?userName=' + window.USER;
+                                let url = window.API + '/group/' + oldData.group_id + '?userName=' + window.USER;
 
                                 fetch(url, { method: 'DELETE' })
                                     .then(handleErrors)

@@ -18,7 +18,7 @@ public class COL {
 	public static final String GROUP_NAME = "group_name";
 	public static final String BUCKETS = "buckets";
 	
-	// Talbe _class
+	// Table _class
 	public static final String CLASS_ID = "class_id";
 	public static final String CLASS_NAME = "class_name";
 	
@@ -46,8 +46,8 @@ public class COL {
 	public static final String VIEW_ID = "view_id";
 	public static final String VIEW_NAME = "view_name";
 	
-	// Table bucket
-	public static final String BUNDLE_ID = "bundle_id";
+	// Table data
+	public static final String DATA_ID = "data_id";
 	public static final String LOCKED = "locked";
 	public static final String LOCKED_BY = "locked_by";
 	public static final String PROPERTIES = "properties";

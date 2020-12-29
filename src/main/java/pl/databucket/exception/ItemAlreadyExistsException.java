@@ -1,6 +1,5 @@
 package pl.databucket.exception;
 
-@SuppressWarnings("serial")
 public class ItemAlreadyExistsException extends Exception {
 
 	public ItemAlreadyExistsException(String itemType, String itemName) {

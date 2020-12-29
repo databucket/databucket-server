@@ -63,7 +63,7 @@ class ViewsTab extends React.Component {
         this.allFilters = props.filters;
         this.state = {
             columns: [
-                { title: 'Id', field: 'view_id', type: 'numeric', editable: 'never', filtering: false },
+                // { title: 'Id', field: 'view_id', type: 'numeric', editable: 'never', filtering: false },
                 { title: 'Name', field: 'view_name' },
                 { title: 'Bucket', field: 'bucket_id', initialEditValue: BUCKET_DEFAULT, emptyValue: BUCKET_DEFAULT, lookup: props.bucketsLookup },
                 { title: 'Class', field: 'class_id', initialEditValue: CLASS_DEFAULT, emptyValue: CLASS_DEFAULT, lookup: props.classesLookup },
@@ -159,7 +159,7 @@ class ViewsTab extends React.Component {
                             this.setLastPageSize(query.pageSize);
                         }
 
-                        let url = window.API + '/views?';
+                        let url = window.API + '/view?';
                         url += 'limit=' + query.pageSize;
                         url += '&page=' + (query.page + 1);
 
@@ -240,7 +240,7 @@ class ViewsTab extends React.Component {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/views?userName=' + window.USER;
+                            let url = window.API + '/view?userName=' + window.USER;
 
                             let payload = JSON.parse(JSON.stringify(newData));
 
@@ -335,7 +335,7 @@ class ViewsTab extends React.Component {
                             let result_ok = true;
 
                             if (changed) {
-                                let url = window.API + '/views/' + oldData.view_id + '?userName=' + window.USER;
+                                let url = window.API + '/view/' + oldData.view_id + '?userName=' + window.USER;
                                 fetch(url, {
                                     method: 'PUT',
                                     body: JSON.stringify(payload),
@@ -358,7 +358,7 @@ class ViewsTab extends React.Component {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             if (oldData.view_id > 0) {
-                                let url = window.API + '/views/' + oldData.view_id + '?userName=' + window.USER;
+                                let url = window.API + '/view/' + oldData.view_id + '?userName=' + window.USER;
                                 fetch(url, { method: 'DELETE' })
                                     .then(handleErrors)
                                     .catch(error => {

@@ -184,7 +184,7 @@ export default class ColumnsEditorDialog extends React.Component {
 
   getDefaultColumns() {
     return [
-      { title: 'Id', field: 'bundle_id', type: 'numeric', editable: 'never', sorting: true, filtering: true },
+      { title: 'Id', field: 'data_id', type: 'numeric', editable: 'never', sorting: true, filtering: true },
       { title: 'Tag', field: 'tag_id', type: 'numeric', editable: 'always', sorting: true, filtering: true },
       { title: 'Locked', field: 'locked', type: 'boolean', editable: 'always', sorting: true, filtering: true },
       { title: 'Locked by', field: 'locked_by', type: 'string', editable: 'never', sorting: true, filtering: true },

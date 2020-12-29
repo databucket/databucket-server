@@ -1,6 +1,5 @@
 package pl.databucket.exception;
 
-@SuppressWarnings("serial")
 public class ItemDoNotExistsException extends Exception {
 
 	public ItemDoNotExistsException(String type, int id) {

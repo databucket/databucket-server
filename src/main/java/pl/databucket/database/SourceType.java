@@ -9,7 +9,7 @@ public enum SourceType {
 
 	private final String sourceName;
 	
-	private SourceType(String sourceName) {
+	SourceType(String sourceName) {
 		this.sourceName = sourceName;
 	}
 	

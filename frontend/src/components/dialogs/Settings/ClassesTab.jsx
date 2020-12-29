@@ -57,7 +57,7 @@ class ClassesTab extends React.Component {
         this.state = {
             bucketsLookup: props.bucketsLookup,
             columns: [
-                { title: 'Id', field: 'class_id', type: 'numeric', editable: 'never', filtering: false },
+                // { title: 'Id', field: 'class_id', type: 'numeric', editable: 'never', filtering: false },
                 { title: 'Name', field: 'class_name' },
                 { title: 'Description', field: 'description' },
                 {
@@ -114,7 +114,7 @@ class ClassesTab extends React.Component {
                             this.setLastPageSize(query.pageSize);
                         } 
 
-                        let url = window.API + '/classes?';
+                        let url = window.API + '/class?';
                         url += 'limit=' + query.pageSize;
                         url += '&page=' + (query.page + 1);
                         if (query.orderBy != null && query.orderBy.field != null)
@@ -188,7 +188,7 @@ class ClassesTab extends React.Component {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/classes?userName=' + window.USER;
+                            let url = window.API + '/class?userName=' + window.USER;
 
                             let result_ok = true;
                             fetch(url, {
@@ -231,7 +231,7 @@ class ClassesTab extends React.Component {
                             let result_ok = true;
 
                             if (changed) {
-                                let url = window.API + '/classes/' + oldData.class_id + '?userName=' + window.USER;
+                                let url = window.API + '/class/' + oldData.class_id + '?userName=' + window.USER;
                                 fetch(url, {
                                     method: 'PUT',
                                     body: JSON.stringify(payload),
@@ -254,7 +254,7 @@ class ClassesTab extends React.Component {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
-                                let url = window.API + '/classes/' + oldData.class_id + '?userName=' + window.USER;
+                                let url = window.API + '/class/' + oldData.class_id + '?userName=' + window.USER;
 
                                 fetch(url, { method: 'DELETE' })
                                     .then(handleErrors)

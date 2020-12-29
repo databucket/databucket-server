@@ -168,7 +168,7 @@ export default class ConditionsEditorDialog extends React.Component {
         return [
             {
                 'left_source': 'field',
-                'left_value': 'bundle_id',
+                'left_value': 'data_id',
                 'operator': '>',
                 'right_source': 'const',
                 'right_value': '5'
@@ -177,7 +177,7 @@ export default class ConditionsEditorDialog extends React.Component {
     }
 
     isProperField(value) {
-        const fields = ['bundle_id', 'tag_id', 'tag_name', 'locked', 'locked_by', 'created_by', 'created_at', 'updated_by', 'updated_at', 'properties'];
+        const fields = ['data_id', 'tag_id', 'tag_name', 'locked', 'locked_by', 'created_by', 'created_at', 'updated_by', 'updated_at', 'properties'];
         let result = fields.includes(value);
 
         if (!result)

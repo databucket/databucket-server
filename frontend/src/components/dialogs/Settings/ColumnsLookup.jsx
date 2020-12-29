@@ -16,6 +16,7 @@ export default class ColumnsLookup extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
+        console.log('getDerivedStateFromProps');
         let bucketId = props.rowData.bucket_id === BUCKET_DEFAULT ? null : parseInt(props.rowData.bucket_id);
         let classId = props.rowData.class_id === CLASS_DEFAULT ? null : parseInt(props.rowData.class_id);
         let filteredColumns = props.allColumns.filter(c => ((c.bucket_id === null || c.bucket_id === bucketId) && (c.class_id === null || c.class_id === classId)));

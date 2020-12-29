@@ -244,7 +244,7 @@ class TaskConfigurationEditorDialog extends React.Component {
   }
 
   isProperField(value) {
-    const fields = ['bundle_id', 'tag_id', 'tag_name', 'locked', 'locked_by', 'created_by', 'created_at', 'updated_by', 'updated_at', 'properties'];
+    const fields = ['data_id', 'tag_id', 'tag_name', 'locked', 'locked_by', 'created_by', 'created_at', 'updated_by', 'updated_at', 'properties'];
     let result = fields.includes(value);
 
     if (!result)
@@ -399,12 +399,12 @@ class TaskConfigurationEditorDialog extends React.Component {
                           <FormControlLabel
                             value="remove"
                             control={<Radio color="primary" />}
-                            label="Remove bundles"
+                            label="Remove data"
                           />
                           <FormControlLabel
                             value="modify"
                             control={<Radio color="primary" />}
-                            label="Modify bundles"
+                            label="Modify data"
                           />
                         </RadioGroup>
                         {this.state.data.actions.type === 'modify' ? (

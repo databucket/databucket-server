@@ -62,7 +62,7 @@ class FiltersTab extends React.Component {
         this.pageSize = this.getLastPageSize();
         this.state = {
             columns: [
-                { title: 'Id', field: 'filter_id', type: 'numeric', editable: 'never', filtering: false },
+                // { title: 'Id', field: 'filter_id', type: 'numeric', editable: 'never', filtering: false },
                 { title: 'Name', field: 'filter_name' },
                 { title: 'Bucket', field: 'bucket_id', initialEditValue: BUCKET_DEFAULT, emptyValue: BUCKET_DEFAULT, lookup: props.bucketsLookup },
                 { title: 'Class', field: 'class_id', initialEditValue: CLASS_DEFAULT, emptyValue: CLASS_DEFAULT, lookup: props.classesLookup },
@@ -135,7 +135,7 @@ class FiltersTab extends React.Component {
             payload.filter_name = payload.filter_name.substr(0, 44);
         payload.filter_name = payload.filter_name + '-clone'
 
-        let url = window.API + '/filters?userName=' + window.USER;
+        let url = window.API + '/filter?userName=' + window.USER;
 
         if (payload.class_id !== CLASS_DEFAULT) {
             payload.class_id = parseInt(payload.class_id);
@@ -178,7 +178,7 @@ class FiltersTab extends React.Component {
                             this.setLastPageSize(query.pageSize);
                         } 
 
-                        let url = window.API + '/filters?';
+                        let url = window.API + '/filter?';
                         url += 'limit=' + query.pageSize;
                         url += '&page=' + (query.page + 1);
                         if (query.orderBy != null && query.orderBy.field != null)
@@ -271,7 +271,7 @@ class FiltersTab extends React.Component {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/filters?userName=' + window.USER;
+                            let url = window.API + '/filter?userName=' + window.USER;
 
                             let payload = JSON.parse(JSON.stringify(newData));
 
@@ -347,7 +347,7 @@ class FiltersTab extends React.Component {
                             let result_ok = true;
 
                             if (changed) {
-                                let url = window.API + '/filters/' + oldData.filter_id + '?userName=' + window.USER;
+                                let url = window.API + '/filter/' + oldData.filter_id + '?userName=' + window.USER;
                                 fetch(url, {
                                     method: 'PUT',
                                     body: JSON.stringify(payload),
@@ -369,7 +369,7 @@ class FiltersTab extends React.Component {
                         }),
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/filters/' + oldData.filter_id + '?userName=' + window.USER;
+                            let url = window.API + '/filter/' + oldData.filter_id + '?userName=' + window.USER;
                             fetch(url, { method: 'DELETE' })
                                 .then(handleErrors)
                                 .catch(error => {

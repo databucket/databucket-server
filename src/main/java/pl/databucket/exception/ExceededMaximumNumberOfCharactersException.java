@@ -1,6 +1,5 @@
 package pl.databucket.exception;
 
-@SuppressWarnings("serial")
 public class ExceededMaximumNumberOfCharactersException extends Exception {
 
 	public ExceededMaximumNumberOfCharactersException(String item, String value, int max) {

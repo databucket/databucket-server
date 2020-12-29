@@ -61,7 +61,7 @@ class BucketsTab extends React.Component {
         this.pageSize = this.getLastPageSize();
         this.state = {
             columns: [
-                { title: 'Id', field: 'bucket_id', type: 'numeric', editable: 'never', filtering: false},
+                // { title: 'Id', field: 'bucket_id', type: 'numeric', editable: 'never', filtering: false},
                 {
                     title: 'Icon', sorting: false, field: 'icon_name', searchable: false, filtering: false, initialEditValue: ICON_DEFAULT,
                     render: rowData => <DynamicIcon iconName={rowData.icon_name} color='action' />,
@@ -131,7 +131,7 @@ class BucketsTab extends React.Component {
                             this.setLastPageSize(query.pageSize);
                         } 
 
-                        let url = window.API + '/buckets?';
+                        let url = window.API + '/bucket?';
                         url += 'limit=' + query.pageSize;
                         url += '&page=' + (query.page + 1);
                         if (query.orderBy != null && query.orderBy.field != null)
@@ -205,7 +205,7 @@ class BucketsTab extends React.Component {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/buckets?userName=' + window.USER;
+                            let url = window.API + '/bucket?userName=' + window.USER;
 
                             let payload = JSON.parse(JSON.stringify(newData));
 
@@ -293,7 +293,7 @@ class BucketsTab extends React.Component {
                             let result_ok = true;
 
                             if (changed) {
-                                let url = window.API + '/buckets/' + oldData.bucket_name + '?userName=' + window.USER;
+                                let url = window.API + '/bucket/' + oldData.bucket_name + '?userName=' + window.USER;
                                 fetch(url, {
                                     method: 'PUT',
                                     body: JSON.stringify(payload),
@@ -316,7 +316,7 @@ class BucketsTab extends React.Component {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
-                                let url = window.API + '/buckets/' + oldData.bucket_name + '?userName=' + window.USER;
+                                let url = window.API + '/bucket/' + oldData.bucket_name + '?userName=' + window.USER;
 
                                 fetch(url, { method: 'DELETE' })
                                     .then(handleErrors)

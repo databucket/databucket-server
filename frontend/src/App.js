@@ -6,8 +6,8 @@ import DatabucketMainDrawer from './components/DatabucketMainDrower';
 
 export default function App() {
 
-  // window.API = 'http://localhost:8080/api';
-  window.API = './api';
+  window.API = 'http://localhost:8080/api';
+  // window.API = './api';
 
   // set user name
   const cookies = new Cookies();

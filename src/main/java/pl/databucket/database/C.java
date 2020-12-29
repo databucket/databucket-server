@@ -13,14 +13,14 @@ public class C {
 	public static final String EVENTS_LOG = "events_log";
 	public static final String COLUMNS = "columns";
 	public static final String VIEWS = "views";
-	public static final String BUNDLES = "bundles";
+	public static final String DATA = "data";
 	
 	public static final String FIELD = "field";
 	public static final String TITLE = "title";
-	
+
 	public static final String LEFT_SOURCE = "left_source";
 	public static final String LEFT_VALUE = "left_value";
-	public static final String OPRERATOR = "operator";
+	public static final String OPERATOR = "operator";
 	public static final String RIGHT_SOURCE = "right_source";
 	public static final String RIGHT_VALUE = "right_value";
 	
@@ -39,7 +39,6 @@ public class C {
 	// TASK
 	public static final String CONFIGURATION = "configuration";
 	public static final String ACTIONS = "actions";
-	public static final String CONDITIONS = "conditions";
 	public static final String TYPE = "type"; // remove or modify for task
 	public static final String REMOVE = "remove"; // for task and property
 	public static final String MODIFY = "modify"; // for task

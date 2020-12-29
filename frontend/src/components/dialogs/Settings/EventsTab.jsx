@@ -66,7 +66,7 @@ class EventsTab extends React.Component {
             messageTitle: null,
             messageText: null,
             columns: [
-                { title: 'Id', field: 'event_id', type: 'numeric', editable: 'never', filtering: false },
+                // { title: 'Id', field: 'event_id', type: 'numeric', editable: 'never', filtering: false },
                 { title: 'Name', field: 'event_name' },
                 { title: 'Active', field: 'active', type: 'boolean' },
                 { title: 'Bucket', field: 'bucket_id', initialEditValue: BUCKET_DEFAULT, emptyValue: BUCKET_DEFAULT, lookup: props.bucketsLookup },
@@ -185,7 +185,7 @@ class EventsTab extends React.Component {
                                 this.setLastPageSize(query.pageSize);
                             }
 
-                            let url = window.API + '/events?';
+                            let url = window.API + '/event?';
                             url += 'limit=' + query.pageSize;
                             url += '&page=' + (query.page + 1);
                             if (query.orderBy != null && query.orderBy.field != null)
@@ -265,7 +265,7 @@ class EventsTab extends React.Component {
                     editable={{
                         onRowAdd: newData =>
                             new Promise((resolve, reject) => {
-                                let url = window.API + '/events?userName=' + window.USER;
+                                let url = window.API + '/event?userName=' + window.USER;
 
                                 let payload = JSON.parse(JSON.stringify(newData));
 
@@ -378,7 +378,7 @@ class EventsTab extends React.Component {
                                 let result_ok = true;
 
                                 if (changed) {
-                                    let url = window.API + '/events/' + oldData.event_id + '?userName=' + window.USER;
+                                    let url = window.API + '/event/' + oldData.event_id + '?userName=' + window.USER;
                                     fetch(url, {
                                         method: 'PUT',
                                         body: JSON.stringify(payload),
@@ -401,7 +401,7 @@ class EventsTab extends React.Component {
                             }),
                         onRowDelete: oldData =>
                             new Promise((resolve, reject) => {
-                                let url = window.API + '/events/' + oldData.event_id + '?userName=' + window.USER;
+                                let url = window.API + '/event/' + oldData.event_id + '?userName=' + window.USER;
                                 fetch(url, { method: 'DELETE' })
                                     .then(handleErrors)
                                     .catch(error => {

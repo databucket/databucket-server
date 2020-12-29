@@ -147,7 +147,7 @@ class TaskExecutionEditorDialog extends React.Component {
       tags: null,
       tasks: null,
       selectedTask: null,
-      apply: null, // number of bundles that meet the conditions
+      apply: null, // number of dataRow that meet the conditions
       taskLoaded: false,
       processing: false, // true for time when task is executing
       executionResult: null, // response message from execution
@@ -280,7 +280,7 @@ class TaskExecutionEditorDialog extends React.Component {
     this.setState(newState);
   }
 
-  getApplyBundlesCount(conditions) {
+  getApplyDataRowCount(conditions) {
     let payload = {};
     if (conditions != null && conditions.length > 0) {
       payload.conditions = conditions;
@@ -299,7 +299,7 @@ class TaskExecutionEditorDialog extends React.Component {
 
     new Promise((resolve, reject) => {
       setTimeout(() => {
-        let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/custom?limit=0';
+        let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/custom?limit=0';
         fetch(url, {
           method: 'POST',
           body: JSON.stringify(payload),
@@ -329,7 +329,7 @@ class TaskExecutionEditorDialog extends React.Component {
       configuration.actions = {};
 
     newState.data = configuration;
-    this.getApplyBundlesCount(configuration.conditions);
+    this.getApplyDataRowCount(configuration.conditions);
     newState.taskLoaded = true;
     this.setState(newState);
 
@@ -374,7 +374,7 @@ class TaskExecutionEditorDialog extends React.Component {
     }
 
     if (actions.type === 'remove') {
-      this.removeBundles(payload);
+      this.removeData(payload);
     } else if (actions.type === 'modify') {
       //prepare modify payload
       // actions: { type: 'none', set_tag: false, tag_id: 0, set_lock: false, lock: false, properties: [] }
@@ -412,16 +412,16 @@ class TaskExecutionEditorDialog extends React.Component {
           payload['remove_properties'] = propertiesToRemoveArray;
       }
 
-      this.modifyBundles(payload);
+      this.modifyData(payload);
     }
 
   }
 
-  removeBundles(payload) {
+  removeData(payload) {
     new Promise((resolve, reject) => {
       this.setState({ processing: true, executionResult: null });
       setTimeout(() => {
-        let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/custom';
+        let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/custom';
         fetch(url, {
           method: 'DELETE',
           body: JSON.stringify(payload),
@@ -437,11 +437,11 @@ class TaskExecutionEditorDialog extends React.Component {
     });
   }
 
-  modifyBundles(payload) {
+  modifyData(payload) {
     new Promise((resolve, reject) => {
       this.setState({ processing: true, executionResult: null });
       setTimeout(() => {
-        let url = window.API + '/buckets/' + this.state.bucket.bucket_name + '/bundles/custom?userName=' + window.USER;
+        let url = window.API + '/bucket/' + this.state.bucket.bucket_name + '/data/custom?userName=' + window.USER;
         fetch(url, {
           method: 'PUT',
           body: JSON.stringify(payload),
@@ -458,7 +458,7 @@ class TaskExecutionEditorDialog extends React.Component {
   }
 
   isProperField(value) {
-    const fields = ['bundle_id', 'tag_id', 'tag_name', 'locked', 'locked_by', 'created_by', 'created_at', 'updated_by', 'updated_at', 'properties'];
+    const fields = ['data_id', 'tag_id', 'tag_name', 'locked', 'locked_by', 'created_by', 'created_at', 'updated_by', 'updated_at', 'properties'];
     let result = fields.includes(value);
 
     if (!result)
@@ -525,7 +525,7 @@ class TaskExecutionEditorDialog extends React.Component {
 
     if (this.state != null && this.state.data != null && this.state.apply == null) {
       new Promise((resolve, reject) => {
-        this.getApplyBundlesCount([]);
+        this.getApplyDataRowCount([]);
       }, 2000);
     }
 
@@ -539,7 +539,7 @@ class TaskExecutionEditorDialog extends React.Component {
         maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
       >
         <DialogTitle id="dialog-title" onClose={this.handleClose}>
-          {this.state.apply != null ? 'Remove/modify bundles (applies to ' + this.state.apply + ' bundles)' : 'Remove/modify bundles'}
+          {this.state.apply != null ? 'Remove/modify data (applies to ' + this.state.apply + ' data items)' : 'Remove/modify data'}
         </DialogTitle>
         <MuiDialogContent dividers className={classes.content}>
           {/* <Divider variant="fullWidth" /> */}
@@ -615,7 +615,7 @@ class TaskExecutionEditorDialog extends React.Component {
                             newState.data.conditions.push(newData);
                             this.setState(newState, () => resolve());   
                             setTimeout(() => {
-                              this.getApplyBundlesCount(newState.data.conditions)
+                              this.getApplyDataRowCount(newState.data.conditions)
                             }, 500);                                                    
                           } else {
                             reject();
@@ -629,7 +629,7 @@ class TaskExecutionEditorDialog extends React.Component {
                             newState.data.conditions[index] = newData;
                             this.setState(newState, () => resolve());  
                             setTimeout(() => {
-                              this.getApplyBundlesCount(newState.data.conditions)
+                              this.getApplyDataRowCount(newState.data.conditions)
                             }, 500);                                                
                           } else {
                             reject();
@@ -642,7 +642,7 @@ class TaskExecutionEditorDialog extends React.Component {
                           newState.data.conditions.splice(index, 1);
                           this.setState(newState, () => resolve());     
                           setTimeout(() => {
-                            this.getApplyBundlesCount(newState.data.conditions)
+                            this.getApplyDataRowCount(newState.data.conditions)
                           }, 500);                     
                         }),
                     }}
@@ -657,12 +657,12 @@ class TaskExecutionEditorDialog extends React.Component {
                         <FormControlLabel
                           value="remove"
                           control={<Radio color="primary" />}
-                          label="Remove bundles"
+                          label="Remove data"
                         />
                         <FormControlLabel
                           value="modify"
                           control={<Radio color="primary" />}
-                          label="Modify bundles"
+                          label="Modify data"
                         />
                       </RadioGroup>
                       {this.state.data.actions.type === 'modify' ? (

@@ -65,7 +65,7 @@ class TasksTab extends React.Component {
             messageTitle: null,
             messageText: null,
             columns: [
-                { title: 'Id', field: 'task_id', type: 'numeric', editable: 'never', filtering: false },
+                // { title: 'Id', field: 'task_id', type: 'numeric', editable: 'never', filtering: false },
                 { title: 'Name', field: 'task_name' },
                 { title: 'Bucket', field: 'bucket_id', initialEditValue: BUCKET_DEFAULT, emptyValue: BUCKET_DEFAULT, lookup: props.bucketsLookup },
                 { title: 'Class', field: 'class_id', initialEditValue: CLASS_DEFAULT, emptyValue: CLASS_DEFAULT, lookup: props.classesLookup },
@@ -166,7 +166,7 @@ class TasksTab extends React.Component {
                             this.setLastPageSize(query.pageSize);
                         } 
 
-                        let url = window.API + '/tasks?';
+                        let url = window.API + '/task?';
                         url += 'limit=' + query.pageSize;
                         url += '&page=' + (query.page + 1);
                         if (query.orderBy != null && query.orderBy.field != null)
@@ -247,7 +247,7 @@ class TasksTab extends React.Component {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/tasks?userName=' + window.USER;
+                            let url = window.API + '/task?userName=' + window.USER;
 
                             let payload = JSON.parse(JSON.stringify(newData));
 
@@ -324,7 +324,7 @@ class TasksTab extends React.Component {
                             let result_ok = true;
 
                             if (changed) {
-                                let url = window.API + '/tasks/' + oldData.task_id + '?userName=' + window.USER;
+                                let url = window.API + '/task/' + oldData.task_id + '?userName=' + window.USER;
                                 fetch(url, {
                                     method: 'PUT',
                                     body: JSON.stringify(payload),
@@ -347,7 +347,7 @@ class TasksTab extends React.Component {
                         }),
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
-                            let url = window.API + '/tasks/' + oldData.task_id + '?userName=' + window.USER;
+                            let url = window.API + '/task/' + oldData.task_id + '?userName=' + window.USER;
                             fetch(url, { method: 'DELETE' })
                                 .then(handleErrors)
                                 .catch(error => {

@@ -1,15 +1,16 @@
 package pl.databucket.database;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class Condition {
 	
-	private SourceType leftSource;
-	private Object leftValue;
-	private Operator operator;
-	private SourceType rightSource;
+	private final SourceType leftSource;
+	private final Object leftValue;
+	private final Operator operator;
+	private final SourceType rightSource;
 	private Object rightValue;
 	
 	public Condition(SourceType leftSource, Object leftValue, Operator operator, SourceType rightSource, Object rightValue) {
@@ -30,13 +31,13 @@ public class Condition {
 	
 	public Condition(Map<String, Object> conditionMap) {
 		this.leftSource = SourceType.fromString((String) conditionMap.get(C.LEFT_SOURCE));
-		this.operator = Operator.fromString((String) conditionMap.get(C.OPRERATOR));
+		this.operator = Operator.fromString((String) conditionMap.get(C.OPERATOR));
 		this.rightSource = SourceType.fromString((String) conditionMap.get(C.RIGHT_SOURCE));
 		
 		this.leftValue = conditionMap.get(C.LEFT_VALUE);
 		this.rightValue = conditionMap.get(C.RIGHT_VALUE);
 				
-		if ((operator.equals(Operator.in) || operator.equals(Operator.notin)) && rightSource.equals(SourceType.s_const) && !(rightValue instanceof List)) {
+		if ((operator.equals(Operator.in) || operator.equals(Operator.notIn)) && rightSource.equals(SourceType.s_const) && !(rightValue instanceof List)) {
 			String rValue = (String) rightValue;
 			if (rValue.contains(",")) {
 				
@@ -51,7 +52,6 @@ public class Condition {
 				
 				// clean spaces and quotation marks
 				for (int i = 0; i < valuesStr.length; i++) {
-//				for (String vStr : valuesStr) {
 					valuesStr[i] = valuesStr[i].trim();
 					if (valuesStr[i].startsWith("\""))
 						valuesStr[i] = valuesStr[i].substring(1);
@@ -60,7 +60,7 @@ public class Condition {
 				}
 				
 				// check if values are numbers
-				boolean intValues = false;
+				boolean intValues;
 				boolean floatValues = false;
 				
 				try {
@@ -82,23 +82,19 @@ public class Condition {
 				}
 				
 				if (intValues) {
-					List<Integer> listOfValues = new ArrayList<Integer>();
+					List<Integer> listOfValues = new ArrayList<>();
 					for (String vStr : valuesStr)
 						listOfValues.add(Integer.parseInt(vStr));
 					this.rightValue = listOfValues;
-//					System.out.println("intValues: " + listOfValues);
 				} else if (floatValues) {
-					List<Float> listOfValues = new ArrayList<Float>();
+					List<Float> listOfValues = new ArrayList<>();
 					for (String vStr : valuesStr)
 						listOfValues.add(Float.parseFloat(vStr));
 					this.rightValue = listOfValues;
-//					System.out.println("floatValues: " + listOfValues);
 				} else {
-					List<String> listOfValues = new ArrayList<String>();
-					for (String vStr : valuesStr)
-						listOfValues.add(vStr);
+					List<String> listOfValues = new ArrayList<>();
+					Collections.addAll(listOfValues, valuesStr);
 					this.rightValue = listOfValues;
-//					System.out.println("stringValues: " + listOfValues);
 				}				
 			}
 		}
@@ -106,10 +102,6 @@ public class Condition {
 
 	public SourceType getLeftSource() {
 		return leftSource;
-	}
-	
-	public void setLeftValue(Object value) {
-		leftValue = value;
 	}
 
 	public Object getLeftValue() {
@@ -123,12 +115,19 @@ public class Condition {
 	public SourceType getRightSource() {
 		return rightSource;
 	}
-	
-	public void setRightValue(Object value) {
-		rightValue = value;
-	}
 
 	public Object getRightValue() {
 		return rightValue;
-	}		
+	}
+
+	public String toString() {
+		String result = "";
+		result += " leftSource: " + getLeftSource();
+		result += " | leftValue: " + getLeftValue();
+		result += " | operator: " + getOperator();
+		result += " | rightSource: " + getRightSource();
+		result += " | rightValue: " + getRightValue();
+
+		return result;
+	}
 }

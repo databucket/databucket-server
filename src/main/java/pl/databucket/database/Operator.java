@@ -5,19 +5,28 @@ public enum Operator {
 	equal("="),
 	grater(">"),
 	graterEqual(">="),
-	notin("NOT IN"),
-	in("IN"),
-	is("IS"),
-	isnot("IS NOT"),
-	less("<"), 
+	less("<"),
 	lessEqual("<="),
-	like("LIKE"), 
-	notEqual("<>"), 
-	notLike("NOT LIKE");
+	notEqual("<>"),
+
+	in("IN"),
+	notIn("NOT IN"),
+
+	like("LIKE"),
+	notLike("NOT LIKE"),
+
+	similarTo("SIMILAR TO"),
+	notSimilarTo("NOT SIMILAR TO"),
+
+	matchesCS("~"),
+	notMatchCS("!~"),
+
+	matchesCI("~*"),
+	notMatchCI("!~*");
 
 	private final String symbol;
 	
-	private Operator(String text) {
+	Operator(String text) {
 		this.symbol = text;
 	}
 	
