@@ -2,7 +2,7 @@ package pl.databucket.repository.group;
 
 import org.springframework.stereotype.Repository;
 import pl.databucket.database.Condition;
-import pl.databucket.model.Group;
+import pl.databucket.model.entity.Group;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;

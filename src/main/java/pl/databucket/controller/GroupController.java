@@ -10,6 +10,8 @@ import pl.databucket.database.Condition;
 import pl.databucket.database.FieldValidator;
 import pl.databucket.database.ResultField;
 import pl.databucket.exception.*;
+import pl.databucket.model.beans.GroupBean;
+import pl.databucket.model.entity.Group;
 import pl.databucket.response.BaseResponse;
 import pl.databucket.response.GroupResponse;
 import pl.databucket.service.GroupService;
@@ -21,28 +23,20 @@ import java.util.*;
 @RestController
 public class GroupController {
 
-  private final CustomExceptionFormatter customExceptionFormatter;
-  private final GroupService service;
+  private final CustomExceptionFormatter customExceptionFormatter = new CustomExceptionFormatter(LoggerFactory.getLogger(GroupController.class));
 
   @Autowired
-  public GroupController(GroupService service) {
-    this.service = service;
-    this.customExceptionFormatter = new CustomExceptionFormatter(LoggerFactory.getLogger(GroupController.class));
-  }
+  private GroupService groupService;
 
   @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> createGroup(@RequestParam String userName, @RequestBody LinkedHashMap<String, Object> body) {
+  public ResponseEntity<?> createGroup(@RequestBody GroupBean groupBean) {
     try {
-      String groupName = FieldValidator.validateGroupName(body, true);
-      String description = FieldValidator.validateDescription(body, false);
-      List<Integer> buckets = FieldValidator.validateBuckets(body, false);
-
-      return new ResponseEntity<>(service.createGroup(userName, groupName, description, buckets), HttpStatus.CREATED);
-
-    } catch (GroupAlreadyExistsException | ExceededMaximumNumberOfCharactersException | EmptyInputValueException e) {
-      return customExceptionFormatter.customException(new BaseResponse(), e, HttpStatus.NOT_ACCEPTABLE);
-    } catch (Exception ee) {
-      return customExceptionFormatter.defaultException(new BaseResponse(), ee);
+      Group newGroup = groupService.createGroup(groupBean);
+      return new ResponseEntity<>(newGroup, HttpStatus.CREATED);
+    } catch (GroupAlreadyExistsException e1) {
+      return customExceptionFormatter.customException(new BaseResponse(), e1, HttpStatus.NOT_ACCEPTABLE);
+    } catch (Exception e2) {
+      return customExceptionFormatter.defaultException(new BaseResponse(), e2);
     }
   }
 
@@ -50,7 +44,7 @@ public class GroupController {
   public ResponseEntity<BaseResponse> deleteGroup(@PathVariable("groupId") Integer groupId, @RequestParam String userName) {
     GroupResponse rb = new GroupResponse();
     try {
-      service.deleteGroup(groupId, userName);
+      groupService.deleteGroup(groupId, userName);
       return new ResponseEntity<>(rb, HttpStatus.OK);
 //    } catch (ItemDoNotExistsException e) {
 //      return customExceptionFormatter.customException(rb, e, HttpStatus.NOT_FOUND);
@@ -89,7 +83,7 @@ public class GroupController {
         urlConditions = FieldValidator.validateFilter(filter.get());
       }
 
-      Map<ResultField, Object> result = service.getGroups(groupId, page, limit, sort, urlConditions);
+      Map<ResultField, Object> result = groupService.getGroups(groupId, page, limit, sort, urlConditions);
 
       long total = (long) result.get(ResultField.TOTAL);
       rb.setTotal(total);
@@ -114,7 +108,7 @@ public class GroupController {
     GroupResponse rb = new GroupResponse();
 
     try {
-      service.modifyGroup(userName, groupId, body);
+      groupService.modifyGroup(userName, groupId, body);
       rb.setMessage("Group '" + groupId + "' has been successfully modified.");
       return new ResponseEntity<>(rb, HttpStatus.OK);
     } catch (ItemDoNotExistsException e1) {

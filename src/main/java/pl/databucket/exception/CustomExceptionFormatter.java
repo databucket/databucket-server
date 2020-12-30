@@ -19,10 +19,17 @@ public class CustomExceptionFormatter {
         return new ResponseEntity<>(rb, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public ResponseEntity<BaseResponse> customException(BaseResponse rb, Exception e, HttpStatus status) {
+    public ResponseEntity<BaseResponse> customException(BaseResponse baseResponse, Exception e, HttpStatus status) {
         logger.warn(e.getMessage());
-        rb.setMessage(e.getMessage());
-        return new ResponseEntity<>(rb, status);
+        baseResponse.setMessage(e.getMessage());
+        return new ResponseEntity<>(baseResponse, status);
+    }
+
+    public ResponseEntity<BaseResponse> customException(Exception e, HttpStatus status) {
+        BaseResponse baseResponse = new BaseResponse();
+        logger.warn(e.getMessage());
+        baseResponse.setMessage(e.getMessage());
+        return new ResponseEntity<>(baseResponse, status);
     }
 
 }

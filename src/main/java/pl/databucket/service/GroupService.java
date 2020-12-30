@@ -7,7 +7,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import pl.databucket.database.*;
-import pl.databucket.model.Group;
+import pl.databucket.model.beans.GroupBean;
+import pl.databucket.model.entity.Group;
 import pl.databucket.exception.*;
 import pl.databucket.old_service.ServiceUtils;
 import pl.databucket.repository.group.GroupRepository;
@@ -30,15 +31,14 @@ public class GroupService {
         this.serviceUtils = new ServiceUtils(jdbcTemplate, logger);
     }
 
-    public Group createGroup(String userName, String groupName, String description, List<Integer> buckets) throws GroupAlreadyExistsException {
-        if (groupRepository.existsByName(groupName))
-            throw new GroupAlreadyExistsException(groupName);
+    public Group createGroup(GroupBean groupBean) throws GroupAlreadyExistsException {
+        if (groupRepository.existsByName(groupBean.getName()))
+            throw new GroupAlreadyExistsException(groupBean.getName());
 
         Group group = new Group();
-        group.setName(groupName);
-        group.setDescription(description);
-        group.setBuckets(buckets);
-//        group.setCreatedBy(userName);
+        group.setName(groupBean.getName());
+        group.setDescription(groupBean.getDescription());
+        group.setBuckets(groupBean.getBuckets());
 
         return groupRepository.save(group);
     }

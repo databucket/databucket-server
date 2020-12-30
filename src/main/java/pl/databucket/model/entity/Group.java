@@ -1,5 +1,6 @@
-package pl.databucket.model;
+package pl.databucket.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +17,7 @@ import java.util.List;
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="groups")
-public class Group extends Auditable<String>{
+public class Group extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,20 +34,7 @@ public class Group extends Auditable<String>{
 	@Column(columnDefinition = "jsonb")
 	private List<Integer> buckets;
 
-//	@Column(name = "created_at")
-//	@Temporal(TemporalType.DATE)
-//	private Date createdAt;
-//
-//	@Column(name = "created_by", length = 50)
-//	private String createdBy;
-//
-//	@Column(name = "updated_at")
-//	@Temporal(TemporalType.DATE)
-//	private Date updatedAt;
-//
-//	@Column(name = "updated_by", length = 50)
-//	private String updatedBy;
-
+	@JsonIgnore
 	private Boolean deleted = false;
 }
 

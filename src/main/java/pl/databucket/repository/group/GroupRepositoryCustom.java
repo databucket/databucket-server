@@ -1,7 +1,7 @@
 package pl.databucket.repository.group;
 
 import pl.databucket.database.Condition;
-import pl.databucket.model.Group;
+import pl.databucket.model.entity.Group;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.List;

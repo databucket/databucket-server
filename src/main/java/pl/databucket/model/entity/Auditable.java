@@ -1,4 +1,4 @@
-package pl.databucket.model;
+package pl.databucket.model.entity;
 
 import lombok.AccessLevel;
 import lombok.Getter;
