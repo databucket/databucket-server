@@ -1,12 +1,11 @@
 package pl.databucket.controller;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import pl.databucket.exception.CustomExceptionFormatter;
-import pl.databucket.model.entity.User;
+import pl.databucket.exception.ExceptionFormatter;
+import pl.databucket.entity.User;
 import pl.databucket.security.TokenProvider;
-import pl.databucket.model.beans.UserBean;
-import pl.databucket.model.beans.AuthTokenBean;
+import pl.databucket.dto.UserDto;
+import pl.databucket.dto.AuthTokenDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,11 +30,11 @@ public class PublicController {
     @Autowired
     private UserService userService;
 
-    private final CustomExceptionFormatter customExceptionFormatter = new CustomExceptionFormatter(LoggerFactory.getLogger(PublicController.class));
+    private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
 
 
     @PostMapping(value = "/signin")
-    public ResponseEntity<?> signIn(@RequestBody UserBean userBean) throws AuthenticationException {
+    public ResponseEntity<?> signIn(@RequestBody UserDto userBean) {
         try {
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userBean.getName(), userBean.getPassword()));
@@ -45,10 +44,9 @@ public class PublicController {
 
             User user = userService.findByName(userBean.getName());
 
-            return ResponseEntity.ok(new AuthTokenBean(token, user.isChangePassword()));
+            return ResponseEntity.ok(new AuthTokenDto(token, user.isChangePassword()));
         } catch (AuthenticationException e) {
-            return customExceptionFormatter.customException(e, HttpStatus.UNAUTHORIZED);
+            return exceptionFormatter.customException(e, HttpStatus.UNAUTHORIZED);
         }
     }
-
 }

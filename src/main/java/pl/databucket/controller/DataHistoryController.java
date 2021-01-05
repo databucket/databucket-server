@@ -1,35 +1,33 @@
 package pl.databucket.controller;
 
-import static org.springframework.http.ResponseEntity.ok;
-
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.databucket.exception.CustomExceptionFormatter;
+import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ItemDoNotExistsException;
-import pl.databucket.service.DataService;
-import pl.databucket.response.BaseResponse;
 import pl.databucket.response.DataResponse;
+import pl.databucket.service.DataService;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api")
 @RestController
 public class DataHistoryController {
 
-  private final CustomExceptionFormatter customExceptionFormatter;
+  private final ExceptionFormatter exceptionFormatter;
   private final DataService service;
 
   public DataHistoryController(DataService service) {
     this.service = service;
-    this.customExceptionFormatter = new CustomExceptionFormatter(LoggerFactory.getLogger(DataHistoryController.class));
+    this.exceptionFormatter = new ExceptionFormatter(DataHistoryController.class);
   }
 
   @GetMapping(value = {
           "/bucket/{bucketName}/data/{dataId}/history"},
           produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<BaseResponse> getDataHistory(
+  public ResponseEntity<?> getDataHistory(
           @PathVariable("bucketName") String bucketName, 
           @PathVariable("dataId") Integer dataId) {
 
@@ -39,16 +37,16 @@ public class DataHistoryController {
       response.setHistory(service.getDataHistory(bucketName, dataId));
       return ok(response);
     } catch (ItemDoNotExistsException e) {
-      return customExceptionFormatter.customException(response, e, HttpStatus.NOT_FOUND);
+      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (Exception ee) {
-      return customExceptionFormatter.defaultException(response, ee);
+      return exceptionFormatter.defaultException(ee);
     }
   }
 
   @GetMapping(value = {
           "/bucket/{bucketName}/data/{dataId}/history/properties/{ids}"},
           produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<BaseResponse> getDataHistoryProperties(
+  public ResponseEntity<?> getDataHistoryProperties(
           @PathVariable String bucketName,
           @PathVariable Integer dataId,
           @PathVariable Integer[] ids) {
@@ -59,9 +57,9 @@ public class DataHistoryController {
       response.setHistory(service.getDataHistoryProperties(bucketName, dataId, ids));
       return ok(response);
     } catch (ItemDoNotExistsException e) {
-      return customExceptionFormatter.customException(response, e, HttpStatus.NOT_FOUND);
+      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (Exception ee) {
-      return customExceptionFormatter.defaultException(response, ee);
+      return exceptionFormatter.defaultException(ee);
     }
   }
 

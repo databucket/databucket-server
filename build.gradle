@@ -38,6 +38,7 @@ dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-core'
   implementation 'com.jayway.jsonpath:json-path'
   implementation 'org.projectlombok:lombok'
+  implementation 'net.kaczmarzyk:specification-arg-resolver:2.6.2'
 
   compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.10.1'
   compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'

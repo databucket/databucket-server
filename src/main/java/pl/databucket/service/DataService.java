@@ -15,7 +15,6 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
-import pl.databucket.old_service.ServiceUtils;
 import pl.databucket.database.*;
 import pl.databucket.exception.ConditionNotAllowedException;
 import pl.databucket.exception.ItemDoNotExistsException;

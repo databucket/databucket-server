@@ -11,185 +11,185 @@
 --     PRIMARY KEY (group_id)
 -- );
 
-CREATE TABLE IF NOT EXISTS public."dataclasses" (
-    class_id serial NOT NULL,
-    class_name character varying(50) NOT NULL,
-    description character varying(500),
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (class_id)
-);
+-- CREATE TABLE IF NOT EXISTS public."dataclasses" (
+--     class_id serial NOT NULL,
+--     class_name character varying(50) NOT NULL,
+--     description character varying(500),
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (class_id)
+-- );
 
-CREATE TABLE IF NOT EXISTS public."buckets" (
-    bucket_id serial NOT NULL,
-    bucket_name character varying(50) NOT NULL,
-    description character varying(500),
-    index smallint NOT NULL DEFAULT 10,
-    class_id smallint,
-    icon_name character varying(30),
-    history boolean NOT NULL DEFAULT false,
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (bucket_id),
-    CONSTRAINT fk_bucket_class_id
-        FOREIGN KEY(class_id)
-            REFERENCES dataclasses(class_id)
-);
+-- CREATE TABLE IF NOT EXISTS public."buckets" (
+--     bucket_id serial NOT NULL,
+--     bucket_name character varying(50) NOT NULL,
+--     description character varying(500),
+--     index smallint NOT NULL DEFAULT 10,
+--     class_id smallint,
+--     icon_name character varying(30),
+--     history boolean NOT NULL DEFAULT false,
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (bucket_id),
+--     CONSTRAINT fk_bucket_class_id
+--         FOREIGN KEY(class_id)
+--             REFERENCES dataclasses(class_id)
+-- );
 
-CREATE TABLE IF NOT EXISTS public."tags" (
-    tag_id serial NOT NULL,
-    tag_name character varying(50) NOT NULL,
-    bucket_id smallint DEFAULT NULL,
-    class_id smallint DEFAULT NULL,
-    description character varying(500),
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (tag_id),
-    CONSTRAINT fk_tag_bucket_id
-        FOREIGN KEY(bucket_id)
-            REFERENCES buckets(bucket_id),
-    CONSTRAINT fk_tag_class_id
-        FOREIGN KEY(class_id)
-            REFERENCES dataclasses(class_id)
-);
+-- CREATE TABLE IF NOT EXISTS public."tags" (
+--     tag_id serial NOT NULL,
+--     tag_name character varying(50) NOT NULL,
+--     bucket_id smallint DEFAULT NULL,
+--     class_id smallint DEFAULT NULL,
+--     description character varying(500),
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (tag_id),
+--     CONSTRAINT fk_tag_bucket_id
+--         FOREIGN KEY(bucket_id)
+--             REFERENCES buckets(bucket_id),
+--     CONSTRAINT fk_tag_class_id
+--         FOREIGN KEY(class_id)
+--             REFERENCES dataclasses(class_id)
+-- );
 
-CREATE TABLE IF NOT EXISTS public."columns" (
-    columns_id serial NOT NULL,
-    columns_name character varying(50) NOT NULL,
-    bucket_id smallint DEFAULT NULL,
-    class_id smallint DEFAULT NULL,
-    description character varying(500),
-    columns jsonb NOT NULL,
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (columns_id),
-    CONSTRAINT fk_columns_bucket_id
-        FOREIGN KEY(bucket_id)
-            REFERENCES buckets(bucket_id),
-    CONSTRAINT fk_columns_class_id
-        FOREIGN KEY(class_id)
-            REFERENCES dataclasses(class_id)
-    );
-
-
-CREATE TABLE IF NOT EXISTS public."filters" (
-    filter_id serial NOT NULL,
-    filter_name character varying(50) NOT NULL,
-    bucket_id smallint DEFAULT NULL,
-    class_id smallint DEFAULT NULL,
-    conditions jsonb NOT NULL,
-    description character varying(500),
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (filter_id),
-    CONSTRAINT fk_filter_bucket_id
-        FOREIGN KEY(bucket_id)
-            REFERENCES buckets(bucket_id),
-    CONSTRAINT fk_filter_class_id
-        FOREIGN KEY(class_id)
-            REFERENCES dataclasses(class_id)
-    );
+-- CREATE TABLE IF NOT EXISTS public."columns" (
+--     columns_id serial NOT NULL,
+--     columns_name character varying(50) NOT NULL,
+--     bucket_id smallint DEFAULT NULL,
+--     class_id smallint DEFAULT NULL,
+--     description character varying(500),
+--     columns jsonb NOT NULL,
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (columns_id),
+--     CONSTRAINT fk_columns_bucket_id
+--         FOREIGN KEY(bucket_id)
+--             REFERENCES buckets(bucket_id),
+--     CONSTRAINT fk_columns_class_id
+--         FOREIGN KEY(class_id)
+--             REFERENCES dataclasses(class_id)
+--     );
 
 
-CREATE TABLE IF NOT EXISTS public."tasks" (
-    task_id serial NOT NULL,
-    task_name character varying(50) NOT NULL,
-    bucket_id smallint DEFAULT NULL,
-    class_id smallint DEFAULT NULL,
-    configuration jsonb NOT NULL,
-    description character varying(500),
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (task_id),
-    CONSTRAINT fk_task_bucket_id
-        FOREIGN KEY(bucket_id)
-            REFERENCES buckets(bucket_id),
-    CONSTRAINT fk_task_class_id
-        FOREIGN KEY(class_id)
-            REFERENCES dataclasses(class_id)
-    );
+-- CREATE TABLE IF NOT EXISTS public."filters" (
+--     filter_id serial NOT NULL,
+--     filter_name character varying(50) NOT NULL,
+--     bucket_id smallint DEFAULT NULL,
+--     class_id smallint DEFAULT NULL,
+--     conditions jsonb NOT NULL,
+--     description character varying(500),
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (filter_id),
+--     CONSTRAINT fk_filter_bucket_id
+--         FOREIGN KEY(bucket_id)
+--             REFERENCES buckets(bucket_id),
+--     CONSTRAINT fk_filter_class_id
+--         FOREIGN KEY(class_id)
+--             REFERENCES dataclasses(class_id)
+--     );
 
-CREATE TABLE IF NOT EXISTS public."events" (
-    event_id serial NOT NULL,
-    event_name character varying(50) NOT NULL,
-    active boolean NOT NULL DEFAULT false,
-    bucket_id smallint DEFAULT NULL,
-    class_id smallint DEFAULT NULL,
-    schedule jsonb NOT NULL,
-    tasks jsonb NOT NULL,
-    description character varying(500),
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (event_id),
-    CONSTRAINT fk_event_bucket_id
-      FOREIGN KEY(bucket_id)
-          REFERENCES buckets(bucket_id),
-    CONSTRAINT fk_event_class_id
-      FOREIGN KEY(class_id)
-          REFERENCES dataclasses(class_id)
-);
 
-CREATE TABLE IF NOT EXISTS public."views" (
-    view_id serial NOT NULL,
-    view_name character varying(50) NOT NULL,
-    bucket_id smallint DEFAULT NULL,
-    class_id smallint DEFAULT NULL,
-    description character varying(500),
-    filter_id smallint DEFAULT NULL,
-    columns_id smallint NOT NULL,
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    created_by character varying(50) NOT NULL,
-    updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    updated_by character varying(50),
-    deleted boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (view_id),
-    CONSTRAINT fk_view_bucket_id
-      FOREIGN KEY(bucket_id)
-          REFERENCES buckets(bucket_id),
-    CONSTRAINT fk_view_class_id
-      FOREIGN KEY(class_id)
-          REFERENCES dataclasses(class_id)
-);
+-- CREATE TABLE IF NOT EXISTS public."tasks" (
+--     task_id serial NOT NULL,
+--     task_name character varying(50) NOT NULL,
+--     bucket_id smallint DEFAULT NULL,
+--     class_id smallint DEFAULT NULL,
+--     configuration jsonb NOT NULL,
+--     description character varying(500),
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (task_id),
+--     CONSTRAINT fk_task_bucket_id
+--         FOREIGN KEY(bucket_id)
+--             REFERENCES buckets(bucket_id),
+--     CONSTRAINT fk_task_class_id
+--         FOREIGN KEY(class_id)
+--             REFERENCES dataclasses(class_id)
+--     );
 
-CREATE TABLE IF NOT EXISTS public."events_log" (
-    event_log_id serial NOT NULL,
-    event_id smallint NOT NULL,
-    task_id smallint NOT NULL,
-    bucket_id smallint NOT NULL,
-    affected integer NOT NULL,
-    created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-    PRIMARY KEY (event_log_id),
-    CONSTRAINT fk_event_log_bucket_id
-       FOREIGN KEY(bucket_id)
-           REFERENCES buckets(bucket_id),
-    CONSTRAINT fk_event_log_event_id
-       FOREIGN KEY(event_id)
-           REFERENCES events(event_id),
-    CONSTRAINT fk_event_log_task_id
-        FOREIGN KEY(task_id)
-            REFERENCES tasks(task_id)
-);
+-- CREATE TABLE IF NOT EXISTS public."events" (
+--     event_id serial NOT NULL,
+--     event_name character varying(50) NOT NULL,
+--     active boolean NOT NULL DEFAULT false,
+--     bucket_id smallint DEFAULT NULL,
+--     class_id smallint DEFAULT NULL,
+--     schedule jsonb NOT NULL,
+--     tasks jsonb NOT NULL,
+--     description character varying(500),
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (event_id),
+--     CONSTRAINT fk_event_bucket_id
+--       FOREIGN KEY(bucket_id)
+--           REFERENCES buckets(bucket_id),
+--     CONSTRAINT fk_event_class_id
+--       FOREIGN KEY(class_id)
+--           REFERENCES dataclasses(class_id)
+-- );
+
+-- CREATE TABLE IF NOT EXISTS public."views" (
+--     view_id serial NOT NULL,
+--     view_name character varying(50) NOT NULL,
+--     bucket_id smallint DEFAULT NULL,
+--     class_id smallint DEFAULT NULL,
+--     description character varying(500),
+--     filter_id smallint DEFAULT NULL,
+--     columns_id smallint NOT NULL,
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     created_by character varying(50) NOT NULL,
+--     updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     updated_by character varying(50),
+--     deleted boolean NOT NULL DEFAULT false,
+--     PRIMARY KEY (view_id),
+--     CONSTRAINT fk_view_bucket_id
+--       FOREIGN KEY(bucket_id)
+--           REFERENCES buckets(bucket_id),
+--     CONSTRAINT fk_view_class_id
+--       FOREIGN KEY(class_id)
+--           REFERENCES dataclasses(class_id)
+-- );
+
+-- CREATE TABLE IF NOT EXISTS public."events_log" (
+--     event_log_id serial NOT NULL,
+--     event_id smallint NOT NULL,
+--     task_id smallint NOT NULL,
+--     bucket_id smallint NOT NULL,
+--     affected integer NOT NULL,
+--     created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
+--     PRIMARY KEY (event_log_id),
+--     CONSTRAINT fk_event_log_bucket_id
+--        FOREIGN KEY(bucket_id)
+--            REFERENCES buckets(bucket_id),
+--     CONSTRAINT fk_event_log_event_id
+--        FOREIGN KEY(event_id)
+--            REFERENCES events(event_id),
+--     CONSTRAINT fk_event_log_task_id
+--         FOREIGN KEY(task_id)
+--             REFERENCES tasks(task_id)
+-- );
 
 CREATE OR REPLACE FUNCTION before_delete() RETURNS trigger AS '
 DECLARE

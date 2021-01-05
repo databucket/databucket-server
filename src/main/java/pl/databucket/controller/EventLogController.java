@@ -1,92 +1,41 @@
 package pl.databucket.controller;
 
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.databucket.database.Condition;
-import pl.databucket.database.FieldValidator;
-import pl.databucket.database.ResultField;
-import pl.databucket.exception.CustomExceptionFormatter;
-import pl.databucket.service.EventService;
-import pl.databucket.response.BaseResponse;
-import pl.databucket.response.EventResponse;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import pl.databucket.exception.ExceptionFormatter;
+import pl.databucket.service.EventLogService;
+import pl.databucket.specification.EventLogSpecification;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/event/log")
 @RestController
 public class EventLogController {
 
-  private final CustomExceptionFormatter customExceptionFormatter;
-  private final EventService service;
+  private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(EventLogController.class);
 
-  public EventLogController(EventService service) {
-    this.service = service;
-    this.customExceptionFormatter = new CustomExceptionFormatter(LoggerFactory.getLogger(EventLogController.class));
-  }
-  
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<BaseResponse> getEventsLog(
-      @RequestParam(required = false) Optional<Integer> page,
-      @RequestParam(required = false) Optional<Integer> limit,
-      @RequestParam(required = false) Optional<String> sort,
-      @RequestParam(required = false) Optional<String> filter) {
+  @Autowired
+  private EventLogService eventLogService;
 
-    EventResponse response = new EventResponse();
+
+  @GetMapping
+  public ResponseEntity<?> getEventLog(EventLogSpecification specification, Pageable pageable) {
     try {
-      if (page.isPresent()) {
-        FieldValidator.mustBeGraterThen0("page", page.get());
-        response.setPage(page.get());
-      }
-
-      if (limit.isPresent()) {
-        FieldValidator.mustBeGraterOrEqual0("limit", limit.get());
-        response.setLimit(limit.get());
-      }
-
-      if (sort.isPresent()) {
-        FieldValidator.validateSort(sort.get());
-        response.setSort(sort.get());
-      }
-
-      List<Condition> urlConditions = null;
-      if (filter.isPresent()) {
-        urlConditions = FieldValidator.validateFilter(filter.get());
-      }
-
-      Map<ResultField, Object> result = service.getEventsLog(page, limit, sort, urlConditions);
-
-      long total = (long) result.get(ResultField.TOTAL);
-      response.setTotal(total);
-
-      if (page.isPresent() && limit.isPresent()) {
-        response.setTotalPages((int) Math.ceil(total / (float) limit.get()));
-      }
-
-      response.setEventsLog((List<Map<String, Object>>) result.get(ResultField.DATA));
-
-      return new ResponseEntity<>(response, HttpStatus.OK);
-
+      return new ResponseEntity<>(eventLogService.getEventLog(specification, pageable), HttpStatus.OK);
     } catch (Exception ee) {
-      return customExceptionFormatter.defaultException(response, ee);
+      return exceptionFormatter.defaultException(ee);
     }
   }
 
-  @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<BaseResponse> clearEventsLog() {
-    EventResponse response = new EventResponse();
-
+  @DeleteMapping
+  public ResponseEntity<?> clearEventLog() {
     try {
-      service.clearEventsLog();
-      response.setMessage("The events log has been cleaned.");
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (Exception ee) {
-      return customExceptionFormatter.defaultException(response, ee);
+      eventLogService.clearEventsLog();
+      return new ResponseEntity<>(null, HttpStatus.OK);
+    } catch (Exception e) {
+      return exceptionFormatter.defaultException(e);
     }
   }
 }

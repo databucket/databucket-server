@@ -1,72 +1,84 @@
 package pl.databucket.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
-import pl.databucket.old_service.ServiceUtils;
 import pl.databucket.database.*;
+import pl.databucket.entity.User;
 import pl.databucket.exception.*;
+import pl.databucket.dto.BucketDto;
+import pl.databucket.entity.Bucket;
+import pl.databucket.repository.BucketRepository;
+import pl.databucket.repository.DataClassRepository;
+import pl.databucket.repository.UserRepository;
 
-import java.sql.SQLException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class BucketService {
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final ServiceUtils serviceUtils;
+    @Autowired
+    private BucketRepository bucketRepository;
+
+    @Autowired
+    private DataClassRepository dataClassRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private NamedParameterJdbcTemplate jdbcTemplate;
+
+    private final String TABLE_PREFIX = "x";
     Logger logger = LoggerFactory.getLogger(BucketService.class);
 
-    public BucketService(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.serviceUtils = new ServiceUtils(jdbcTemplate, logger);
-    }
+    public Bucket createBucket(BucketDto bucketDto) throws BucketAlreadyExistsException, ConditionNotAllowedException, UnknownColumnException {
+        if (!bucketRepository.existsByNameAndDeleted(bucketDto.getName(), false)) {
+            Bucket bucket = new Bucket();
+            bucket.setName(bucketDto.getName());
+            bucket.setDescription(bucketDto.getDescription());
+            bucket.setHistory(bucketDto.isHistory());
+            bucket.setIconName(bucketDto.getIconName());
+            if (bucketDto.getDataClassId() != null)
+                bucket.setDataClass(dataClassRepository.getOne(bucketDto.getDataClassId()));
 
-    public int createBucket(String createdBy, String bucketName, int index, String description, String icon, boolean history, Integer classId) throws BucketAlreadyExistsException, ConditionNotAllowedException, UnknownColumnException {
-        if (!serviceUtils.isBucketExist(bucketName)) {
+            if (bucketDto.getUsers() != null) {
+                Set<User> users = new HashSet<>();
+                for (long id : bucketDto.getUsers())
+                    users.add(userRepository.getOne(id));
+                bucket.setUsers(users);
+            }
 
-            MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-            namedParameters.addValue(COL.BUCKET_NAME, bucketName);
-            namedParameters.addValue(COL.INDEX, index);
-            namedParameters.addValue(COL.ICON_NAME, icon);
-            namedParameters.addValue(COL.CREATED_BY, createdBy);
-            namedParameters.addValue(COL.HISTORY, history);
-            namedParameters.addValue(COL.CLASS_ID, classId);
-            if (description != null)
-                namedParameters.addValue(COL.DESCRIPTION, description);
+            bucket = bucketRepository.save(bucket);
 
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-
-            Query query = new Query(TAB.BUCKET, true).insertIntoValues(namedParameters);
-
-            jdbcTemplate.update(query.toString(logger, null), namedParameters, keyHolder, new String[]{COL.BUCKET_ID});
-            int bucketId = keyHolder.getKey().intValue();
+            String dataTableName = TABLE_PREFIX + '-' + bucket.getId();
 
             // Create table for data
-            String sql = "CREATE TABLE public.\"" + bucketName + "\" ("
+            String sql = "CREATE TABLE public.\"" + dataTableName + "\" ("
                     + "data_id bigserial NOT NULL,"
-                    + "tag_id smallint NULL,"
-                    + "locked boolean NOT NULL DEFAULT false,"
-                    + "locked_by character varying(50) DEFAULT NULL,"
+                    + "tag_id bigint NULL,"
+                    + "reserved boolean NOT NULL DEFAULT false,"
+                    + "reserved_by character varying(50) DEFAULT NULL,"
                     + "properties jsonb NOT NULL DEFAULT '{}'::jsonb,"
-                    + "created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
                     + "created_by character varying(50) NOT NULL,"
-                    + "updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
-                    + "updated_by character varying(50),"
+                    + "created_date timestamp with time zone NOT NULL DEFAULT current_timestamp,"
+                    + "last_updated_by character varying(50),"
+                    + "last_updated_date timestamp with time zone NOT NULL DEFAULT current_timestamp,"
                     + "PRIMARY KEY (data_id),"
-                    + "CONSTRAINT fk_tag_id FOREIGN KEY(tag_id) REFERENCES _tag(tag_id))";
+                    + "CONSTRAINT fk_tag_id FOREIGN KEY(tag_id) REFERENCES tags(tag_id))";
 
             logger.debug(sql);
             jdbcTemplate.getJdbcTemplate().execute(sql);
 
             // Create table for history
-            sql = "CREATE TABLE \"" + bucketName + "_h\" ("
+            sql = "CREATE TABLE \"" + dataTableName + "-h\" ("
                     + "id bigserial NOT NULL,"
                     + "data_id bigint NOT NULL,"
                     + "tag_id smallint DEFAULT NULL,"
@@ -75,271 +87,75 @@ public class BucketService {
                     + "updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
                     + "updated_by character varying(50),"
                     + "PRIMARY KEY (id),"
-                    + "CONSTRAINT fk_tag_h_id FOREIGN KEY(data_id) REFERENCES \"" + bucketName + "\"(data_id))";
+                    + "CONSTRAINT fk_tag_h_id FOREIGN KEY(data_id) REFERENCES \"" + dataTableName + "\"(data_id))";
 
             logger.debug(sql);
             jdbcTemplate.getJdbcTemplate().execute(sql);
 
-            createBeforeDeleteTrigger(bucketName);
+            createBeforeDeleteTrigger(dataTableName);
 
             // Create after insert and after update triggers if history is enabled
-            if (history) {
-                createAfterInsertTrigger(bucketName);
-                createAfterUpdateTrigger(bucketName);
+            if (bucket.isHistory()) {
+                createAfterInsertTrigger(dataTableName);
+                createAfterUpdateTrigger(dataTableName);
             }
 
-            return bucketId;
+            return bucket;
         } else {
-            throw new BucketAlreadyExistsException(bucketName);
+            throw new BucketAlreadyExistsException(bucketDto.getName());
         }
     }
 
-    public Map<ResultField, Object> getBuckets(Optional<String> bucketName, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort, List<Condition> urlConditions) throws UnknownColumnException, DataAccessException, ConditionNotAllowedException {
-
-        Map<String, Object> paramMap = new HashMap<>();
-        List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition(COL.DELETED, Operator.equal, false));
-
-        if (bucketName.isPresent())
-            conditions.add(new Condition(COL.BUCKET_NAME, Operator.equal, bucketName.get()));
-
-        if (urlConditions != null)
-            conditions.addAll(urlConditions);
-
-        Query queryCount = new Query(TAB.BUCKET, true)
-                .selectCount()
-                .from()
-                .where(conditions, paramMap);
-
-        Query queryData = new Query(TAB.BUCKET, true)
-                .select(serviceUtils.getBucketColumns())
-                .from()
-                .where(conditions, paramMap)
-                .orderBy(sort)
-                .limitPage(paramMap, limit, page);
-
-        Map<ResultField, Object> result = new HashMap<>();
-        result.put(ResultField.TOTAL, jdbcTemplate.queryForObject(queryCount.toString(logger, paramMap), paramMap, Long.TYPE));
-        result.put(ResultField.DATA, jdbcTemplate.queryForList(queryData.toString(logger, paramMap), paramMap));
-
-        return result;
+    public Page<Bucket> getBuckets(Specification<Bucket> specification, Pageable pageable) {
+        return bucketRepository.findAll(specification, pageable);
     }
 
-    public void deleteBucket(String bucketName, String userName) throws ItemDoNotExistsException, UnknownColumnException, ItemAlreadyUsedException, ConditionNotAllowedException {
-        if (!serviceUtils.isBucketExist(bucketName))
-            throw new ItemDoNotExistsException("Bucket", bucketName);
+    public void deleteBucket(long bucketId) throws ItemDoNotExistsException, UnknownColumnException, ItemAlreadyUsedException, ConditionNotAllowedException {
+        Bucket bucket = bucketRepository.getOne(bucketId);
+        bucket.setDeleted(true);
+        bucketRepository.save(bucket);
 
-        int bucketId = serviceUtils.getBucketId(bucketName);
-
-        String message = referencesBucketItem(bucketId);
-        if (message != null)
-            throw new ItemAlreadyUsedException(message);
-
-        Condition condition = new Condition(COL.BUCKET_ID, Operator.equal, bucketId);
-
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put(COL.DELETED, true);
-        paramMap.put(COL.UPDATED_BY, userName);
-
-        // Set bucket as deleted
-        Query query = new Query(TAB.BUCKET, false)
-                .update()
-                .set(paramMap)
-                .where(condition, paramMap);
-
-        paramMap.put(COL.BUCKET_ID, bucketId);
-        jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
-
-        paramMap = new HashMap<>();
-        paramMap.put(COL.DELETED, true);
-        paramMap.put(COL.UPDATED_BY, userName);
-
-        // Delete tags from _tags
-        query = new Query(TAB.TAG, false)
-                .update()
-                .set(paramMap)
-                .where(condition, paramMap);
-
-        paramMap.put(COL.BUCKET_ID, bucketId);
-        jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
-
-        paramMap = new HashMap<>();
-        paramMap.put(COL.DELETED, true);
-        paramMap.put(COL.UPDATED_BY, userName);
-
-        // Delete filters from _filters
-        query = new Query(TAB.FILTER, false)
-                .update()
-                .set(paramMap)
-                .where(condition, paramMap);
-
-        paramMap.put(COL.BUCKET_ID, bucketId);
-        jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
-
-        paramMap = new HashMap<>();
-        paramMap.put(COL.DELETED, true);
-        paramMap.put(COL.UPDATED_BY, userName);
-
-        // Delete views from _views
-        query = new Query(TAB.VIEW, false)
-                .update()
-                .set(paramMap)
-                .where(condition, paramMap);
-
-        paramMap.put(COL.BUCKET_ID, bucketId);
-        jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        String dataTableName = TABLE_PREFIX + '-' + bucket.getId();
 
         // Drop bucket history table
-        query = new Query(bucketName + "_h", false)
-                .dropTable();
-
-        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, paramMap));
+        Query query = new Query(dataTableName + "-h", false).dropTable();
+        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
 
         // Drop bucket table
-        query = new Query(bucketName, false)
-                .dropTable();
-
-        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, paramMap));
+        query = new Query(dataTableName, false).dropTable();
+        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
     }
 
-    private String referencesBucketItem(int bucketId) throws UnknownColumnException, ConditionNotAllowedException {
-        final String AS_ID = " as \"id\"";
-        final String AS_NAME = " as \"name\"";
-        String result = "";
+    public Bucket modifyBucket(BucketDto bucketDto) throws ItemDoNotExistsException, BucketAlreadyExistsException, IncorrectValueException, ExceededMaximumNumberOfCharactersException, DataAccessException {
+        Bucket bucket = bucketRepository.getOne(bucketDto.getId());
+        bucket.setName(bucketDto.getName());
+        bucket.setDescription(bucketDto.getDescription());
+        bucket.setIconName(bucketDto.getIconName());
 
-        List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition(COL.BUCKET_ID, Operator.equal, bucketId));
-        conditions.add(new Condition(COL.DELETED, Operator.equal, false));
-
-        Map<String, Object> paramMap = new HashMap<>();
-
-        Query query = new Query(TAB.TAG, true)
-                .select(new String[]{COL.TAG_ID + AS_ID, COL.TAG_NAME + AS_NAME})
-                .from()
-                .where(conditions, paramMap);
-        List<Map<String, Object>> resultList = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
-        result += serviceUtils.getStringWithItemsNames(C.TAGS, resultList);
-
-        query = new Query(TAB.COLUMNS, true)
-                .select(new String[]{COL.COLUMNS_ID + AS_ID, COL.COLUMNS_NAME + AS_NAME})
-                .from()
-                .where(conditions, paramMap);
-        resultList = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
-        result += serviceUtils.getStringWithItemsNames(C.COLUMNS, resultList);
-
-        query = new Query(TAB.FILTER, true)
-                .select(new String[]{COL.FILTER_ID + AS_ID, COL.FILTER_NAME + AS_NAME})
-                .from()
-                .where(conditions, paramMap);
-        resultList = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
-        result += serviceUtils.getStringWithItemsNames(C.FILTERS, resultList);
-
-        query = new Query(TAB.TASK, true)
-                .select(new String[]{COL.TASK_ID + AS_ID, COL.TASK_NAME + AS_NAME})
-                .from()
-                .where(conditions, paramMap);
-        resultList = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
-        result += serviceUtils.getStringWithItemsNames(C.TASKS, resultList);
-
-        query = new Query(TAB.VIEW, true)
-                .select(new String[]{COL.VIEW_ID + AS_ID, COL.VIEW_NAME + AS_NAME})
-                .from()
-                .where(conditions, paramMap);
-        resultList = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
-        result += serviceUtils.getStringWithItemsNames(C.VIEWS, resultList);
-
-        query = new Query(TAB.EVENT, true)
-                .select(new String[]{COL.EVENT_ID + AS_ID, COL.EVENT_NAME + AS_NAME})
-                .from()
-                .where(conditions, paramMap);
-        resultList = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
-        result += serviceUtils.getStringWithItemsNames(C.EVENTS, resultList);
-
-        if (result.length() > 0)
-            return result;
+        if (bucketDto.getDataClassId() != null)
+            bucket.setDataClass(dataClassRepository.getOne(bucketDto.getDataClassId()));
         else
-            return null;
-    }
+            bucket.setDataClass(null);
 
+        if (bucketDto.getUsers() != null) {
+            Set<User> users = new HashSet<>();
+            for (long id : bucketDto.getUsers())
+                users.add(userRepository.getOne(id));
+            bucket.setUsers(users);
+        } else
+            bucket.setUsers(null);
 
-    public void modifyBucket(String updatedBy, String bucketName, Map<String, Object> details) throws ItemDoNotExistsException, BucketAlreadyExistsException, JsonProcessingException, IncorrectValueException, ExceededMaximumNumberOfCharactersException, DataAccessException, UnknownColumnException, SQLException, ConditionNotAllowedException {
-        Map<ResultField, Object> result = getBuckets(Optional.of(bucketName), Optional.empty(), Optional.empty(), Optional.empty(), null);
-        List<Map<String, Object>> buckets = (List<Map<String, Object>>) result.get(ResultField.DATA);
-
-        if (buckets.size() > 0) {
-            Map<String, Object> bucket = buckets.get(0);
-
-            if (details.containsKey(COL.BUCKET_NAME)) {
-                String newBucketName = (String) details.get(COL.BUCKET_NAME);
-                if (newBucketName != null) {
-                    String currentBucketName = (String) bucket.get(COL.BUCKET_NAME);
-                    if (!newBucketName.equals(currentBucketName)) {
-                        if (!newBucketName.equalsIgnoreCase(bucketName)) {
-                            if (!serviceUtils.isBucketExist(newBucketName)) {
-                                modifyBucketName(bucketName, newBucketName);
-                            } else {
-                                throw new BucketAlreadyExistsException(newBucketName);
-                            }
-                        }
-                    }
-                } else
-                    throw new IncorrectValueException("Bucket name can not be empty!");
-
-                bucketName = newBucketName;
+        if (bucket.isHistory() != bucketDto.isHistory()) {
+            if (bucketDto.isHistory()) {
+                createAfterInsertTrigger(bucketDto.getName());
+                createAfterUpdateTrigger(bucketDto.getName());
+            } else {
+                removeAfterInsertTrigger(bucketDto.getName());
+                removeAfterUpdateTrigger(bucketDto.getName());
             }
-
-            if (details.containsKey(COL.DESCRIPTION)) {
-                String description = (String) details.get(COL.DESCRIPTION);
-                if (description.length() > 100)
-                    throw new ExceededMaximumNumberOfCharactersException(COL.DESCRIPTION, description, 100);
-            }
-
-            Condition conBucketId = new Condition(COL.BUCKET_ID, Operator.equal, bucket.get(COL.BUCKET_ID));
-
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put(COL.UPDATED_BY, updatedBy);
-            serviceUtils.putNotEmpty(details, paramMap, COL.BUCKET_NAME);
-            serviceUtils.putNotEmpty(details, paramMap, COL.DESCRIPTION);
-            serviceUtils.putNotEmpty(details, paramMap, COL.INDEX);
-            serviceUtils.putNotEmpty(details, paramMap, COL.ICON_NAME);
-            serviceUtils.putNotEmpty(details, paramMap, COL.HISTORY);
-
-            if (details.containsKey(COL.CLASS_ID)) {
-                Integer classId = (Integer) details.get(COL.CLASS_ID);
-                paramMap.put(COL.CLASS_ID, classId);
-            }
-
-            Query query = new Query(TAB.BUCKET, false)
-                    .update()
-                    .set(paramMap)
-                    .where(conBucketId, paramMap);
-
-            this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
-
-            if (details.get(COL.HISTORY) != null) {
-                boolean enableHistory = (boolean) details.get(COL.HISTORY);
-                if (enableHistory) {
-                    createAfterInsertTrigger(bucketName);
-                    createAfterUpdateTrigger(bucketName);
-                } else {
-                    removeAfterInsertTrigger(bucketName);
-                    removeAfterUpdateTrigger(bucketName);
-                }
-            }
-        } else {
-            throw new ItemDoNotExistsException("Bucket", bucketName);
         }
-    }
 
-    private void modifyBucketName(String bucketName, String newBucketName) {
-        // Change table names
-        String sql = "ALTER TABLE \"" + bucketName + "\" RENAME TO \"" + newBucketName + "\"";
-        logger.debug(sql);
-        jdbcTemplate.getJdbcTemplate().execute(sql);
-
-        sql = "ALTER TABLE \"" + bucketName + "_h\" RENAME TO \"" + newBucketName + "_h\"";
-        logger.debug(sql);
-        jdbcTemplate.getJdbcTemplate().execute(sql);
+        return bucketRepository.save(bucket);
     }
 
     private void createBeforeDeleteTrigger(String bucketName) {
