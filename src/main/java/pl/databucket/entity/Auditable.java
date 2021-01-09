@@ -17,7 +17,7 @@ import java.util.Date;
 @Setter(AccessLevel.PUBLIC)
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class AuditableAll<U>
+public class Auditable<U>
 {
     @CreatedBy
     @Column(name = "created_by", length = 50)

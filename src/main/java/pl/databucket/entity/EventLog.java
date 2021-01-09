@@ -15,19 +15,19 @@ public class EventLog extends AuditableCreatedDate<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_log_generator")
-    @SequenceGenerator(name="event_log_generator", sequenceName = "event_log_seq")
+    @SequenceGenerator(name="event_log_generator", sequenceName = "event_log_seq", allocationSize = 1)
     @Column(name = "event_log_id", updatable = false, nullable = false)
 	private long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "event_id", referencedColumnName = "event_id", nullable = false)
     private Event event;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "task_id", referencedColumnName = "task_id", nullable = false)
     private Task task;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "bucket_id", referencedColumnName = "bucket_id", nullable = false)
     private Bucket bucket;
 

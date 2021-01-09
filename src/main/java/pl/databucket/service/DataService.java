@@ -16,8 +16,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import pl.databucket.database.*;
+import pl.databucket.entity.Bucket;
 import pl.databucket.exception.ConditionNotAllowedException;
-import pl.databucket.exception.ItemDoNotExistsException;
+import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.UnexpectedException;
 import pl.databucket.exception.UnknownColumnException;
 
@@ -40,18 +41,18 @@ public class DataService {
         this.serviceUtils = new ServiceUtils(jdbcTemplate, logger);
     }
 
-    public long getDataCount(String bucketName, Query query, Map<String, Object> namedParameters) throws ItemDoNotExistsException, UnexpectedException {
+    public long getDataCount(String bucketName, Query query, Map<String, Object> namedParameters) throws ItemNotFoundException, UnexpectedException {
         try {
             return jdbcTemplate.queryForObject(query.toString(logger, namedParameters), namedParameters, Long.TYPE);
         } catch (Exception e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else
                 throw new UnexpectedException(e);
         }
     }
 
-    public List<Integer> lockData(String bucketName, String userName, Optional<Integer[]> tagId, Optional<Integer> filterId, Optional<List<Condition>> conditions, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
+    public List<Integer> lockData(String bucketName, String userName, Optional<Integer[]> tagId, Optional<Integer> filterId, Optional<List<Condition>> conditions, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort) throws ItemNotFoundException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
 
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
@@ -127,7 +128,7 @@ public class DataService {
                 }
             } catch (Exception e) {
                 if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                    throw new ItemDoNotExistsException("Bucket", bucketName);
+                    throw new ItemNotFoundException(Bucket.class, bucketName);
                 else if (e.getMessage().contains("Unknown column"))
                     throw new UnknownColumnException(serviceUtils.getColumnName(e.getMessage()));
                 else
@@ -138,14 +139,14 @@ public class DataService {
         return bundlesIdsList;
     }
 
-    public List<Map<String, Object>> getDataByQuery(String bucketName, Query query, Map<String, Object> namedParameters) throws ItemDoNotExistsException, UnknownColumnException, UnexpectedException {
+    public List<Map<String, Object>> getDataByQuery(String bucketName, Query query, Map<String, Object> namedParameters) throws ItemNotFoundException, UnknownColumnException, UnexpectedException {
         try {
             List<Map<String, Object>> result = jdbcTemplate.queryForList(query.toString(logger, namedParameters), namedParameters);
             serviceUtils.convertStringToMap(result, COL.PROPERTIES);
             return result;
         } catch (BadSqlGrammarException e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else if (e.getMessage().contains("Unknown column"))
                 throw new UnknownColumnException(serviceUtils.getColumnName(e.getMessage()));
             else
@@ -166,7 +167,7 @@ public class DataService {
         return columns;
     }
 
-    public Map<ResultField, Object> getData(String bucketName, Optional<Integer[]> dataId, Optional<Integer[]> tagId, Optional<Integer> filterId, Optional<Integer> viewId, Optional<List<Map<String, Object>>> inColumns, Optional<List<Condition>> inConditions, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort) throws ItemDoNotExistsException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
+    public Map<ResultField, Object> getData(String bucketName, Optional<Integer[]> dataId, Optional<Integer[]> tagId, Optional<Integer> filterId, Optional<Integer> viewId, Optional<List<Map<String, Object>>> inColumns, Optional<List<Condition>> inConditions, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
 
         List<Map<String, Object>> columns;
         Map<String, Object> paramMap = new HashMap<>();
@@ -291,7 +292,7 @@ public class DataService {
         return result;
     }
 
-    public int createData(String createdBy, String bucketName, Map<String, Object> details) throws JsonProcessingException, UnexpectedException, ItemDoNotExistsException, UnknownColumnException, ConditionNotAllowedException {
+    public int createData(String createdBy, String bucketName, Map<String, Object> details) throws JsonProcessingException, UnexpectedException, ItemNotFoundException, UnknownColumnException, ConditionNotAllowedException {
         try {
             MapSqlParameterSource namedParameters = new MapSqlParameterSource();
             if (details.containsKey(COL.TAG_ID))
@@ -313,14 +314,14 @@ public class DataService {
             return keyHolder.getKey().intValue();
         } catch (BadSqlGrammarException | SQLException e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else
                 throw new UnexpectedException(e);
         }
     }
 
 
-    public int modifyData(String updatedBy, String bucketName, Optional<Integer[]> dataIdArray, Optional<Integer> filterId, Optional<Integer[]> tagsIds, LinkedHashMap<String, Object> details) throws IOException, UnexpectedException, ItemDoNotExistsException, UnknownColumnException, SQLException, ConditionNotAllowedException {
+    public int modifyData(String updatedBy, String bucketName, Optional<Integer[]> dataIdArray, Optional<Integer> filterId, Optional<Integer[]> tagsIds, LinkedHashMap<String, Object> details) throws IOException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         if (dataIdArray.isPresent()) {
             conditions.add(new Condition(COL.DATA_ID, Operator.in, new ArrayList<>(Arrays.asList(dataIdArray.get()))));
@@ -367,13 +368,13 @@ public class DataService {
             return this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
         } catch (Exception e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else
                 throw new UnexpectedException(e);
         }
     }
 
-    public int deleteData(String bucketName, Optional<Integer[]> bundlesIds, Optional<Integer> filterId, Optional<Integer[]> tagsIds) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
+    public int deleteData(String bucketName, Optional<Integer[]> bundlesIds, Optional<Integer> filterId, Optional<Integer[]> tagsIds) throws ItemNotFoundException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         Map<String, Object> paramMap = new HashMap<>();
 
@@ -394,13 +395,13 @@ public class DataService {
             return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
         } catch (Exception e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else
                 throw new UnexpectedException(e);
         }
     }
 
-    public int deleteData(String bucketName, List<Condition> conditions) throws ItemDoNotExistsException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
+    public int deleteData(String bucketName, List<Condition> conditions) throws ItemNotFoundException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
         Map<String, Object> paramMap = new HashMap<>();
 
         boolean joinTags = serviceUtils.usedTagNameColumn(conditions);
@@ -415,13 +416,13 @@ public class DataService {
             return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
         } catch (Exception e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else
                 throw new UnexpectedException(e);
         }
     }
 
-    public List<Map<String, Object>> getDataHistory(String bucketName, Integer dataId) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
+    public List<Map<String, Object>> getDataHistory(String bucketName, Integer dataId) throws ItemNotFoundException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
         Map<String, Object> paramMap = new HashMap<>();
 
         String[] columns = {COL.ID, COL.TAG_ID, COL.LOCKED, COL.PROPERTIES + " is not null as \"" + COL.PROPERTIES + "\"", COL.UPDATED_AT, COL.UPDATED_BY};
@@ -460,13 +461,13 @@ public class DataService {
 
         } catch (Exception e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else
                 throw new UnexpectedException(e);
         }
     }
 
-    public List<Map<String, Object>> getDataHistoryProperties(String bucketName, Integer dataId, Integer[] ids) throws ItemDoNotExistsException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
+    public List<Map<String, Object>> getDataHistoryProperties(String bucketName, Integer dataId, Integer[] ids) throws ItemNotFoundException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         Map<String, Object> namedParameters = new HashMap<>();
 
@@ -486,7 +487,7 @@ public class DataService {
             return result;
         } catch (Exception e) {
             if (e.getMessage().matches(".*Table '.*' doesn't exist.*"))
-                throw new ItemDoNotExistsException("Bucket", bucketName);
+                throw new ItemNotFoundException(Bucket.class, bucketName);
             else
                 throw new UnexpectedException(e);
         }

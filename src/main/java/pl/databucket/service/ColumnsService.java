@@ -45,7 +45,7 @@ public class ColumnsService {
         return columnsRepository.findAll(specification, pageable);
     }
 
-    public Columns modifyColumns(ColumnsDto columnsDto) throws ColumnsAlreadyExistsException {
+    public Columns modifyColumns(ColumnsDto columnsDto) {
         Columns columns = columnsRepository.getOne(columnsDto.getId());
 
         columns.setName(columnsDto.getName());
@@ -72,7 +72,7 @@ public class ColumnsService {
         return columnsRepository.save(columns);
     }
 
-    public void deleteColumns(long columnsId) throws ItemDoNotExistsException, ItemAlreadyUsedException, UnknownColumnException, ConditionNotAllowedException {
+    public void deleteColumns(long columnsId) throws ItemNotFoundException, ItemAlreadyUsedException, UnknownColumnException, ConditionNotAllowedException {
         Columns columns = columnsRepository.getOne(columnsId);
         columns.setDeleted(true);
         columnsRepository.save(columns);

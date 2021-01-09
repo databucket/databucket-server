@@ -14,7 +14,7 @@ import pl.databucket.specification.FilterSpecification;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/filter")
+@RequestMapping("/api/filters")
 @RestController
 public class FilterController {
 

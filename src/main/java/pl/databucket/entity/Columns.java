@@ -18,11 +18,11 @@ import java.util.List;
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="columns")
-public class Columns extends AuditableAll<String> {
+public class Columns extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "columns_generator")
-	@SequenceGenerator(name="columns_generator", sequenceName = "columns_seq")
+	@SequenceGenerator(name="columns_generator", sequenceName = "columns_seq", allocationSize = 1)
 	@Column(name = "columns_id", updatable = false, nullable = false)
 	private long id;
 

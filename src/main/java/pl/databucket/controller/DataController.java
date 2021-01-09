@@ -76,7 +76,7 @@ public class DataController {
       }
       return new ResponseEntity<>(response, HttpStatus.OK);
 
-    } catch (ItemDoNotExistsException e1) {
+    } catch (ItemNotFoundException e1) {
       return exceptionFormatter.customException(e1, HttpStatus.NOT_FOUND);
     } catch (IncorrectValueException | UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -134,7 +134,7 @@ public class DataController {
         response.setMessage("No data meets the given requirements!");
       }
       return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (ItemDoNotExistsException e1) {
+    } catch (ItemNotFoundException e1) {
       return exceptionFormatter.customException(e1, HttpStatus.NOT_FOUND);
     } catch (IncorrectValueException | UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -185,7 +185,7 @@ public class DataController {
         response.setDataIds(null);
         return new ResponseEntity<>(response, HttpStatus.OK);
       }
-    } catch (ItemDoNotExistsException e) {
+    } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (IncorrectValueException | UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -235,7 +235,7 @@ public class DataController {
         response.setDataIds(null);
         return new ResponseEntity<>(response, HttpStatus.OK);
       }
-    } catch (ItemDoNotExistsException e) {
+    } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (IncorrectValueException | UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -258,7 +258,7 @@ public class DataController {
       response.setDataId(dataId);
       response.setMessage("The new data has been successfully created.");
       return new ResponseEntity<>(response, HttpStatus.CREATED);
-    } catch (ItemDoNotExistsException e1) {
+    } catch (ItemNotFoundException e1) {
       return exceptionFormatter.customException(e1, HttpStatus.NOT_FOUND);
     } catch (UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -286,7 +286,7 @@ public class DataController {
       int count = dataService.modifyData(userName, bucketName, dataIds, filterId, tagsIds, body);
       response.setMessage("Number of modified data: " + count);
       return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (ItemDoNotExistsException e1) {
+    } catch (ItemNotFoundException e1) {
       return exceptionFormatter.customException(e1, HttpStatus.NOT_FOUND);
     } catch (UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -309,7 +309,7 @@ public class DataController {
       int count = dataService.modifyData(userName, bucketName, Optional.empty(), Optional.empty(), Optional.empty(), body);
       response.setMessage("Number of modified data: " + count);
       return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (ItemDoNotExistsException e1) {
+    } catch (ItemNotFoundException e1) {
       return exceptionFormatter.customException(e1, HttpStatus.NOT_FOUND);
     } catch (UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -335,7 +335,7 @@ public class DataController {
       int count = dataService.deleteData(bucketName, dataIds, filterId, tagsIds);
       response.setMessage("Number of removed data: " + count);
       return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (ItemDoNotExistsException e) {
+    } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);
@@ -358,7 +358,7 @@ public class DataController {
       int count = dataService.deleteData(bucketName, conditions);
       response.setMessage("Number of removed data: " + count);
       return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (ItemDoNotExistsException e) {
+    } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (UnknownColumnException | ConditionNotAllowedException e2) {
       return exceptionFormatter.customException(e2, HttpStatus.NOT_ACCEPTABLE);

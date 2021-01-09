@@ -12,11 +12,11 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name="tags")
-public class Tag extends AuditableAll<String> {
+public class Tag extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_generator")
-    @SequenceGenerator(name="tag_generator", sequenceName = "tag_seq")
+    @SequenceGenerator(name="tag_generator", sequenceName = "tag_seq", allocationSize = 1)
     @Column(name = "tag_id", updatable = false, nullable = false)
 	private long id;
 
@@ -25,13 +25,13 @@ public class Tag extends AuditableAll<String> {
 
     private String description = null;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "tags_buckets",
             joinColumns = {@JoinColumn(name = "tag_id") },
             inverseJoinColumns = {@JoinColumn(name = "bucket_id") })
     private Set<Bucket> buckets;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "tags_dataclasses",
             joinColumns = {@JoinColumn(name = "tag_id") },
             inverseJoinColumns = {@JoinColumn(name = "class_id") })

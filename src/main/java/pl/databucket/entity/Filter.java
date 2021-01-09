@@ -19,11 +19,11 @@ import java.util.Set;
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="filters")
-public class Filter extends AuditableAll<String> {
+public class Filter extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "filter_generator")
-	@SequenceGenerator(name="filter_generator", sequenceName = "filter_seq")
+	@SequenceGenerator(name="filter_generator", sequenceName = "filter_seq", allocationSize = 1)
 	@Column(name = "filter_id", updatable = false, nullable = false)
 	private long id;
 
@@ -33,13 +33,13 @@ public class Filter extends AuditableAll<String> {
 	@Column(length = 500)
 	private String description;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@ManyToMany
 	@JoinTable(name = "filter_buckets",
 			joinColumns = {@JoinColumn(name = "filter_id") },
 			inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
 	private Set<Bucket> buckets;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@ManyToMany
 	@JoinTable(name = "filter_dataclasses",
 			joinColumns = {@JoinColumn(name = "filter_id")},
 			inverseJoinColumns = {@JoinColumn(name = "class_id")})

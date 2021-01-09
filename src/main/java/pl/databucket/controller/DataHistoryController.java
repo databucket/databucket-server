@@ -5,7 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.exception.ExceptionFormatter;
-import pl.databucket.exception.ItemDoNotExistsException;
+import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.response.DataResponse;
 import pl.databucket.service.DataService;
 
@@ -36,7 +36,7 @@ public class DataHistoryController {
     try {
       response.setHistory(service.getDataHistory(bucketName, dataId));
       return ok(response);
-    } catch (ItemDoNotExistsException e) {
+    } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (Exception ee) {
       return exceptionFormatter.defaultException(ee);
@@ -56,7 +56,7 @@ public class DataHistoryController {
     try {
       response.setHistory(service.getDataHistoryProperties(bucketName, dataId, ids));
       return ok(response);
-    } catch (ItemDoNotExistsException e) {
+    } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (Exception ee) {
       return exceptionFormatter.defaultException(ee);

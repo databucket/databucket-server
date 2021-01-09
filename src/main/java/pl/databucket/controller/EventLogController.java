@@ -10,7 +10,7 @@ import pl.databucket.service.EventLogService;
 import pl.databucket.specification.EventLogSpecification;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/event/log")
+@RequestMapping("/api/events/log")
 @RestController
 public class EventLogController {
 

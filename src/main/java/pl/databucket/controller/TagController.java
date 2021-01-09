@@ -13,7 +13,7 @@ import pl.databucket.specification.TagSpecification;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/tag")
+@RequestMapping("/api/tags")
 @RestController
 public class TagController {
 

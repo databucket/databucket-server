@@ -2,12 +2,7 @@ package pl.databucket.exception;
 
 public class ItemAlreadyExistsException extends Exception {
 
-	public ItemAlreadyExistsException(String itemType, String itemName) {
-        super(itemType + " '" + itemName + "' already exists!");
+    public ItemAlreadyExistsException(Class<?> clazz, String name) {
+        super("Entity '" + clazz.getName() + "' with the given name '" + name + "' already exists exception!");
     }
-	
-	public ItemAlreadyExistsException(String message) {
-        super(message);
-    }
-
 }

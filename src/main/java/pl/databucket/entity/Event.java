@@ -17,11 +17,11 @@ import java.util.Map;
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="events")
-public class Event extends AuditableAll<String> {
+public class Event extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_generator")
-	@SequenceGenerator(name="event_generator", sequenceName = "event_seq")
+	@SequenceGenerator(name="event_generator", sequenceName = "event_seq", allocationSize = 1)
 	@Column(name = "event_id", updatable = false, nullable = false)
 	private long id;
 
@@ -34,11 +34,11 @@ public class Event extends AuditableAll<String> {
 	@Column
 	private boolean active = false;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
 	private DataClass dataClass;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "bucket_id", referencedColumnName = "bucket_id")
 	private Bucket bucket;
 

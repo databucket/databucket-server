@@ -18,11 +18,11 @@ import java.util.Set;
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="tasks")
-public class Task extends AuditableAll<String> {
+public class Task extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_generator")
-	@SequenceGenerator(name="task_generator", sequenceName = "task_seq")
+	@SequenceGenerator(name="task_generator", sequenceName = "task_seq", allocationSize = 1)
 	@Column(name = "task_id", updatable = false, nullable = false)
 	private long id;
 
@@ -32,13 +32,13 @@ public class Task extends AuditableAll<String> {
 	@Column(length = 500)
 	private String description;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@ManyToMany
 	@JoinTable(name = "tasks_buckets",
 			joinColumns = {@JoinColumn(name = "task_id") },
 			inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
 	private Set<Bucket> buckets;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@ManyToMany
 	@JoinTable(name = "tasks_dataclasses",
 			joinColumns = {@JoinColumn(name = "task_id")},
 			inverseJoinColumns = {@JoinColumn(name = "class_id")})

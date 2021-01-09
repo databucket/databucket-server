@@ -14,7 +14,7 @@ import pl.databucket.specification.TaskSpecification;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/task")
+@RequestMapping("/api/tasks")
 @RestController
 public class TaskController {
 

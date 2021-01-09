@@ -10,10 +10,11 @@ import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.service.DataClassService;
 import pl.databucket.specification.DataClassSpecification;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/class")
+@RequestMapping("/api/classes")
 @RestController
 public class DataClassController {
 
@@ -44,6 +45,8 @@ public class DataClassController {
     public ResponseEntity<?> modifyDataClass(@Valid @RequestBody DataClassDto dataClassDto) {
         try {
             return new ResponseEntity<>(dataClassService.modifyDataClass(dataClassDto), HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -54,6 +57,9 @@ public class DataClassController {
         try {
             dataClassService.deleteDataClass(classId);
             return new ResponseEntity<>(null, HttpStatus.OK);
+
+        } catch (EntityNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

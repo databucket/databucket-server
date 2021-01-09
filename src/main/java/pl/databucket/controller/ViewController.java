@@ -12,7 +12,7 @@ import pl.databucket.specification.ViewSpecification;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/view")
+@RequestMapping("/api/views")
 @RestController
 public class ViewController {
 

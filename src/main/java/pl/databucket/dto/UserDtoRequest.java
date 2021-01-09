@@ -5,9 +5,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserDto {
+public class UserDtoRequest {
 
     private String name;
     private String password;
+    private Integer projectId;
 
 }

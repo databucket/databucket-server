@@ -17,7 +17,7 @@ public class DataClassService {
     @Autowired
     private DataClassRepository dataClassRepository;
 
-    public DataClass createDataClass(DataClassDto dataClassDto) throws ClassAlreadyExistsException {
+    public DataClass createDataClass(DataClassDto dataClassDto) {
         DataClass dataClass = new DataClass();
         dataClass.setName(dataClassDto.getName());
         dataClass.setDescription(dataClass.getDescription());

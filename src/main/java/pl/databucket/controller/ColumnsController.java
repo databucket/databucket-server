@@ -11,6 +11,7 @@ import pl.databucket.exception.ItemAlreadyUsedException;
 import pl.databucket.service.ColumnsService;
 import pl.databucket.specification.ColumnsSpecification;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -45,6 +46,8 @@ public class ColumnsController {
     public ResponseEntity<?> modifyColumns(@Valid @RequestBody ColumnsDto columnsDto) {
         try {
             return new ResponseEntity<>(columnsService.modifyColumns(columnsDto), HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
@@ -55,8 +58,8 @@ public class ColumnsController {
         try {
             columnsService.deleteColumns(columnsId);
             return new ResponseEntity<>(null, HttpStatus.OK);
-        } catch (ItemAlreadyUsedException e1) {
-            return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
+        } catch (EntityNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

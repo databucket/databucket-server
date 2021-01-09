@@ -15,7 +15,7 @@ import pl.databucket.specification.EventSpecification;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/event")
+@RequestMapping("/api/events")
 @RestController
 public class EventController {
 

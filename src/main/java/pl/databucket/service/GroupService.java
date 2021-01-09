@@ -29,9 +29,9 @@ public class GroupService {
     @Autowired
     private UserRepository userRepository;
 
-    public Group createGroup(GroupDto groupDto) throws GroupAlreadyExistsException {
+    public Group createGroup(GroupDto groupDto) throws ItemAlreadyExistsException {
         if (groupRepository.existsByNameAndDeleted(groupDto.getName(), false))
-            throw new GroupAlreadyExistsException(groupDto.getName());
+            throw new ItemAlreadyExistsException(Group.class, groupDto.getName());
 
         Group group = new Group();
         group.setName(groupDto.getName());

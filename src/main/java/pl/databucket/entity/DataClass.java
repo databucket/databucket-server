@@ -10,11 +10,11 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name="dataclasses")
-public class DataClass extends AuditableAll<String> {
+public class DataClass extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "class_generator")
-    @SequenceGenerator(name="class_generator", sequenceName = "class_seq")
+    @SequenceGenerator(name="class_generator", sequenceName = "class_seq", allocationSize = 1)
     @Column(name = "class_id", updatable = false, nullable = false)
     private long id;
 

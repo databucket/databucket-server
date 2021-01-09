@@ -2,16 +2,18 @@ package pl.databucket.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
-import lombok.AllArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
+import java.util.List;
+
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AuthTokenDto {
+public class AuthDto {
 
     private String token;
-    private boolean changePassword;
+    private Boolean changePassword;
+    private String message;
+    private List<AuthProjectDto> projects;
 
 }

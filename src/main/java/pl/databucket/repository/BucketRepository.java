@@ -10,6 +10,7 @@ import pl.databucket.entity.Bucket;
 @Repository
 public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
+    Bucket findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     Page<Bucket> findAll(Specification<Bucket> specification, Pageable pageable);
 }

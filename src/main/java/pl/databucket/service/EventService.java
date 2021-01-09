@@ -32,11 +32,11 @@ public class EventService {
 
     public Event createEvent(EventDto eventDto) throws ItemAlreadyExistsException {
         if (eventRepository.existsByNameAndDeleted(eventDto.getName(), false))
-            throw new ItemAlreadyExistsException("Event", eventDto.getName());
+            throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
 
         // check an event exist in the database events
         if (serviceUtils.isDatabaseEventExist(eventDto.getName()))
-            throw new ItemAlreadyExistsException("Event " + eventDto.getName() + " already exist in the database!");
+            throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
 
         Event event = new Event();
         event.setName(eventDto.getName());
@@ -67,10 +67,10 @@ public class EventService {
     public Event modifyEvent(EventDto eventDto) throws ItemAlreadyExistsException {
 
         if (eventRepository.existsByNameAndDeleted(eventDto.getName(), false))
-            throw new ItemAlreadyExistsException("Event", eventDto.getName());
+            throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
 
         if (serviceUtils.isDatabaseEventExist(eventDto.getName()))
-            throw new ItemAlreadyExistsException("Event " + eventDto.getName() + " already exist in the database!");
+            throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
 
         Event event = eventRepository.getOne(eventDto.getId());
         event.setName(eventDto.getName());

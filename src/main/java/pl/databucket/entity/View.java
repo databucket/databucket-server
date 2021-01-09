@@ -12,11 +12,11 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name="views")
-public class View extends AuditableAll<String> {
+public class View extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "view_generator")
-	@SequenceGenerator(name="view_generator", sequenceName = "view_seq")
+	@SequenceGenerator(name="view_generator", sequenceName = "view_seq", allocationSize = 1)
 	@Column(name = "view_id", updatable = false, nullable = false)
 	private long id;
 
@@ -26,19 +26,19 @@ public class View extends AuditableAll<String> {
 	@Column(length = 500)
 	private String description;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
 	private DataClass dataClass;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "bucket_id", referencedColumnName = "bucket_id")
 	private Bucket bucket;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "columns_id", referencedColumnName = "columns_id")
 	private Columns columns;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
 	private Filter filter;
 

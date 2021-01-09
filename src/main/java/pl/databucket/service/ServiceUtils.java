@@ -9,8 +9,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import pl.databucket.database.*;
+import pl.databucket.entity.Bucket;
+import pl.databucket.entity.Tag;
 import pl.databucket.exception.ConditionNotAllowedException;
-import pl.databucket.exception.ItemDoNotExistsException;
+import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.UnexpectedException;
 import pl.databucket.exception.UnknownColumnException;
 
@@ -52,7 +54,7 @@ public class ServiceUtils {
         return jdbcTemplate.queryForList(queryData.toString(logger, paramMap), paramMap);
     }
 
-    public int getBucketId(String bucketName) throws ItemDoNotExistsException, UnknownColumnException, ConditionNotAllowedException {
+    public int getBucketId(String bucketName) throws ItemNotFoundException, UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         conditions.add(new Condition(COL.BUCKET_NAME, Operator.equal, bucketName));
         conditions.add(new Condition(COL.DELETED, Operator.equal, false));
@@ -67,7 +69,7 @@ public class ServiceUtils {
         try {
             return jdbcTemplate.queryForObject(query.toString(logger, paramMap), paramMap, Integer.class);
         } catch (EmptyResultDataAccessException e) {
-            throw new ItemDoNotExistsException("Bucket", bucketName);
+            throw new ItemNotFoundException(Bucket.class, bucketName);
         }
     }
 
@@ -129,7 +131,7 @@ public class ServiceUtils {
             return null;
     }
 
-    public int getTagId(String tagName) throws ItemDoNotExistsException, UnknownColumnException, ConditionNotAllowedException {
+    public int getTagId(String tagName) throws ItemNotFoundException, UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         conditions.add(new Condition(COL.TAG_NAME, Operator.equal, tagName));
         conditions.add(new Condition(COL.DELETED, Operator.equal, false));
@@ -143,7 +145,7 @@ public class ServiceUtils {
         try {
             return jdbcTemplate.queryForObject(query.toString(logger, paramMap), paramMap, Integer.class);
         } catch (EmptyResultDataAccessException e) {
-            throw new ItemDoNotExistsException("Tag", tagName);
+            throw new ItemNotFoundException(Tag.class, tagName);
         }
     }
 

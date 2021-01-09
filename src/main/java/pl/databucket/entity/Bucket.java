@@ -5,17 +5,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
 @Setter
 @Table(name="buckets")
-public class Bucket extends AuditableAll<String> {
+public class Bucket extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bucket_generator")
-    @SequenceGenerator(name="bucket_generator", sequenceName = "bucket_seq")
+    @SequenceGenerator(name="bucket_generator", sequenceName = "bucket_seq", allocationSize = 1)
     @Column(name = "bucket_id", updatable = false, nullable = false)
     private long id;
 
@@ -35,13 +37,14 @@ public class Bucket extends AuditableAll<String> {
     @Column(nullable = false)
     private boolean history = false;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "buckets_users",
-            joinColumns = {	@JoinColumn(name = "bucket_id") },
-            inverseJoinColumns = { @JoinColumn(name = "user_id") })
+    @ManyToMany(mappedBy = "buckets")
     private Set<User> users;
 
     @JsonIgnore
     private Boolean deleted = false;
+
+    public List<Long> getListOfUsers() {
+        return users.stream().map(User::getId).collect(Collectors.toList());
+    }
 
 }
