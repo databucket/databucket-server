@@ -25,7 +25,7 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
     private RoleRepository roleRepository;
 
     @Autowired
-    private ColumnsRepository columnsRepository;
+    private DataColumnsRepository columnsRepository;
 
     @Autowired
     private ViewRepository viewRepository;
@@ -38,8 +38,8 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
         createProjects();
         createRoles();
         createUsers();
-        createColumns();
-        createViews();
+//        createColumns();
+//        createViews();
     }
 
     private void createProjects() {
@@ -159,7 +159,7 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
             dc.add(new ColumnDto("Last modified by", "last_modified_by", "string", "never", true, true));
             dc.add(new ColumnDto("Last modified date", "last_modified_date", "datetime", "never", true, true));
 
-            Columns columns = new Columns();
+            DataColumns columns = new DataColumns();
             columns.setName(Constants.COLUMNS_DEFAULT);
             columns.setDescription("Default columns");
             columns.setColumns(dc);
@@ -171,13 +171,13 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
     private void createViews() {
         if (!viewRepository.existsByNameAndDeleted(Constants.VIEWS_DEFAULT, false)) {
             View view = new View();
-            Columns columns = columnsRepository.findColumnsByName(Constants.COLUMNS_DEFAULT);
+            DataColumns columns = columnsRepository.findColumnsByName(Constants.COLUMNS_DEFAULT);
 
             view.setName(Constants.VIEWS_DEFAULT);
             view.setDescription("Default view");
             viewRepository.save(view);
 
-            view.setColumns(columns);
+            view.setDataColumns(columns);
             viewRepository.save(view);
         }
     }

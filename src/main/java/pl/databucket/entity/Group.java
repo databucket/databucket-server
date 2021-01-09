@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 import java.util.List;
@@ -15,13 +17,17 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Table(name="groups")
-public class Group extends Auditable<String> {
+@Filter(name = "projectFilter", condition = "project_id = :projectId")
+public class Group extends Auditable<String> implements TenantSupport {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_generator")
 	@SequenceGenerator(name="group_generator", sequenceName = "group_seq", allocationSize = 1)
 	@Column(name = "group_id", updatable = false, nullable = false)
 	private long id;
+
+	@Column(name = "project_id", nullable = false)
+	private Integer projectId;
 
 	@Column(name = "group_name", length = 50)
 	private String name;

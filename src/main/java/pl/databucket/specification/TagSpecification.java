@@ -5,7 +5,6 @@ import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import org.springframework.data.jpa.domain.Specification;
 import pl.databucket.configuration.Constants;
-import pl.databucket.entity.Columns;
 import pl.databucket.entity.Tag;
 
 @And({

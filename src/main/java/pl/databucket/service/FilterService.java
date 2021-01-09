@@ -5,19 +5,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import pl.databucket.dto.FilterDto;
-import pl.databucket.entity.Filter;
-import pl.databucket.repository.FilterRepository;
+import pl.databucket.dto.DataFilterDto;
+import pl.databucket.entity.DataFilter;
+import pl.databucket.repository.DataFilterRepository;
 
 
 @Service
 public class FilterService {
 
     @Autowired
-    private FilterRepository filterRepository;
+    private DataFilterRepository filterRepository;
 
-    public Filter createFilter(FilterDto filterDto) {
-        Filter filter = new Filter();
+    public DataFilter createFilter(DataFilterDto filterDto) {
+        DataFilter filter = new DataFilter();
         filter.setName(filterDto.getName());
         filter.setDescription(filterDto.getDescription());
         filter.setCriteria(filterDto.getCreteria());
@@ -26,12 +26,12 @@ public class FilterService {
         return filterRepository.save(filter);
     }
 
-    public Page<Filter> getFilters(Specification<Filter> specification, Pageable pageable) {
+    public Page<DataFilter> getFilters(Specification<DataFilter> specification, Pageable pageable) {
         return filterRepository.findAll(specification, pageable);
     }
 
-    public Filter modifyFilter(FilterDto filterDto) {
-        Filter filter = filterRepository.getOne(filterDto.getId());
+    public DataFilter modifyFilter(DataFilterDto filterDto) {
+        DataFilter filter = filterRepository.getOne(filterDto.getId());
         filter.setName(filterDto.getName());
         filter.setDescription(filterDto.getDescription());
         filter.setCriteria(filterDto.getCreteria());
@@ -41,7 +41,7 @@ public class FilterService {
     }
 
     public void deleteFilter(long filterId) {
-        Filter filter = filterRepository.getOne(filterId);
+        DataFilter filter = filterRepository.getOne(filterId);
         filter.setDeleted(true);
         filterRepository.save(filter);
     }

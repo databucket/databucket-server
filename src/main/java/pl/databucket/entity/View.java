@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 
@@ -12,13 +14,17 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name="views")
-public class View extends Auditable<String> {
+@Filter(name = "projectFilter", condition = "project_id = :projectId")
+public class View extends Auditable<String> implements TenantSupport {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "view_generator")
 	@SequenceGenerator(name="view_generator", sequenceName = "view_seq", allocationSize = 1)
 	@Column(name = "view_id", updatable = false, nullable = false)
 	private long id;
+
+	@Column(name = "project_id", nullable = false)
+	private Integer projectId;
 
 	@Column(name = "view_name", length = 50)
 	private String name;
@@ -36,11 +42,11 @@ public class View extends Auditable<String> {
 
 	@OneToOne
 	@JoinColumn(name = "columns_id", referencedColumnName = "columns_id")
-	private Columns columns;
+	private DataColumns dataColumns;
 
 	@OneToOne
 	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
-	private Filter filter;
+	private DataFilter dataFilter;
 
 	@JsonIgnore
 	private Boolean deleted = false;

@@ -5,12 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.databucket.entity.Columns;
+import pl.databucket.entity.DataFilter;
 
 @Repository
-public interface ColumnsRepository extends JpaRepository<Columns, Long> {
+public interface DataFilterRepository extends JpaRepository<DataFilter, Long> {
 
     boolean existsByNameAndDeleted(String name, boolean deleted);
-    Columns findColumnsByName(String name);
-    Page<Columns> findAll(Specification<Columns> specification, Pageable pageable);
+    Page<DataFilter> findAll(Specification<DataFilter> specification, Pageable pageable);
 }

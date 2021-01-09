@@ -3,6 +3,8 @@ package pl.databucket.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 
@@ -11,13 +13,17 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name="event_log")
-public class EventLog extends AuditableCreatedDate<String> {
+@Filter(name = "projectFilter", condition = "project_id = :projectId")
+public class EventLog extends AuditableCreatedDate<String> implements TenantSupport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_log_generator")
     @SequenceGenerator(name="event_log_generator", sequenceName = "event_log_seq", allocationSize = 1)
     @Column(name = "event_log_id", updatable = false, nullable = false)
 	private long id;
+
+    @Column(name = "project_id", nullable = false)
+    private Integer projectId;
 
     @OneToOne
     @JoinColumn(name = "event_id", referencedColumnName = "event_id", nullable = false)

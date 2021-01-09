@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.Filter;
+import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 import java.util.Map;
@@ -18,13 +20,17 @@ import java.util.Set;
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="tasks")
-public class Task extends Auditable<String> {
+@Filter(name = "projectFilter", condition = "project_id = :projectId")
+public class Task extends Auditable<String> implements TenantSupport {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_generator")
 	@SequenceGenerator(name="task_generator", sequenceName = "task_seq", allocationSize = 1)
 	@Column(name = "task_id", updatable = false, nullable = false)
 	private long id;
+
+	@Column(name = "project_id", nullable = false)
+	private Integer projectId;
 
 	@Column(name = "task_name", length = 50)
 	private String name;

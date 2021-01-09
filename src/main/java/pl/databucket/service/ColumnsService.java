@@ -6,10 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.exception.*;
-import pl.databucket.dto.ColumnsDto;
-import pl.databucket.entity.Columns;
+import pl.databucket.dto.DataColumnsDto;
+import pl.databucket.entity.DataColumns;
 import pl.databucket.repository.BucketRepository;
-import pl.databucket.repository.ColumnsRepository;
+import pl.databucket.repository.DataColumnsRepository;
 import pl.databucket.repository.DataClassRepository;
 
 
@@ -17,7 +17,7 @@ import pl.databucket.repository.DataClassRepository;
 public class ColumnsService {
 
     @Autowired
-    private ColumnsRepository columnsRepository;
+    private DataColumnsRepository columnsRepository;
 
     @Autowired
     private BucketRepository bucketRepository;
@@ -25,8 +25,8 @@ public class ColumnsService {
     @Autowired
     private DataClassRepository dataClassRepository;
 
-    public Columns createColumns(ColumnsDto columnsDto) {
-        Columns columns = new Columns();
+    public DataColumns createColumns(DataColumnsDto columnsDto) {
+        DataColumns columns = new DataColumns();
         columns.setName(columnsDto.getName());
         columns.setDescription(columnsDto.getDescription());
 
@@ -41,12 +41,12 @@ public class ColumnsService {
         return columnsRepository.save(columns);
     }
 
-    public Page<Columns> getColumns(Specification<Columns> specification, Pageable pageable) {
+    public Page<DataColumns> getColumns(Specification<DataColumns> specification, Pageable pageable) {
         return columnsRepository.findAll(specification, pageable);
     }
 
-    public Columns modifyColumns(ColumnsDto columnsDto) {
-        Columns columns = columnsRepository.getOne(columnsDto.getId());
+    public DataColumns modifyColumns(DataColumnsDto columnsDto) {
+        DataColumns columns = columnsRepository.getOne(columnsDto.getId());
 
         columns.setName(columnsDto.getName());
         columns.setDescription(columnsDto.getDescription());
@@ -73,7 +73,7 @@ public class ColumnsService {
     }
 
     public void deleteColumns(long columnsId) throws ItemNotFoundException, ItemAlreadyUsedException, UnknownColumnException, ConditionNotAllowedException {
-        Columns columns = columnsRepository.getOne(columnsId);
+        DataColumns columns = columnsRepository.getOne(columnsId);
         columns.setDeleted(true);
         columnsRepository.save(columns);
     }

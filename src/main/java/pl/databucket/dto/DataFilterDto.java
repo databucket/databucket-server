@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class FilterDto {
+public class DataFilterDto {
 
     private Long id;
 

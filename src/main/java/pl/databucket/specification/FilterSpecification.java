@@ -5,7 +5,7 @@ import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import org.springframework.data.jpa.domain.Specification;
 import pl.databucket.configuration.Constants;
-import pl.databucket.entity.Filter;
+import pl.databucket.entity.DataFilter;
 
 @And({
     @Spec(path = "id", spec = In.class, paramSeparator = ','),
@@ -19,5 +19,5 @@ import pl.databucket.entity.Filter;
     @Spec(path = "lastModifiedDate", params={"modifiedBefore"}, spec = LessThanOrEqual.class, config = Constants.DATE_FORMAT),
     @Spec(path = "deleted", constVal = "false", spec = Equal.class)
 })
-public interface FilterSpecification extends Specification<Filter> {
+public interface FilterSpecification extends Specification<DataFilter> {
 }

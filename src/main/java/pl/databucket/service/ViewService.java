@@ -20,10 +20,10 @@ public class ViewService {
     private DataClassRepository dataClassRepository;
 
     @Autowired
-    private ColumnsRepository columnsRepository;
+    private DataColumnsRepository columnsRepository;
 
     @Autowired
-    private FilterRepository filterRepository;
+    private DataFilterRepository dataFilterRepository;
 
     @Autowired
     private ViewRepository viewRepository;
@@ -32,10 +32,10 @@ public class ViewService {
         View view = new View();
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setColumns(columnsRepository.getOne(viewDto.getColumnsId()));
+        view.setDataColumns(columnsRepository.getOne(viewDto.getColumnsId()));
 
         if (viewDto.getFilterId() != null)
-            view.setFilter(filterRepository.getOne(viewDto.getFilterId()));
+            view.setDataFilter(dataFilterRepository.getOne(viewDto.getFilterId()));
 
         if (viewDto.getBucketId() != null)
             view.setBucket(bucketRepository.getOne(viewDto.getBucketId()));
@@ -60,11 +60,11 @@ public class ViewService {
         View view = viewRepository.getOne(viewDto.getId());
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setColumns(columnsRepository.getOne(viewDto.getColumnsId()));
+        view.setDataColumns(columnsRepository.getOne(viewDto.getColumnsId()));
         if (viewDto.getFilterId() != null)
-            view.setFilter(filterRepository.getOne(viewDto.getFilterId()));
+            view.setDataFilter(dataFilterRepository.getOne(viewDto.getFilterId()));
         else
-            view.setFilter(null);
+            view.setDataFilter(null);
 
         if (viewDto.getBucketId() != null)
             view.setBucket(bucketRepository.getOne(viewDto.getBucketId()));

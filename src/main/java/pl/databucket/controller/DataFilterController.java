@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.databucket.dto.FilterDto;
+import pl.databucket.dto.DataFilterDto;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.service.FilterService;
 import pl.databucket.specification.FilterSpecification;
@@ -16,16 +16,16 @@ import javax.validation.Valid;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/filters")
 @RestController
-public class FilterController {
+public class DataFilterController {
 
-    private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(FilterController.class);
+    private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(DataFilterController.class);
 
     @Autowired
     private FilterService filterService;
 
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createFilter(@Valid @RequestBody FilterDto filterDto) {
+    public ResponseEntity<?> createFilter(@Valid @RequestBody DataFilterDto filterDto) {
         try {
             return new ResponseEntity<>(filterService.createFilter(filterDto), HttpStatus.CREATED);
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class FilterController {
     }
 
     @PutMapping
-    public ResponseEntity<?> modifyFilter(@Valid @RequestBody FilterDto filterDto) {
+    public ResponseEntity<?> modifyFilter(@Valid @RequestBody DataFilterDto filterDto) {
         try {
             return new ResponseEntity<>(filterService.modifyFilter(filterDto), HttpStatus.OK);
         } catch (Exception e) {

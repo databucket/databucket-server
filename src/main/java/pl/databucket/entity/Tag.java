@@ -3,6 +3,8 @@ package pl.databucket.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -12,13 +14,17 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name="tags")
-public class Tag extends Auditable<String> {
+@Filter(name = "projectFilter", condition = "project_id = :projectId")
+public class Tag extends Auditable<String> implements TenantSupport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_generator")
     @SequenceGenerator(name="tag_generator", sequenceName = "tag_seq", allocationSize = 1)
     @Column(name = "tag_id", updatable = false, nullable = false)
 	private long id;
+
+    @Column(name = "project_id", nullable = false)
+    private Integer projectId;
 
 	@Column(name = "tag_name", nullable = false)
 	private String name;

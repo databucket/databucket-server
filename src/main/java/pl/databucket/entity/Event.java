@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.Filter;
+import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 import java.util.Map;
@@ -17,13 +19,17 @@ import java.util.Map;
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="events")
-public class Event extends Auditable<String> {
+@Filter(name = "projectFilter", condition = "project_id = :projectId")
+public class Event extends Auditable<String> implements TenantSupport {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_generator")
 	@SequenceGenerator(name="event_generator", sequenceName = "event_seq", allocationSize = 1)
 	@Column(name = "event_id", updatable = false, nullable = false)
 	private long id;
+
+	@Column(name = "project_id", nullable = false)
+	private Integer projectId;
 
 	@Column(name = "event_name", length = 50)
 	private String name;
