@@ -3,6 +3,7 @@ package pl.databucket.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pl.databucket.configuration.Constants;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -20,11 +21,13 @@ public class Project extends Auditable<String> {
     @Column(name = "project_id", updatable = false, nullable = false)
     private int id;
 
-    @Column(name = "project_name", nullable = false)
+    @Column(name = "project_name", nullable = false, length = Constants.NAME_MAX)
     private String name;
 
+    @Column(length = Constants.DESCRIPTION_MAX)
     private String description = null;
 
+    @Column
     private Boolean deleted = false;
 
     @ManyToMany(mappedBy = "projects")

@@ -1,5 +1,6 @@
 package pl.databucket.controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,8 @@ public class EventLogController {
   @Autowired
   private EventLogService eventLogService;
 
+  @Autowired
+  private ModelMapper modelMapper;
 
   @GetMapping
   public ResponseEntity<?> getEventLog(EventLogSpecification specification, Pageable pageable) {

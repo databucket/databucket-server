@@ -6,8 +6,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.TaskDto;
+import pl.databucket.entity.Bucket;
+import pl.databucket.entity.DataClass;
 import pl.databucket.entity.Task;
+import pl.databucket.exception.ItemNotFoundException;
+import pl.databucket.exception.ModifyByNullEntityIdException;
+import pl.databucket.repository.BucketRepository;
+import pl.databucket.repository.DataClassRepository;
 import pl.databucket.repository.TaskRepository;
+
+import java.util.HashSet;
+import java.util.List;
 
 
 @Service
@@ -16,13 +25,28 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
+    @Autowired
+    private BucketRepository bucketRepository;
+
+    @Autowired
+    private DataClassRepository dataClassRepository;
+
     public Task createTask(TaskDto taskDto) {
         Task task = new Task();
         task.setName(taskDto.getName());
         task.setDescription(taskDto.getDescription());
         task.setConfiguration(taskDto.getConfiguration());
-//        task.setBuckets();
-//        task.setDataClasses();
+
+        if (taskDto.getBuckets() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, taskDto.getBuckets());
+            task.setBuckets(new HashSet<>(buckets));
+        } else
+            task.setBuckets(null);
+
+        if (taskDto.getDataClasses() != null) {
+            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, taskDto.getDataClasses());
+            task.setDataClasses(new HashSet<>(dataClasses));
+        }
 
         return taskRepository.save(task);
     }
@@ -31,77 +55,41 @@ public class TaskService {
         return taskRepository.findAll(specification, pageable);
     }
 
-    public Task modifyTask(TaskDto taskDto) {
-        Task task = taskRepository.getOne(taskDto.getId());
+    public Task modifyTask(TaskDto taskDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
+        if (taskDto.getId() == null)
+            throw new ModifyByNullEntityIdException(Task.class);
+
+        Task task = taskRepository.findByIdAndDeleted(taskDto.getId(), false);
+
+        if (task == null)
+            throw new ItemNotFoundException(Task.class, taskDto.getId());
+
         task.setName(taskDto.getName());
         task.setDescription(taskDto.getDescription());
         task.setConfiguration(taskDto.getConfiguration());
-//        task.setBuckets();
-//        task.setDataClasses();
+
+        if (taskDto.getBuckets() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, taskDto.getBuckets());
+            task.setBuckets(new HashSet<>(buckets));
+        } else
+            task.setBuckets(null);
+
+        if (taskDto.getDataClasses() != null) {
+            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, taskDto.getDataClasses());
+            task.setDataClasses(new HashSet<>(dataClasses));
+        }
 
         return taskRepository.save(task);
     }
 
-    public void deleteTask(long taskId) {
-        Task task = taskRepository.getOne(taskId);
+    public void deleteTask(long taskId) throws ItemNotFoundException {
+        Task task = taskRepository.findByIdAndDeleted(taskId, false);
+
+        if (task == null)
+            throw new ItemNotFoundException(Task.class, taskId);
+
         task.setDeleted(true);
         taskRepository.save(task);
     }
-
-//    private String referencesTaskItem(int taskId) throws UnknownColumnException, ConditionNotAllowedException {
-//        final String AS_ID = " as 'id'";
-//        final String AS_NAME = " as 'name'";
-//        String result = "";
-//
-//        List<Condition> conditions = new ArrayList<>();
-//        conditions.add(new Condition(COL.DELETED, Operator.equal, false));
-//        Map<String, Object> paramMap = new HashMap<>();
-//
-//        Query query = new Query(TAB.EVENT, true)
-//                .select(new String[]{COL.EVENT_ID + AS_ID, COL.EVENT_NAME + AS_NAME, COL.TASKS})
-//                .from()
-//                .where(conditions, paramMap);
-//
-//        List<Map<String, Object>> eventList = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
-//
-//        if (eventList.size() > 0) {
-//            ObjectMapper mapper = new ObjectMapper();
-//            List<Map<String, Object>> refEventList = new ArrayList<>();
-//            for (Map<String, Object> event: eventList) {
-//                String eventTasksStr = (String) event.get(COL.TASKS);
-//                try {
-//                    List<Map<String, Object>> eventTasks = mapper.readValue(eventTasksStr, new TypeReference<List<Map<String, Object>>>() {});
-//                    if (eventTasks.size() > 0) {
-//                        for (Map<String, Object> eventTask: eventTasks) {
-//                            int eventTaskId = Integer.parseInt((String) eventTask.get(COL.TASK_ID));
-//                            if (eventTaskId == taskId)
-//                                refEventList.add(event);
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            if (refEventList.size() > 0) {
-//                result += serviceUtils.getStringWithItemsNames(C.EVENTS, refEventList);
-//            }
-//        }
-//
-//        conditions = new ArrayList<>();
-//        conditions.add(new Condition(COL.TASK_ID, Operator.equal, taskId));
-//        query = new Query(TAB.EVENT_LOG, false)
-//                .select(COL.COUNT)
-//                .from()
-//                .where(conditions, paramMap);
-//        int count = jdbcTemplate.queryForObject(query.toString(logger, paramMap), paramMap, Integer.class);
-//        if (count > 1)
-//            result += "\nLOGS";
-//
-//        if (result.length() > 0)
-//            return result;
-//        else
-//            return null;
-//    }
 
 }

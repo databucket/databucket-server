@@ -10,7 +10,7 @@ import pl.databucket.entity.DataColumns;
 @Repository
 public interface DataColumnsRepository extends JpaRepository<DataColumns, Long> {
 
+    DataColumns findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
-    DataColumns findColumnsByName(String name);
     Page<DataColumns> findAll(Specification<DataColumns> specification, Pageable pageable);
 }

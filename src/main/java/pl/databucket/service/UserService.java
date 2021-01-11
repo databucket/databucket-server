@@ -15,11 +15,12 @@ import org.springframework.stereotype.Service;
 import pl.databucket.configuration.Constants;
 import pl.databucket.dto.AuthProjectDto;
 import pl.databucket.dto.RoleDto;
+import pl.databucket.dto.AuthDtoRequest;
 import pl.databucket.dto.UserDtoRequest;
-import pl.databucket.entity.Role;
-import pl.databucket.entity.User;
-import pl.databucket.repository.RoleRepository;
-import pl.databucket.repository.UserRepository;
+import pl.databucket.entity.*;
+import pl.databucket.exception.ItemAlreadyExistsException;
+import pl.databucket.exception.SomeItemsNotFoundException;
+import pl.databucket.repository.*;
 import pl.databucket.security.CustomUserDetails;
 
 import java.util.HashSet;
@@ -36,6 +37,15 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
+    private BucketRepository bucketRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -64,7 +74,8 @@ public class UserService implements UserDetailsService {
                 projectId,
                 projects,
                 user.isChangePassword(),
-                user.getEnabled());
+                user.getEnabled(),
+                user.isSuperUser());
     }
 
     private Set<SimpleGrantedAuthority> getAuthority(User user) {
@@ -83,54 +94,105 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(id);
     }
 
-    public User findByName(String name) {
-        return userRepository.findByName(name);
+    public User createUser(UserDtoRequest userDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
+        if (userRepository.existsByName(userDto.getName()))
+            throw new ItemAlreadyExistsException(User.class, userDto.getName());
+
+        User newUser = new User();
+        newUser.setName(userDto.getName());
+        newUser.setPassword(bcryptEncoder.encode(userDto.getPassword()));
+
+        if (userDto.getRolesIds() != null)
+            newUser.setRoles(new HashSet<>(roleRepository.findAllById(userDto.getRolesIds())));
+
+        if (userDto.getProjectsIds() != null) {
+            List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false, userDto.getProjectsIds());
+            if (userDto.getProjectsIds().size() != projects.size()) {
+                List<Long> givenIds = userDto.getProjectsIds().stream().mapToLong(Integer::longValue).boxed().collect(Collectors.toList());
+                List<Integer> foundIds = projects.stream().map(Project::getId).collect(Collectors.toList());
+                List<Long> foundIdsLong = foundIds.stream().mapToLong(Integer::longValue).boxed().collect(Collectors.toList());
+                givenIds.removeAll(foundIds);
+                throw new SomeItemsNotFoundException(Project.class, givenIds);
+            } else
+                newUser.setProjects(new HashSet<>(projects));
+        }
+
+        if (userDto.getGroupsIds() != null) {
+            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, userDto.getGroupsIds());
+            if (userDto.getGroupsIds().size() != groups.size()) {
+                List<Long> givenIds = userDto.getGroupsIds().stream().mapToLong(Long::longValue).boxed().collect(Collectors.toList());
+                List<Long> foundIds = groups.stream().map(Group::getId).collect(Collectors.toList());
+                givenIds.removeAll(foundIds);
+                throw new SomeItemsNotFoundException(Group.class, givenIds);
+            } else
+                newUser.setGroups(new HashSet<>(groups));
+        }
+
+        if (userDto.getBucketsIds() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, userDto.getBucketsIds());
+            if (userDto.getBucketsIds().size() != buckets.size()) {
+                List<Long> givenIds = userDto.getBucketsIds().stream().mapToLong(Long::longValue).boxed().collect(Collectors.toList());
+                List<Long> foundIds = buckets.stream().map(Bucket::getId).collect(Collectors.toList());
+                givenIds.removeAll(foundIds);
+                throw new SomeItemsNotFoundException(Bucket.class, givenIds);
+            } else
+                newUser.setBuckets(new HashSet<>(buckets));
+        }
+        return userRepository.save(newUser);
     }
 
-    public User save(UserDtoRequest userDto) {
-        if (!userRepository.existsByName(userDto.getName())) {
-            User newUser = new User();
-            newUser.setName(userDto.getName());
-            newUser.setPassword(bcryptEncoder.encode(userDto.getPassword()));
-            return userRepository.save(newUser);
+    public User modifyUser(UserDtoRequest userDto) throws SomeItemsNotFoundException {
+
+        User user = userRepository.findByName(userDto.getName());
+
+        user.setEnabled(userDto.getEnabled());
+
+        if (userDto.getRolesIds() != null)
+            user.setRoles(new HashSet<>(roleRepository.findAllById(userDto.getRolesIds())));
+        else
+            user.setRoles(null);
+
+        if (userDto.getProjectsIds() != null) {
+            List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false, userDto.getProjectsIds());
+            if (userDto.getProjectsIds().size() != projects.size()) {
+                List<Long> givenIds = userDto.getProjectsIds().stream().mapToLong(Integer::longValue).boxed().collect(Collectors.toList());
+                List<Integer> foundIds = projects.stream().map(Project::getId).collect(Collectors.toList());
+                List<Long> foundIdsLong = foundIds.stream().mapToLong(Integer::longValue).boxed().collect(Collectors.toList());
+                givenIds.removeAll(foundIdsLong);
+                throw new SomeItemsNotFoundException(Project.class, givenIds);
+            } else
+                user.setProjects(new HashSet<>(projects));
         } else
-            throw new IllegalArgumentException("The given user already exists.");
-    }
+            user.setProjects(null);
 
-    public User addRole(RoleDto roleDto) {
-        User user = userRepository.findByName(roleDto.getUserName());
-        if (user == null)
-            throw new IllegalArgumentException("The given user has not been found!");
+        if (userDto.getGroupsIds() != null) {
+            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, userDto.getGroupsIds());
+            if (userDto.getGroupsIds().size() != groups.size()) {
+                List<Long> givenIds = userDto.getGroupsIds().stream().mapToLong(Long::longValue).boxed().collect(Collectors.toList());
+                List<Long> foundIds = groups.stream().map(Group::getId).collect(Collectors.toList());
+                givenIds.removeAll(foundIds);
+                throw new SomeItemsNotFoundException(Group.class, givenIds);
+            } else
+                user.setGroups(new HashSet<>(groups));
+        } else
+            user.setGroups(null);
 
-        Role role = roleRepository.findByName(roleDto.getRoleName());
-        if (role == null)
-            throw new IllegalArgumentException("The given role has not been found!");
+        if (userDto.getBucketsIds() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, userDto.getBucketsIds());
+            if (userDto.getBucketsIds().size() != buckets.size()) {
+                List<Long> givenIds = userDto.getBucketsIds().stream().mapToLong(Long::longValue).boxed().collect(Collectors.toList());
+                List<Long> foundIds = buckets.stream().map(Bucket::getId).collect(Collectors.toList());
+                givenIds.removeAll(foundIds);
+                throw new SomeItemsNotFoundException(Bucket.class, givenIds);
+            } else
+                user.setBuckets(new HashSet<>(buckets));
+        } else
+            user.setBuckets(null);
 
-        Set<Role> roles = user.getRoles();
-        if (roles == null)
-            roles = new HashSet<>();
-        roles.add(role);
         return userRepository.save(user);
     }
 
-    public User removeRole(RoleDto roleDto) {
-        User user = userRepository.findByName(roleDto.getUserName());
-        if (user == null)
-            throw new IllegalArgumentException("The given user has not been found!");
-
-        Role role = roleRepository.findByName(roleDto.getRoleName());
-        if (role == null)
-            throw new IllegalArgumentException("The given role has not been found!");
-
-        Set<Role> roles = user.getRoles();
-        if (roles == null)
-            return user;
-
-        roles.remove(role);
-        return userRepository.save(user);
-    }
-
-    public User resetPassword(UserDtoRequest userDto) {
+    public User resetPassword(AuthDtoRequest userDto) {
         User user = userRepository.findByName(userDto.getName());
         if (user != null) {
             user.setPassword(bcryptEncoder.encode(userDto.getPassword()));
@@ -140,7 +202,7 @@ public class UserService implements UserDetailsService {
             throw new IllegalArgumentException("The given user does not exist.");
     }
 
-    public User changePassword(UserDtoRequest userDto) {
+    public User changePassword(AuthDtoRequest userDto) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!name.equals(userDto.getName())) {
             User user = userRepository.findByName(userDto.getName());

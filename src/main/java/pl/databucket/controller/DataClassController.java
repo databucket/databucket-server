@@ -1,16 +1,22 @@
 package pl.databucket.controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.DataClassDto;
+import pl.databucket.entity.DataClass;
 import pl.databucket.exception.ExceptionFormatter;
+import pl.databucket.exception.ItemAlreadyExistsException;
+import pl.databucket.exception.ItemNotFoundException;
+import pl.databucket.exception.ModifyByNullEntityIdException;
+import pl.databucket.response.DataClassPageResponse;
 import pl.databucket.service.DataClassService;
 import pl.databucket.specification.DataClassSpecification;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -23,10 +29,17 @@ public class DataClassController {
     @Autowired
     private DataClassService dataClassService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @PostMapping
     public ResponseEntity<?> createDataClass(@Valid @RequestBody DataClassDto dataClassDto) {
         try {
-            return new ResponseEntity<>(dataClassService.createDataClass(dataClassDto), HttpStatus.CREATED);
+            DataClass dataClass = dataClassService.createDataClass(dataClassDto);
+            modelMapper.map(dataClass, dataClassDto);
+            return new ResponseEntity<>(dataClassDto, HttpStatus.CREATED);
+        } catch (ItemAlreadyExistsException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -35,7 +48,8 @@ public class DataClassController {
     @GetMapping
     public ResponseEntity<?> getDataClasses(DataClassSpecification specification, Pageable pageable) {
         try {
-            return new ResponseEntity<>(dataClassService.getDataClasses(specification, pageable), HttpStatus.OK);
+            Page<DataClass> dataClassPage = dataClassService.getDataClasses(specification, pageable);
+            return new ResponseEntity<>(new DataClassPageResponse(dataClassPage, modelMapper), HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
@@ -44,8 +58,10 @@ public class DataClassController {
     @PutMapping
     public ResponseEntity<?> modifyDataClass(@Valid @RequestBody DataClassDto dataClassDto) {
         try {
-            return new ResponseEntity<>(dataClassService.modifyDataClass(dataClassDto), HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
+            DataClass dataClass = dataClassService.modifyDataClass(dataClassDto);
+            modelMapper.map(dataClass, dataClassDto);
+            return new ResponseEntity<>(dataClassDto, HttpStatus.OK);
+        } catch (ItemNotFoundException | ModifyByNullEntityIdException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
@@ -57,8 +73,7 @@ public class DataClassController {
         try {
             dataClassService.deleteDataClass(classId);
             return new ResponseEntity<>(null, HttpStatus.OK);
-
-        } catch (EntityNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);

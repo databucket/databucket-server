@@ -7,14 +7,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pl.databucket.database.Query;
 import pl.databucket.dto.BucketDto;
 import pl.databucket.entity.Bucket;
+import pl.databucket.entity.DataClass;
 import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.ItemNotFoundException;
+import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.BucketRepository;
 import pl.databucket.repository.DataClassRepository;
+import pl.databucket.security.CustomUserDetails;
 
 @Service
 public class BucketService {
@@ -28,10 +32,15 @@ public class BucketService {
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
-    private final String TABLE_PREFIX = "x";
     Logger logger = LoggerFactory.getLogger(BucketService.class);
 
-    public Bucket createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException {
+    private String composeBucketName(long id) {
+        int projectId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId();
+        String BUCKET_PREFIX = "x-bucket";
+        return String.format("%s-%03d-%03d", BUCKET_PREFIX, projectId, id);
+    }
+
+    public Bucket createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
         if (bucketRepository.existsByNameAndDeleted(bucketDto.getName(), false))
             throw new ItemAlreadyExistsException(Bucket.class, bucketDto.getName());
 
@@ -39,13 +48,19 @@ public class BucketService {
         bucket.setName(bucketDto.getName());
         bucket.setDescription(bucketDto.getDescription());
         bucket.setHistory(bucketDto.isHistory());
+        bucket.setHiddenData(bucketDto.isHiddenData());
         bucket.setIconName(bucketDto.getIconName());
-        if (bucketDto.getDataClassId() != null)
-            bucket.setDataClass(dataClassRepository.getOne(bucketDto.getDataClassId()));
+        if (bucketDto.getDataClassId() != null) {
+            DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getDataClassId(), false);
+            if (dataClass != null)
+                bucket.setDataClass(dataClass);
+            else
+                throw new ItemNotFoundException(DataClass.class, bucketDto.getDataClassId());
+        }
 
         bucket = bucketRepository.save(bucket);
 
-        String dataTableName = TABLE_PREFIX + '-' + bucket.getId();
+        String dataTableName = composeBucketName(bucket.getId());
 
         // Create table for data
         String sql = "CREATE TABLE public.\"" + dataTableName + "\" ("
@@ -94,27 +109,10 @@ public class BucketService {
         return bucketRepository.findAll(specification, pageable);
     }
 
-    public void deleteBucket(long bucketId) throws ItemNotFoundException {
-        Bucket bucket = bucketRepository.findByIdAndDeleted(bucketId, false);
+    public Bucket modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
+        if (bucketDto.getId() == null)
+            throw new ModifyByNullEntityIdException(Bucket.class);
 
-        if (bucket == null)
-            throw new ItemNotFoundException(Bucket.class, bucketId);
-
-        bucket.setDeleted(true);
-        bucketRepository.save(bucket);
-
-        String dataTableName = TABLE_PREFIX + '-' + bucket.getId();
-
-        // Drop bucket history table
-        Query query = new Query(dataTableName + "-h", false).dropTable();
-        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
-
-        // Drop bucket table
-        query = new Query(dataTableName, false).dropTable();
-        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
-    }
-
-    public Bucket modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
         Bucket bucket = bucketRepository.findByIdAndDeleted(bucketDto.getId(), false);
 
         if (bucket == null)
@@ -129,9 +127,13 @@ public class BucketService {
         bucket.setDescription(bucketDto.getDescription());
         bucket.setIconName(bucketDto.getIconName());
 
-        if (bucketDto.getDataClassId() != null)
-            bucket.setDataClass(dataClassRepository.getOne(bucketDto.getDataClassId()));
-        else
+        if (bucketDto.getDataClassId() != null) {
+            DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getDataClassId(), false);
+            if (dataClass != null)
+                bucket.setDataClass(dataClass);
+            else
+                throw new ItemNotFoundException(DataClass.class, bucketDto.getDataClassId());
+        } else
             bucket.setDataClass(null);
 
         if (bucket.isHistory() != bucketDto.isHistory()) {
@@ -144,7 +146,29 @@ public class BucketService {
             }
         }
 
+        bucket.setHiddenData(bucketDto.isHiddenData());
+
         return bucketRepository.save(bucket);
+    }
+
+    public void deleteBucket(long bucketId) throws ItemNotFoundException {
+        Bucket bucket = bucketRepository.findByIdAndDeleted(bucketId, false);
+
+        if (bucket == null)
+            throw new ItemNotFoundException(Bucket.class, bucketId);
+
+        bucket.setDeleted(true);
+        bucketRepository.save(bucket);
+
+        String dataTableName = composeBucketName(bucket.getId());
+
+        // Drop bucket history table
+        Query query = new Query(dataTableName + "-h", false).dropTable();
+        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
+
+        // Drop bucket table
+        query = new Query(dataTableName, false).dropTable();
+        jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
     }
 
     private void createBeforeDeleteTrigger(String bucketName) {
@@ -203,5 +227,4 @@ public class BucketService {
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
-
 }

@@ -36,8 +36,10 @@ public class BucketController {
             return new ResponseEntity<>(bucketDto, HttpStatus.CREATED);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
         }
     }
 
@@ -57,12 +59,12 @@ public class BucketController {
             Bucket bucket = bucketService.modifyBucket(bucketDto);
             modelMapper.map(bucket, bucketDto);
             return new ResponseEntity<>(bucketDto, HttpStatus.OK);
-        } catch (ItemNotFoundException e) {
+        } catch (ItemNotFoundException | ModifyByNullEntityIdException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
         }
     }
 

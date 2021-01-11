@@ -1,12 +1,19 @@
 package pl.databucket.controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.TagDto;
+import pl.databucket.entity.Tag;
 import pl.databucket.exception.ExceptionFormatter;
+import pl.databucket.exception.ItemAlreadyExistsException;
+import pl.databucket.exception.ItemNotFoundException;
+import pl.databucket.exception.ModifyByNullEntityIdException;
+import pl.databucket.response.TagPageResponse;
 import pl.databucket.service.TagService;
 import pl.databucket.specification.TagSpecification;
 
@@ -22,11 +29,18 @@ public class TagController {
     @Autowired
     private TagService tagService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
 
     @PostMapping
     public ResponseEntity<?> createTag(@Valid @RequestBody TagDto tagDto) {
         try {
-            return new ResponseEntity<>(tagService.createTag(tagDto), HttpStatus.CREATED);
+            Tag tag = tagService.createTag(tagDto);
+            modelMapper.map(tag, tagDto);
+            return new ResponseEntity<>(tagDto, HttpStatus.CREATED);
+        } catch (ItemAlreadyExistsException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -35,7 +49,8 @@ public class TagController {
     @GetMapping
     public ResponseEntity<?> getTags(TagSpecification specification, Pageable pageable) {
         try {
-            return new ResponseEntity<>(tagService.getTags(specification, pageable), HttpStatus.OK);
+            Page<Tag> tagPage = tagService.getTags(specification, pageable);
+            return new ResponseEntity<>(new TagPageResponse(tagPage, modelMapper), HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
@@ -44,7 +59,13 @@ public class TagController {
     @PutMapping
     public ResponseEntity<?> modifyTag(@Valid @RequestBody TagDto tagDto) {
         try {
-            return new ResponseEntity<>(tagService.modifyTag(tagDto), HttpStatus.OK);
+            Tag tag = tagService.modifyTag(tagDto);
+            modelMapper.map(tag, tagDto);
+            return new ResponseEntity<>(tagDto, HttpStatus.OK);
+        } catch (ItemAlreadyExistsException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+        } catch (ItemNotFoundException | ModifyByNullEntityIdException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

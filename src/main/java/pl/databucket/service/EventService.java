@@ -64,15 +64,24 @@ public class EventService {
         return eventRepository.findAll(specification, pageable);
     }
 
-    public Event modifyEvent(EventDto eventDto) throws ItemAlreadyExistsException {
+    public Event modifyEvent(EventDto eventDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
+        if (eventDto.getId() == null)
+            throw new ModifyByNullEntityIdException(Event.class);
 
-        if (eventRepository.existsByNameAndDeleted(eventDto.getName(), false))
-            throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
+        Event event = eventRepository.findByIdAndDeleted(eventDto.getId(), false);
 
-        if (serviceUtils.isDatabaseEventExist(eventDto.getName()))
-            throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
+        if (event == null)
+            throw new ItemNotFoundException(Event.class, eventDto.getId());
 
-        Event event = eventRepository.getOne(eventDto.getId());
+        if (event.getName().equals(eventDto.getName()))
+            if (eventRepository.existsByNameAndDeleted(eventDto.getName(), false))
+                throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
+
+        if (event.getName().equals(eventDto.getName()))
+            if (serviceUtils.isDatabaseEventExist(eventDto.getName()))
+                throw new ItemAlreadyExistsException(Event.class, eventDto.getName());
+
+
         event.setName(eventDto.getName());
         event.setDescription(eventDto.getDescription());
 //        event.setBucket(eventDto.getBucketId()); TODO

@@ -10,6 +10,7 @@ import pl.databucket.entity.Tag;
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
+    Tag findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     Page<Tag> findAll(Specification<Tag> specification, Pageable pageable);
 }

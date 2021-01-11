@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Filter;
+import pl.databucket.configuration.Constants;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
@@ -31,10 +32,10 @@ public class Event extends Auditable<String> implements TenantSupport {
 	@Column(name = "project_id", nullable = false)
 	private Integer projectId;
 
-	@Column(name = "event_name", length = 50)
+	@Column(name = "event_name", length = Constants.NAME_MAX)
 	private String name;
 
-	@Column(length = 500)
+	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
 	@Column

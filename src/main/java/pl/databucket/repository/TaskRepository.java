@@ -10,6 +10,7 @@ import pl.databucket.entity.Task;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
+    Task findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     Page<Task> findAll(Specification<Task> specification, Pageable pageable);
 }

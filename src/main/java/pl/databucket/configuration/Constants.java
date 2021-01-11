@@ -3,6 +3,9 @@ package pl.databucket.configuration;
 public class Constants {
 
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final int NAME_MIN = 3;
+    public static final int NAME_MAX = 50;
+    public static final int DESCRIPTION_MAX = 200;
 
     // Projects
     public static final String PROJECT_DEMO_NAME1 = "DEMO1";

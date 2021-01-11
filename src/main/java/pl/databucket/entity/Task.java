@@ -8,11 +8,13 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Filter;
+import pl.databucket.configuration.Constants;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -32,10 +34,10 @@ public class Task extends Auditable<String> implements TenantSupport {
 	@Column(name = "project_id", nullable = false)
 	private Integer projectId;
 
-	@Column(name = "task_name", length = 50)
+	@Column(name = "task_name", length = Constants.NAME_MAX)
 	private String name;
 
-	@Column(length = 500)
+	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
 	@ManyToMany
@@ -56,5 +58,12 @@ public class Task extends Auditable<String> implements TenantSupport {
 
 	@JsonIgnore
 	private Boolean deleted = false;
+
+	public Set<Long> getListOfBuckets() {
+		return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+	}
+	public Set<Long> getListOfDataClasses() {
+		return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
+	}
 }
 

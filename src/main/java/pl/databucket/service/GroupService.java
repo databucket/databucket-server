@@ -8,14 +8,17 @@ import org.springframework.stereotype.Service;
 import pl.databucket.dto.GroupDto;
 import pl.databucket.entity.Bucket;
 import pl.databucket.entity.Group;
-import pl.databucket.entity.User;
-import pl.databucket.exception.*;
+import pl.databucket.exception.ItemAlreadyExistsException;
+import pl.databucket.exception.ItemNotFoundException;
+import pl.databucket.exception.ModifyByNullEntityIdException;
+import pl.databucket.exception.SomeItemsNotFoundException;
 import pl.databucket.repository.BucketRepository;
 import pl.databucket.repository.GroupRepository;
-import pl.databucket.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -26,25 +29,20 @@ public class GroupService {
     @Autowired
     private BucketRepository bucketRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    public Group createGroup(GroupDto groupDto) throws ItemAlreadyExistsException {
-        if (groupRepository.existsByNameAndDeleted(groupDto.getName(), false))
-            throw new ItemAlreadyExistsException(Group.class, groupDto.getName());
-
+    public Group createGroup(GroupDto groupDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
         Group group = new Group();
         group.setName(groupDto.getName());
         group.setDescription(groupDto.getDescription());
 
-        if (groupDto.getBuckets() != null) {
-            List<Bucket> buckets = bucketRepository.findAllById(groupDto.getBuckets());
-            group.setBuckets(new HashSet<>(buckets));
-        }
-
-        if (groupDto.getUsers() != null) {
-            List<User> users = userRepository.findAllById(groupDto.getUsers());
-            group.setUsers(new HashSet<>(users));
+        if (groupDto.getBucketsIds() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, groupDto.getBucketsIds());
+            if (groupDto.getBucketsIds().size() != buckets.size()) {
+                List<Long> foundIds = buckets.stream().map(Bucket::getId).collect(Collectors.toList());
+                List<Long> givenIds = new ArrayList<>(groupDto.getBucketsIds());
+                givenIds.removeAll(foundIds);
+                throw new SomeItemsNotFoundException(Bucket.class, givenIds);
+            } else
+                group.setBuckets(new HashSet<>(buckets));
         }
 
         return groupRepository.save(group);
@@ -54,29 +52,40 @@ public class GroupService {
         return groupRepository.findAll(specification, pageable);
     }
 
-    public void deleteGroup(Long groupId) {
-        Group group = groupRepository.getOne(groupId);
-        group.setDeleted(true);
-        groupRepository.save(group);
-    }
+    public Group modifyGroup(GroupDto groupDto) throws ItemNotFoundException, SomeItemsNotFoundException, ModifyByNullEntityIdException {
+        if (groupDto.getId() == null)
+            throw new ModifyByNullEntityIdException(Group.class);
 
-    public Group modifyGroup(GroupDto groupDto) {
-        Group group = groupRepository.getOne(groupDto.getId());
+        Group group = groupRepository.findByIdAndDeleted(groupDto.getId(), false);
+
+        if (group == null)
+            throw new ItemNotFoundException(Group.class, groupDto.getId());
+
         group.setName(groupDto.getName());
         group.setDescription(groupDto.getDescription());
 
-        if (groupDto.getBuckets() != null) {
-            List<Bucket> buckets = bucketRepository.findAllById(groupDto.getBuckets());
+        if (groupDto.getBucketsIds() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, groupDto.getBucketsIds());
+            if (groupDto.getBucketsIds().size() != buckets.size()) {
+                List<Long> foundIds = buckets.stream().map(Bucket::getId).collect(Collectors.toList());
+                List<Long> givenIds = new ArrayList<>(groupDto.getBucketsIds());
+                givenIds.removeAll(foundIds);
+                throw new SomeItemsNotFoundException(Bucket.class, givenIds);
+            }
             group.setBuckets(new HashSet<>(buckets));
         } else
             group.setBuckets(null);
 
-        if (groupDto.getUsers() != null) {
-            List<User> users = userRepository.findAllById(groupDto.getUsers());
-            group.setUsers(new HashSet<>(users));
-        } else
-            group.setUsers(null);
-
         return groupRepository.save(group);
+    }
+
+    public void deleteGroup(Long groupId) throws ItemNotFoundException {
+        Group group = groupRepository.findByIdAndDeleted(groupId, false);
+
+        if (group == null)
+            throw new ItemNotFoundException(Group.class, groupId);
+
+        group.setDeleted(true);
+        groupRepository.save(group);
     }
 }

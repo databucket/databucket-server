@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
+import pl.databucket.configuration.Constants;
 import pl.databucket.tenant.TenantSupport;
 
 
@@ -31,13 +32,13 @@ public class Bucket extends Auditable<String> implements TenantSupport {
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
 
-    @Column(name = "bucket_name", length = 50)
+    @Column(name = "bucket_name", length = Constants.NAME_MAX)
     private String name;
 
-    @Column(name = "icon_name", length = 50)
+    @Column(name = "icon_name", length = Constants.NAME_MAX)
     private String iconName;
 
-    @Column
+    @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
 
     @OneToOne
@@ -46,6 +47,9 @@ public class Bucket extends Auditable<String> implements TenantSupport {
 
     @Column(nullable = false)
     private boolean history = false;
+
+    @Column(name = "hidden_data", nullable = false)
+    private boolean hiddenData = false;
 
     @ManyToMany(mappedBy = "buckets")
     private Set<User> users;

@@ -6,7 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.ViewDto;
-import pl.databucket.entity.View;
+import pl.databucket.entity.*;
+import pl.databucket.exception.ItemNotFoundException;
+import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.*;
 
 
@@ -28,20 +30,40 @@ public class ViewService {
     @Autowired
     private ViewRepository viewRepository;
 
-    public View createView(ViewDto viewDto) {
+    public View createView(ViewDto viewDto) throws ItemNotFoundException {
         View view = new View();
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setDataColumns(columnsRepository.getOne(viewDto.getColumnsId()));
 
-        if (viewDto.getFilterId() != null)
-            view.setDataFilter(dataFilterRepository.getOne(viewDto.getFilterId()));
+        DataColumns dataColumns = columnsRepository.findByIdAndDeleted(viewDto.getColumnsId(), false);
+        if (dataColumns != null)
+            view.setDataColumns(dataColumns);
+        else
+            throw new ItemNotFoundException(DataColumns.class, viewDto.getColumnsId());
 
-        if (viewDto.getBucketId() != null)
-            view.setBucket(bucketRepository.getOne(viewDto.getBucketId()));
+        if (viewDto.getFilterId() != null) {
+            DataFilter dataFilter = dataFilterRepository.findByIdAndDeleted(viewDto.getFilterId(), false);
+            if (dataFilter != null)
+                view.setDataFilter(dataFilter);
+            else
+                throw new ItemNotFoundException(DataFilter.class, viewDto.getFilterId());
+        }
 
-        if (viewDto.getDataClassId() != null)
-            view.setDataClass(dataClassRepository.getOne(viewDto.getDataClassId()));
+        if (viewDto.getBucketId() != null) {
+            Bucket bucket = bucketRepository.findByIdAndDeleted(viewDto.getBucketId(), false);
+            if (bucket != null)
+                view.setBucket(bucket);
+            else
+                throw new ItemNotFoundException(Bucket.class, viewDto.getBucketId());
+        }
+
+        if (viewDto.getDataClassId() != null) {
+            DataClass dataClass = dataClassRepository.findByIdAndDeleted(viewDto.getDataClassId(), false);
+            if (dataClass != null)
+                view.setDataClass(dataClass);
+            else
+                throw new ItemNotFoundException(DataClass.class, viewDto.getDataClassId());
+        }
 
         return viewRepository.save(view);
     }
@@ -50,32 +72,61 @@ public class ViewService {
         return viewRepository.findAll(specification, pageable);
     }
 
-    public void deleteView(long viewId) {
-        View view = viewRepository.getOne(viewId);
-        view.setDeleted(true);
-        viewRepository.save(view);
-    }
+    public View modifyView(ViewDto viewDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
+        if (viewDto.getId() == null)
+            throw new ModifyByNullEntityIdException(View.class);
 
-    public View modifyView(ViewDto viewDto) {
-        View view = viewRepository.getOne(viewDto.getId());
+        View view = viewRepository.findByIdAndDeleted(viewDto.getId(), false);
+
+        if (view == null)
+            throw new ItemNotFoundException(View.class, viewDto.getId());
+
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setDataColumns(columnsRepository.getOne(viewDto.getColumnsId()));
-        if (viewDto.getFilterId() != null)
-            view.setDataFilter(dataFilterRepository.getOne(viewDto.getFilterId()));
+
+        DataColumns dataColumns = columnsRepository.findByIdAndDeleted(viewDto.getColumnsId(), false);
+        if (dataColumns != null)
+            view.setDataColumns(dataColumns);
         else
+            throw new ItemNotFoundException(DataColumns.class, viewDto.getColumnsId());
+
+        if (viewDto.getFilterId() != null) {
+            DataFilter dataFilter = dataFilterRepository.findByIdAndDeleted(viewDto.getFilterId(), false);
+            if (dataFilter != null)
+                view.setDataFilter(dataFilter);
+            else
+                throw new ItemNotFoundException(DataFilter.class, viewDto.getFilterId());
+        } else
             view.setDataFilter(null);
 
-        if (viewDto.getBucketId() != null)
-            view.setBucket(bucketRepository.getOne(viewDto.getBucketId()));
-        else
+        if (viewDto.getBucketId() != null) {
+            Bucket bucket = bucketRepository.findByIdAndDeleted(viewDto.getBucketId(), false);
+            if (bucket != null)
+                view.setBucket(bucket);
+            else
+                throw new ItemNotFoundException(Bucket.class, viewDto.getBucketId());
+        } else
             view.setBucket(null);
 
-        if (viewDto.getDataClassId() != null)
-            view.setDataClass(dataClassRepository.getOne(viewDto.getDataClassId()));
-        else
+        if (viewDto.getDataClassId() != null) {
+            DataClass dataClass = dataClassRepository.findByIdAndDeleted(viewDto.getDataClassId(), false);
+            if (dataClass != null)
+                view.setDataClass(dataClass);
+            else
+                throw new ItemNotFoundException(DataClass.class, viewDto.getDataClassId());
+        } else
             view.setDataClass(null);
 
         return viewRepository.save(view);
+    }
+
+    public void deleteView(long viewId) throws ItemNotFoundException {
+        View view = viewRepository.findByIdAndDeleted(viewId, false);
+
+        if (view == null)
+            throw new ItemNotFoundException(View.class, viewId);
+
+        view.setDeleted(true);
+        viewRepository.save(view);
     }
 }

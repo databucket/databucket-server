@@ -4,10 +4,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
+import pl.databucket.configuration.Constants;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -26,9 +28,10 @@ public class Tag extends Auditable<String> implements TenantSupport {
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
 
-	@Column(name = "tag_name", nullable = false)
+	@Column(name = "tag_name", nullable = false, length = Constants.NAME_MAX)
 	private String name;
 
+	@Column(length = Constants.DESCRIPTION_MAX)
     private String description = null;
 
     @ManyToMany
@@ -44,5 +47,12 @@ public class Tag extends Auditable<String> implements TenantSupport {
     private Set<DataClass> dataClasses;
 
 	private Boolean deleted = false;
+
+    public Set<Long> getListOfBuckets() {
+        return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+    }
+    public Set<Long> getListOfDataClasses() {
+        return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
+    }
 }
 

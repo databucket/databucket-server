@@ -3,7 +3,7 @@ package pl.databucket.exception;
 public class ItemAlreadyUsedException extends Exception {
 
     public ItemAlreadyUsedException(Class<?> clazz, Long id) {
-        super("Entity '" + clazz.getName() + "' with the given id '" + id + "' already used exception!");
+        super("Entity '" + clazz.getSimpleName() + "' with the given id '" + id + "' already used!");
     }
 
     public ItemAlreadyUsedException(String message) {

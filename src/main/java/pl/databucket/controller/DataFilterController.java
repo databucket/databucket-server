@@ -1,14 +1,19 @@
 package pl.databucket.controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.DataFilterDto;
+import pl.databucket.entity.DataFilter;
 import pl.databucket.exception.ExceptionFormatter;
-import pl.databucket.service.FilterService;
+import pl.databucket.exception.ModifyByNullEntityIdException;
+import pl.databucket.response.DataFilterPageResponse;
+import pl.databucket.service.DataFilterService;
 import pl.databucket.specification.FilterSpecification;
 
 import javax.validation.Valid;
@@ -21,13 +26,18 @@ public class DataFilterController {
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(DataFilterController.class);
 
     @Autowired
-    private FilterService filterService;
+    private DataFilterService filterService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createFilter(@Valid @RequestBody DataFilterDto filterDto) {
+    public ResponseEntity<?> createFilter(@Valid @RequestBody DataFilterDto dataFilterDto) {
         try {
-            return new ResponseEntity<>(filterService.createFilter(filterDto), HttpStatus.CREATED);
+            DataFilter dataFilter = filterService.createFilter(dataFilterDto);
+            modelMapper.map(dataFilter, dataFilterDto);
+            return new ResponseEntity<>(dataFilterDto, HttpStatus.CREATED);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -36,16 +46,21 @@ public class DataFilterController {
     @GetMapping
     public ResponseEntity<?> getFilters(FilterSpecification specification, Pageable pageable) {
         try {
-            return new ResponseEntity<>(filterService.getFilters(specification, pageable), HttpStatus.OK);
+            Page<DataFilter> dataFilterPage = filterService.getFilters(specification, pageable);
+            return new ResponseEntity<>(new DataFilterPageResponse(dataFilterPage, modelMapper), HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
     }
 
     @PutMapping
-    public ResponseEntity<?> modifyFilter(@Valid @RequestBody DataFilterDto filterDto) {
+    public ResponseEntity<?> modifyFilter(@Valid @RequestBody DataFilterDto dataFilterDto) {
         try {
-            return new ResponseEntity<>(filterService.modifyFilter(filterDto), HttpStatus.OK);
+            DataFilter dataFilter = filterService.modifyFilter(dataFilterDto);
+            modelMapper.map(dataFilter, dataFilterDto);
+            return new ResponseEntity<>(dataFilterDto, HttpStatus.OK);
+        } catch (ModifyByNullEntityIdException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

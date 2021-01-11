@@ -10,7 +10,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.AuthDto;
-import pl.databucket.dto.UserDtoRequest;
+import pl.databucket.dto.AuthDtoRequest;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.security.CustomUserDetails;
 import pl.databucket.security.TokenProvider;
@@ -29,7 +29,7 @@ public class PublicController {
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
 
     @PostMapping(value = "/signin")
-    public ResponseEntity<?> signIn(@RequestBody UserDtoRequest userDto) {
+    public ResponseEntity<?> signIn(@RequestBody AuthDtoRequest userDto) {
         try {
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDto.getName(), userDto.getPassword()));
@@ -52,6 +52,10 @@ public class PublicController {
                     authDto.setMessage("The user is not assigned to given project!");
             } else if (customUserDetails.getProjects() != null && customUserDetails.getProjects().size() > 0) {
                 authDto.setProjects(customUserDetails.getProjects());
+            } else if (customUserDetails.isSuperUser()) {
+                final String token = jwtTokenUtil.generateToken(authentication, userDto.getProjectId());
+                authDto.setToken(token);
+                authDto.setChangePassword(customUserDetails.isChangePassword());
             } else
                 authDto.setMessage("The user is not assigned to any project!");
 

@@ -9,6 +9,8 @@ import pl.databucket.entity.View;
 
 @Repository
 public interface ViewRepository extends JpaRepository<View, Long> {
+
+    View findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     Page<View> findAll(Specification<View> specification, Pageable pageable);
 }

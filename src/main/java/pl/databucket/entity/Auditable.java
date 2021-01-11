@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pl.databucket.configuration.Constants;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -20,7 +21,7 @@ import java.util.Date;
 public class Auditable<U>
 {
     @CreatedBy
-    @Column(name = "created_by", length = 50)
+    @Column(name = "created_by", length = Constants.NAME_MAX)
     private U createdBy;
 
     @CreatedDate
@@ -29,7 +30,7 @@ public class Auditable<U>
     private Date createdDate;
 
     @LastModifiedBy
-    @Column(name = "last_modified_by", length = 50)
+    @Column(name = "last_modified_by", length = Constants.NAME_MAX)
     private U lastModifiedBy;
 
     @LastModifiedDate

@@ -10,6 +10,7 @@ import pl.databucket.entity.DataFilter;
 @Repository
 public interface DataFilterRepository extends JpaRepository<DataFilter, Long> {
 
+    DataFilter findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     Page<DataFilter> findAll(Specification<DataFilter> specification, Pageable pageable);
 }

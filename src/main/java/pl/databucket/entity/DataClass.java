@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
+import pl.databucket.configuration.Constants;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
@@ -24,10 +25,10 @@ public class DataClass extends Auditable<String> implements TenantSupport {
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
 
-    @Column(name = "class_name", length = 50, unique = true)
+    @Column(name = "class_name", length = Constants.NAME_MAX, unique = true)
     private String name;
 
-    @Column
+    @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
 
     @JsonIgnore

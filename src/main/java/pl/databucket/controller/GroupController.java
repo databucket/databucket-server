@@ -8,8 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.GroupDto;
 import pl.databucket.entity.Group;
-import pl.databucket.exception.ExceptionFormatter;
-import pl.databucket.exception.ItemAlreadyExistsException;
+import pl.databucket.exception.*;
 import pl.databucket.response.GroupPageResponse;
 import pl.databucket.service.GroupService;
 import pl.databucket.specification.GroupSpecification;
@@ -35,10 +34,12 @@ public class GroupController {
       Group group = groupService.createGroup(groupDto);
       modelMapper.map(group, groupDto);
       return new ResponseEntity<>(groupDto, HttpStatus.CREATED);
-    } catch (ItemAlreadyExistsException e1) {
-      return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
-    } catch (Exception e2) {
-      return exceptionFormatter.defaultException(e2);
+    } catch (ItemAlreadyExistsException e) {
+      return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+    } catch (SomeItemsNotFoundException e) {
+      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return exceptionFormatter.defaultException(e);
     }
   }
 
@@ -57,8 +58,10 @@ public class GroupController {
       Group group = groupService.modifyGroup(groupDto);
       modelMapper.map(group, groupDto);
       return new ResponseEntity<>(groupDto, HttpStatus.OK);
-    } catch (Exception ee) {
-      return exceptionFormatter.defaultException(ee);
+    } catch (ItemNotFoundException | SomeItemsNotFoundException | ModifyByNullEntityIdException e) {
+      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return exceptionFormatter.defaultException(e);
     }
   }
 
@@ -67,8 +70,10 @@ public class GroupController {
     try {
       groupService.deleteGroup(groupId);
       return new ResponseEntity<>(null, HttpStatus.OK);
-    } catch (Exception ee) {
-      return exceptionFormatter.defaultException(ee);
+    } catch (ItemNotFoundException e) {
+      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return exceptionFormatter.defaultException(e);
     }
   }
 }

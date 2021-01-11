@@ -23,6 +23,7 @@ public class CustomUserDetails implements UserDetails {
     private Set<Long> groupsIds;
     private Set<Long> bucketsIds;
     private Boolean enabled;
+    private boolean superUser;
 
     public CustomUserDetails(String username,
                              String password,
@@ -30,7 +31,8 @@ public class CustomUserDetails implements UserDetails {
                              Integer projectId,
                              List<AuthProjectDto> projects,
                              boolean changePassword,
-                             boolean enabled) {
+                             boolean enabled,
+                             boolean superUser) {
 
         this.username = username;
         this.password = password;
@@ -39,6 +41,7 @@ public class CustomUserDetails implements UserDetails {
         this.projects = projects;
         this.changePassword = changePassword;
         this.enabled = enabled;
+        this.superUser = superUser;
     }
 
     @Override

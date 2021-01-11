@@ -10,6 +10,7 @@ import pl.databucket.entity.Event;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
+    Event findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     Page<Event> findAll(Specification<Event> specification, Pageable pageable);
 }
