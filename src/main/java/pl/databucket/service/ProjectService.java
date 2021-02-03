@@ -12,6 +12,8 @@ import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.ProjectRepository;
 
+import java.util.List;
+
 
 @Service
 public class ProjectService {
@@ -19,13 +21,12 @@ public class ProjectService {
     @Autowired
     private ProjectRepository projectRepository;
 
-    public Project createProject(ProjectDto projectDto) throws ItemAlreadyExistsException {
-        if (projectRepository.existsByNameAndDeleted(projectDto.getName(), false))
-            throw new ItemAlreadyExistsException(Project.class, projectDto.getName());
-
+    public Project createProject(ProjectDto projectDto) {
         Project project = new Project();
         project.setName(projectDto.getName());
         project.setDescription(projectDto.getDescription());
+        project.setExpirationDate(projectDto.getExpirationDate());
+        project.setEnabled(projectDto.isEnabled());
 
         return projectRepository.save(project);
     }
@@ -34,7 +35,11 @@ public class ProjectService {
         return projectRepository.findAll(specification, pageable);
     }
 
-    public Project modifyProject(ProjectDto projectDto) throws ItemNotFoundException, ItemAlreadyExistsException, ModifyByNullEntityIdException {
+    public List<Project> getProjects() {
+        return projectRepository.findAll();
+    }
+
+    public Project modifyProject(ProjectDto projectDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
         if (projectDto.getId() == null)
             throw new ModifyByNullEntityIdException(Project.class);
 
@@ -43,12 +48,10 @@ public class ProjectService {
         if (project == null)
             throw new ItemNotFoundException(Project.class, projectDto.getId());
 
-        if (!project.getName().equals(projectDto.getName()))
-            if (projectRepository.existsByNameAndDeleted(projectDto.getName(), false))
-                throw new ItemAlreadyExistsException(Project.class, projectDto.getName());
-
         project.setName(projectDto.getName());
         project.setDescription(projectDto.getDescription());
+        project.setEnabled(projectDto.isEnabled());
+        project.setExpirationDate(projectDto.getExpirationDate());
         return projectRepository.save(project);
     }
 

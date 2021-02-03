@@ -16,6 +16,8 @@ public class ProjectDto {
     private String name;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
+    private boolean enabled;
+    private Date expirationDate;
 
     private String createdBy;
     private Date createdDate;

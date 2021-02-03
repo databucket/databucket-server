@@ -11,6 +11,8 @@ public class ProjectPropertyMap extends PropertyMap<Project, ProjectDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
+        map().setEnabled(source.getEnabled());
+        map().setExpirationDate(source.getExpirationDate());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

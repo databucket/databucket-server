@@ -1,54 +1,41 @@
-import React from 'react';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import Cookies from 'universal-cookie';
-import DatabucketMainDrawer from './components/DatabucketMainDrower';
+import React, {useContext} from 'react';
+import {ThemeProvider} from '@material-ui/core/styles';
+import {LightTheme, DarkTheme} from './utils/Themes'
+import AppRouter from './route/AppRouter'
+import {ThemeContext} from "./context/ThemeContext";
+import CssBaseline from "@material-ui/core/CssBaseline";
+// import {getProjectId, getProjectName, getRoles, getThemeName, getToken} from "./utils/ConfigurationStorage";
+// import DatabucketMainDrawer from './components/DatabucketMainDrower';
 // import ConditionsTable from './components/conditionsTable/ConditionsTable';
 
 export default function App() {
 
-  window.API = 'http://localhost:8080/api';
-  // window.API = './api';
+    window.apiURL = 'http://localhost:8080/api';
+    // window.apiURL = './api';
 
-  // set user name
-  const cookies = new Cookies();
-  const userName = cookies.get('user_name');
+    // console.log("Theme: " + getThemeName());
+    // console.log("Token: " + getToken());
+    // console.log("ProjectId: " + getProjectId());
+    // console.log("ProjectName: " + getProjectName());
+    // console.log("Roles: " + getRoles());
 
-  if (userName == null) {
-    let newUserName = prompt('Type your nick or name (max 20 characters).\n\nIt is required to create/modify/delete items.\n\n');
-    if (newUserName == null)
-      newUserName = 'unknown';
+    const [themeName] = useContext(ThemeContext);
+    return (
+        <ThemeProvider theme={getTheme(themeName)}>
+            {/*<DatabucketMainDrawer />*/}
+            {/* <ConditionsTable /> */}
+            <CssBaseline>
+                <AppRouter/>
+            </CssBaseline>
+        </ThemeProvider>
+    );
+}
 
-    if (newUserName.length > 20)
-      newUserName = newUserName.substr(0, 20);
-
-    const current = new Date();
-    const nextYear = new Date();
-    nextYear.setFullYear(current.getFullYear() + 1);
-    cookies.set('user_name', newUserName, { path: '/', expires: nextYear });
-    window.USER = newUserName;
-  } else {
-    window.USER = userName;
-  }
-
-  const theme = createMuiTheme({
-    palette: {
-      primary: {
-        // main: '#353a47',
-        // main: '#495677', // main databucket logo color
-        // main: '#6d7792',
-        // main: '#3e4864'
-        main: '#0d47a1', // granatowy
-      },
-      // secondary: {
-      //   main: '#f44336',
-      // },
-    },
-  });
-
-  return (
-    <ThemeProvider theme={theme}>
-      <DatabucketMainDrawer />
-      {/* <ConditionsTable /> */}
-    </ThemeProvider>
-  );
+function getTheme(name) {
+    switch (name) {
+        case 'dark':
+            return DarkTheme;
+        default:
+            return LightTheme;
+    }
 }

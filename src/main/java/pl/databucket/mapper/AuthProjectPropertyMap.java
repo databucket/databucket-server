@@ -11,5 +11,7 @@ public class AuthProjectPropertyMap extends PropertyMap<Project, AuthProjectDto>
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
+        map().setEnabled(source.getEnabled());
+        map().setExpired(source.isExpired());
     }
 }

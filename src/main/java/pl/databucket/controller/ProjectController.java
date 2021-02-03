@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.ProjectDto;
 import pl.databucket.entity.Project;
 import pl.databucket.exception.ExceptionFormatter;
-import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.response.ProjectPageResponse;
@@ -19,6 +18,8 @@ import pl.databucket.service.ProjectService;
 import pl.databucket.specification.ProjectSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @PreAuthorize("hasRole('SUPER')")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -41,8 +42,6 @@ public class ProjectController {
             Project project = projectService.createProject(projectDto);
             modelMapper.map(project, projectDto);
             return new ResponseEntity<>(projectDto, HttpStatus.CREATED);
-        } catch (ItemAlreadyExistsException e) {
-            return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -53,6 +52,17 @@ public class ProjectController {
         try {
             Page<Project> projectPage = projectService.getProjects(specification, pageable);
             return new ResponseEntity<>(new ProjectPageResponse(projectPage, modelMapper), HttpStatus.OK);
+        } catch (Exception ee) {
+            return exceptionFormatter.defaultException(ee);
+        }
+    }
+
+    @GetMapping(value="/all")
+    public ResponseEntity<?> getProjects() {
+        try {
+            List<Project> projects = projectService.getProjects();
+            List<ProjectDto> projectsDto = projects.stream().map(item -> modelMapper.map(item, ProjectDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(projectsDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

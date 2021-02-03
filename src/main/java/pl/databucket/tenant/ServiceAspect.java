@@ -7,7 +7,6 @@ import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import pl.databucket.configuration.Constants;
 import pl.databucket.security.CustomUserDetails;
 
 import javax.persistence.EntityManager;
@@ -24,6 +23,13 @@ public class ServiceAspect {
     @Before("execution(* pl.databucket.service.BucketService.*(..))"
             + " || execution(* pl.databucket.service.GroupService.*(..)) "
             + " || execution(* pl.databucket.service.DataClassService.*(..)) "
+            + " || execution(* pl.databucket.service.DataColumnsService.*(..)) "
+            + " || execution(* pl.databucket.service.DataFilterService.*(..)) "
+            + " || execution(* pl.databucket.service.EventLogService.*(..)) "
+            + " || execution(* pl.databucket.service.EventService.*(..)) "
+            + " || execution(* pl.databucket.service.TagService.*(..)) "
+            + " || execution(* pl.databucket.service.TaskService.*(..)) "
+            + " || execution(* pl.databucket.service.ViewService.*(..)) "
     )
     // @formatter:on
     public void aroundExecution(JoinPoint pjp) throws Throwable {

@@ -10,8 +10,9 @@ import java.util.Set;
 @Setter
 public class UserDtoResponse {
 
-    private String name;
+    private String username;
     private Boolean enabled;
+    private Date expirationDate;
     private Set<Short> rolesIds;
     private Set<Integer> projectsIds;
     private Set<Long> groupsIds;

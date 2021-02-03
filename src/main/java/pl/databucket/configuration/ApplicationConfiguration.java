@@ -24,6 +24,7 @@ public class ApplicationConfiguration {
         modelMapper.addMappings(new TagPropertyMap());
         modelMapper.addMappings(new TaskPropertyMap());
         modelMapper.addMappings(new ViewPropertyMap());
+        modelMapper.addMappings(new RolePropertyMap());
         return modelMapper;
     }
 }

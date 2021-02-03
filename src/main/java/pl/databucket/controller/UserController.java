@@ -7,9 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.databucket.dto.AuthDtoRequest;
-import pl.databucket.dto.UserDtoRequest;
-import pl.databucket.dto.UserDtoResponse;
+import pl.databucket.dto.*;
+import pl.databucket.entity.Role;
 import pl.databucket.entity.User;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ItemAlreadyExistsException;
@@ -19,6 +18,8 @@ import pl.databucket.service.UserService;
 import pl.databucket.specification.UserSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/users")
@@ -75,12 +76,12 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('SUPER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER')")
     @PostMapping(value = "/password/reset")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody AuthDtoRequest userDto) {
         try {
-            User user = userService.resetPassword(userDto);
-            return ResponseEntity.ok(user);
+            userService.resetPassword(userDto);
+            return new ResponseEntity<>(null, HttpStatus.OK);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }
@@ -88,10 +89,21 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('SUPER', 'ADMIN', 'MEMBER')")
     @PostMapping(value = "/password/change")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody AuthDtoRequest userDto) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDtoRequest changePasswordDtoRequest) {
         try {
-            User user = userService.changePassword(userDto);
-            return ResponseEntity.ok(user);
+            userService.changePassword(changePasswordDtoRequest);
+            return new ResponseEntity<>(null, HttpStatus.OK);
+        } catch (IllegalArgumentException e1) {
+            return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+
+    @GetMapping(value = "/roles")
+    public ResponseEntity<?> getRoles() {
+        try {
+            List<Role> roles = userService.getRoles();
+            List<RoleDto> rolesDto = roles.stream().map(item -> modelMapper.map(item, RoleDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(rolesDto, HttpStatus.OK);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class AuthDtoRequest {
 
-    private String name;
+    private String username;
     private String password;
     private Integer projectId;
 

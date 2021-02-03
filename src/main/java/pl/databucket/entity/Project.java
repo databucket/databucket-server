@@ -6,6 +6,7 @@ import lombok.Setter;
 import pl.databucket.configuration.Constants;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -27,10 +28,21 @@ public class Project extends Auditable<String> {
     @Column(length = Constants.DESCRIPTION_MAX)
     private String description = null;
 
+    @Column(name = "expiration_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expirationDate;
+
+    @Column
+    private Boolean enabled = true;
+
     @Column
     private Boolean deleted = false;
 
     @ManyToMany(mappedBy = "projects")
     private Set<User> users;
+
+    public boolean isExpired() {
+        return (expirationDate != null && expirationDate.before(new Date()));
+    }
 }
 

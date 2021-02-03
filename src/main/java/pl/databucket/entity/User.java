@@ -6,6 +6,7 @@ import pl.databucket.configuration.Constants;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ public class User extends Auditable<String> implements Serializable {
     private long id;
 
     @Column(name = "user_name", length = Constants.NAME_MAX, unique = true)
-    private String name;
+    private String username;
 
     @Column
     private String password;
@@ -35,13 +36,18 @@ public class User extends Auditable<String> implements Serializable {
     @Column
     private Boolean enabled = true;
 
+    @Column(name = "expiration_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expirationDate;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> roles;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "user_projects",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "project_id")})
@@ -53,7 +59,7 @@ public class User extends Auditable<String> implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "group_id")})
     private Set<Group> groups;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_buckets",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
@@ -92,6 +98,10 @@ public class User extends Auditable<String> implements Serializable {
             return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_SUPER));
         else
             return false;
+    }
+
+    public boolean isExpired() {
+        return (expirationDate != null && expirationDate.before(new Date()));
     }
 
 }
