@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.configuration.Constants;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.Set;
@@ -14,12 +13,12 @@ import java.util.Set;
 public class TagDto {
 
     private Long id;
-    @Size(min = Constants.NAME_MIN, max = Constants.NAME_MAX)
+    @Size(min = 1, max = Constants.NAME_MAX)
     private String name;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
-    private Set<Long> buckets;
-    private Set<Long> dataClasses;
+    private Set<Long> bucketsIds;
+    private Set<Long> classesIds;
 
     private String createdBy;
     private Date createdDate;

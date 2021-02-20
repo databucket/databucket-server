@@ -11,10 +11,13 @@ public class BucketPropertyMap extends PropertyMap<Bucket, BucketDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setHistory(source.isHistory());
-        map().setHiddenData(source.isHiddenData());
         map().setIconName(source.getIconName());
-        map().setDataClassId(source.getDataClass().getId());
+        map().setClassId(source.getDataClass().getId());
+        map().setGroupsIds(source.getGroupsIds());
+        map().setUsersIds(source.getUsersIds());
+        map().setHistory(source.isHistory());
+        map().setProtectedData(source.isProtectedData());
+        map().setPrivateItem(source.isPrivateItem());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

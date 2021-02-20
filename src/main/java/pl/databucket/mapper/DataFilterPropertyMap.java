@@ -11,9 +11,7 @@ public class DataFilterPropertyMap extends PropertyMap<DataFilter, DataFilterDto
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setBuckets(source.getListOfBuckets());
-        map().setDataClasses(source.getListOfDataClasses());
-        map().setCreteria(source.getCriteria());
+        map().setConfiguration(source.getConfiguration());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

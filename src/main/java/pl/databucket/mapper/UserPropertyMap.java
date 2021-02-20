@@ -8,13 +8,13 @@ public class UserPropertyMap extends PropertyMap<User, UserDtoResponse> {
 
     @Override
     protected void configure() {
-        map().setUsername(source.getUsername());
+        map().setId(source.getId());
         map().setEnabled(source.getEnabled());
-        map().setExpirationDate(source.getExpirationDate());
-        map().setRolesIds(source.getRolesIds());
-        map().setProjectsIds(source.getProjectsIds());
+        map().setUsername(source.getUsername());
         map().setGroupsIds(source.getGroupsIds());
         map().setBucketsIds(source.getBucketsIds());
+        map().setViewsIds(source.getViewsIds());
+        map().setExpirationDate(source.getExpirationDate());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

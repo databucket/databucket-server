@@ -35,19 +35,19 @@ export const validateItem = (data, specification) => {
             let check = spec['check'];
             for (const validation of check) {
                 if (validation === 'notEmpty' && (!data.hasOwnProperty(key) || data[key] == null || data[key].length === 0))
-                    message += `${title} can not be empty!`;
+                    message += `${title} can not be empty! `;
 
                 if (data.hasOwnProperty(key) && data[key] != null) {
                     if (validation.includes('min')) {
                         let min = parseInt(validation.substring(3));
                         if (data[key].length < min)
-                            message += `${title} must be at least ${min} characters long!`;
+                            message += `${title} must be at least ${min} characters long! `;
                     }
 
                     if (validation.includes('max')) {
                         let max = parseInt(validation.substring(3));
                         if (data[key].length > max)
-                            message += `${title} can be up to ${max} characters long!`;
+                            message += `${title} can be up to ${max} characters long! `;
                     }
                 }
             }
@@ -64,52 +64,84 @@ export const validateItem = (data, specification) => {
     Warning: `value` prop on `input` should not be null. Consider using an empty string to clear the component or `undefined` for uncontrolled components.
     Example:
     resolve({
-        data: convertNullValues(result.data, ['description']),
+        data: convertNullValuesInCollection(result.data, {description: '', bucketsIds: []}}),
         page: result.page,
         totalCount: result.total,
     })
  */
-export const convertNullValues = (inputData, keys) => {
-    for (let item of inputData) {
-        for (let key of keys) {
-            if (item[key] == null)
-                item[key] = '';
+export const convertNullValuesInCollection = (inputCollection, mappers) => {
+    inputCollection.forEach(function (item) {
+        for (let key in mappers) {
+            if (mappers.hasOwnProperty(key))
+                if (item[key] == null)
+                    item[key] = mappers[key];
         }
-    }
-    return inputData;
+    });
+
+    return inputCollection;
 }
 
-export const getProjectsIdsStr = (projectsIds) => {
-    if (projectsIds != null) {
-        const length = projectsIds.length;
+export const convertNullValuesInObject = (inputObject, mappers) => {
+    for (let key in mappers) {
+        if (mappers.hasOwnProperty(key))
+            if (inputObject[key] == null)
+                inputObject[key] = mappers[key];
+    }
+    return inputObject;
+}
+
+export const getIdsStr = (inputIdsArray) => {
+    if (inputIdsArray != null && inputIdsArray.length > 0) {
+        let ids = JSON.parse(JSON.stringify(inputIdsArray));
+        const length = ids.length;
         if (length > 4)
-            return `${projectsIds.splice(0, 3).join(', ')}...[${length}]`;
+            return `${ids.splice(0, 3).join(', ')}...[${length}]`;
         else
-            return projectsIds.join(`, `);
+            return ids.join(`, `);
     } else
         return '';
 }
 
-export const setSelectionProjects = (inputProjects, projectsIds) => {
-    let projects = JSON.parse(JSON.stringify(inputProjects));
+export const getArrayLengthStr = (inputIdsArray) => {
+    if (inputIdsArray != null && inputIdsArray.length > 0)
+        return `[${inputIdsArray.length}]`;
+    else
+        return '[0]';
+}
 
-    if (projectsIds != null && projectsIds.length > 0)
-        for (let project of projects)
-            if (projectsIds.indexOf(project.id) > -1) {
-                project['tableData'] = {};
-                project['tableData']['checked'] = true;
+export const setSelectionItemById = (inputItems, itemId) => {
+    let items = JSON.parse(JSON.stringify(inputItems));
+
+    if (itemId > 0)
+        for (let item of items)
+            if (item.id === itemId) {
+                item['tableData'] = {};
+                item['tableData']['checked'] = true;
             }
 
-    return projects;
+    return items;
+}
+
+export const setSelectionItemsByIds = (inputItems, itemsIds) => {
+    let items = JSON.parse(JSON.stringify(inputItems));
+
+    if (itemsIds != null && itemsIds.length > 0)
+        for (let item of items)
+            if (itemsIds.indexOf(item.id) > -1) {
+                item['tableData'] = {};
+                item['tableData']['checked'] = true;
+            }
+
+    return items;
 }
 
 export const getRolesNames = (roles, rolesIds) => {
-    if (rolesIds != null && rolesIds.length > 0 && roles.length > 0) {
+    if (roles != null && rolesIds != null && rolesIds.length > 0 && roles.length > 0) {
         let rolesStr = '';
         for (let roleId of rolesIds) {
             let filteredRoles = roles.filter(r => r.id === roleId);
             if (filteredRoles.length > 0)
-                rolesStr += ` ${filteredRoles[0].name.substring(0,1)}`;
+                rolesStr += ` ${filteredRoles[0].name.substring(0, 1)}`;
             else
                 rolesStr += " ?";
         }
@@ -124,4 +156,37 @@ export const sortByKey = (array, key) => {
         const y = b[key];
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
+}
+
+
+export const notifierChangeAdapter = (items, payload) => {
+    const fieldName = payload.itemsTargetFieldName;
+    const sourceObjId = payload.sourceObjectId;
+    const sourceObjItemsIds = payload.sourceObjectItemsIds;
+
+    return items.map(item => {
+        if (sourceObjItemsIds != null && sourceObjItemsIds.includes(item.id)) {
+            // make sure this item is in the array
+            if (item[fieldName] == null) {
+                item[fieldName] = [];
+                item[fieldName].push(sourceObjId);
+            } else if (!item[fieldName].includes(sourceObjId))
+                item[fieldName].push(sourceObjId);
+        } else {
+            // make sure this item is not in the array
+            if (item[fieldName] != null && item[fieldName].includes(sourceObjId))
+                item[fieldName] = item[fieldName].filter(id => id !== sourceObjId);
+        }
+        return item;
+    });
+}
+
+export const arraysEquals = (newData, oldData, fieldName) => {
+    const newArray = newData[fieldName];
+    const oldArray = oldData[fieldName];
+
+    if (newArray == null || oldArray == null)
+        return newArray === oldArray;
+    else
+        return JSON.stringify(newArray.sort()) === JSON.stringify(oldArray.sort());
 }

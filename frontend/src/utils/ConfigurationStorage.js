@@ -5,6 +5,9 @@ const PROJECT_NAME = 'project-name';
 const PROJECT_ID = 'project-id';
 const ROLES = 'roles';
 const LAST_PAGE_SIZE = 'last-page-size';
+const LAST_PAGE_SIZE_DIALOG = 'last-page-size-dialog';
+const LAST_SETTINGS_PAGE_NAME = 'last-settings-page-name';
+const LAST_MANAGEMENT_PAGE_NAME = 'last-management-page-name';
 
 export const logOut = () => {
     clearUsername();
@@ -62,9 +65,9 @@ export const setProjectId = (projectId) => {
     localStorage.setItem(PROJECT_ID, projectId);
 }
 
-// export const getProjectId = () => {
-//     return localStorage.getItem(PROJECT_ID)
-// }
+export const getProjectId = () => {
+    return localStorage.getItem(PROJECT_ID)
+}
 
 export const clearProjectId = () => {
     localStorage.removeItem(PROJECT_ID);
@@ -78,11 +81,12 @@ export const getRoles = () => {
     return localStorage.getItem(ROLES);
 }
 
-export const hasRole = (role) => {
-    if (localStorage.getItem(ROLES) != null)
-        return localStorage.getItem(ROLES).includes(role);
-    else
-        return false;
+export const hasSuperRole = () => {
+    return !!localStorage.getItem(ROLES) && localStorage.getItem(ROLES).includes("SUPER");
+}
+
+export const hasOnlyRobotRole = (roles) => {
+    return (roles != null) && (roles.length === 1) && (roles[0] === 'ROBOT');
 }
 
 export const clearRoles = () => {
@@ -100,6 +104,17 @@ export const getThemeName = () => {
         return 'light';
 }
 
+export const getLastPageSizeOnDialog = () => {
+    if (localStorage.getItem(LAST_PAGE_SIZE_DIALOG) != null)
+        return parseInt(localStorage.getItem(LAST_PAGE_SIZE_DIALOG));
+    else
+        return 10;
+}
+
+export const setLastPageSizeOnDialog = (size) => {
+    localStorage.setItem(LAST_PAGE_SIZE_DIALOG, size.toString());
+}
+
 export const getLastPageSize = () => {
     if (localStorage.getItem(LAST_PAGE_SIZE) != null)
         return parseInt(localStorage.getItem(LAST_PAGE_SIZE));
@@ -109,4 +124,20 @@ export const getLastPageSize = () => {
 
 export const setLastPageSize = (size) => {
     localStorage.setItem(LAST_PAGE_SIZE, size.toString());
+}
+
+export const setLastSettingsPageName = (name) => {
+    localStorage.setItem(LAST_SETTINGS_PAGE_NAME, name);
+}
+
+export const getLastSettingsPageName = () => {
+    return !!localStorage.getItem(LAST_SETTINGS_PAGE_NAME) ? localStorage.getItem(LAST_SETTINGS_PAGE_NAME) : 'groups';
+}
+
+export const setLastManagementPageName = (name) => {
+    localStorage.setItem(LAST_MANAGEMENT_PAGE_NAME, name);
+}
+
+export const getLastManagementPageName = () => {
+    return !!localStorage.getItem(LAST_MANAGEMENT_PAGE_NAME) ? localStorage.getItem(LAST_MANAGEMENT_PAGE_NAME) : 'projects';
 }

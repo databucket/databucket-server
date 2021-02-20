@@ -7,10 +7,11 @@ import Typography from "@material-ui/core/Typography";
 import FormControl from "@material-ui/core/FormControl";
 import Button from "@material-ui/core/Button";
 import React, {useState} from "react";
-import {MessageBox} from "../MessageBox";
+import {MessageBox} from "../utils/MessageBox";
 import {clearToken, getToken, getUsername} from "../../utils/ConfigurationStorage";
 import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
 import {Redirect} from "react-router-dom";
+import {getProjectDataPath} from "../../route/AppRouter";
 
 const initialState = {
     password: "",
@@ -42,7 +43,7 @@ export default function ChangePasswordPage() {
                     });
                     setTimeout(() => {
                         setRedirect(true);
-                    }, 1500)
+                    }, 1000)
                 }).catch(error => {
                     setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                 }
@@ -82,7 +83,7 @@ export default function ChangePasswordPage() {
 
     return (
         redirect === true ? (
-            <Redirect to='/project/'/>
+            <Redirect to={getProjectDataPath()}/>
         ) : (
             <div className="ContainerClass">
                 <Paper className="PaperClass" elevation={3}>

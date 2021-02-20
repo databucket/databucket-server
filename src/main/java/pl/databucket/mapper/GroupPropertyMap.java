@@ -11,7 +11,9 @@ public class GroupPropertyMap extends PropertyMap<Group, GroupDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setBucketsIds(source.getListOfBuckets());
+        map().setBucketsIds(source.getBucketsIds());
+        map().setUsersIds(source.getUsersIds());
+        map().setPrivateItem(source.isPrivateItem());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

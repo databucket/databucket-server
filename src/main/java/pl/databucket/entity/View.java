@@ -9,6 +9,8 @@ import pl.databucket.configuration.Constants;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -33,6 +35,9 @@ public class View extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
+	@Column(name = "private", nullable = false)
+	private boolean privateItem = false;
+
 	@OneToOne
 	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
 	private DataClass dataClass;
@@ -49,7 +54,17 @@ public class View extends Auditable<String> implements TenantSupport {
 	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
 	private DataFilter dataFilter;
 
+	@ManyToMany(mappedBy = "groups")
+	private Set<User> users;
+
 	@JsonIgnore
 	private Boolean deleted = false;
+
+	public Set<Long> getUsersIds() {
+		if (users != null && users.size() > 0)
+			return users.stream().map(User::getId).collect(Collectors.toSet());
+		else
+			return null;
+	}
 }
 

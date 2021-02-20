@@ -9,7 +9,6 @@ import pl.databucket.configuration.Constants;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +35,9 @@ public class Group extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
+	@Column(name = "private", nullable = false)
+	private boolean privateItem = false;
+
 	@ManyToMany
 	@JoinTable(name = "groups_buckets",
 			joinColumns = {	@JoinColumn(name = "group_id") },
@@ -48,8 +50,18 @@ public class Group extends Auditable<String> implements TenantSupport {
 	@JsonIgnore
 	private Boolean deleted = false;
 
-	public Set<Long> getListOfBuckets() {
-		return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+	public Set<Long> getBucketsIds() {
+		if (buckets != null && buckets.size() > 0)
+			return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+		else
+			return null;
+	}
+
+	public Set<Long> getUsersIds() {
+		if (users != null && users.size() > 0)
+			return users.stream().map(User::getId).collect(Collectors.toSet());
+		else
+			return null;
 	}
 }
 

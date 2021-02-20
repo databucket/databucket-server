@@ -8,6 +8,7 @@ import pl.databucket.configuration.Constants;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -40,6 +41,13 @@ public class Project extends Auditable<String> {
 
     @ManyToMany(mappedBy = "projects")
     private Set<User> users;
+
+    public Set<Long> getUsersIds() {
+        if (users != null && users.size() > 0)
+            return users.stream().map(User::getId).collect(Collectors.toSet());
+        else
+            return null;
+    }
 
     public boolean isExpired() {
         return (expirationDate != null && expirationDate.before(new Date()));

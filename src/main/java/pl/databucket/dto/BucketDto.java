@@ -6,6 +6,7 @@ import pl.databucket.configuration.Constants;
 
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,9 +18,12 @@ public class BucketDto {
     private String iconName;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
-    private Long dataClassId;
+    private Long classId;
+    private Set<Long> groupsIds;
+    private Set<Long> usersIds;
     private boolean history;
-    private boolean hiddenData;
+    private boolean protectedData;
+    private boolean privateItem;
 
     private String createdBy;
     private Date createdDate;

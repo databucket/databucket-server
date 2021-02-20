@@ -2,18 +2,20 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.BucketDto;
 import pl.databucket.entity.Bucket;
-import pl.databucket.exception.*;
-import pl.databucket.response.BucketPageResponse;
+import pl.databucket.exception.ExceptionFormatter;
+import pl.databucket.exception.ItemAlreadyExistsException;
+import pl.databucket.exception.ItemNotFoundException;
+import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.service.BucketService;
-import pl.databucket.specification.BucketSpecification;
+
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/buckets")
@@ -44,10 +46,11 @@ public class BucketController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getBuckets(BucketSpecification specification, Pageable pageable) {
+    public ResponseEntity<?> getBuckets() {
         try {
-            Page<Bucket> bucketPage = bucketService.getBuckets(specification, pageable);
-            return new ResponseEntity<>(new BucketPageResponse(bucketPage, modelMapper), HttpStatus.OK);
+            List<Bucket> buckets = bucketService.getBuckets();
+            List<BucketDto> bucketsDto = buckets.stream().map(item -> modelMapper.map(item, BucketDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(bucketsDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

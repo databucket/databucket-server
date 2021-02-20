@@ -2,22 +2,17 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.DataClassDto;
 import pl.databucket.entity.DataClass;
-import pl.databucket.exception.ExceptionFormatter;
-import pl.databucket.exception.ItemAlreadyExistsException;
-import pl.databucket.exception.ItemNotFoundException;
-import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.response.DataClassPageResponse;
+import pl.databucket.exception.*;
 import pl.databucket.service.DataClassService;
-import pl.databucket.specification.DataClassSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/classes")
@@ -46,10 +41,11 @@ public class DataClassController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getDataClasses(DataClassSpecification specification, Pageable pageable) {
+    public ResponseEntity<?> getDataClasses() {
         try {
-            Page<DataClass> dataClassPage = dataClassService.getDataClasses(specification, pageable);
-            return new ResponseEntity<>(new DataClassPageResponse(dataClassPage, modelMapper), HttpStatus.OK);
+            List<DataClass> dataClasses = dataClassService.getDataClasses();
+            List<DataClassDto> dataClassesDto = dataClasses.stream().map(item -> modelMapper.map(item, DataClassDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(dataClassesDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
@@ -75,6 +71,8 @@ public class DataClassController {
             return new ResponseEntity<>(null, HttpStatus.OK);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (ItemAlreadyUsedException e) {
+            return exceptionFormatter.customException(e, HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

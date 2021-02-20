@@ -11,9 +11,7 @@ public class DataColumnsPropertyMap extends PropertyMap<DataColumns, DataColumns
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setBucketId(source.getBucket().getId());
-        map().setDataClassId(source.getDataClass().getId());
-        map().setColumns(source.getColumns());
+        map().setConfiguration(source.getConfiguration());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

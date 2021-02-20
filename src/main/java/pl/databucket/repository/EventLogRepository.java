@@ -9,6 +9,5 @@ import pl.databucket.entity.EventLog;
 
 @Repository
 public interface EventLogRepository extends JpaRepository<EventLog, Long> {
-
     Page<EventLog> findAll(Specification<EventLog> specification, Pageable pageable);
 }

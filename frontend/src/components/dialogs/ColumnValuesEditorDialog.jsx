@@ -26,8 +26,8 @@ import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import ToggleOff from '@material-ui/icons/ToggleOff';
 import ToggleOn from '@material-ui/icons/ToggleOn'
-import DynamicIcon from '../DynamicIcon';
-import EditIconDialog from './EditIconDialog';
+import DynamicIcon from '../utils/DynamicIcon';
+import EditIconDialog from '../project/dialogs/EditIconDialog';
 
 const styles = theme => ({
   root: {

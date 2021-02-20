@@ -16,7 +16,11 @@ import Search from "@material-ui/icons/Search";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import Remove from "@material-ui/icons/Remove";
 import ViewColumn from "@material-ui/icons/ViewColumn";
-import { darken, lighten } from '@material-ui/core/styles';
+import {darken, lighten} from '@material-ui/core/styles';
+import UserIcon from "@material-ui/icons/AccountCircle";
+import DisabledUserIcon from "@material-ui/icons/NotInterested";
+import ExpiredUserIcon from "@material-ui/icons/EventBusy";
+import Tooltip from "@material-ui/core/Tooltip";
 
 export const getPageableUlr = (endpoint, query, enableFilters) => {
 
@@ -41,6 +45,18 @@ export const getBaseUrl = (endpoint) => {
     return `${window.apiURL}/${endpoint}`;
 }
 
+const reverseMapping = (payload) => {
+    let newPayload = JSON.parse(JSON.stringify(payload));
+
+    if (newPayload['description'] != null && newPayload['description'] === '')
+        newPayload['description'] = null;
+
+    if (newPayload['classId'] != null && newPayload['classId'] === 'none')
+        newPayload['classId'] = null;
+
+    return JSON.stringify(newPayload);
+}
+
 export const getGetOptions = () => {
     return ({
         method: 'GET',
@@ -51,7 +67,7 @@ export const getGetOptions = () => {
 export const getPostOptions = (payload) => {
     return ({
         method: 'POST',
-        body: JSON.stringify(payload),
+        body: reverseMapping(payload),
         headers: fetchHelper(getToken())
     });
 }
@@ -59,7 +75,7 @@ export const getPostOptions = (payload) => {
 export const getPutOptions = (payload) => {
     return ({
         method: 'PUT',
-        body: JSON.stringify(payload),
+        body: reverseMapping(payload),
         headers: fetchHelper(getToken())
     });
 }
@@ -73,6 +89,10 @@ export const getDeleteOptions = () => {
 
 export const getPageSizeOptions = () => {
     return [15, 20, 25, 30, 35, 40, 50];
+}
+
+export const getPageSizeOptionsOnDialog = () => {
+    return [10, 15, 20, 25, 30, 40];
 }
 
 export const getTableIcons = () => {
@@ -109,18 +129,83 @@ export const handleErrors = (res) => {
 
 export const getTableHeaderBackgroundColor = (theme) => {
     if (theme.palette.type === 'light') {
-        return darken(theme.palette.background.default, 0.15);
+        return darken(theme.palette.background.default, 0.10);
     } else if (theme.palette.type === 'dark') {
         return lighten(theme.palette.background.default, 0.15);
     } else
-        return darken(theme.palette.background.default, 0.15);
+        return darken(theme.palette.background.default, 0.10);
 }
 
 export const getTableRowBackgroundColor = (rowData, theme) => {
-    if (theme.palette.type === 'light') {
-        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.06) : darken(theme.palette.background.default, 0.03);
-    } else if (theme.palette.type === 'dark') {
+    if (theme.palette.type === 'light')
+        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.03) : theme.palette.background.default;
+    else
         return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.06) : lighten(theme.palette.background.default, 0.03);
-    } else
-        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.06) : darken(theme.palette.background.default, 0.03);
+}
+
+export const getTableRowBackgroundColorWithSelection = (rowData, theme, selected) => {
+    if (rowData.id === selected) {
+        if (theme.palette.type === 'light')
+            return theme.palette.secondary.light;
+        else
+            return theme.palette.secondary.dark;
+    } else if (theme.palette.type === 'light')
+        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.03) : theme.palette.background.default;
+    else
+        return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.06) : lighten(theme.palette.background.default, 0.03);
+}
+
+export const getUserIcon = (rowData) => {
+    const enabled = rowData['enabled'];
+    const expiredDateStr = rowData['expirationDate'];
+    let expired = false;
+
+    if (expiredDateStr != null) {
+        const now = new Date();
+        const expiredDate = Date.parse(expiredDateStr);
+        expired = expiredDate < now;
+    }
+
+    if (!enabled)
+        return (
+            <Tooltip title={'Disabled'}>
+                <DisabledUserIcon color={'error'}/>
+            </Tooltip>
+        );
+    else if (expired)
+        return (
+            <Tooltip title={'Expired'}>
+                <ExpiredUserIcon color={'error'}/>
+            </Tooltip>
+        );
+    else
+        return (<UserIcon/>);
+}
+
+export const moveUp = (dataCollection, itemId) => {
+    const updated = dataCollection.map(item => {
+        if (item.tableData.id === itemId - 1)
+            item.tableData.id = itemId;
+        else if (item.tableData.id === itemId)
+            item.tableData.id = itemId - 1;
+        return item;
+    });
+
+    return (updated.sort((a, b) => {
+        return (a.tableData.id > b.tableData.id) ? 1 : -1;
+    }));
+}
+
+export const moveDown = (dataCollection, itemId) => {
+    const updated = dataCollection.map(item => {
+        if (item.tableData.id === itemId)
+            item.tableData.id = itemId + 1;
+        else if (item.tableData.id === itemId + 1)
+            item.tableData.id = itemId;
+        return item;
+    });
+
+    return updated.sort((a, b) => {
+        return (a.tableData.id > b.tableData.id) ? 1 : -1;
+    });
 }

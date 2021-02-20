@@ -2,18 +2,17 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.GroupDto;
 import pl.databucket.entity.Group;
 import pl.databucket.exception.*;
-import pl.databucket.response.GroupPageResponse;
 import pl.databucket.service.GroupService;
-import pl.databucket.specification.GroupSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/groups")
@@ -44,9 +43,11 @@ public class GroupController {
   }
 
   @GetMapping
-  public ResponseEntity<?> getGroups(GroupSpecification customerSpec, Pageable pageable) {
+  public ResponseEntity<?> getGroups() {
     try {
-      return new ResponseEntity<>(new GroupPageResponse(groupService.getGroups(customerSpec, pageable), modelMapper), HttpStatus.OK);
+      List<Group> groups = groupService.getGroups();
+      List<GroupDto> groupsDto = groups.stream().map(item -> modelMapper.map(item, GroupDto.class)).collect(Collectors.toList());
+      return new ResponseEntity<>(groupsDto, HttpStatus.OK);
     } catch (Exception ee) {
       return exceptionFormatter.defaultException(ee);
     }

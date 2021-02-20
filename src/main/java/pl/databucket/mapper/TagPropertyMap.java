@@ -11,8 +11,8 @@ public class TagPropertyMap extends PropertyMap<Tag, TagDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setBuckets(source.getListOfBuckets());
-        map().setDataClasses(source.getListOfDataClasses());
+        map().setBucketsIds(source.getBucketsIds());
+        map().setClassesIds(source.getDataClassesIds());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

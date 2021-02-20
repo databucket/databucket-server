@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.databucket.entity.Bucket;
+import pl.databucket.entity.DataClass;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
     Bucket findByIdAndDeleted(long id, boolean deleted);
     List<Bucket> findAllByDeletedAndIdIn(boolean deleted, Iterable<Long> longs);
+    List<Bucket> findAllByDeletedOrderById(boolean deleted);
+    List<Bucket> findAllByDeletedAndDataClass(boolean deleted, DataClass dataClassId);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     Page<Bucket> findAll(Specification<Bucket> specification, Pageable pageable);
 }

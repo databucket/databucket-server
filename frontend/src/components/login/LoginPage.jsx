@@ -16,22 +16,22 @@ import DisabledProjectIcon from "@material-ui/icons/NotInterested";
 import ExpiredProjectIcon from "@material-ui/icons/EventBusy";
 import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
-import {handleErrors} from "../../utils/FetchHelper";
+import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
     isLogin,
     setToken,
     setProjectId,
     setProjectName,
-    setRoles,
-    hasRole, getThemeName, setUsername
+    setRoles, getThemeName, setUsername, hasSuperRole, hasOnlyRobotRole
 } from '../../utils/ConfigurationStorage';
 import {Link, Redirect} from 'react-router-dom';
 import FormControl from "@material-ui/core/FormControl";
 import IconButton from "@material-ui/core/IconButton";
 import {Visibility, VisibilityOff} from "@material-ui/icons";
 import Grid from "@material-ui/core/Grid";
-import {MessageBox} from "../MessageBox";
+import {MessageBox} from "../utils/MessageBox";
 import {sortByKey} from "../../utils/JsonHelper";
+import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRouter";
 
 const initialState = {
     username: "",
@@ -69,26 +69,29 @@ export default function LoginPage() {
             body: JSON.stringify(projectId == null ? {username, password} : {username, password, projectId}),
             headers: {'Content-Type': 'application/json'}
         })
-            .then(handleErrors)
+            .then(handleLoginErrors)
             .then(data => {
                 setUsername(username);
                 if (data.changePassword != null && data.changePassword === true) {
                     setToken(data.token);
                     setState(prevState => ({...prevState, changePassword: true}));
                 } else if (data.projects != null) {
-                    // for SUPER user only
-                    if (data.token != null)
+                    setRoles(data.roles);
+
+                    if (hasSuperRole())
                         setToken(data.token);
 
-                    setRoles(data.roles);
                     let sortedProjects = sortByKey(data.projects, 'id');
                     setState(prevState => ({...prevState, projects: sortedProjects, changePassword: false}));
                 } else if (data.token != null) {
-                    setToken(data.token);
-                    setProjectId(data.project.id);
-                    setProjectName(data.project.name);
-                    setRoles(data.roles);
-                    setState(prevState => ({...prevState, projects: null, changePassword: false}));
+                    if (!hasOnlyRobotRole(data.roles)) {
+                        setRoles(data.roles);
+                        setToken(data.token);
+                        setProjectId(data.project.id);
+                        setProjectName(data.project.name);
+                        setState(prevState => ({...prevState, projects: null, changePassword: false}));
+                    } else
+                        setMessageBox({open: true, severity: 'error', title: 'Login failed', message: 'This user does not have required role to use GUI'});
                 }
             }).catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Login failed', message: error});
@@ -163,16 +166,15 @@ export default function LoginPage() {
                             Select project
                         </Typography>
                     </Grid>
-                    {hasRole("SUPER") ? (
+                    {hasSuperRole() ? (
                         <Grid item>
-                            <IconButton component={Link} to={'/management'}>
+                            <IconButton component={Link} to={getManagementProjectsPath()}>
                                 <ManageAccountsIcon/>
                             </IconButton>
                         </Grid>
                     ) : (
                         <div/>
                     )}
-
                 </Grid>
 
                 <List component="nav" className="ProjectsList">
@@ -183,7 +185,7 @@ export default function LoginPage() {
                                     <ListItemAvatar>
                                         <Avatar>
                                             {enabled !== true ? <DisabledProjectIcon /> : expired === true ?
-                                                <ExpiredProjectIcon color='error' /> : <ActiveProjectIcon color='secondary'/>}
+                                                <ExpiredProjectIcon /> : <ActiveProjectIcon color='secondary'/>}
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText primary={name} secondary={description}/>
@@ -202,9 +204,12 @@ export default function LoginPage() {
 
     const getSwitchParam = () => {
         if (changePassword === true) {
-            return 3;
+            return 4;
         } else if (projects != null) {
-            return 2;
+            if (projects.length > 0)
+                return 3;
+            else
+                return 2;
         } else if (isLogin()) {
             return 1;
         } else {
@@ -214,12 +219,14 @@ export default function LoginPage() {
 
     const paper = () => {
         switch (getSwitchParam()) {
-            case 3:
+            case 4:
                 return redirectTo("/change-password");
-            case 2:
+            case 3:
                 return getProjectsPaper();
+            case 2:
+                return redirectTo(getManagementProjectsPath());
             case 1:
-                return redirectTo("/project/");
+                return redirectTo(getProjectDataPath());
             default:
                 return getLoginPaper();
         }

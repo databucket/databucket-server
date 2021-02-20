@@ -42,28 +42,34 @@ public class User extends Auditable<String> implements Serializable {
 
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles",
+    @JoinTable(name = "users_roles",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> roles;
 
     @ManyToMany
-    @JoinTable(name = "user_projects",
+    @JoinTable(name = "users_projects",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "project_id")})
     private Set<Project> projects;
 
     @ManyToMany
-    @JoinTable(name = "user_groups",
+    @JoinTable(name = "users_groups",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "group_id")})
     private Set<Group> groups;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_buckets",
+    @JoinTable(name = "users_buckets",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
     private Set<Bucket> buckets;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_views",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "view_id")})
+    private Set<View> views;
 
     public Set<Short> getRolesIds() {
         if (roles != null && roles.size() > 0)
@@ -89,6 +95,13 @@ public class User extends Auditable<String> implements Serializable {
     public Set<Long> getBucketsIds() {
         if (buckets != null && buckets.size() > 0)
             return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+        else
+            return null;
+    }
+
+    public Set<Long> getViewsIds() {
+        if (views != null && views.size() > 0)
+            return views.stream().map(View::getId).collect(Collectors.toSet());
         else
             return null;
     }

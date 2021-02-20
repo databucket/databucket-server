@@ -1,21 +1,13 @@
 package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.DataFilterDto;
-import pl.databucket.entity.Bucket;
-import pl.databucket.entity.DataClass;
 import pl.databucket.entity.DataFilter;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.repository.BucketRepository;
-import pl.databucket.repository.DataClassRepository;
 import pl.databucket.repository.DataFilterRepository;
 
-import java.util.HashSet;
 import java.util.List;
 
 
@@ -25,35 +17,17 @@ public class DataFilterService {
     @Autowired
     private DataFilterRepository filterRepository;
 
-    @Autowired
-    private BucketRepository bucketRepository;
-
-    @Autowired
-    private DataClassRepository dataClassRepository;
-
     public DataFilter createFilter(DataFilterDto dataFilterDto) {
         DataFilter dataFilter = new DataFilter();
         dataFilter.setName(dataFilterDto.getName());
         dataFilter.setDescription(dataFilterDto.getDescription());
-        dataFilter.setCriteria(dataFilterDto.getCreteria());
-
-        if (dataFilterDto.getBuckets() != null) {
-            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, dataFilterDto.getBuckets());
-            dataFilter.setBuckets(new HashSet<>(buckets));
-        } else
-            dataFilter.setBuckets(null);
-
-        if (dataFilterDto.getDataClasses() != null) {
-            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, dataFilterDto.getDataClasses());
-            dataFilter.setDataClasses(new HashSet<>(dataClasses));
-        } else
-            dataFilter.setDataClasses(null);
+        dataFilter.setConfiguration(dataFilterDto.getConfiguration());
 
         return filterRepository.save(dataFilter);
     }
 
-    public Page<DataFilter> getFilters(Specification<DataFilter> specification, Pageable pageable) {
-        return filterRepository.findAll(specification, pageable);
+    public List<DataFilter> getFilters() {
+        return filterRepository.findAllByDeletedOrderById(false);
     }
 
     public DataFilter modifyFilter(DataFilterDto dataFilterDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
@@ -67,19 +41,7 @@ public class DataFilterService {
 
         dataFilter.setName(dataFilterDto.getName());
         dataFilter.setDescription(dataFilterDto.getDescription());
-        dataFilter.setCriteria(dataFilterDto.getCreteria());
-
-        if (dataFilterDto.getBuckets() != null) {
-            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, dataFilterDto.getBuckets());;
-            dataFilter.setBuckets(new HashSet<>(buckets));
-        } else
-            dataFilter.setBuckets(null);
-
-        if (dataFilterDto.getDataClasses() != null) {
-            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, dataFilterDto.getDataClasses());
-            dataFilter.setDataClasses(new HashSet<>(dataClasses));
-        } else
-            dataFilter.setDataClasses(null);
+        dataFilter.setConfiguration(dataFilterDto.getConfiguration());
 
         return filterRepository.save(dataFilter);
     }

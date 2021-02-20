@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import pl.databucket.configuration.Constants;
-import pl.databucket.dto.ColumnDto;
+import pl.databucket.dto.DataColumnsItemDto;
 import org.hibernate.annotations.Filter;
 import pl.databucket.tenant.TenantSupport;
 
@@ -39,17 +39,9 @@ public class DataColumns extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
-	private DataClass dataClass;
-
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "bucket_id", referencedColumnName = "bucket_id")
-	private Bucket bucket;
-
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private List<ColumnDto> columns;
+	private List<DataColumnsItemDto> configuration;
 
 	@JsonIgnore
 	private Boolean deleted = false;

@@ -2,8 +2,6 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +11,11 @@ import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.response.TagPageResponse;
 import pl.databucket.service.TagService;
-import pl.databucket.specification.TagSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/tags")
@@ -47,10 +45,11 @@ public class TagController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getTags(TagSpecification specification, Pageable pageable) {
+    public ResponseEntity<?> getTags() {
         try {
-            Page<Tag> tagPage = tagService.getTags(specification, pageable);
-            return new ResponseEntity<>(new TagPageResponse(tagPage, modelMapper), HttpStatus.OK);
+            List<Tag> tags = tagService.getTags();
+            List<TagDto> tagsDto = tags.stream().map(item -> modelMapper.map(item, TagDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(tagsDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

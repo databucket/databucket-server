@@ -1,14 +1,13 @@
 package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.DataClassDto;
+import pl.databucket.entity.Bucket;
 import pl.databucket.entity.DataClass;
 import pl.databucket.exception.*;
-import pl.databucket.repository.DataClassRepository;
+import pl.databucket.repository.*;
+import java.util.List;
 
 
 @Service
@@ -16,6 +15,25 @@ public class DataClassService {
 
     @Autowired
     private DataClassRepository dataClassRepository;
+
+    @Autowired
+    private BucketRepository bucketRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
+    private DataFilterRepository dataFilterRepository;
+
+    @Autowired
+    private DataColumnsRepository dataColumnsRepository;
+
+    @Autowired
+    private ViewRepository viewRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
+
 
     public DataClass createDataClass(DataClassDto dataClassDto) throws ItemAlreadyExistsException {
         if (dataClassRepository.existsByNameAndDeleted(dataClassDto.getName(), false))
@@ -27,8 +45,8 @@ public class DataClassService {
         return dataClassRepository.save(dataClass);
     }
 
-    public Page<DataClass> getDataClasses(Specification<DataClass> specification, Pageable pageable) {
-        return dataClassRepository.findAll(specification, pageable);
+    public List<DataClass> getDataClasses() {
+        return dataClassRepository.findAllByDeletedOrderById(false);
     }
 
     public DataClass modifyDataClass(DataClassDto dataClassDto) throws ItemNotFoundException, ItemAlreadyExistsException, ModifyByNullEntityIdException {
@@ -49,11 +67,21 @@ public class DataClassService {
         return dataClassRepository.save(dataClass);
     }
 
-    public void deleteDataClass(long dataClassId) throws ItemNotFoundException {
+    public void deleteDataClass(long dataClassId) throws ItemNotFoundException, ItemAlreadyUsedException {
         DataClass dataClass = dataClassRepository.findByIdAndDeleted(dataClassId, false);
 
         if (dataClass == null)
             throw new ItemNotFoundException(DataClass.class, dataClassId);
+
+        String usedByItems = "";
+        List<Bucket> buckets = bucketRepository.findAllByDeletedAndDataClass(false, dataClass);
+        for (Bucket bucket : buckets)
+            usedByItems += " Bucket " + bucket.getName();
+
+        //TODO sprawdzić dla reszty encji
+
+        if (usedByItems.length() > 0)
+            throw new ItemAlreadyUsedException("Class", dataClass.getName(), usedByItems);
 
         dataClass.setDeleted(true);
         dataClassRepository.save(dataClass);

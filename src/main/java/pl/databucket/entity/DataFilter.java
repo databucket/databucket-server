@@ -2,14 +2,13 @@ package pl.databucket.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import pl.databucket.configuration.Constants;
-import pl.databucket.dto.CriteriaDto;
+import pl.databucket.dto.DataFilterItemDto;
 import org.hibernate.annotations.Filter;
 import pl.databucket.tenant.TenantSupport;
 
@@ -42,31 +41,13 @@ public class DataFilter extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@ManyToMany
-	@JoinTable(name = "filter_buckets",
-			joinColumns = {@JoinColumn(name = "filter_id") },
-			inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
-	private Set<Bucket> buckets;
-
-	@ManyToMany
-	@JoinTable(name = "filter_dataclasses",
-			joinColumns = {@JoinColumn(name = "filter_id")},
-			inverseJoinColumns = {@JoinColumn(name = "class_id")})
-	private Set<DataClass> dataClasses;
-
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private List<CriteriaDto> criteria;
+	private List<DataFilterItemDto> configuration;
 
 	@JsonIgnore
 	private Boolean deleted = false;
 
-	public Set<Long> getListOfBuckets() {
-		return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
-	}
-	public Set<Long> getListOfDataClasses() {
-		return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
-	}
 
 }
 

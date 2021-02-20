@@ -4,15 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.EventDto;
 import pl.databucket.entity.Event;
 import pl.databucket.exception.*;
 import pl.databucket.repository.EventRepository;
+
+import java.util.List;
 
 
 @Service
@@ -60,8 +59,8 @@ public class EventService {
         return event;
     }
 
-    public Page<Event> getEvents(Specification<Event> specification, Pageable pageable) {
-        return eventRepository.findAll(specification, pageable);
+    public List<Event> getEvents() {
+        return eventRepository.findAllByDeletedOrderById(false);
     }
 
     public Event modifyEvent(EventDto eventDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {

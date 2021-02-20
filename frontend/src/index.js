@@ -3,13 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import {ThemeContextProvider} from "./context/ThemeContext";
 import {getThemeName} from "./utils/ConfigurationStorage";
+import CustomThemeProvider from "./context/theme/CustomThemeProvider";
 
 ReactDOM.render(
-    <ThemeContextProvider name={getThemeName()}>
+    <CustomThemeProvider name={getThemeName()}>
         <App/>
-    </ThemeContextProvider>,
+    </CustomThemeProvider>,
     document.getElementById('root'));
 
 

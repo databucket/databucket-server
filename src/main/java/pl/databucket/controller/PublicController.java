@@ -116,9 +116,11 @@ public class PublicController {
                 } else {
                     List<AuthProjectDto> projects = user.getProjects().stream().map(item -> modelMapper.map(item, AuthProjectDto.class)).collect(Collectors.toList());
                     List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
+                    AuthProjectDto authProjectDto = new AuthProjectDto();
+                    modelMapper.map(project, authProjectDto);
 
-                    authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, userDto.getProjectId()));
-                    authDtoResponse.setProject(projects.get(0));
+                    authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, projects.get(0).getId()));
+                    authDtoResponse.setProject(authProjectDto);
                     authDtoResponse.setRoles(roles);
                 }
 

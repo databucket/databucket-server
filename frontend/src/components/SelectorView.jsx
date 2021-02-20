@@ -7,7 +7,7 @@ import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import DynamicIcon from './DynamicIcon';
+import DynamicIcon from './utils/DynamicIcon';
 
 const styles = theme => ({
     root: {

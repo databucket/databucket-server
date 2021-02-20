@@ -43,6 +43,7 @@ dependencies {
   compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.10.1'
   compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
   compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.9'
+  compile group: 'org.yaml', name: 'snakeyaml', version: '1.27'
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
 

@@ -1,9 +1,6 @@
 package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.TaskDto;
 import pl.databucket.entity.Bucket;
@@ -51,8 +48,8 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Page<Task> getTasks(Specification<Task> specification, Pageable pageable) {
-        return taskRepository.findAll(specification, pageable);
+    public List<Task> getTasks() {
+        return taskRepository.findAllByDeletedOrderById(false);
     }
 
     public Task modifyTask(TaskDto taskDto) throws ItemNotFoundException, ModifyByNullEntityIdException {

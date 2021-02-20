@@ -15,6 +15,7 @@ public class ViewPropertyMap extends PropertyMap<View, ViewDto> {
         map().setDataClassId(source.getDataClass().getId());
         map().setColumnsId(source.getDataColumns().getId());
         map().setFilterId(source.getDataFilter().getId());
+        map().setPrivateItem(source.isPrivateItem());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

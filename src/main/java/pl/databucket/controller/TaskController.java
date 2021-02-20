@@ -14,9 +14,10 @@ import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.response.TaskPageResponse;
 import pl.databucket.service.TaskService;
-import pl.databucket.specification.TaskSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/tasks")
@@ -43,10 +44,11 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getTasks(TaskSpecification specification, Pageable pageable) {
+    public ResponseEntity<?> getTasks() {
         try {
-            Page<Task> taskPage = taskService.getTasks(specification, pageable);
-            return new ResponseEntity<>(new TaskPageResponse(taskPage, modelMapper), HttpStatus.OK);
+            List<Task> tasks = taskService.getTasks();
+            List<TaskDto> tasksDto = tasks.stream().map(item -> modelMapper.map(item, TaskDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(tasksDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

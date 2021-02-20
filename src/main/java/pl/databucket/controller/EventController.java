@@ -2,8 +2,6 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +11,11 @@ import pl.databucket.entity.Event;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.response.EventPageResponse;
 import pl.databucket.service.EventService;
-import pl.databucket.specification.EventSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/events")
@@ -44,10 +42,11 @@ public class EventController {
   }
 
   @GetMapping
-  public ResponseEntity<?> getEvents(EventSpecification specification, Pageable pageable) {
+  public ResponseEntity<?> getEvents() {
     try {
-      Page<Event> eventPage = eventService.getEvents(specification, pageable);
-      return new ResponseEntity<>(new EventPageResponse(eventPage, modelMapper), HttpStatus.OK);
+      List<Event> events = eventService.getEvents();
+      List<EventDto> eventsDto = events.stream().map(item -> modelMapper.map(item, EventDto.class)).collect(Collectors.toList());
+      return new ResponseEntity<>(eventsDto, HttpStatus.OK);
     } catch (Exception ee) {
       return exceptionFormatter.defaultException(ee);
     }

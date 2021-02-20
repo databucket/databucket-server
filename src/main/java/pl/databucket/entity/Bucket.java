@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hibernate.annotations.Filter;
@@ -48,17 +47,33 @@ public class Bucket extends Auditable<String> implements TenantSupport {
     @Column(nullable = false)
     private boolean history = false;
 
-    @Column(name = "hidden_data", nullable = false)
-    private boolean hiddenData = false;
+    @Column(name = "private", nullable = false)
+    private boolean privateItem = false;
+
+    @Column(name = "protected_data", nullable = false)
+    private boolean protectedData = false;
 
     @ManyToMany(mappedBy = "buckets")
     private Set<User> users;
 
+    @ManyToMany(mappedBy = "buckets")
+    private Set<Group> groups;
+
     @JsonIgnore
     private Boolean deleted = false;
 
-    public List<Long> getListOfUsers() {
-        return users.stream().map(User::getId).collect(Collectors.toList());
+    public Set<Long> getUsersIds() {
+        if (users != null && users.size() > 0)
+            return users.stream().map(User::getId).collect(Collectors.toSet());
+        else
+            return null;
+    }
+
+    public Set<Long> getGroupsIds() {
+        if (groups != null && groups.size() > 0)
+            return groups.stream().map(Group::getId).collect(Collectors.toSet());
+        else
+            return null;
     }
 
 }

@@ -1,4 +1,4 @@
-import {clearToken} from "./ConfigurationStorage";
+import {logOut} from "./ConfigurationStorage";
 
 export function fetchHelper(token) {
     if (token) {
@@ -11,12 +11,25 @@ export function fetchHelper(token) {
     }
 }
 
+export function handleLoginErrors(response) {
+    return response.text().then(text => {
+        const body = text !== '' ? JSON.parse(text) : JSON.parse("{}");
+        if (!response.ok) {
+            const error = body.message || response.statusText;
+            return Promise.reject(error);
+        }
+        return body;
+    });
+}
+
+
 export function handleErrors(response) {
     return response.text().then(text => {
         const body = text !== '' ? JSON.parse(text) : JSON.parse("{}");
         if (!response.ok) {
             if (response.status === 401) {
-                clearToken();
+                logOut();
+                window.location.reload();
             }
 
             const error = body.message || response.statusText;

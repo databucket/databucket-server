@@ -3,7 +3,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import DynamicIcon from './DynamicIcon';
+import DynamicIcon from './utils/DynamicIcon';
 
 export default class SelectorBucket extends React.Component {
 

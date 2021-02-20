@@ -5,7 +5,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
-import DynamicIcon from '../DynamicIcon';
+import DynamicIcon from '../utils/DynamicIcon';
 
 const StyledMenu = withStyles({
     paper: {

@@ -13,8 +13,9 @@ public class ApplicationConfiguration {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        modelMapper.addMappings(new ProjectPropertyMap());
+        modelMapper.addMappings(new ManageProjectPropertyMap());
         modelMapper.addMappings(new UserPropertyMap());
+        modelMapper.addMappings(new ManageUserPropertyMap());
         modelMapper.addMappings(new BucketPropertyMap());
         modelMapper.addMappings(new GroupPropertyMap());
         modelMapper.addMappings(new AuthProjectPropertyMap());
@@ -25,6 +26,7 @@ public class ApplicationConfiguration {
         modelMapper.addMappings(new TaskPropertyMap());
         modelMapper.addMappings(new ViewPropertyMap());
         modelMapper.addMappings(new RolePropertyMap());
+        modelMapper.addMappings(new DataEnumPropertyMap());
         return modelMapper;
     }
 }

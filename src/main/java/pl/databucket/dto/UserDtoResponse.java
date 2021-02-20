@@ -10,13 +10,14 @@ import java.util.Set;
 @Setter
 public class UserDtoResponse {
 
+    private long id;
     private String username;
     private Boolean enabled;
-    private Date expirationDate;
     private Set<Short> rolesIds;
-    private Set<Integer> projectsIds;
     private Set<Long> groupsIds;
     private Set<Long> bucketsIds;
+    private Set<Long> viewsIds;
+    private Date expirationDate;
 
     private String createdBy;
     private Date createdDate;

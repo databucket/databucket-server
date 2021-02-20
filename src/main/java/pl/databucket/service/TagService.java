@@ -1,9 +1,6 @@
 package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.TagDto;
 import pl.databucket.entity.Bucket;
@@ -40,21 +37,21 @@ public class TagService {
         tag.setName(tagDto.getName());
         tag.setDescription(tagDto.getDescription());
 
-        if (tagDto.getBuckets() != null) {
-            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, tagDto.getBuckets());
+        if (tagDto.getBucketsIds() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, tagDto.getBucketsIds());
             tag.setBuckets(new HashSet<>(buckets));
         }
 
-        if (tagDto.getDataClasses() != null) {
-            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, tagDto.getDataClasses());
+        if (tagDto.getClassesIds() != null) {
+            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, tagDto.getClassesIds());
             tag.setDataClasses(new HashSet<>(dataClasses));
         }
 
         return tagRepository.save(tag);
     }
 
-    public Page<Tag> getTags(Specification<Tag> specification, Pageable pageable) {
-        return tagRepository.findAll(specification, pageable);
+    public List<Tag> getTags() {
+        return tagRepository.findAllByDeletedOrderById(false);
     }
 
     public Tag modifyTag(TagDto tagDto) throws ItemNotFoundException, ItemAlreadyExistsException, ModifyByNullEntityIdException {
@@ -73,14 +70,14 @@ public class TagService {
         tag.setName(tagDto.getName());
         tag.setDescription(tagDto.getDescription());
 
-        if (tagDto.getBuckets() != null) {
-            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, tagDto.getBuckets());
+        if (tagDto.getBucketsIds() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, tagDto.getBucketsIds());
             tag.setBuckets(new HashSet<>(buckets));
         } else
             tag.setBuckets(null);
 
-        if (tagDto.getDataClasses() != null) {
-            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, tagDto.getDataClasses());
+        if (tagDto.getClassesIds() != null) {
+            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, tagDto.getClassesIds());
             tag.setDataClasses(new HashSet<>(dataClasses));
         } else
             tag.setDataClasses(null);

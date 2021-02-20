@@ -1,11 +1,8 @@
 package pl.databucket.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.databucket.configuration.Constants;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -23,6 +20,7 @@ public class ViewDto {
     @NotEmpty
     private long columnsId;
     private Long filterId;
+    private boolean privateItem;
 
     private String createdBy;
     private Date createdDate;

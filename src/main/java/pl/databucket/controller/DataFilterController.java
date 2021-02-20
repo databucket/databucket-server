@@ -2,8 +2,6 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +10,11 @@ import pl.databucket.dto.DataFilterDto;
 import pl.databucket.entity.DataFilter;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.response.DataFilterPageResponse;
 import pl.databucket.service.DataFilterService;
-import pl.databucket.specification.FilterSpecification;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/filters")
@@ -44,10 +42,11 @@ public class DataFilterController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getFilters(FilterSpecification specification, Pageable pageable) {
+    public ResponseEntity<?> getFilters() {
         try {
-            Page<DataFilter> dataFilterPage = filterService.getFilters(specification, pageable);
-            return new ResponseEntity<>(new DataFilterPageResponse(dataFilterPage, modelMapper), HttpStatus.OK);
+            List<DataFilter> dataFilters = filterService.getFilters();
+            List<DataFilterDto> dataFiltersDto = dataFilters.stream().map(item -> modelMapper.map(item, DataFilterDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(dataFiltersDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

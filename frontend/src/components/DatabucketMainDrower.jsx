@@ -15,7 +15,7 @@ import SettingsDialog from './dialogs/Settings/SettingsDialog';
 import SelectorGroup from './SelectorGroup';
 import SelectorBucket from './SelectorBucket';
 import SelectorView from './SelectorView';
-import DynamicIcon from './DynamicIcon';
+import DynamicIcon from './utils/DynamicIcon';
 import LookupIconDialog from './dialogs/EditLookupIconDialog';
 import Cookies from 'universal-cookie';
 

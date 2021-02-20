@@ -13,18 +13,31 @@ import pl.databucket.database.Query;
 import pl.databucket.dto.BucketDto;
 import pl.databucket.entity.Bucket;
 import pl.databucket.entity.DataClass;
+import pl.databucket.entity.Group;
+import pl.databucket.entity.User;
 import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.BucketRepository;
 import pl.databucket.repository.DataClassRepository;
+import pl.databucket.repository.GroupRepository;
+import pl.databucket.repository.UserRepository;
 import pl.databucket.security.CustomUserDetails;
+
+import java.util.HashSet;
+import java.util.List;
 
 @Service
 public class BucketService {
 
     @Autowired
     private BucketRepository bucketRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private DataClassRepository dataClassRepository;
@@ -48,17 +61,39 @@ public class BucketService {
         bucket.setName(bucketDto.getName());
         bucket.setDescription(bucketDto.getDescription());
         bucket.setHistory(bucketDto.isHistory());
-        bucket.setHiddenData(bucketDto.isHiddenData());
+        bucket.setProtectedData(bucketDto.isProtectedData());
+        bucket.setPrivateItem(bucketDto.isPrivateItem());
         bucket.setIconName(bucketDto.getIconName());
-        if (bucketDto.getDataClassId() != null) {
-            DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getDataClassId(), false);
+
+        if (bucketDto.getClassId() != null) {
+            DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getClassId(), false);
             if (dataClass != null)
                 bucket.setDataClass(dataClass);
             else
-                throw new ItemNotFoundException(DataClass.class, bucketDto.getDataClassId());
+                throw new ItemNotFoundException(DataClass.class, bucketDto.getClassId());
         }
 
-        bucket = bucketRepository.save(bucket);
+        bucket = bucketRepository.saveAndFlush(bucket);
+
+        if (bucketDto.getGroupsIds() != null && bucketDto.getGroupsIds().size() > 0) {
+            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, bucketDto.getGroupsIds());
+            if (groups.size() > 0)
+                for (Group group : groups) {
+                    group.getBuckets().add(bucket);
+                    groupRepository.save(group);
+                }
+            bucket.setGroups(new HashSet<>(groups));
+        }
+
+        if (bucketDto.getUsersIds() != null && bucketDto.getUsersIds().size() > 0) {
+            List<User> users = userRepository.findAllByIdIn(bucketDto.getUsersIds());
+            if (users.size() > 0)
+                for (User user : users) {
+                    user.getBuckets().add(bucket);
+                    userRepository.save(user);
+                }
+            bucket.setUsers(new HashSet<>(users));
+        }
 
         String dataTableName = composeBucketName(bucket.getId());
 
@@ -109,6 +144,10 @@ public class BucketService {
         return bucketRepository.findAll(specification, pageable);
     }
 
+    public List<Bucket> getBuckets() {
+        return bucketRepository.findAllByDeletedOrderById(false);
+    }
+
     public Bucket modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
         if (bucketDto.getId() == null)
             throw new ModifyByNullEntityIdException(Bucket.class);
@@ -127,26 +166,48 @@ public class BucketService {
         bucket.setDescription(bucketDto.getDescription());
         bucket.setIconName(bucketDto.getIconName());
 
-        if (bucketDto.getDataClassId() != null) {
-            DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getDataClassId(), false);
-            if (dataClass != null)
-                bucket.setDataClass(dataClass);
-            else
-                throw new ItemNotFoundException(DataClass.class, bucketDto.getDataClassId());
+        if (bucketDto.getClassId() != null) {
+            DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getClassId(), false);
+            bucket.setDataClass(dataClass);
         } else
             bucket.setDataClass(null);
 
+        if (bucketDto.getGroupsIds() != null) {
+            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, bucketDto.getGroupsIds());
+            if (groups.size() > 0)
+                for (Group group : groups) {
+                    group.getBuckets().add(bucket);
+                    groupRepository.save(group);
+                }
+            bucket.setGroups(new HashSet<>(groups));
+        }
+
+        if (bucketDto.getUsersIds() != null) {
+            List<User> users = userRepository.findAllByIdIn(bucketDto.getUsersIds());
+            if (users.size() > 0)
+                for (User user : users) {
+                    user.getBuckets().add(bucket);
+                    userRepository.save(user);
+                }
+            bucket.setUsers(new HashSet<>(users));
+        }
+
+        String dataTableName = composeBucketName(bucket.getId());
+
         if (bucket.isHistory() != bucketDto.isHistory()) {
             if (bucketDto.isHistory()) {
-                createAfterInsertTrigger(bucketDto.getName());
-                createAfterUpdateTrigger(bucketDto.getName());
+                createAfterInsertTrigger(dataTableName);
+                createAfterUpdateTrigger(dataTableName);
+                bucket.setHistory(true);
             } else {
-                removeAfterInsertTrigger(bucketDto.getName());
-                removeAfterUpdateTrigger(bucketDto.getName());
+                removeAfterInsertTrigger(dataTableName);
+                removeAfterUpdateTrigger(dataTableName);
+                bucket.setHistory(false);
             }
         }
 
-        bucket.setHiddenData(bucketDto.isHiddenData());
+        bucket.setProtectedData(bucketDto.isProtectedData());
+        bucket.setPrivateItem(bucketDto.isPrivateItem());
 
         return bucketRepository.save(bucket);
     }
@@ -156,6 +217,16 @@ public class BucketService {
 
         if (bucket == null)
             throw new ItemNotFoundException(Bucket.class, bucketId);
+
+        for (Group group : bucket.getGroups()) {
+            group.getBuckets().remove(bucket);
+            groupRepository.save(group);
+        }
+
+        for (User user : bucket.getUsers()) {
+            user.getBuckets().remove(bucket);
+            userRepository.save(user);
+        }
 
         bucket.setDeleted(true);
         bucketRepository.save(bucket);
@@ -171,12 +242,12 @@ public class BucketService {
         jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
     }
 
-    private void createBeforeDeleteTrigger(String bucketName) {
-        removeBeforeDeleteTrigger(bucketName);
+    private void createBeforeDeleteTrigger(String dataTableName) {
+        removeBeforeDeleteTrigger(dataTableName);
 
         String sql = "CREATE TRIGGER trigger_before_delete\n" +
                 "BEFORE DELETE\n" +
-                "ON \"" + bucketName + "\"" +
+                "ON \"" + dataTableName + "\"" +
                 "FOR EACH ROW\n" +
                 "EXECUTE PROCEDURE before_delete()";
 
@@ -184,12 +255,12 @@ public class BucketService {
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
-    private void createAfterInsertTrigger(String bucketName) {
-        removeAfterInsertTrigger(bucketName);
+    private void createAfterInsertTrigger(String dataTableName) {
+        removeAfterInsertTrigger(dataTableName);
 
         String sql = "CREATE TRIGGER trigger_after_insert\n" +
                 "AFTER INSERT\n" +
-                "ON \"" + bucketName + "\"\n" +
+                "ON \"" + dataTableName + "\"\n" +
                 "FOR EACH ROW\n" +
                 "EXECUTE PROCEDURE after_insert()";
 

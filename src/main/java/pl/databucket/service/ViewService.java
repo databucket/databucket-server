@@ -1,15 +1,14 @@
 package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.ViewDto;
 import pl.databucket.entity.*;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.*;
+
+import java.util.List;
 
 
 @Service
@@ -34,6 +33,7 @@ public class ViewService {
         View view = new View();
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
+        view.setPrivateItem(viewDto.isPrivateItem());
 
         DataColumns dataColumns = columnsRepository.findByIdAndDeleted(viewDto.getColumnsId(), false);
         if (dataColumns != null)
@@ -68,8 +68,8 @@ public class ViewService {
         return viewRepository.save(view);
     }
 
-    public Page<View> getViews(Specification<View> specification, Pageable pageable) {
-        return viewRepository.findAll(specification, pageable);
+    public List<View> getViews() {
+        return viewRepository.findAllByDeletedOrderById(false);
     }
 
     public View modifyView(ViewDto viewDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
@@ -83,6 +83,7 @@ public class ViewService {
 
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
+        view.setPrivateItem(viewDto.isPrivateItem());
 
         DataColumns dataColumns = columnsRepository.findByIdAndDeleted(viewDto.getColumnsId(), false);
         if (dataColumns != null)

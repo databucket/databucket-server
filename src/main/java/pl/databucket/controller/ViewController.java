@@ -2,8 +2,6 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +10,11 @@ import pl.databucket.entity.View;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.response.ViewPageResponse;
 import pl.databucket.service.ViewService;
-import pl.databucket.specification.ViewSpecification;
+
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/views")
@@ -44,10 +43,11 @@ public class ViewController {
   }
 
   @GetMapping
-  public ResponseEntity<?> getViews(ViewSpecification specification, Pageable pageable) {
+  public ResponseEntity<?> getViews() {
     try {
-      Page<View> viewPage = viewService.getViews(specification, pageable);
-      return new ResponseEntity<>(new ViewPageResponse(viewPage, modelMapper), HttpStatus.OK);
+      List<View> views = viewService.getViews();
+      List<ViewDto> viewsDto = views.stream().map(item -> modelMapper.map(item, ViewDto.class)).collect(Collectors.toList());
+      return new ResponseEntity<>(viewsDto, HttpStatus.OK);
     } catch (Exception ee) {
       return exceptionFormatter.defaultException(ee);
     }

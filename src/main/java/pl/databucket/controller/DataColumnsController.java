@@ -2,8 +2,6 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +9,12 @@ import pl.databucket.dto.DataColumnsDto;
 import pl.databucket.entity.DataColumns;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.response.DataColumnsPageResponse;
 import pl.databucket.service.DataColumnsService;
-import pl.databucket.specification.ColumnsSpecification;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/columns")
@@ -43,10 +41,11 @@ public class DataColumnsController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getColumns(ColumnsSpecification specification, Pageable pageable) {
+    public ResponseEntity<?> getColumns() {
         try {
-            Page<DataColumns> dataColumnsPage = columnsService.getColumns(specification, pageable);
-            return new ResponseEntity<>(new DataColumnsPageResponse(dataColumnsPage, modelMapper), HttpStatus.OK);
+            List<DataColumns> dataColumns = columnsService.getColumns();
+            List<DataColumnsDto> dataColumnsDto = dataColumns.stream().map(item -> modelMapper.map(item, DataColumnsDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(dataColumnsDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

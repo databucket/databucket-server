@@ -18,6 +18,8 @@ public class GroupDto {
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
     private Set<Long> bucketsIds;
+    private Set<Long> usersIds;
+    private boolean privateItem;
 
     private String createdBy;
     private Date createdDate;

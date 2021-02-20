@@ -1,15 +1,17 @@
 package pl.databucket.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.databucket.entity.User;
 import org.springframework.stereotype.Repository;
+import pl.databucket.entity.Project;
+import pl.databucket.entity.User;
+
+import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String name);
     boolean existsByUsername(String name);
-    Page<User> findAll(Specification<User> specification, Pageable pageable);
+    List<User> findAllByIdIn(Iterable<Long> ids);
+    List<User> findAllByOrderById();
+    List<User> findUsersByProjectsContainsOrderById(Project project);
 }

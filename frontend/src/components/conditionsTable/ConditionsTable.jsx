@@ -46,15 +46,6 @@ const sourceLookup = {
     'field': 'Field',
     'property': 'Property',
     'function': 'Function'
-    // 'string': 'String',
-    // 'numeric': 'Numeric',
-    // 'boolean': 'Boolean',
-    // 'date': 'Date',
-    // 'time': 'Time',
-    // 'datetime': 'Datetime',
-    // 'string-array': 'String array',
-    // 'numeric-array': 'Numeric array',
-    // 'null': 'Null'
 };
 
 const operatorLookup = {
