@@ -6,7 +6,7 @@ import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
     getBaseUrl, getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions,
+    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
@@ -27,10 +27,13 @@ import {
 import {getColumnsMapper} from "../../../utils/NullValueMappers";
 import ColumnsContext from "../../../context/columns/ColumnsContext";
 import EditColumnsDialog from "../dialogs/EditColumnsDialog";
+import CloneIcon from '@material-ui/icons/ViewStream'
+import {useWindowDimension} from "../../utils/UseWindowDimension";
 
 export default function ColumnsTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -39,7 +42,7 @@ export default function ColumnsTab() {
     const {columns, fetchColumns, addColumns, editColumns, removeColumns} = columnsContext;
     const changeableFields = ['name', 'description', 'configuration'];
     const fieldsSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min1', 'max50']},
+        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
@@ -51,6 +54,19 @@ export default function ColumnsTab() {
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
         setLastPageSize(pageSize);
+    }
+
+    const cloneItem = (rowData) => {
+        fetch(getBaseUrl('columns'), getPostOptions(rowData))
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+            })
+            .then((columns) => {
+                if (columns != null) {
+                    addColumns(convertNullValuesInObject(columns, getColumnsMapper()));
+                }
+            });
     }
 
     return (
@@ -96,6 +112,8 @@ export default function ColumnsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -113,6 +131,11 @@ export default function ColumnsTab() {
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)
+                    },
+                    {
+                        icon: () => <CloneIcon/>,
+                        tooltip: 'Clone',
+                        onClick: (event, rowData) => cloneItem(rowData)
                     }
                 ]}
                 editable={{
@@ -161,8 +184,8 @@ export default function ColumnsTab() {
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
-                                    severity: 'Item is not valid',
-                                    title: '',
+                                    severity: 'error',
+                                    title: 'Item is not valid',
                                     message: message
                                 });
                                 reject();

@@ -334,7 +334,7 @@ public class DataController {
     try {
       int count = dataService.deleteData(bucketName, dataIds, filterId, tagsIds);
       response.setMessage("Number of removed data: " + count);
-      return new ResponseEntity<>(response, HttpStatus.OK);
+      return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (UnknownColumnException | ConditionNotAllowedException e2) {
@@ -357,7 +357,7 @@ public class DataController {
       List<Condition> conditions = FieldValidator.validateListOfConditions(body, false);
       int count = dataService.deleteData(bucketName, conditions);
       response.setMessage("Number of removed data: " + count);
-      return new ResponseEntity<>(response, HttpStatus.OK);
+      return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (UnknownColumnException | ConditionNotAllowedException e2) {

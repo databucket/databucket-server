@@ -6,7 +6,7 @@ import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
     getBaseUrl, getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions,
+    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
@@ -27,10 +27,12 @@ import {
 import {getEnumMapper} from "../../../utils/NullValueMappers";
 import EditEnumDialog from "../dialogs/EditEnumDialog";
 import EnumsContext from "../../../context/enums/EnumsContext";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
 
 export default function EnumsTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -39,7 +41,7 @@ export default function EnumsTab() {
     const {enums, fetchEnums, addEnum, editEnum, removeEnum} = enumsContext;
     const changeableFields = ['name', 'description', 'textValues', 'items'];
     const fieldsSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min3', 'max50']},
+        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
@@ -100,6 +102,8 @@ export default function EnumsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -166,8 +170,8 @@ export default function EnumsTab() {
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
-                                    severity: 'Item is not valid',
-                                    title: '',
+                                    severity: 'error',
+                                    title: 'Item is not valid',
                                     message: message
                                 });
                                 reject();

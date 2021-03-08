@@ -8,9 +8,8 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Paper
+    Paper, Tooltip
 } from "@material-ui/core";
-import ManageAccountsIcon from "@material-ui/icons/Settings";
 import ActiveProjectIcon from "@material-ui/icons/FolderSpecial";
 import DisabledProjectIcon from "@material-ui/icons/NotInterested";
 import ExpiredProjectIcon from "@material-ui/icons/EventBusy";
@@ -18,11 +17,9 @@ import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
-    isLogin,
     setToken,
-    setProjectId,
-    setProjectName,
-    setRoles, getThemeName, setUsername, hasSuperRole, hasOnlyRobotRole
+    setActiveProjectId,
+    setRoles, getThemeName, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut
 } from '../../utils/ConfigurationStorage';
 import {Link, Redirect} from 'react-router-dom';
 import FormControl from "@material-ui/core/FormControl";
@@ -71,6 +68,7 @@ export default function LoginPage() {
         })
             .then(handleLoginErrors)
             .then(data => {
+                logOut();
                 setUsername(username);
                 if (data.changePassword != null && data.changePassword === true) {
                     setToken(data.token);
@@ -84,14 +82,15 @@ export default function LoginPage() {
                     let sortedProjects = sortByKey(data.projects, 'id');
                     setState(prevState => ({...prevState, projects: sortedProjects, changePassword: false}));
                 } else if (data.token != null) {
-                    if (!hasOnlyRobotRole(data.roles)) {
-                        setRoles(data.roles);
-                        setToken(data.token);
-                        setProjectId(data.project.id);
-                        setProjectName(data.project.name);
+                    setRoles(data.roles);
+                    setToken(data.token);
+                    if (hasMemberRole() || hasAdminRole()) {
+                        setActiveProjectId(data.project.id);
+                        setState(prevState => ({...prevState, projects: null, changePassword: false}));
+                    } else if (hasSuperRole()) {
                         setState(prevState => ({...prevState, projects: null, changePassword: false}));
                     } else
-                        setMessageBox({open: true, severity: 'error', title: 'Login failed', message: 'This user does not have required role to use GUI'});
+                        setMessageBox({open: true, severity: 'error', title: 'Login failed', message: 'This user does not have required role to see the project frontend!'});
                 }
             }).catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Login failed', message: error});
@@ -168,9 +167,11 @@ export default function LoginPage() {
                     </Grid>
                     {hasSuperRole() ? (
                         <Grid item>
-                            <IconButton component={Link} to={getManagementProjectsPath()}>
-                                <ManageAccountsIcon/>
-                            </IconButton>
+                            <Tooltip title="Manage accounts">
+                                <IconButton component={Link} to={getManagementProjectsPath()}>
+                                    <span className="material-icons">manage_accounts</span>
+                                </IconButton>
+                            </Tooltip>
                         </Grid>
                     ) : (
                         <div/>
@@ -184,8 +185,8 @@ export default function LoginPage() {
                                 <ListItem button onClick={() => selectProject(id)}>
                                     <ListItemAvatar>
                                         <Avatar>
-                                            {enabled !== true ? <DisabledProjectIcon /> : expired === true ?
-                                                <ExpiredProjectIcon /> : <ActiveProjectIcon color='secondary'/>}
+                                            {enabled !== true ? <DisabledProjectIcon/> : expired === true ?
+                                                <ExpiredProjectIcon/> : <ActiveProjectIcon color='secondary'/>}
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText primary={name} secondary={description}/>
@@ -205,12 +206,11 @@ export default function LoginPage() {
     const getSwitchParam = () => {
         if (changePassword === true) {
             return 4;
-        } else if (projects != null) {
-            if (projects.length > 0)
-                return 3;
-            else
-                return 2;
-        } else if (isLogin()) {
+        } else if (projects != null && projects.length > 0) {
+            return 3;
+        } else if (hasToken() && hasProject()) {
+            return 2;
+        } else if (hasToken() && hasSuperRole()) {
             return 1;
         } else {
             return 0;
@@ -224,9 +224,9 @@ export default function LoginPage() {
             case 3:
                 return getProjectsPaper();
             case 2:
-                return redirectTo(getManagementProjectsPath());
-            case 1:
                 return redirectTo(getProjectDataPath());
+            case 1:
+                return redirectTo(getManagementProjectsPath());
             default:
                 return getLoginPaper();
         }

@@ -2,12 +2,9 @@ import React from 'react';
 import {Link, Route, Switch} from "react-router-dom";
 import {Tab, Tabs} from "@material-ui/core";
 import {getProjectDataPath, getProjectSettingsPath} from "../../../route/AppRouter";
-import {makeStyles} from "@material-ui/core/styles";
-import {getAppBarBackgroundColor} from "../../../utils/Themes";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
+import {makeStyles, withStyles} from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@material-ui/icons/Cancel";
 import {getLastSettingsPageName, setLastSettingsPageName} from "../../../utils/ConfigurationStorage";
 import ProjectRoute from "../../../route/ProjectRoute";
 import NotFoundPage from "../../NotFoundPage";
@@ -28,25 +25,60 @@ import EnumsTab from "./EnumsTab";
 import EnumsProvider from "../../../context/enums/EnumsProvider";
 import FiltersProvider from "../../../context/filters/FiltersProvider";
 import FiltersTab from "./FiltersTab";
+import TasksProvider from "../../../context/tasks/TasksProvider";
+import EventsProvider from "../../../context/events/EventsProvider";
+import ViewsProvider from "../../../context/views/ViewsProvider";
+import ViewsTab from "./ViewsTab";
+import TasksTab from "./TasksTab";
+import EventsTab from "./EventsTab";
+import TeamsProvider from "../../../context/teams/TeamsProvider";
+import TeamsTab from "./TeamsTab";
+import {
+    getSettingsTabHooverBackgroundColor,
+    getSettingsTabsBackgroundColor,
+    getSettingsTabsColor,
+    getSettingsTabSelectedBackgroundColor,
+    getSettingsTabSelectedColor
+} from "../../../utils/MaterialTableHelper";
 
-const useStyles = makeStyles(theme => ({
-    appBar: {
-        position: 'relative',
-        background: getAppBarBackgroundColor()
-    },
-    title: {
-        marginLeft: theme.spacing(2),
+const useStyles = makeStyles((theme) => ({
+    root: {
+        flexGrow: 1,
+        display: 'flex'
     },
     tabs: {
-        flex: 1,
+        color: getSettingsTabsColor(theme),
+        backgroundColor: getSettingsTabsBackgroundColor(theme),
+        borderRight: `1px solid ${theme.palette.divider}`,
+        width: '8%'
     },
+    panel: {
+        width: '92%'
+    }
+
 }));
 
+const styles = theme => ({
+    root: {
+        "&:hover": {
+            backgroundColor: getSettingsTabHooverBackgroundColor(theme),
+            opacity: 1
+        },
+        "&$selected": {
+            backgroundColor: getSettingsTabSelectedBackgroundColor(theme),
+            color: getSettingsTabSelectedColor(theme),
+        },
+        textTransform: "initial"
+    },
+    selected: {}
+});
+
+const StyledTab = withStyles(styles)(Tab)
 
 export default function _ProjectSettingsTabs() {
 
     const classes = useStyles();
-    const tabs = ['users', 'buckets', 'groups', 'classes', 'tags', 'columns', 'enums', 'filters', 'views', 'tasks', 'events', 'logs'];
+    const tabs = ['teams', 'users', 'classes', 'groups', 'buckets', 'tags', 'columns', 'enums', 'filters', 'views', 'tasks', 'events', 'logs'];
 
     const getTabsValue = (pathname) => {
         let value = pathname.split("/").pop();
@@ -65,116 +97,54 @@ export default function _ProjectSettingsTabs() {
         <Route
             path="/"
             render={({location}) => (
-                <div>
-                    <AppBar className={classes.appBar}>
-                        <Toolbar variant="dense">
-                            <IconButton color="inherit" edge="start" component={Link} to={getProjectDataPath()}
-                                        aria-label="Close">
-                                <CloseIcon/>
-                            </IconButton>
-                            <Tabs value={getTabsValue(location.pathname)}
-                                  variant="scrollable"
-                                  scrollButtons="on"
-                                  className={classes.tabs}>
-                                <Tab label="Users" value={tabs[0]} component={Link}
-                                     to={`${getProjectSettingsPath()}/users`}/>
-                                <Tab label="Buckets" value={tabs[1]} component={Link}
-                                     to={`${getProjectSettingsPath()}/buckets`}/>
-                                <Tab label="Groups" value={tabs[2]} component={Link}
-                                     to={`${getProjectSettingsPath()}/groups`}/>
-                                <Tab label="Classes" value={tabs[3]} component={Link}
-                                     to={`${getProjectSettingsPath()}/classes`}/>
-                                <Tab label="Tags" value={tabs[4]} component={Link}
-                                     to={`${getProjectSettingsPath()}/tags`}/>
-                                <Tab label="Columns" value={tabs[5]} component={Link}
-                                     to={`${getProjectSettingsPath()}/columns`}/>
-                                <Tab label="Enums" value={tabs[6]} component={Link}
-                                     to={`${getProjectSettingsPath()}/enums`}/>
-                                <Tab label="Filters" value={tabs[7]} component={Link}
-                                     to={`${getProjectSettingsPath()}/filters`}/>
-                                <Tab label="Views" value={tabs[8]} component={Link}
-                                     to={`${getProjectSettingsPath()}/views`}/>
-                                <Tab label="Tasks" value={tabs[9]} component={Link}
-                                     to={`${getProjectSettingsPath()}/tasks`}/>
-                                <Tab label="Events" value={tabs[10]} component={Link}
-                                     to={`${getProjectSettingsPath()}/events`}/>
-                                <Tab label="Logs" value={tabs[11]} component={Link}
-                                     to={`${getProjectSettingsPath()}/logs`}/>
-                            </Tabs>
-                        </Toolbar>
-                    </AppBar>
-                    <RolesProvider> <GroupsProvider> <BucketsProvider> <UsersProvider>
-                        <ClassesProvider> <TagsProvider> <ColumnsProvider> <EnumsProvider>
-                            <FiltersProvider>
+                <div className={classes.root}>
+                    <div className={classes.tabs}>
+                        <IconButton component={Link} to={getProjectDataPath()} aria-label="Close">
+                            <CloseIcon/>
+                        </IconButton>
+                        <Tabs
+                            value={getTabsValue(location.pathname)}
+                            variant="scrollable"
+                            scrollButtons="on"
+                            orientation={'vertical'}
+                        >
+                            <StyledTab label="Teams" value={tabs[0]} component={Link} to={`${getProjectSettingsPath()}/teams`}/>
+                            <StyledTab label="Users" value={tabs[1]} component={Link} to={`${getProjectSettingsPath()}/users`}/>
+                            <StyledTab label="Classes" value={tabs[2]} component={Link} to={`${getProjectSettingsPath()}/classes`}/>
+                            <StyledTab label="Groups" value={tabs[3]} component={Link} to={`${getProjectSettingsPath()}/groups`}/>
+                            <StyledTab label="Buckets" value={tabs[4]} component={Link} to={`${getProjectSettingsPath()}/buckets`}/>
+                            <StyledTab label="Tags" value={tabs[5]} component={Link} to={`${getProjectSettingsPath()}/tags`}/>
+                            <StyledTab label="Columns" value={tabs[6]} component={Link} to={`${getProjectSettingsPath()}/columns`}/>
+                            <StyledTab label="Enums" value={tabs[7]} component={Link} to={`${getProjectSettingsPath()}/enums`}/>
+                            <StyledTab label="Filters" value={tabs[8]} component={Link} to={`${getProjectSettingsPath()}/filters`}/>
+                            <StyledTab label="Views" value={tabs[9]} component={Link} to={`${getProjectSettingsPath()}/views`}/>
+                            <StyledTab label="Tasks" value={tabs[10]} component={Link} to={`${getProjectSettingsPath()}/tasks`}/>
+                            <StyledTab label="Events" value={tabs[11]} component={Link} to={`${getProjectSettingsPath()}/events`}/>
+                            <StyledTab label="Logs" value={tabs[12]} component={Link} to={`${getProjectSettingsPath()}/logs`}/>
+                        </Tabs>
+                    </div>
+                    <div className={classes.panel}>
+                        <RolesProvider> <GroupsProvider> <BucketsProvider> <UsersProvider><ClassesProvider><TagsProvider><ColumnsProvider>
+                            <EnumsProvider> <FiltersProvider> <TasksProvider> <EventsProvider> <ViewsProvider> <TeamsProvider>
                                 <Switch>
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/users`}
-                                        component={UsersTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/buckets`}
-                                        component={BucketsTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/groups`}
-                                        component={GroupsTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/classes`}
-                                        component={ClassesTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/tags`}
-                                        component={TagsTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/columns`}
-                                        component={ColumnsTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/enums`}
-                                        component={EnumsTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/filters`}
-                                        component={FiltersTab}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/views`}
-                                        component={() => <div>Views</div>}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/tasks`}
-                                        component={() => <div>Tasks</div>}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/events`}
-                                        component={() => <div>Events</div>}
-                                    />
-                                    <ProjectRoute
-                                        exact
-                                        path={`${getProjectSettingsPath()}/logs`}
-                                        component={() => <div>Logs</div>}
-                                    />
-                                    <ProjectRoute
-                                        path={`${getProjectSettingsPath()}/*`}
-                                        component={NotFoundPage}
-                                    />
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/teams`} component={TeamsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/users`} component={UsersTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/classes`} component={ClassesTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/groups`} component={GroupsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/buckets`} component={BucketsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/tags`} component={TagsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/columns`} component={ColumnsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/enums`} component={EnumsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/filters`} component={FiltersTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/views`} component={ViewsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/tasks`} component={TasksTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/events`} component={EventsTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/logs`} component={() => <div>Logs</div>}/>
+                                    <ProjectRoute path={`${getProjectSettingsPath()}/*`} component={NotFoundPage}/>
                                 </Switch>
-                            </FiltersProvider>
-                        </EnumsProvider> </ColumnsProvider> </TagsProvider> </ClassesProvider>
-                    </UsersProvider> </BucketsProvider> </GroupsProvider> </RolesProvider>
+                            </TeamsProvider> </ViewsProvider> </EventsProvider> </TasksProvider> </FiltersProvider> </EnumsProvider>
+                        </ColumnsProvider> </TagsProvider> </ClassesProvider> </UsersProvider> </BucketsProvider> </GroupsProvider> </RolesProvider>
+                    </div>
                 </div>
             )}
         />

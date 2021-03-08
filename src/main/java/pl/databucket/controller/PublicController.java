@@ -62,7 +62,7 @@ public class PublicController {
 
             // The user has to change password. We force this action.
             if (user.isChangePassword()) {
-                authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, 0));
+                authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, userDto.getProjectId() != null ? userDto.getProjectId() : 0));
                 authDtoResponse.setChangePassword(true);
 
                 // We've got the projectId that user want to sign into

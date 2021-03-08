@@ -3,16 +3,16 @@ import {withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Done';
 import Typography from '@material-ui/core/Typography';
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 import Tooltip from "@material-ui/core/Tooltip";
 import {
+    getDialogTableHeight,
     getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColorWithSelection
+    getTableIcons, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
 import {
@@ -22,6 +22,9 @@ import {
 import {useTheme} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
+import RadioChecked from "@material-ui/icons/RadioButtonChecked";
+import RadioUnchecked from "@material-ui/icons/RadioButtonUnchecked";
+import {useWindowDimension} from "./UseWindowDimension";
 
 const styles = (theme) => ({
     root: {
@@ -56,14 +59,6 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
-
 SelectSingleDialog.propTypes = {
     columns: PropTypes.array.isRequired,
     data: PropTypes.array.isRequired,
@@ -78,11 +73,11 @@ SelectSingleDialog.propTypes = {
 export default function SelectSingleDialog(props) {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const [open, setOpen] = useState(false);
     const [data] = useState(props.data);
     const tableRef = createRef();
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
-    const [selection, setSelection] = useState(props.id);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -90,7 +85,6 @@ export default function SelectSingleDialog(props) {
 
     const handleSave = () => {
         setOpen(false);
-        props.onChange(selection);
     }
 
     const onChangeRowsPerPage = (pageSize) => {
@@ -99,11 +93,23 @@ export default function SelectSingleDialog(props) {
     }
 
     const getSelectionName = () => {
-        if (selection > 0)
-            return data.find(item => item.id === selection).name;
+        if (props.id > 0)
+            return data.find(item => item.id === props.id).name;
         else
             return '';
     }
+
+    const getColumnSelection = () => {
+        return {
+            title: '',
+            field: '',
+            type: 'numeric',
+            editable: 'never',
+            filtering: false,
+            cellStyle: {width: '1%'},
+            render: rowData => (rowData['id'] === props.id ? <RadioChecked color={'secondary'} fontSize={'small'}/> : <RadioUnchecked fontSize={'small'}/>)
+        };
+    };
 
     return (
         <div>
@@ -111,6 +117,7 @@ export default function SelectSingleDialog(props) {
                 <Button
                     startIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
+                    style={{textTransform: 'none'}}
                 >
                     {getSelectionName()}
                 </Button>
@@ -130,10 +137,10 @@ export default function SelectSingleDialog(props) {
                         icons={getTableIcons()}
                         title={props.tableTitle}
                         tableRef={tableRef}
-                        columns={props.columns}
+                        columns={[getColumnSelection(), ...props.columns]}
                         data={data}
                         onChangeRowsPerPage={onChangeRowsPerPage}
-                        onRowClick={(event, rowData) => setSelection(rowData.id)}
+                        onRowClick={(event, rowData) => props.onChange(rowData.id !== props.id ? rowData.id : -1)}
                         options={{
                             paging: true,
                             pageSize: pageSize,
@@ -145,14 +152,15 @@ export default function SelectSingleDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                            rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColorWithSelection(rowData, theme, selection)})
+                            maxBodyHeight: getDialogTableHeight(height, 30),
+                            minBodyHeight: getDialogTableHeight(height, 30),
+                            rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{
                             Container: props => <div {...props} />
                         }}
                     />
                 </DialogContent>
-                <DialogActions/>
             </Dialog>
         </div>
     );

@@ -54,22 +54,10 @@ public class User extends Auditable<String> implements Serializable {
     private Set<Project> projects;
 
     @ManyToMany
-    @JoinTable(name = "users_groups",
+    @JoinTable(name = "users_teams",
             joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "group_id")})
-    private Set<Group> groups;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_buckets",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
-    private Set<Bucket> buckets;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_views",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "view_id")})
-    private Set<View> views;
+            inverseJoinColumns = {@JoinColumn(name = "team_id")})
+    private Set<Team> teams;
 
     public Set<Short> getRolesIds() {
         if (roles != null && roles.size() > 0)
@@ -85,23 +73,9 @@ public class User extends Auditable<String> implements Serializable {
             return null;
     }
 
-    public Set<Long> getGroupsIds() {
-        if (groups != null && groups.size() > 0)
-            return groups.stream().map(Group::getId).collect(Collectors.toSet());
-        else
-            return null;
-    }
-
-    public Set<Long> getBucketsIds() {
-        if (buckets != null && buckets.size() > 0)
-            return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
-        else
-            return null;
-    }
-
-    public Set<Long> getViewsIds() {
-        if (views != null && views.size() > 0)
-            return views.stream().map(View::getId).collect(Collectors.toSet());
+    public Set<Short> getTeamsIds() {
+        if (teams != null && teams.size() > 0)
+            return teams.stream().map(Team::getId).collect(Collectors.toSet());
         else
             return null;
     }

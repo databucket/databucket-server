@@ -11,9 +11,7 @@ public class UserPropertyMap extends PropertyMap<User, UserDtoResponse> {
         map().setId(source.getId());
         map().setEnabled(source.getEnabled());
         map().setUsername(source.getUsername());
-        map().setGroupsIds(source.getGroupsIds());
-        map().setBucketsIds(source.getBucketsIds());
-        map().setViewsIds(source.getViewsIds());
+        map().setTeamsIds(source.getTeamsIds());
         map().setExpirationDate(source.getExpirationDate());
 
         map().setCreatedBy(source.getCreatedBy());

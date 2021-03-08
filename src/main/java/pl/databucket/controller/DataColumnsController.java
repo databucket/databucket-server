@@ -68,7 +68,7 @@ public class DataColumnsController {
     public ResponseEntity<?> deleteColumns(@PathVariable long columnsId) {
         try {
             columnsService.deleteColumns(columnsId);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception ee) {

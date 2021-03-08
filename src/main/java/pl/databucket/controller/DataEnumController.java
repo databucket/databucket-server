@@ -68,7 +68,7 @@ public class DataEnumController {
     public ResponseEntity<?> deleteDataEnum(@PathVariable("dataEnumId") int dataEnumId) {
         try {
             dataEnumService.deleteDataEnum(dataEnumId);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (ItemAlreadyUsedException e) {

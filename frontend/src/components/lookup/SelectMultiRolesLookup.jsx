@@ -14,7 +14,7 @@ const MenuProps = {
     },
 };
 
-export default function RolesLookup(props) {
+export default function SelectMultiRolesLookup(props) {
     const [selectedRoles, setSelectedRoles] = useState(props.rowData['rolesIds'] != null ? props.rowData['rolesIds'] : []);
 
     const handleChange = (event) => {

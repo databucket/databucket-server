@@ -31,6 +31,7 @@ public class ServiceAspect {
             + " || execution(* pl.databucket.service.TaskService.*(..)) "
             + " || execution(* pl.databucket.service.ViewService.*(..)) "
             + " || execution(* pl.databucket.service.DataEnumService.*(..)) "
+            + " || execution(* pl.databucket.service.TeamService.*(..)) "
     )
     // @formatter:on
     public void aroundExecution(JoinPoint pjp) throws Throwable {

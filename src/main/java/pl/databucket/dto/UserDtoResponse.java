@@ -14,9 +14,7 @@ public class UserDtoResponse {
     private String username;
     private Boolean enabled;
     private Set<Short> rolesIds;
-    private Set<Long> groupsIds;
-    private Set<Long> bucketsIds;
-    private Set<Long> viewsIds;
+    private Set<Short> teamsIds;
     private Date expirationDate;
 
     private String createdBy;

@@ -6,7 +6,7 @@ import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
     getBaseUrl, getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions,
+    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
@@ -24,7 +24,7 @@ import {
     getColumnCreatedDate,
     getColumnDescription, getColumnGroups,
     getColumnLastModifiedBy, getColumnLastModifiedDate,
-    getColumnName, getColumnPrivate, getColumnUsers
+    getColumnName, getColumnRole, getColumnTeams, getColumnUsers
 } from "../../utils/StandardColumns";
 import BucketsContext from "../../../context/buckets/BucketsContext";
 import GroupsContext from "../../../context/groups/GroupsContext";
@@ -35,10 +35,13 @@ import UsersContext from "../../../context/users/UsersContext";
 import {getBucketMapper} from "../../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../../utils/ConfirmRemovingDialog";
 import ClassesContext from "../../../context/classes/ClassesContext";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
+import TeamsContext from "../../../context/teams/TeamsContext";
 
 export default function BucketsTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
@@ -54,9 +57,11 @@ export default function BucketsTab() {
     const {buckets, fetchBuckets, addBucket, editBucket, removeBucket} = bucketsContext;
     const classesContext = useContext(ClassesContext);
     const {classes, fetchClasses, classesLookup} = classesContext;
-    const changeableFields = ['name', 'iconName', 'history', 'protectedData', 'description', 'groupsIds', 'usersIds', 'classId', 'privateItem'];
+    const teamsContext = useContext(TeamsContext);
+    const {teams, fetchTeams} = teamsContext;
+    const changeableFields = ['name', 'iconName', 'history', 'protectedData', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
     const fieldsSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min3', 'max50']},
+        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
@@ -84,6 +89,11 @@ export default function BucketsTab() {
         if (classes == null)
             fetchClasses();
     }, [classes, fetchClasses]);
+
+    useEffect(() => {
+        if (teams == null)
+            fetchTeams();
+    }, [teams, fetchTeams]);
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
@@ -121,17 +131,18 @@ export default function BucketsTab() {
                         searchable: false,
                         filtering: false,
                         initialEditValue: 'PanoramaFishEye',
-                        render: rowData => <DynamicIcon iconName={rowData.iconName} color='action'/>,
+                        render: rowData => <DynamicIcon iconName={rowData.iconName} />,
                         editComponent: props => <EditIconDialog value={props.value} onChange={props.onChange}/>
                     },
                     getColumnName(),
                     getColumnDescription(),
-                    {title: 'Protected', field: 'protectedData', type: 'boolean'},
-                    {title: 'History', field: 'history', type: 'boolean'},
-                    getColumnPrivate(),
-                    getColumnUsers(users, roles),
-                    getColumnClass(classesLookup),
-                    getColumnGroups(groups),
+                    getColumnClass(classesLookup, 'Class support'),
+                    getColumnGroups(groups, 'Show in groups'),
+                    {title: 'Protect orphaned data', field: 'protectedData', type: 'boolean'},
+                    {title: 'Collect data history', field: 'history', type: 'boolean'},
+                    getColumnUsers(users, roles, 'Access for users'),
+                    getColumnRole(roles, 'Access by role'),
+                    getColumnTeams(teams, 'Access by teams'),
                     getColumnCreatedDate(),
                     getColumnCreatedBy(),
                     getColumnLastModifiedDate(),
@@ -150,6 +161,8 @@ export default function BucketsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -218,8 +231,8 @@ export default function BucketsTab() {
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
-                                    severity: 'Item is not valid',
-                                    title: '',
+                                    severity: 'error',
+                                    title: 'Item is not valid',
                                     message: message
                                 });
                                 reject();
@@ -247,6 +260,8 @@ export default function BucketsTab() {
                     onRowDelete: oldData =>
                         new Promise((resolve) => {
                             setConfirmRemove({open: true, id: oldData.id, name: oldData.name});
+                            notifyGroups('BUCKET', oldData.id, []);
+                            notifyUsers('BUCKET', oldData.id, []);
                             resolve();
                         }),
                 }}

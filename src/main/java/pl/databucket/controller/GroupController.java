@@ -70,7 +70,7 @@ public class GroupController {
   public ResponseEntity<?> deleteGroup(@PathVariable("groupId") Long groupId) {
     try {
       groupService.deleteGroup(groupId);
-      return new ResponseEntity<>(null, HttpStatus.OK);
+      return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (Exception e) {

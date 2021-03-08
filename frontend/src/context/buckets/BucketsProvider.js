@@ -17,9 +17,9 @@ const BucketsProvider = props => {
     const fetchBuckets = () => {
         fetch(getBaseUrl('buckets'), getGetOptions())
             .then(handleErrors)
-            .then(users => dispatch({
+            .then(buckets => dispatch({
                 type: "FETCH_BUCKETS",
-                payload: convertNullValuesInCollection(users, getBucketMapper())
+                payload: convertNullValuesInCollection(buckets, getBucketMapper())
             }))
             .catch(err => console.log(err));
     }

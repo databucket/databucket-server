@@ -37,7 +37,7 @@ export const validateItem = (data, specification) => {
                 if (validation === 'notEmpty' && (!data.hasOwnProperty(key) || data[key] == null || data[key].length === 0))
                     message += `${title} can not be empty! `;
 
-                if (data.hasOwnProperty(key) && data[key] != null) {
+                if (data.hasOwnProperty(key) && data[key] != null && data[key].length > 0) {
                     if (validation.includes('min')) {
                         let min = parseInt(validation.substring(3));
                         if (data[key].length < min)
@@ -48,6 +48,12 @@ export const validateItem = (data, specification) => {
                         let max = parseInt(validation.substring(3));
                         if (data[key].length > max)
                             message += `${title} can be up to ${max} characters long! `;
+                    }
+
+                    if (validation === 'selected') {
+                        let value = parseInt(data[key]);
+                        if (value <= 0)
+                            message += `${title} must be selected! `;
                     }
                 }
             }
@@ -109,6 +115,13 @@ export const getArrayLengthStr = (inputIdsArray) => {
         return '[0]';
 }
 
+export const getItemName = (objectCollection, id) => {
+    if (objectCollection != null && objectCollection.length > 0 && id != null && id > 0) {
+        return objectCollection.find(item => item.id === id).name;
+    } else
+        return '';
+}
+
 export const setSelectionItemById = (inputItems, itemId) => {
     let items = JSON.parse(JSON.stringify(inputItems));
 
@@ -135,17 +148,42 @@ export const setSelectionItemsByIds = (inputItems, itemsIds) => {
     return items;
 }
 
+export const getRoleName = (roles, roleId) => {
+    if (roles != null && roleId != null && roleId > 0) {
+        return roles.find(r => r.id === roleId).name;
+    } else
+        return '- none -';
+}
+
+export const getAdminMemberRolesLookup = (roles) => {
+    let lookup = {0: ' - none -'}
+    if (roles != null) {
+        return roles.filter(role => ['ADMIN', 'MEMBER'].includes(role.name))
+            .reduce((obj, item) => {
+                return {
+                    ...obj,
+                    [item.id]: item.name,
+                };
+            }, lookup);
+    } else
+        return {};
+}
+
 export const getRolesNames = (roles, rolesIds) => {
     if (roles != null && rolesIds != null && rolesIds.length > 0 && roles.length > 0) {
-        let rolesStr = '';
-        for (let roleId of rolesIds) {
-            let filteredRoles = roles.filter(r => r.id === roleId);
-            if (filteredRoles.length > 0)
-                rolesStr += ` ${filteredRoles[0].name.substring(0, 1)}`;
-            else
-                rolesStr += " ?";
+        if (rolesIds.length === 1)
+            return roles.find(r => r.id === rolesIds[0]).name;
+        else {
+            let rolesStr = '';
+            for (let roleId of rolesIds) {
+                let filteredRoles = roles.filter(r => r.id === roleId);
+                if (filteredRoles.length > 0)
+                    rolesStr += `${filteredRoles[0].name.substring(0, 1)}.`;
+                else
+                    rolesStr += " ?";
+            }
+            return rolesStr;
         }
-        return rolesStr;
     } else
         return '';
 }

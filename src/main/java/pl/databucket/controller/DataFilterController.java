@@ -69,7 +69,7 @@ public class DataFilterController {
     public ResponseEntity<?> deleteFilters(@PathVariable long filterId) {
         try {
             filterService.deleteFilter(filterId);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

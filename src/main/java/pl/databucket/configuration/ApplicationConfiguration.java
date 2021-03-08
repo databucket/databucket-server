@@ -27,6 +27,9 @@ public class ApplicationConfiguration {
         modelMapper.addMappings(new ViewPropertyMap());
         modelMapper.addMappings(new RolePropertyMap());
         modelMapper.addMappings(new DataEnumPropertyMap());
+        modelMapper.addMappings(new AccessTreeGroupPropertyMap());
+        modelMapper.addMappings(new AccessTreeBucketPropertyMap());
+        modelMapper.addMappings(new AccessTreeViewPropertyMap());
         return modelMapper;
     }
 }

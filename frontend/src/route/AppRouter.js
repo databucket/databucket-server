@@ -8,7 +8,7 @@ import ProjectRoute from './ProjectRoute'
 import ManagementRoute from './ManagementRoute';
 import _ManagementTabs from "../components/management/_ManagementTabs";
 import ChangePasswordPage from "../components/login/ChangePasswordPage";
-import {getProjectId} from "../utils/ConfigurationStorage";
+import {hasProject} from "../utils/ConfigurationStorage";
 import ProjectRouteInternal from "../components/project/ProjectRouteInternal";
 import ChangePasswordRoute from "./ChangePasswordRoute";
 
@@ -18,10 +18,10 @@ export default function AppRouter() {
             <Switch>
                 <Redirect exact from='/' to={getProjectDataPath()}/>
                 <PublicRoute exact restricted={true} path="/login" component={LoginPage}/>
-                <ProjectRoute path="/project/:id/settings" component={_ProjectSettingsTabs}/>
+                <ProjectRoute path="/project/settings" component={_ProjectSettingsTabs}/>
                 <ChangePasswordRoute exact path="/change-password" component={ChangePasswordPage}/>
                 <ManagementRoute path="/management" component={_ManagementTabs}/>
-                <ProjectRoute path="/project/:id" component={ProjectRouteInternal}/>
+                <ProjectRoute path="/project" component={ProjectRouteInternal}/>
                 <PublicRoute path="*" component={NotFoundPage}/>
             </Switch>
         </BrowserRouter>
@@ -29,11 +29,11 @@ export default function AppRouter() {
 }
 
 export const getProjectDataPath = () => {
-    return getProjectId() !== null ? `/project/${getProjectId()}` : '/login'
+    return hasProject() ? `/project` : '/login'
 }
 
 export const getProjectSettingsPath = () => {
-    return getProjectId() !== null ? `/project/${getProjectId()}/settings` : '/login'
+    return hasProject() ? `/project/settings` : '/login'
 }
 
 export const getManagementProjectsPath = () => {

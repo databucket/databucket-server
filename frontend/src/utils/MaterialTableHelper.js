@@ -48,11 +48,20 @@ export const getBaseUrl = (endpoint) => {
 const reverseMapping = (payload) => {
     let newPayload = JSON.parse(JSON.stringify(payload));
 
+    if (newPayload['name'] != null && newPayload['name'] === '')
+        newPayload['name'] = null;
+
     if (newPayload['description'] != null && newPayload['description'] === '')
         newPayload['description'] = null;
 
     if (newPayload['classId'] != null && newPayload['classId'] === 'none')
         newPayload['classId'] = null;
+
+    if (newPayload['filterId'] === -1)
+        newPayload['filterId'] = null;
+
+    if (newPayload['roleId'] === 0 || newPayload['roleId'] === '0')
+        newPayload['roleId'] = null;
 
     return JSON.stringify(newPayload);
 }
@@ -129,30 +138,51 @@ export const handleErrors = (res) => {
 
 export const getTableHeaderBackgroundColor = (theme) => {
     if (theme.palette.type === 'light') {
-        return darken(theme.palette.background.default, 0.10);
-    } else if (theme.palette.type === 'dark') {
-        return lighten(theme.palette.background.default, 0.15);
+        return darken(theme.palette.background.default, 0.1);
     } else
-        return darken(theme.palette.background.default, 0.10);
+        return lighten(theme.palette.background.default, 0.1);
 }
 
 export const getTableRowBackgroundColor = (rowData, theme) => {
     if (theme.palette.type === 'light')
-        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.03) : theme.palette.background.default;
+        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.02) : theme.palette.background.default;
     else
-        return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.06) : lighten(theme.palette.background.default, 0.03);
+        return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.02) : theme.palette.background.default;
 }
 
-export const getTableRowBackgroundColorWithSelection = (rowData, theme, selected) => {
-    if (rowData.id === selected) {
-        if (theme.palette.type === 'light')
-            return theme.palette.secondary.light;
-        else
-            return theme.palette.secondary.dark;
-    } else if (theme.palette.type === 'light')
-        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.03) : theme.palette.background.default;
-    else
-        return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.06) : lighten(theme.palette.background.default, 0.03);
+export const getSettingsTabsColor = (theme) => {
+    if (theme.palette.type === 'light') {
+        return theme.palette.text;
+    } else
+        return theme.palette.primary.contrastText;
+}
+
+export const getSettingsTabsBackgroundColor = (theme) => {
+    if (theme.palette.type === 'light') {
+        return darken(theme.palette.background.paper, 0.1);
+    } else
+        return theme.palette.background.paper;
+}
+
+export const getSettingsTabHooverBackgroundColor = (theme) => {
+    if (theme.palette.type === 'light') {
+        return darken(theme.palette.background.paper, 0.03);
+    } else
+        return lighten(theme.palette.background.paper, 0.1);
+}
+
+export const getSettingsTabSelectedBackgroundColor = (theme) => {
+    if (theme.palette.type === 'light') {
+        return darken(theme.palette.background.paper, 0.05);
+    } else
+        return lighten(theme.palette.background.paper, 0.05);
+}
+
+export const getSettingsTabSelectedColor = (theme) => {
+    if (theme.palette.type === 'light') {
+        return darken(theme.palette.secondary.main, 0.2);
+    } else
+        return theme.palette.secondary.main;
 }
 
 export const getUserIcon = (rowData) => {
@@ -208,4 +238,19 @@ export const moveDown = (dataCollection, itemId) => {
     return updated.sort((a, b) => {
         return (a.tableData.id > b.tableData.id) ? 1 : -1;
     });
+}
+
+export const getTableHeight = (height) => {
+    const tableHeight = ((height - 64 - 64 - 52 - 2) / height * 100).toFixed(2);
+    return `${tableHeight}vh`;
+}
+
+export const getSettingsTableHeight = (height) => {
+    const tableHeight = ((height - 64 - 64 + 10) / height * 100).toFixed(2);
+    return `${tableHeight}vh`;
+}
+
+export const getDialogTableHeight = (height, custom) => {
+    const tableHeight = ((height - 64 - 64 - 52 - 2) / height * 100).toFixed(2) - custom;
+    return `${tableHeight}vh`;
 }

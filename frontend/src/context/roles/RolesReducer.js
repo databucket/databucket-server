@@ -1,4 +1,4 @@
-export default (state, action) => {
+const RolesReducer = (state, action) => {
     switch (action.type) {
         case "FETCH_ROLES":
             return {
@@ -8,4 +8,6 @@ export default (state, action) => {
         default:
             return state;
     }
-}
+};
+
+export default RolesReducer;

@@ -10,10 +10,12 @@ public class GroupPropertyMap extends PropertyMap<Group, GroupDto> {
     protected void configure() {
         map().setId(source.getId());
         map().setName(source.getName());
+        map().setShortName(source.getShortName());
         map().setDescription(source.getDescription());
         map().setBucketsIds(source.getBucketsIds());
         map().setUsersIds(source.getUsersIds());
-        map().setPrivateItem(source.isPrivateItem());
+        map().setRoleId(source.getRole().getId());
+        map().setTeamsIds(source.getTeamsIds());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

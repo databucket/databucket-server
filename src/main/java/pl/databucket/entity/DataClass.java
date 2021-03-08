@@ -1,18 +1,24 @@
 package pl.databucket.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import pl.databucket.configuration.Constants;
+import pl.databucket.dto.JsonSchemaDto;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @Table(name="data_classes")
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Filter(name = "projectFilter", condition = "project_id = :projectId")
 public class DataClass extends Auditable<String> implements TenantSupport {
 
@@ -30,6 +36,13 @@ public class DataClass extends Auditable<String> implements TenantSupport {
 
     @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
+
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private JsonSchemaDto jsonSchema;
+
+    @ManyToMany(mappedBy = "dataClasses")
+    private Set<View> views;
 
     @JsonIgnore
     private Boolean deleted = false;

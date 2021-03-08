@@ -19,9 +19,9 @@ import ViewColumn from '@material-ui/icons/ViewColumn';
 import RateReviewOutlined from '@material-ui/icons/RateReviewOutlined';
 import Refresh from '@material-ui/icons/Refresh';
 import Cookies from 'universal-cookie';
-import DataDetailsDialog from './dialogs/DataDetailsDialog';
-import DataHistoryDialog from './dialogs/DataHistoryDialog';
-import TaskExecutionEditorDialog from './dialogs/TaskExecutionEditorDialog';
+import DataDetailsDialog from './_deprecated_/DataDetailsDialog';
+import DataHistoryDialog from './_deprecated_/DataHistoryDialog';
+import TaskExecutionEditorDialog from './_deprecated_/TaskExecutionEditorDialog';
 // import ImportIcon from '@material-ui/icons/ExitToApp';
 // import ExportIcon from '@material-ui/icons/OpenInNew'
 

@@ -11,21 +11,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pl.databucket.database.Query;
 import pl.databucket.dto.BucketDto;
-import pl.databucket.entity.Bucket;
-import pl.databucket.entity.DataClass;
-import pl.databucket.entity.Group;
-import pl.databucket.entity.User;
+import pl.databucket.entity.*;
 import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.repository.BucketRepository;
-import pl.databucket.repository.DataClassRepository;
-import pl.databucket.repository.GroupRepository;
-import pl.databucket.repository.UserRepository;
+import pl.databucket.repository.*;
 import pl.databucket.security.CustomUserDetails;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BucketService {
@@ -38,6 +34,12 @@ public class BucketService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private DataClassRepository dataClassRepository;
@@ -62,8 +64,13 @@ public class BucketService {
         bucket.setDescription(bucketDto.getDescription());
         bucket.setHistory(bucketDto.isHistory());
         bucket.setProtectedData(bucketDto.isProtectedData());
-        bucket.setPrivateItem(bucketDto.isPrivateItem());
         bucket.setIconName(bucketDto.getIconName());
+        bucket = bucketRepository.saveAndFlush(bucket);
+
+        if (bucketDto.getRoleId() != null) {
+            Role role = roleRepository.getOne(bucketDto.getRoleId());
+            bucket.setRole(role);
+        }
 
         if (bucketDto.getClassId() != null) {
             DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getClassId(), false);
@@ -72,8 +79,6 @@ public class BucketService {
             else
                 throw new ItemNotFoundException(DataClass.class, bucketDto.getClassId());
         }
-
-        bucket = bucketRepository.saveAndFlush(bucket);
 
         if (bucketDto.getGroupsIds() != null && bucketDto.getGroupsIds().size() > 0) {
             List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, bucketDto.getGroupsIds());
@@ -87,13 +92,15 @@ public class BucketService {
 
         if (bucketDto.getUsersIds() != null && bucketDto.getUsersIds().size() > 0) {
             List<User> users = userRepository.findAllByIdIn(bucketDto.getUsersIds());
-            if (users.size() > 0)
-                for (User user : users) {
-                    user.getBuckets().add(bucket);
-                    userRepository.save(user);
-                }
             bucket.setUsers(new HashSet<>(users));
         }
+
+        if (bucketDto.getTeamsIds() != null && bucketDto.getTeamsIds().size() > 0) {
+            List<Team> teams = teamRepository.findAllByIdIn(bucketDto.getTeamsIds());
+            bucket.setTeams(new HashSet<>(teams));
+        }
+
+        bucket = bucketRepository.save(bucket);
 
         String dataTableName = composeBucketName(bucket.getId());
 
@@ -182,15 +189,17 @@ public class BucketService {
             bucket.setGroups(new HashSet<>(groups));
         }
 
-        if (bucketDto.getUsersIds() != null) {
+        if (bucketDto.getUsersIds() != null && bucketDto.getUsersIds().size() > 0) {
             List<User> users = userRepository.findAllByIdIn(bucketDto.getUsersIds());
-            if (users.size() > 0)
-                for (User user : users) {
-                    user.getBuckets().add(bucket);
-                    userRepository.save(user);
-                }
             bucket.setUsers(new HashSet<>(users));
-        }
+        } else
+            bucket.setUsers(null);
+
+        if (bucketDto.getTeamsIds() != null && bucketDto.getTeamsIds().size() > 0) {
+            List<Team> teams = teamRepository.findAllByIdIn(bucketDto.getTeamsIds());
+            bucket.setTeams(new HashSet<>(teams));
+        } else
+            bucket.setTeams(null);
 
         String dataTableName = composeBucketName(bucket.getId());
 
@@ -207,7 +216,12 @@ public class BucketService {
         }
 
         bucket.setProtectedData(bucketDto.isProtectedData());
-        bucket.setPrivateItem(bucketDto.isPrivateItem());
+
+        if (bucketDto.getRoleId() != null) {
+            Role role = roleRepository.getOne(bucketDto.getRoleId());
+            bucket.setRole(role);
+        } else
+            bucket.setRole(null);
 
         return bucketRepository.save(bucket);
     }
@@ -223,10 +237,8 @@ public class BucketService {
             groupRepository.save(group);
         }
 
-        for (User user : bucket.getUsers()) {
-            user.getBuckets().remove(bucket);
-            userRepository.save(user);
-        }
+        bucket.setUsers(null);
+        bucket.setTeams(null);
 
         bucket.setDeleted(true);
         bucketRepository.save(bucket);
@@ -298,4 +310,21 @@ public class BucketService {
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
+
+    public List<Bucket> getAccessTreeBuckets(User user) {
+        return bucketRepository.findAllByDeletedOrderById(false).stream().filter(bucket -> hasUserAccessToBucket(bucket, user)).collect(Collectors.toList());
+    }
+
+    private boolean hasUserAccessToBucket(Bucket bucket, User user) {
+        boolean accessForUser = bucket.getUsers().size() > 0 && bucket.getUsers().contains(user);
+
+        if (accessForUser)
+            return true;
+        else {
+            boolean accessByRole = bucket.getRole() != null ? user.getRoles().contains(bucket.getRole()) : bucket.getTeams().size() > 0;
+            boolean accessByTeam = bucket.getTeams().size() > 0 ? !Collections.disjoint(bucket.getTeams(), user.getTeams()) : bucket.getRole() != null;
+            return accessByRole && accessByTeam;
+        }
+    }
+
 }

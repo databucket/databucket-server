@@ -7,15 +7,19 @@ export const getManageUserMapper = () => {
 }
 
 export const getUserMapper = () => {
-    return {rolesIds: [], groupsIds: [], bucketsIds: [], viewsIds: []};
+    return {rolesIds: [], teamsIds: []};
 }
 
 export const getGroupMapper = () => {
-    return {description: '', bucketsIds: []};
+    return {name: '', description: '', bucketsIds: [], usersIds: [], teamsIds: [], roleId: 0};
+}
+
+export const getTeamMapper = () => {
+    return {name: '', description: '', usersIds: []};
 }
 
 export const getBucketMapper = () => {
-    return {description: '', groupsIds: [], usersIds: [], classId: 'none'};
+    return {description: '', groupsIds: [], usersIds: [], teamsIds: [], classId: 'none', roleId: 0};
 }
 
 export const getClassMapper = () => {
@@ -28,6 +32,18 @@ export const getColumnsMapper = () => {
 
 export const getFiltersMapper = () => {
     return {description: '', configuration: []};
+}
+
+export const getTasksMapper = () => {
+    return {description: ''};
+}
+
+export const getEventsMapper = () => {
+    return {description: ''};
+}
+
+export const getViewsMapper = () => {
+    return {description: '', roleId: 0};
 }
 
 export const getColumnMapper = () => {

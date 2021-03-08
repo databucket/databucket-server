@@ -35,16 +35,47 @@ public class View extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@Column(name = "private", nullable = false)
-	private boolean privateItem = false;
+	@Column(nullable = false)
+	private boolean enabledDetails = true;
 
-	@OneToOne
-	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
-	private DataClass dataClass;
+	@Column(nullable = false)
+	private boolean enabledCreation = true;
 
-	@OneToOne
-	@JoinColumn(name = "bucket_id", referencedColumnName = "bucket_id")
-	private Bucket bucket;
+	@Column(nullable = false)
+	private boolean enabledModifying = true;
+
+	@Column(nullable = false)
+	private boolean enabledRemoval = true;
+
+	@Column(nullable = false)
+	private boolean enabledImport = true;
+
+	@Column(nullable = false)
+	private boolean enabledExport = true;
+
+	@Column(nullable = false)
+	private boolean enabledHistory = true;
+
+	@Column(nullable = false)
+	private boolean enabledTasks = true;
+
+	@Column(nullable = false)
+	private boolean enabledReservation = true;
+
+	@Column(nullable = false)
+	private boolean searching = true;
+
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "views_classes",
+			joinColumns = {@JoinColumn(name = "view_id")},
+			inverseJoinColumns = {@JoinColumn(name = "class_id")})
+	private Set<DataClass> dataClasses;
+
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "views_buckets",
+			joinColumns = {@JoinColumn(name = "view_id")},
+			inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
+	private Set<Bucket> buckets;
 
 	@OneToOne
 	@JoinColumn(name = "columns_id", referencedColumnName = "columns_id")
@@ -54,8 +85,22 @@ public class View extends Auditable<String> implements TenantSupport {
 	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
 	private DataFilter dataFilter;
 
-	@ManyToMany(mappedBy = "groups")
+
+	@ManyToMany
+	@JoinTable(name = "views_teams",
+			joinColumns = {@JoinColumn(name = "view_id")},
+			inverseJoinColumns = {@JoinColumn(name = "team_id")})
+	private Set<Team> teams;
+
+	@ManyToMany
+	@JoinTable(name = "views_users",
+			joinColumns = {@JoinColumn(name = "view_id")},
+			inverseJoinColumns = {@JoinColumn(name = "user_id")})
 	private Set<User> users;
+
+	@OneToOne
+	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
+	private Role role;
 
 	@JsonIgnore
 	private Boolean deleted = false;
@@ -63,6 +108,27 @@ public class View extends Auditable<String> implements TenantSupport {
 	public Set<Long> getUsersIds() {
 		if (users != null && users.size() > 0)
 			return users.stream().map(User::getId).collect(Collectors.toSet());
+		else
+			return null;
+	}
+
+	public Set<Short> getTeamsIds() {
+		if (teams != null && teams.size() > 0)
+			return teams.stream().map(Team::getId).collect(Collectors.toSet());
+		else
+			return null;
+	}
+
+	public Set<Long> getBucketsIds() {
+		if (buckets != null && buckets.size() > 0)
+			return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+		else
+			return null;
+	}
+
+	public Set<Long> getClassesIds() {
+		if (dataClasses != null && dataClasses.size() > 0)
+			return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
 		else
 			return null;
 	}

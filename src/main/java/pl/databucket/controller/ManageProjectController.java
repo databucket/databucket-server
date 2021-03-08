@@ -81,7 +81,7 @@ public class ManageProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable Integer projectId) {
         try {
             manageProjectService.deleteProject(projectId);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {

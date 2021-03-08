@@ -71,7 +71,7 @@ public class TaskController {
     public ResponseEntity<?> deleteTask(@PathVariable long taskId) {
         try {
             taskService.deleteTask(taskId);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

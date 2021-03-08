@@ -6,7 +6,7 @@ import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
     getBaseUrl, getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions,
+    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
@@ -31,10 +31,12 @@ import BucketsContext from "../../../context/buckets/BucketsContext";
 import {getTagMapper} from "../../../utils/NullValueMappers";
 import ClassesContext from "../../../context/classes/ClassesContext";
 import TagsContext from "../../../context/tags/TagsContext";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
 
 export default function TagsTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -47,7 +49,7 @@ export default function TagsTab() {
     const {classes, fetchClasses} = classesContext;
     const changeableFields = ['name', 'description', 'bucketsIds', 'classesIds'];
     const fieldsSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min1', 'max50']},
+        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
@@ -81,8 +83,8 @@ export default function TagsTab() {
                 columns={[
                     getColumnName(),
                     getColumnDescription(),
-                    getColumnClasses(classes),
-                    getColumnBuckets(buckets),
+                    getColumnBuckets(buckets, 'Show for buckets'),
+                    getColumnClasses(classes, 'Show by classes'),
                     getColumnCreatedDate(),
                     getColumnCreatedBy(),
                     getColumnLastModifiedDate(),
@@ -101,6 +103,8 @@ export default function TagsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -168,8 +172,8 @@ export default function TagsTab() {
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
-                                    severity: 'Item is not valid',
-                                    title: '',
+                                    severity: 'error',
+                                    title: 'Item is not valid',
                                     message: message
                                 });
                                 reject();

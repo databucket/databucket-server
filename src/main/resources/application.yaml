@@ -15,6 +15,7 @@ spring:
     open-in-view: true
     properties:
       hibernate.ejb.interceptor: pl.databucket.tenant.EntityInterceptor
+
 #  jackson:
 #    serialization:
 #      fail-on-empty-beans: false

@@ -70,7 +70,7 @@ public class ViewController {
   public ResponseEntity<?> deleteViews(@PathVariable long viewId) {
     try {
       viewService.deleteView(viewId);
-      return new ResponseEntity<>(null, HttpStatus.OK);
+      return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     } catch (Exception e) {
       return exceptionFormatter.defaultException(e);
     }

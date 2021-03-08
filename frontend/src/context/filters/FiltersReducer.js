@@ -1,4 +1,4 @@
-export default (state, action) => {
+const FiltersReducer = (state, action) => {
     switch (action.type) {
         case "FETCH_FILTERS":
             return {
@@ -29,4 +29,6 @@ export default (state, action) => {
         default:
             return state;
     }
-}
+};
+
+export default FiltersReducer;

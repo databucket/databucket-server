@@ -17,7 +17,7 @@ import {
 import Refresh from "@material-ui/icons/Refresh";
 import FilterList from "@material-ui/icons/FilterList";
 import ResetPasswordIcon from "@material-ui/icons/VpnKey";
-import RolesLookup from "../lookup/RolesLookup";
+import SelectMultiRolesLookup from "../lookup/SelectMultiRolesLookup";
 import SelectProjectsDialog from "../project/dialogs/SelectProjectsDialog";
 import {useTheme} from "@material-ui/core/styles";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -50,7 +50,7 @@ export default function UsersTab() {
     const {projects, fetchProjects, notifyProjects} = projectsContext;
     const changeableFields = ['id', 'username', 'enabled', 'expirationDate', 'rolesIds', 'projectsIds'];
     const userSpecification = {
-        username: {title: 'Username', check: ['notEmpty', 'min3', 'max50']}
+        username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']}
     };
 
     useEffect(() => {
@@ -86,8 +86,8 @@ export default function UsersTab() {
                     {
                         title: 'Roles', field: 'rolesIds', filtering: false, sorting: false,
                         render: rowData => getRolesNames(roles, rowData['rolesIds']),
-                        editComponent: props => <RolesLookup rowData={props.rowData} roles={roles}
-                                                             onChange={props.onChange}/>
+                        editComponent: props => <SelectMultiRolesLookup rowData={props.rowData} roles={roles}
+                                                                        onChange={props.onChange}/>
                     },
                     {
                         title: 'Projects', field: 'projectsIds', filtering: false, searchable: false, sorting: false,

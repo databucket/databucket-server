@@ -1,6 +1,7 @@
 package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.ViewDto;
 import pl.databucket.entity.*;
@@ -8,7 +9,10 @@ import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.*;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -27,19 +31,53 @@ public class ViewService {
     private DataFilterRepository dataFilterRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private ViewRepository viewRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     public View createView(ViewDto viewDto) throws ItemNotFoundException {
         View view = new View();
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setPrivateItem(viewDto.isPrivateItem());
+        view.setEnabledDetails(viewDto.isEnabledDetails());
+        view.setEnabledCreation(viewDto.isEnabledCreation());
+        view.setEnabledModifying(viewDto.isEnabledModifying());
+        view.setEnabledRemoval(viewDto.isEnabledRemoval());
+        view.setEnabledExport(viewDto.isEnabledExport());
+        view.setEnabledImport(viewDto.isEnabledImport());
+        view.setEnabledHistory(viewDto.isEnabledHistory());
+        view.setEnabledTasks(viewDto.isEnabledTasks());
+        view.setEnabledReservation(viewDto.isEnabledReservation());
+
+        if (viewDto.getRoleId() != null) {
+            Role role = roleRepository.getOne(viewDto.getRoleId());
+            view.setRole(role);
+        }
 
         DataColumns dataColumns = columnsRepository.findByIdAndDeleted(viewDto.getColumnsId(), false);
         if (dataColumns != null)
             view.setDataColumns(dataColumns);
         else
             throw new ItemNotFoundException(DataColumns.class, viewDto.getColumnsId());
+
+        viewRepository.saveAndFlush(view);
+
+        if (viewDto.getBucketsIds() != null) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, viewDto.getBucketsIds());
+            view.setBuckets(new HashSet<>(buckets));
+        }
+
+        if (viewDto.getClassesIds() != null) {
+            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, viewDto.getClassesIds());
+            view.setDataClasses(new HashSet<>(dataClasses));
+        }
 
         if (viewDto.getFilterId() != null) {
             DataFilter dataFilter = dataFilterRepository.findByIdAndDeleted(viewDto.getFilterId(), false);
@@ -49,20 +87,14 @@ public class ViewService {
                 throw new ItemNotFoundException(DataFilter.class, viewDto.getFilterId());
         }
 
-        if (viewDto.getBucketId() != null) {
-            Bucket bucket = bucketRepository.findByIdAndDeleted(viewDto.getBucketId(), false);
-            if (bucket != null)
-                view.setBucket(bucket);
-            else
-                throw new ItemNotFoundException(Bucket.class, viewDto.getBucketId());
+        if (viewDto.getUsersIds() != null && viewDto.getUsersIds().size() > 0) {
+            List<User> users = userRepository.findAllByIdIn(viewDto.getUsersIds());
+            view.setUsers(new HashSet<>(users));
         }
 
-        if (viewDto.getDataClassId() != null) {
-            DataClass dataClass = dataClassRepository.findByIdAndDeleted(viewDto.getDataClassId(), false);
-            if (dataClass != null)
-                view.setDataClass(dataClass);
-            else
-                throw new ItemNotFoundException(DataClass.class, viewDto.getDataClassId());
+        if (viewDto.getTeamsIds() != null && viewDto.getTeamsIds().size() > 0) {
+            List<Team> teams = teamRepository.findAllByIdIn(viewDto.getTeamsIds());
+            view.setTeams(new HashSet<>(teams));
         }
 
         return viewRepository.save(view);
@@ -83,7 +115,33 @@ public class ViewService {
 
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setPrivateItem(viewDto.isPrivateItem());
+        view.setEnabledDetails(viewDto.isEnabledDetails());
+        view.setEnabledCreation(viewDto.isEnabledCreation());
+        view.setEnabledModifying(viewDto.isEnabledModifying());
+        view.setEnabledRemoval(viewDto.isEnabledRemoval());
+        view.setEnabledExport(viewDto.isEnabledExport());
+        view.setEnabledImport(viewDto.isEnabledImport());
+        view.setEnabledHistory(viewDto.isEnabledHistory());
+        view.setEnabledTasks(viewDto.isEnabledTasks());
+        view.setEnabledReservation(viewDto.isEnabledReservation());
+
+        if (viewDto.getRoleId() != null) {
+            Role role = roleRepository.getOne(viewDto.getRoleId());
+            view.setRole(role);
+        } else
+            view.setRole(null);
+
+        if (viewDto.getBucketsIds() != null && viewDto.getBucketsIds().size() > 0) {
+            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, viewDto.getBucketsIds());
+            view.setBuckets(new HashSet<>(buckets));
+        } else
+            view.setBuckets(null);
+
+        if (viewDto.getClassesIds() != null && viewDto.getClassesIds().size() > 0) {
+            List<DataClass> dataClasses = dataClassRepository.findAllByDeletedAndIdIn(false, viewDto.getClassesIds());
+            view.setDataClasses(new HashSet<>(dataClasses));
+        } else
+            view.setDataClasses(null);
 
         DataColumns dataColumns = columnsRepository.findByIdAndDeleted(viewDto.getColumnsId(), false);
         if (dataColumns != null)
@@ -100,23 +158,17 @@ public class ViewService {
         } else
             view.setDataFilter(null);
 
-        if (viewDto.getBucketId() != null) {
-            Bucket bucket = bucketRepository.findByIdAndDeleted(viewDto.getBucketId(), false);
-            if (bucket != null)
-                view.setBucket(bucket);
-            else
-                throw new ItemNotFoundException(Bucket.class, viewDto.getBucketId());
+        if (viewDto.getUsersIds() != null && viewDto.getUsersIds().size() > 0) {
+            List<User> users = userRepository.findAllByIdIn(viewDto.getUsersIds());
+            view.setUsers(new HashSet<>(users));
         } else
-            view.setBucket(null);
+            view.setUsers(null);
 
-        if (viewDto.getDataClassId() != null) {
-            DataClass dataClass = dataClassRepository.findByIdAndDeleted(viewDto.getDataClassId(), false);
-            if (dataClass != null)
-                view.setDataClass(dataClass);
-            else
-                throw new ItemNotFoundException(DataClass.class, viewDto.getDataClassId());
+        if (viewDto.getTeamsIds() != null && viewDto.getTeamsIds().size() > 0) {
+            List<Team> teams = teamRepository.findAllByIdIn(viewDto.getTeamsIds());
+            view.setTeams(new HashSet<>(teams));
         } else
-            view.setDataClass(null);
+            view.setTeams(null);
 
         return viewRepository.save(view);
     }
@@ -127,7 +179,28 @@ public class ViewService {
         if (view == null)
             throw new ItemNotFoundException(View.class, viewId);
 
+        view.setBuckets(null);
+        view.setUsers(null);
+        view.setTeams(null);
+        view.setDataClasses(null);
+
         view.setDeleted(true);
         viewRepository.save(view);
+    }
+
+    public List<View> getAccessTreeViews(User user) {
+        return viewRepository.findAllByDeletedOrderById(false).stream().filter(view -> hasUserAccessToView(view, user)).collect(Collectors.toList());
+    }
+
+    private boolean hasUserAccessToView(View view, User user) {
+        boolean accessForUser = view.getUsers().size() > 0 && view.getUsers().contains(user);
+
+        if (accessForUser)
+            return true;
+        else {
+            boolean accessByRole = view.getRole() != null ? user.getRoles().contains(view.getRole()) : view.getTeams().size() > 0;
+            boolean accessByTeam = view.getTeams().size() > 0 ? !Collections.disjoint(view.getTeams(), user.getTeams()) : view.getRole() != null;
+            return accessByRole && accessByTeam;
+        }
     }
 }

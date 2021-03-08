@@ -9,7 +9,5 @@ import java.util.Set;
 public class UserDtoRequest {
 
     private String username;
-    private Set<Long> groupsIds;
-    private Set<Long> bucketsIds;
-    private Set<Long> viewsIds;
+    private Set<Short> teamsIds;
 }

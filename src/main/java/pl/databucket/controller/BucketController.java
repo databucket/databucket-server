@@ -75,7 +75,7 @@ public class BucketController {
     public ResponseEntity<?> deleteBucket(@PathVariable long bucketId) {
         try {
             bucketService.deleteBucket(bucketId);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception ee) {

@@ -11,12 +11,12 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import DatabucketTable from './DatabucketTable';
 import { withStyles } from '@material-ui/core';
-import SettingsDialog from './dialogs/Settings/SettingsDialog';
+import SettingsDialog from './_deprecated_/Settings/SettingsDialog';
 import SelectorGroup from './SelectorGroup';
 import SelectorBucket from './SelectorBucket';
 import SelectorView from './SelectorView';
 import DynamicIcon from './utils/DynamicIcon';
-import LookupIconDialog from './dialogs/EditLookupIconDialog';
+import LookupIconDialog from './_deprecated_/EditLookupIconDialog';
 import Cookies from 'universal-cookie';
 
 const drawerWidth = 250;

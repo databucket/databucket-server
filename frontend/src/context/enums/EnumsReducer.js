@@ -1,4 +1,4 @@
-export default (state, action) => {
+const EnumsReducer = (state, action) => {
     switch (action.type) {
         case "FETCH_ENUMS":
             return {
@@ -29,4 +29,6 @@ export default (state, action) => {
         default:
             return state;
     }
-}
+};
+
+export default EnumsReducer;

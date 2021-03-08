@@ -3,7 +3,7 @@ import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getBaseUrl,
-    getPageSizeOptions, getPutOptions, getTableHeaderBackgroundColor,
+    getPageSizeOptions, getPutOptions, getSettingsTableHeight, getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor, getUserIcon
 } from "../../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
@@ -26,14 +26,14 @@ import {
     getColumnLastModifiedBy, getColumnLastModifiedDate,
 } from "../../utils/StandardColumns";
 import {getManageUserMapper} from "../../../utils/NullValueMappers";
-import SelectGroupsDialog from "../dialogs/SelectGroupsDialog";
-import GroupsContext from "../../../context/groups/GroupsContext";
-import SelectBucketsDialog from "../dialogs/SelectBucketsDialog";
-import BucketsContext from "../../../context/buckets/BucketsContext";
+import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
+import TeamsContext from "../../../context/teams/TeamsContext";
 
 export default function UsersTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
@@ -42,14 +42,12 @@ export default function UsersTab() {
     const {users, fetchUsers, editUser} = usersContext;
     const rolesContext = useContext(RolesContext);
     const {roles, fetchRoles} = rolesContext;
-    const groupContext = useContext(GroupsContext);
-    const {groups, fetchGroups, notifyGroups} = groupContext;
-    const bucketsContext = useContext(BucketsContext);
-    const {buckets, fetchBuckets, notifyBuckets} = bucketsContext;
+    const teamsContext = useContext(TeamsContext);
+    const {teams, fetchTeams, notifyTeams} = teamsContext;
 
-    const changeableFields = ['id', 'username', 'rolesIds', 'groupsIds', 'bucketsIds', 'viewsIds'];
+    const changeableFields = ['id', 'username', 'rolesIds', 'teamsIds'];
     const userSpecification = {
-        username: {title: 'Username', check: ['notEmpty', 'min3', 'max50']}
+        username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']}
     };
 
     useEffect(() => {
@@ -63,14 +61,10 @@ export default function UsersTab() {
     }, [roles, fetchRoles]);
 
     useEffect(() => {
-        if (groups == null)
-            fetchGroups();
-    }, [groups, fetchGroups]);
+        if (teams == null)
+            fetchTeams();
+    }, [teams, fetchTeams]);
 
-    useEffect(() => {
-        if (buckets == null)
-            fetchBuckets();
-    }, [buckets, fetchBuckets]);
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
@@ -91,35 +85,15 @@ export default function UsersTab() {
                         render: rowData => getRolesNames(roles, rowData['rolesIds'])
                     },
                     {
-                        title: 'Groups', field: 'groupsIds', filtering: false, searchable: false, sorting: false,
-                        render: rowData => getArrayLengthStr(rowData['groupsIds']),
+                        title: 'Teams', field: 'teamsIds', filtering: false, searchable: false, sorting: false,
+                        render: rowData => getArrayLengthStr(rowData['teamsIds']),
                         editComponent: props => (
-                            <SelectGroupsDialog
-                                groups={groups != null ? groups : []}
+                            <SelectTeamsDialog
+                                teams={teams != null ? teams : []}
                                 rowData={props.rowData}
                                 onChange={props.onChange}
                             />
                         )
-                    },
-                    {
-                        title: 'Buckets', field: 'bucketsIds', filtering: false, searchable: false, sorting: false,
-                        render: rowData => getArrayLengthStr(rowData['bucketsIds']),
-                        editComponent: props => (
-                            <SelectBucketsDialog
-                                buckets={buckets != null ? buckets : []}
-                                rowData={props.rowData}
-                                onChange={props.onChange}
-                            />
-                        )
-                    },
-                    {
-                        title: 'View',
-                        field: 'viewsIds',
-                        filtering: false,
-                        searchable: false,
-                        sorting: false,
-                        editable: 'never',
-                        render: rowData => getArrayLengthStr(rowData['viewsIds']),
                     },
                     getColumnCreatedDate(),
                     getColumnCreatedBy(),
@@ -139,6 +113,8 @@ export default function UsersTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -196,10 +172,8 @@ export default function UsersTab() {
                                 .then((user) => {
                                     if (user != null) {
                                         editUser(convertNullValuesInObject(user, getManageUserMapper()));
-                                        if (!arraysEquals(newData, oldData, 'groupsIds'))
-                                            notifyGroups('USER', user.id, user['groupsIds']);
-                                        if (!arraysEquals(newData, oldData, 'bucketsIds'))
-                                            notifyBuckets('USER', user.id, user['bucketsIds']);
+                                        if (!arraysEquals(newData, oldData, 'teamsIds'))
+                                            notifyTeams('USER', user.id, user['teamsIds']);
                                         resolve();
                                     }
                                 });

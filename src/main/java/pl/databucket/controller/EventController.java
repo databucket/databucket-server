@@ -71,7 +71,7 @@ public class EventController {
   public ResponseEntity<?> deleteEvent(@PathVariable Long eventId) {
     try {
       eventService.deleteEvent(eventId);
-      return new ResponseEntity<>(null, HttpStatus.OK);
+      return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     } catch (Exception e) {
       return exceptionFormatter.defaultException(e);
     }

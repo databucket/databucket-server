@@ -1,20 +1,24 @@
 const THEME_NAME = "theme-name";
 const USER_NAME = "user-name";
 const TOKEN = 'token';
-const PROJECT_NAME = 'project-name';
 const PROJECT_ID = 'project-id';
+const PROJECT_CONTEXT = 'project-context';
 const ROLES = 'roles';
 const LAST_PAGE_SIZE = 'last-page-size';
 const LAST_PAGE_SIZE_DIALOG = 'last-page-size-dialog';
 const LAST_SETTINGS_PAGE_NAME = 'last-settings-page-name';
 const LAST_MANAGEMENT_PAGE_NAME = 'last-management-page-name';
+const LEFT_PANEL_OPEN = 'left-panel-open';
+const LAST_ACTIVE_GROUP = 'last-active-group';
+const LAST_ACTIVE_BUCKET = 'last-active-bucket';
+const LAST_OPENED_BUCKETS = 'last-opened-buckets';
+const LAST_ACTIVE_VIEW = 'last-active-view';
 
 export const logOut = () => {
     clearUsername();
     clearToken();
     clearRoles();
-    clearProjectName();
-    clearProjectId();
+    clearActiveProjectId();
 }
 
 export const clearUsername = () => {
@@ -41,35 +45,23 @@ export const clearToken = () => {
     localStorage.removeItem(TOKEN)
 }
 
-export const isLogin = () => {
-    return !!localStorage.getItem(TOKEN) && !!localStorage.getItem(PROJECT_ID);
-}
-
 export const hasToken = () => {
     return !!localStorage.getItem(TOKEN);
 }
 
-export const setProjectName = (projectName) => {
-    localStorage.setItem(PROJECT_NAME, projectName);
+export const hasProject = () => {
+    return !!localStorage.getItem(PROJECT_ID);
 }
 
-export const getProjectName = () => {
-    return localStorage.getItem(PROJECT_NAME)
-}
-
-export const clearProjectName = () => {
-    localStorage.removeItem(PROJECT_NAME);
-}
-
-export const setProjectId = (projectId) => {
+export const setActiveProjectId = (projectId) => {
     localStorage.setItem(PROJECT_ID, projectId);
 }
 
-export const getProjectId = () => {
-    return localStorage.getItem(PROJECT_ID)
+export const getActiveProjectId = () => {
+    return parseInt(localStorage.getItem(PROJECT_ID));
 }
 
-export const clearProjectId = () => {
+export const clearActiveProjectId = () => {
     localStorage.removeItem(PROJECT_ID);
 }
 
@@ -81,12 +73,16 @@ export const getRoles = () => {
     return localStorage.getItem(ROLES);
 }
 
-export const hasSuperRole = () => {
-    return !!localStorage.getItem(ROLES) && localStorage.getItem(ROLES).includes("SUPER");
+export const hasMemberRole = () => {
+    return !!localStorage.getItem(ROLES) && localStorage.getItem(ROLES).includes("MEMBER");
 }
 
-export const hasOnlyRobotRole = (roles) => {
-    return (roles != null) && (roles.length === 1) && (roles[0] === 'ROBOT');
+export const hasAdminRole = () => {
+    return !!localStorage.getItem(ROLES) && localStorage.getItem(ROLES).includes("ADMIN");
+}
+
+export const hasSuperRole = () => {
+    return !!localStorage.getItem(ROLES) && localStorage.getItem(ROLES).includes("SUPER");
 }
 
 export const clearRoles = () => {
@@ -140,4 +136,96 @@ export const setLastManagementPageName = (name) => {
 
 export const getLastManagementPageName = () => {
     return !!localStorage.getItem(LAST_MANAGEMENT_PAGE_NAME) ? localStorage.getItem(LAST_MANAGEMENT_PAGE_NAME) : 'projects';
+}
+
+export const isLeftPanelOpen = () => {
+    return !!localStorage.getItem(LEFT_PANEL_OPEN) && localStorage.getItem(LEFT_PANEL_OPEN).toLowerCase() === 'true';
+}
+
+export const setLeftPanelOpen = (open) => {
+    localStorage.setItem(LEFT_PANEL_OPEN, open);
+}
+
+// ********************************  PROJECT CONTEXT  ********************************
+
+const getActiveProjectKey = () => {
+    return `P-${getActiveProjectId()}`;
+}
+
+const setActiveProjectContextProperty = (propertyName, propertyValue) => {
+    let projectContext = JSON.parse(localStorage.getItem(PROJECT_CONTEXT));
+    if (projectContext == null)
+        projectContext = {};
+
+    let activeProjectContext = projectContext[getActiveProjectKey()];
+    if (activeProjectContext == null)
+        activeProjectContext = {};
+
+    activeProjectContext[propertyName] = propertyValue;
+    projectContext[getActiveProjectKey()] = activeProjectContext;
+
+    localStorage.setItem(PROJECT_CONTEXT, JSON.stringify(projectContext))
+}
+
+const getActiveProjectContextProperty = (propertyName) => {
+    if (localStorage.getItem(PROJECT_CONTEXT) != null) {
+        const projectContext = JSON.parse(localStorage.getItem(PROJECT_CONTEXT));
+        const activeProjectContext = projectContext[getActiveProjectKey()];
+        if (activeProjectContext != null)
+            return activeProjectContext[propertyName];
+    } else
+        return null;
+}
+
+
+export const getLastActiveGroup = () => {
+    const lastActiveGroup = getActiveProjectContextProperty(LAST_ACTIVE_GROUP);
+
+    if (lastActiveGroup != null)
+        return parseInt(lastActiveGroup);
+    else
+        return -1;
+}
+
+export const setLastActiveGroup = (groupId) => {
+    setActiveProjectContextProperty(LAST_ACTIVE_GROUP, groupId);
+}
+
+export const getLastActiveBucket = () => {
+    const lastActiveBucket = getActiveProjectContextProperty(LAST_ACTIVE_BUCKET);
+
+    if (lastActiveBucket != null)
+        return parseInt(lastActiveBucket);
+    else
+        return -1;
+}
+
+export const setLastActiveBucket = (bucketId) => {
+    setActiveProjectContextProperty(LAST_ACTIVE_BUCKET, bucketId);
+}
+
+export const getLastOpenedBuckets = () => {
+    const lastOpenedBuckets = getActiveProjectContextProperty(LAST_OPENED_BUCKETS);
+
+    if (lastOpenedBuckets != null)
+        return lastOpenedBuckets;
+    else
+        return [];
+}
+
+export const setLastOpenedBuckets = (buckets) => {
+    setActiveProjectContextProperty(LAST_OPENED_BUCKETS, buckets.map(({id}) => id));
+}
+
+export const getLastActiveView = (bucketId) => {
+    const lastActiveView = getActiveProjectContextProperty(LAST_ACTIVE_VIEW);
+
+    if (lastActiveView != null)
+        return lastActiveView[bucketId];
+}
+
+export const setLastActiveView = (bucketId, viewId) => {
+    let lastActiveView = getActiveProjectContextProperty(LAST_ACTIVE_VIEW);
+    lastActiveView[bucketId] = viewId;
+    setActiveProjectContextProperty(LAST_ACTIVE_VIEW, lastActiveView);
 }

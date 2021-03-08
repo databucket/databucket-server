@@ -1,6 +1,6 @@
 import {notifierChangeAdapter} from "../../utils/JsonHelper";
 
-export default (state, action) => {
+const TagReducer = (state, action) => {
     switch (action.type) {
         case "FETCH_TAGS":
             return {
@@ -36,4 +36,6 @@ export default (state, action) => {
         default:
             return state;
     }
-}
+};
+
+export default TagReducer;

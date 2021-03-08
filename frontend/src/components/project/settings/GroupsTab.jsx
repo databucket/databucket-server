@@ -6,7 +6,7 @@ import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
     getBaseUrl, getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions,
+    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
@@ -24,17 +24,20 @@ import {
     getColumnCreatedDate,
     getColumnDescription,
     getColumnLastModifiedBy, getColumnLastModifiedDate,
-    getColumnName, getColumnPrivate, getColumnUsers
+    getColumnName, getColumnRole, getColumnShortName, getColumnTeams, getColumnUsers
 } from "../../utils/StandardColumns";
 import BucketsContext from "../../../context/buckets/BucketsContext";
 import GroupsContext from "../../../context/groups/GroupsContext";
 import UsersContext from "../../../context/users/UsersContext";
 import RolesContext from "../../../context/roles/RolesContext";
 import {getGroupMapper} from "../../../utils/NullValueMappers";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
+import TeamsContext from "../../../context/teams/TeamsContext";
 
 export default function GroupsTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -47,9 +50,12 @@ export default function GroupsTab() {
     const {buckets, fetchBuckets, notifyBuckets} = bucketsContext;
     const usersContext = useContext(UsersContext);
     const {users, fetchUsers, notifyUsers} = usersContext;
-    const changeableFields = ['name', 'description', 'bucketsIds', 'usersIds'];
+    const teamsContext = useContext(TeamsContext);
+    const {teams, fetchTeams} = teamsContext;
+    const changeableFields = ['name', 'shortName', 'description', 'bucketsIds', 'usersIds', 'roleId', 'teamsIds'];
     const fieldsSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min3', 'max50']},
+        name: {title: 'Name', check: ['min5', 'max30']},
+        shortName: {title: 'Short name', check: ['notEmpty', 'min1', 'max5']},
         description: {title: 'Description', check: ['max250']}
     };
 
@@ -73,6 +79,11 @@ export default function GroupsTab() {
             fetchUsers();
     }, [users, fetchUsers]);
 
+    useEffect(() => {
+        if (teams == null)
+            fetchTeams();
+    }, [teams, fetchTeams]);
+
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
         setLastPageSize(pageSize);
@@ -85,11 +96,13 @@ export default function GroupsTab() {
                 title='Groups'
                 tableRef={tableRef}
                 columns={[
+                    getColumnShortName(),
                     getColumnName(),
                     getColumnDescription(),
-                    getColumnPrivate(),
-                    getColumnUsers(users, roles),
-                    getColumnBuckets(buckets),
+                    getColumnBuckets(buckets, 'Assigned buckets'),
+                    getColumnUsers(users, roles, 'Access for user'),
+                    getColumnRole(roles, 'Access by role'),
+                    getColumnTeams(teams, 'Access by team'),
                     getColumnCreatedDate(),
                     getColumnCreatedBy(),
                     getColumnLastModifiedDate(),
@@ -108,6 +121,8 @@ export default function GroupsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -176,8 +191,8 @@ export default function GroupsTab() {
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
-                                    severity: 'Item is not valid',
-                                    title: '',
+                                    severity: 'error',
+                                    title: 'Item is not valid',
                                     message: message
                                 });
                                 reject();

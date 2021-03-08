@@ -5,7 +5,7 @@ import {
     getColumnCreatedBy,
     getColumnCreatedDate,
     getColumnDescription,
-    getColumnName
+    getColumnName, getColumnShortName
 } from "../../utils/StandardColumns";
 
 SelectGroupsDialog.propTypes = {
@@ -17,6 +17,7 @@ SelectGroupsDialog.propTypes = {
 export default function SelectGroupsDialog(props) {
 
     const columns = [
+        getColumnShortName(),
         getColumnName(),
         getColumnDescription(),
         getColumnCreatedDate(),

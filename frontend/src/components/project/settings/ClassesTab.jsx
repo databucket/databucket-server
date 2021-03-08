@@ -6,13 +6,13 @@ import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
     getBaseUrl, getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions,
+    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
 import {handleErrors} from "../../../utils/FetchHelper";
 import {
-    convertNullValuesInObject,
+    convertNullValuesInObject, getArrayLengthStr,
     isItemChanged,
     validateItem
 } from "../../../utils/JsonHelper";
@@ -26,10 +26,13 @@ import {
 } from "../../utils/StandardColumns";
 import ClassesContext from "../../../context/classes/ClassesContext";
 import {getClassMapper} from "../../../utils/NullValueMappers";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
+import EditColumnsDialog from "../dialogs/EditColumnsDialog";
 
 export default function ClassesTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -38,7 +41,7 @@ export default function ClassesTab() {
     const {classes, fetchClasses, addClass, editClass, removeClass} = classesContext;
     const changeableFields = ['name', 'description'];
     const fieldsSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min3', 'max50']},
+        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
@@ -61,6 +64,22 @@ export default function ClassesTab() {
                 columns={[
                     getColumnName(),
                     getColumnDescription(),
+                    {
+                        title: 'Fields',
+                        field: 'schema',
+                        filtering: false,
+                        searchable: false,
+                        sorting: false,
+                        render: rowData => getArrayLengthStr(rowData['schema']),
+                        editComponent: props => (
+                            <EditColumnsDialog
+                                configuration={props.rowData.configuration != null ? props.rowData.configuration : []}
+                                name={props.rowData.name != null ? props.rowData.name : ''}
+                                description={props.rowData.description != null && props.rowData.description.length > 0 ? "(" + props.rowData.description + ")" : ''}
+                                onChange={props.onChange}
+                            />
+                        )
+                    },
                     getColumnCreatedDate(),
                     getColumnCreatedBy(),
                     getColumnLastModifiedDate(),
@@ -79,6 +98,8 @@ export default function ClassesTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -145,8 +166,8 @@ export default function ClassesTab() {
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
-                                    severity: 'Item is not valid',
-                                    title: '',
+                                    severity: 'error',
+                                    title: 'Item is not valid',
                                     message: message
                                 });
                                 reject();

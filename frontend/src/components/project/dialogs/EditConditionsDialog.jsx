@@ -3,7 +3,6 @@ import {withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Done';
 import Typography from '@material-ui/core/Typography';
@@ -15,6 +14,7 @@ import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../../utils/ConfigurationStorage";
 import {
+    getDialogTableHeight,
     getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor, moveDown, moveUp
@@ -29,6 +29,7 @@ import ConstEditor from "../editors/ConstEditor";
 import FieldEditor from "../editors/FieldEditor";
 import PropertyEditor from "../editors/PropertyEditor";
 import FunctionEditor from "../editors/FunctionEditor";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
 
 
 const styles = (theme) => ({
@@ -64,14 +65,6 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
-
 EditConditionsDialog.propTypes = {
     configuration: PropTypes.array.isRequired,
     name: PropTypes.string.isRequired,
@@ -105,6 +98,7 @@ const operatorLookup = {
 export default function EditConditionsDialog(props) {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [data, setData] = useState(props.configuration);
     const [open, setOpen] = useState(false);
@@ -114,7 +108,7 @@ export default function EditConditionsDialog(props) {
     const {enums, fetchEnums} = enumsContext;
     const changeableFields = ['title', 'field'];
     const fieldsSpecification = {
-        title: {title: 'Title', check: ['notEmpty', 'min1', 'max50']},
+        title: {title: 'Title', check: ['notEmpty', 'min1', 'max30']},
         field: {title: 'Source', check: ['notEmpty']}
     };
 
@@ -205,6 +199,8 @@ export default function EditConditionsDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                            maxBodyHeight: getDialogTableHeight(height, 30),
+                            minBodyHeight: getDialogTableHeight(height, 30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{
@@ -245,8 +241,8 @@ export default function EditConditionsDialog(props) {
                                     if (message != null) {
                                         setMessageBox({
                                             open: true,
-                                            severity: 'Item is not valid',
-                                            title: '',
+                                            severity: 'error',
+                                            title: 'Item is not valid',
                                             message: message
                                         });
                                         reject();
@@ -289,7 +285,6 @@ export default function EditConditionsDialog(props) {
                         ]}
                     />
                 </DialogContent>
-                <DialogActions/>
             </Dialog>
             <MessageBox
                 config={messageBox}

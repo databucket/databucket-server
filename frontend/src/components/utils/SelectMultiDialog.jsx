@@ -3,13 +3,13 @@ import {withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Done';
 import Typography from '@material-ui/core/Typography';
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 import Tooltip from "@material-ui/core/Tooltip";
 import {
+    getDialogTableHeight,
     getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
     getTableIcons,
@@ -24,6 +24,7 @@ import {useTheme} from '@material-ui/core/styles';
 import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
+import {useWindowDimension} from "./UseWindowDimension";
 
 const styles = (theme) => ({
     root: {
@@ -58,14 +59,6 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
-
 SelectMultiDialog.propTypes = {
     columns: PropTypes.array.isRequired,
     data: PropTypes.array.isRequired,
@@ -80,6 +73,7 @@ SelectMultiDialog.propTypes = {
 export default function SelectMultiDialog(props) {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const [open, setOpen] = useState(false);
     const [data] = useState(setSelectionItemsByIds(props.data, props.ids));
     const tableRef = createRef();
@@ -106,6 +100,7 @@ export default function SelectMultiDialog(props) {
                 <Button
                     startIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
+                    style={{textTransform: 'none'}}
                 >
                     {`[${selection.length}]`}
                 </Button>
@@ -140,6 +135,8 @@ export default function SelectMultiDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                            maxBodyHeight: getDialogTableHeight(height, 30),
+                            minBodyHeight: getDialogTableHeight(height, 30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{
@@ -147,7 +144,6 @@ export default function SelectMultiDialog(props) {
                         }}
                     />
                 </DialogContent>
-                <DialogActions/>
             </Dialog>
         </div>
     );

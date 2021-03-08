@@ -74,7 +74,7 @@ public class TagController {
     public ResponseEntity<?> deleteTags(@PathVariable long tagId) {
         try {
             tagService.deleteTag(tagId);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

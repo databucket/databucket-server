@@ -14,4 +14,8 @@ public class ItemNotFoundException extends Exception {
         super("Entity '" + clazz.getSimpleName() + "' with the given id '" + id + "' doesn't exist!");
     }
 
+    public ItemNotFoundException(Class<?> clazz, Short id) {
+        super("Entity '" + clazz.getSimpleName() + "' with the given id '" + id + "' doesn't exist!");
+    }
+
 }

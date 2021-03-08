@@ -11,22 +11,12 @@ import org.springframework.stereotype.Service;
 import pl.databucket.configuration.Constants;
 import pl.databucket.dto.ChangePasswordDtoRequest;
 import pl.databucket.dto.UserDtoRequest;
-import pl.databucket.entity.Bucket;
-import pl.databucket.entity.Group;
-import pl.databucket.entity.Project;
-import pl.databucket.entity.User;
+import pl.databucket.entity.*;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.SomeItemsNotFoundException;
-import pl.databucket.repository.BucketRepository;
-import pl.databucket.repository.GroupRepository;
-import pl.databucket.repository.ProjectRepository;
-import pl.databucket.repository.UserRepository;
+import pl.databucket.repository.*;
 import pl.databucket.security.CustomUserDetails;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @Service(value = "userService")
@@ -39,10 +29,7 @@ public class UserService implements UserDetailsService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private GroupRepository groupRepository;
-
-    @Autowired
-    private BucketRepository bucketRepository;
+    private TeamRepository teamRepository;
 
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
@@ -56,16 +43,17 @@ public class UserService implements UserDetailsService {
                 user.getUsername(),
                 user.getPassword(),
                 getAuthority(user),
-                user.getBucketsIds(),
                 user.getEnabled(),
                 user.isSuperUser());
     }
 
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     private Set<SimpleGrantedAuthority> getAuthority(User user) {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        user.getRoles().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
-        });
+        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName())));
         return authorities;
     }
 
@@ -81,14 +69,9 @@ public class UserService implements UserDetailsService {
     public User modifyUser(UserDtoRequest userDtoRequest) throws SomeItemsNotFoundException {
         User user = userRepository.findByUsername(userDtoRequest.getUsername());
 
-        if (userDtoRequest.getGroupsIds() != null) {
-            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, userDtoRequest.getGroupsIds());
-            user.setGroups(new HashSet<>(groups));
-        }
-
-        if (userDtoRequest.getBucketsIds() != null) {
-            List<Bucket> buckets = bucketRepository.findAllByDeletedAndIdIn(false, userDtoRequest.getBucketsIds());
-            user.setBuckets(new HashSet<>(buckets));
+        if (userDtoRequest.getTeamsIds() != null) {
+            List<Team> teams = teamRepository.findAllByDeletedAndIdIn(false, userDtoRequest.getTeamsIds());
+            user.setTeams(new HashSet<>(teams));
         }
 
         return userRepository.save(user);
@@ -116,4 +99,5 @@ public class UserService implements UserDetailsService {
         } else
             throw new IllegalArgumentException("The given user does not exist.");
     }
+
 }

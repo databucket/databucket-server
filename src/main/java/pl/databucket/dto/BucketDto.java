@@ -21,9 +21,10 @@ public class BucketDto {
     private Long classId;
     private Set<Long> groupsIds;
     private Set<Long> usersIds;
+    private Set<Short> teamsIds;
     private boolean history;
     private boolean protectedData;
-    private boolean privateItem;
+    private Short roleId;
 
     private String createdBy;
     private Date createdDate;

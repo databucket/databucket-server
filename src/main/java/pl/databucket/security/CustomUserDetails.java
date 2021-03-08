@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -16,21 +15,18 @@ public class CustomUserDetails implements UserDetails {
     private String password;
     private String username;
     private Integer projectId;
-    private Set<Long> bucketsIds;
     private Boolean enabled;
     private boolean superUser;
 
     public CustomUserDetails(String username,
                              String password,
                              Collection<? extends GrantedAuthority> authorities,
-                             Set<Long> bucketsIds,
                              boolean enabled,
                              boolean superUser) {
 
         this.username = username;
         this.password = password;
         this.authorities = authorities;
-        this.bucketsIds = bucketsIds;
         this.enabled = enabled;
         this.superUser = superUser;
     }

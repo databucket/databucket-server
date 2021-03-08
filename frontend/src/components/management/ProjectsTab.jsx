@@ -50,7 +50,7 @@ export default function ProjectsTab() {
     const {roles, fetchRoles} = rolesContext;
     const changeableFields = ['id', 'enabled', 'name', 'description', 'usersIds', 'expirationDate'];
     const projectSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min3', 'max50']},
+        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
@@ -206,8 +206,8 @@ export default function ProjectsTab() {
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
-                                    severity: 'Item is not valid',
-                                    title: '',
+                                    severity: 'error',
+                                    title: 'Item is not valid',
                                     message: message
                                 });
                                 reject();

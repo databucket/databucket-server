@@ -17,7 +17,8 @@ public class BucketPropertyMap extends PropertyMap<Bucket, BucketDto> {
         map().setUsersIds(source.getUsersIds());
         map().setHistory(source.isHistory());
         map().setProtectedData(source.isProtectedData());
-        map().setPrivateItem(source.isPrivateItem());
+        map().setRoleId(source.getRole().getId());
+        map().setTeamsIds(source.getTeamsIds());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedDate(source.getCreatedDate());

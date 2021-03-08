@@ -32,11 +32,11 @@ public class Group extends Auditable<String> implements TenantSupport {
 	@Column(name = "group_name", length = Constants.NAME_MAX)
 	private String name;
 
+	@Column(name = "short_name", length = 5)
+	private String shortName;
+
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
-
-	@Column(name = "private", nullable = false)
-	private boolean privateItem = false;
 
 	@ManyToMany
 	@JoinTable(name = "groups_buckets",
@@ -44,8 +44,21 @@ public class Group extends Auditable<String> implements TenantSupport {
 			inverseJoinColumns = { @JoinColumn(name = "bucket_id") })
 	private Set<Bucket> buckets;
 
-	@ManyToMany(mappedBy = "groups")
+	@ManyToMany
+	@JoinTable(name = "groups_teams",
+			joinColumns = {@JoinColumn(name = "group_id")},
+			inverseJoinColumns = {@JoinColumn(name = "team_id")})
+	private Set<Team> teams;
+
+	@ManyToMany
+	@JoinTable(name = "groups_users",
+			joinColumns = {@JoinColumn(name = "group_id")},
+			inverseJoinColumns = {@JoinColumn(name = "user_id")})
 	private Set<User> users;
+
+	@OneToOne
+	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
+	private Role role;
 
 	@JsonIgnore
 	private Boolean deleted = false;
@@ -60,6 +73,13 @@ public class Group extends Auditable<String> implements TenantSupport {
 	public Set<Long> getUsersIds() {
 		if (users != null && users.size() > 0)
 			return users.stream().map(User::getId).collect(Collectors.toSet());
+		else
+			return null;
+	}
+
+	public Set<Short> getTeamsIds() {
+		if (teams != null && teams.size() > 0)
+			return teams.stream().map(Team::getId).collect(Collectors.toSet());
 		else
 			return null;
 	}

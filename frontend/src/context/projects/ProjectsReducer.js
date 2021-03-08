@@ -1,6 +1,6 @@
 import {notifierChangeAdapter} from "../../utils/JsonHelper";
 
-export default (state, action) => {
+const ProjectReducer = (state, action) => {
     switch (action.type) {
         case "FETCH_PROJECTS":
             return {
@@ -36,4 +36,6 @@ export default (state, action) => {
         default:
             return state;
     }
-}
+};
+
+export default ProjectReducer;

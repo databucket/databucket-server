@@ -1,6 +1,6 @@
 import {getClassesLookup} from "../../utils/LookupHelper";
 
-export default (state, action) => {
+const ClassesReducer = (state, action) => {
     let updatedClasses;
     switch (action.type) {
         case "FETCH_CLASSES":
@@ -39,4 +39,6 @@ export default (state, action) => {
         default:
             return state;
     }
-}
+};
+
+export default ClassesReducer;

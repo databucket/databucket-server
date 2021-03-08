@@ -11,9 +11,6 @@ import CustomThemeContext from "../../../context/theme/CustomThemeContext";
 import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-    },
     oneLine: {
         display: 'flex',
         alignItems: 'center',
@@ -62,55 +59,53 @@ export default function UserProfile(props) {
     };
 
     return (
-        <div className={classes.root}>
-            <div>
-                <IconButton
-                    aria-label="account of current user"
-                    aria-controls="menu-appbar"
-                    aria-haspopup="true"
-                    onClick={handleMenu}
-                    color="inherit"
-                >
-                    <AccountCircle/>
-                </IconButton>
-                <Menu
-                    id="menu-appbar"
-                    anchorEl={anchorEl}
-                    anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    keepMounted
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    open={open}
-                    onClose={handleClose}
-                >
-                    <div className={classes.content}>
-                        <div className={classes.oneLine}>
-                            <AccountCircle/>
-                            <Typography color="secondary" style={{marginLeft: "10px"}}>{getUsername()}</Typography>
-                        </div>
-                        <Button
-                            className={classes.button}
-                            startIcon={customThemeName === 'light' ? <SetDarkTheme/> : <SetLightTheme/>}
-                            onClick={handleChangeTheme}
-                        >
-                            {customThemeName === 'light' ? "Dark" : "Light"}
-                        </Button>
-                        <Button
-                            variant="contained"
-                            className={classes.button}
-                            onClick={handleLogout}
-                            color="primary"
-                        >
-                            Logout
-                        </Button>
+        <div>
+            <IconButton
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+            >
+                <AccountCircle/>
+            </IconButton>
+            <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                open={open}
+                onClose={handleClose}
+            >
+                <div className={classes.content}>
+                    <div className={classes.oneLine}>
+                        <AccountCircle/>
+                        <Typography color="secondary" style={{marginLeft: "10px"}}>{getUsername()}</Typography>
                     </div>
-                </Menu>
-            </div>
+                    <Button
+                        className={classes.button}
+                        startIcon={customThemeName === 'light' ? <SetDarkTheme/> : <SetLightTheme/>}
+                        onClick={handleChangeTheme}
+                    >
+                        {customThemeName === 'light' ? "Dark" : "Light"}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        className={classes.button}
+                        onClick={handleLogout}
+                        color="primary"
+                    >
+                        Logout
+                    </Button>
+                </div>
+            </Menu>
         </div>
     );
 }

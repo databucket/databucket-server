@@ -1,4 +1,4 @@
-export default (state, action) => {
+const ColumnsReducer = (state, action) => {
     switch (action.type) {
         case "FETCH_COLUMNS":
             return {
@@ -29,4 +29,6 @@ export default (state, action) => {
         default:
             return state;
     }
-}
+};
+
+export default ColumnsReducer;

@@ -35,11 +35,8 @@ const UsersProvider = props => {
         console.log(`notifyUsers: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
         let itemsTargetFieldName;
         switch (sourceName) {
-            case "GROUP":
-                itemsTargetFieldName = "groupsIds";
-                break;
-            case "BUCKET":
-                itemsTargetFieldName = "bucketsIds";
+            case "TEAM":
+                itemsTargetFieldName = "teamsIds";
                 break;
             default:
                 console.log("Undefined notification source!");

@@ -38,7 +38,7 @@ export default function SelectBucketsDialog(props) {
             ids={props.rowData['bucketsIds'] != null ? props.rowData['bucketsIds'] : []}
             tooltipTitle={'Select buckets'}
             dialogTitle={'Select buckets'}
-            tableTitle={'Name: ' + props.rowData['name']}
+            tableTitle={'Name: ' + (props.rowData['name'] || props.rowData['username'])}
             maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />

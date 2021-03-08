@@ -3,13 +3,13 @@ import {withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Done';
 import Typography from '@material-ui/core/Typography';
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 import Tooltip from "@material-ui/core/Tooltip";
 import {
+    getDialogTableHeight,
     getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
     getTableIcons,
@@ -24,6 +24,7 @@ import EditIconDialog from "./EditIconDialog";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import {MessageBox} from "../../utils/MessageBox";
+import {useWindowDimension} from "../../utils/UseWindowDimension";
 
 const styles = (theme) => ({
     root: {
@@ -58,13 +59,6 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
 
 EditEnumDialog.propTypes = {
     name: PropTypes.string.isRequired,
@@ -76,6 +70,7 @@ EditEnumDialog.propTypes = {
 export default function EditEnumDialog(props) {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const tableRef = createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [open, setOpen] = useState(false);
@@ -164,6 +159,8 @@ export default function EditEnumDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                            maxBodyHeight: getDialogTableHeight(height, 30),
+                            minBodyHeight: getDialogTableHeight(height, 30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{
@@ -213,7 +210,6 @@ export default function EditEnumDialog(props) {
                         ]}
                     />
                 </DialogContent>
-                <DialogActions/>
             </Dialog>
             <MessageBox
                 config={messageBox}

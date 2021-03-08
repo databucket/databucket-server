@@ -47,17 +47,30 @@ public class Bucket extends Auditable<String> implements TenantSupport {
     @Column(nullable = false)
     private boolean history = false;
 
-    @Column(name = "private", nullable = false)
-    private boolean privateItem = false;
-
     @Column(name = "protected_data", nullable = false)
     private boolean protectedData = false;
 
     @ManyToMany(mappedBy = "buckets")
-    private Set<User> users;
+    private Set<Group> groups;
 
     @ManyToMany(mappedBy = "buckets")
-    private Set<Group> groups;
+    private Set<View> views;
+
+    @ManyToMany
+    @JoinTable(name = "buckets_teams",
+            joinColumns = {@JoinColumn(name = "bucket_id")},
+            inverseJoinColumns = {@JoinColumn(name = "team_id")})
+    private Set<Team> teams;
+
+    @ManyToMany
+    @JoinTable(name = "buckets_users",
+            joinColumns = {@JoinColumn(name = "bucket_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_id")})
+    private Set<User> users;
+
+    @OneToOne
+    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    private Role role;
 
     @JsonIgnore
     private Boolean deleted = false;
@@ -72,6 +85,13 @@ public class Bucket extends Auditable<String> implements TenantSupport {
     public Set<Long> getGroupsIds() {
         if (groups != null && groups.size() > 0)
             return groups.stream().map(Group::getId).collect(Collectors.toSet());
+        else
+            return null;
+    }
+
+    public Set<Short> getTeamsIds() {
+        if (teams != null && teams.size() > 0)
+            return teams.stream().map(Team::getId).collect(Collectors.toSet());
         else
             return null;
     }
