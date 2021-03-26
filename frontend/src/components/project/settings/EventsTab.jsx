@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -18,15 +18,14 @@ import {
 } from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName
 } from "../../utils/StandardColumns";
 import {getColumnsMapper, getEventsMapper} from "../../../utils/NullValueMappers";
 import EventsContext from "../../../context/events/EventsContext";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function EventsTab() {
 
@@ -63,10 +62,10 @@ export default function EventsTab() {
                 columns={[
                     getColumnName(),
                     getColumnDescription(),
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={events != null ? events : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

@@ -5,30 +5,33 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
 import {handleErrors} from "../../../utils/FetchHelper";
 import {
-    convertNullValuesInObject, getArrayLengthStr,
+    convertNullValuesInObject, getObjectLengthStr,
     isItemChanged,
     validateItem
 } from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
-    getColumnName
+    getColumnModifiedBy, getColumnModifiedAt,
+    getColumnName, getColumnClass
 } from "../../utils/StandardColumns";
-import {getColumnsMapper, getFiltersMapper} from "../../../utils/NullValueMappers";
+import {getFiltersMapper} from "../../../utils/NullValueMappers";
 import FiltersContext from "../../../context/filters/FiltersContext";
-import EditConditionsDialog from "../dialogs/EditConditionsDialog";
+import EditFilterRulesDialog from "../dialogs/EditFilterRulesDialog";
 import CloneIcon from '@material-ui/icons/ViewStream'
 import {useWindowDimension} from "../../utils/UseWindowDimension";
+import ClassesContext from "../../../context/classes/ClassesContext";
+import TagsContext from "../../../context/tags/TagsContext";
+import UsersContext from "../../../context/users/UsersContext";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
+import {getClassById} from "../../utils/PropertiesTable";
 
 export default function FiltersTab() {
 
@@ -38,9 +41,15 @@ export default function FiltersTab() {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
+    const classesContext = useContext(ClassesContext);
+    const {classes, fetchClasses, classesLookup} = classesContext;
+    const tagsContext = useContext(TagsContext);
+    const {tags, fetchTags} = tagsContext;
+    const usersContext = useContext(UsersContext);
+    const {users, fetchUsers} = usersContext;
     const filtersContext = useContext(FiltersContext);
     const {filters, fetchFilters, addFilter, editFilter, removeFilter} = filtersContext;
-    const changeableFields = ['name', 'description', 'configuration'];
+    const changeableFields = ['name', 'description', 'classId', 'configuration'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -50,6 +59,21 @@ export default function FiltersTab() {
         if (filters == null)
             fetchFilters();
     }, [filters, fetchFilters]);
+
+    useEffect(() => {
+        if (classes == null)
+            fetchClasses();
+    }, [classes, fetchClasses]);
+
+    useEffect(() => {
+        if (tags == null)
+            fetchTags();
+    }, [tags, fetchTags]);
+
+    useEffect(() => {
+        if (users == null)
+            fetchUsers();
+    }, [users, fetchUsers]);
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
@@ -78,26 +102,31 @@ export default function FiltersTab() {
                 columns={[
                     getColumnName(),
                     getColumnDescription(),
+                    getColumnClass(classesLookup, 'Class support'),
                     {
-                        title: 'Configuration',
+                        title: 'Rules',
                         field: 'configuration',
                         filtering: false,
                         searchable: false,
                         sorting: false,
-                        render: rowData => getArrayLengthStr(rowData['configuration']),
+                        initialEditValue: {fields: [], logic: null},
+                        render: rowData => getObjectLengthStr(rowData['configuration']),
                         editComponent: props => (
-                            <EditConditionsDialog
-                                configuration={props.rowData.configuration != null ? props.rowData.configuration : []}
+                            <EditFilterRulesDialog
+                                configuration={props.rowData.configuration}
                                 name={props.rowData.name != null ? props.rowData.name : ''}
                                 description={props.rowData.description != null && props.rowData.description.length > 0 ? "(" + props.rowData.description + ")" : ''}
+                                dataClass={getClassById(classes, props.rowData.classId)}
+                                tags={tags}
+                                users={users}
                                 onChange={props.onChange}
                             />
                         )
                     },
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={filters != null ? filters : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}
@@ -200,7 +229,7 @@ export default function FiltersTab() {
                                 })
                                 .then((filter) => {
                                     if (filter != null) {
-                                        editFilter(convertNullValuesInObject(filter, getColumnsMapper()));
+                                        editFilter(convertNullValuesInObject(filter, getFiltersMapper()));
                                         resolve();
                                     }
                                 });

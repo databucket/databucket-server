@@ -16,11 +16,11 @@ public class DataEnumDto {
     private String name;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
-    private boolean textValues;
+    private boolean iconsEnabled;
     private List<DataEnumItemDto> items;
 
     private String createdBy;
-    private Date createdDate;
-    private String lastModifiedBy;
-    private Date lastModifiedDate;
+    private Date createdAt;
+    private String modifiedBy;
+    private Date modifiedAt;
 }

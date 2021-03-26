@@ -1,7 +1,6 @@
 package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.ViewDto;
 import pl.databucket.entity.*;
@@ -46,15 +45,7 @@ public class ViewService {
         View view = new View();
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setEnabledDetails(viewDto.isEnabledDetails());
-        view.setEnabledCreation(viewDto.isEnabledCreation());
-        view.setEnabledModifying(viewDto.isEnabledModifying());
-        view.setEnabledRemoval(viewDto.isEnabledRemoval());
-        view.setEnabledExport(viewDto.isEnabledExport());
-        view.setEnabledImport(viewDto.isEnabledImport());
-        view.setEnabledHistory(viewDto.isEnabledHistory());
-        view.setEnabledTasks(viewDto.isEnabledTasks());
-        view.setEnabledReservation(viewDto.isEnabledReservation());
+        view.setFeaturesIds(viewDto.getFeaturesIds());
 
         if (viewDto.getRoleId() != null) {
             Role role = roleRepository.getOne(viewDto.getRoleId());
@@ -104,6 +95,10 @@ public class ViewService {
         return viewRepository.findAllByDeletedOrderById(false);
     }
 
+    public List<View> getViews(List<Long> ids) {
+        return viewRepository.findAllByDeletedAndIdIn(false, ids);
+    }
+
     public View modifyView(ViewDto viewDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
         if (viewDto.getId() == null)
             throw new ModifyByNullEntityIdException(View.class);
@@ -115,15 +110,7 @@ public class ViewService {
 
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
-        view.setEnabledDetails(viewDto.isEnabledDetails());
-        view.setEnabledCreation(viewDto.isEnabledCreation());
-        view.setEnabledModifying(viewDto.isEnabledModifying());
-        view.setEnabledRemoval(viewDto.isEnabledRemoval());
-        view.setEnabledExport(viewDto.isEnabledExport());
-        view.setEnabledImport(viewDto.isEnabledImport());
-        view.setEnabledHistory(viewDto.isEnabledHistory());
-        view.setEnabledTasks(viewDto.isEnabledTasks());
-        view.setEnabledReservation(viewDto.isEnabledReservation());
+        view.setFeaturesIds(viewDto.getFeaturesIds());
 
         if (viewDto.getRoleId() != null) {
             Role role = roleRepository.getOne(viewDto.getRoleId());

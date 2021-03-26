@@ -78,7 +78,7 @@ const StyledTab = withStyles(styles)(Tab)
 export default function _ProjectSettingsTabs() {
 
     const classes = useStyles();
-    const tabs = ['teams', 'users', 'classes', 'groups', 'buckets', 'tags', 'columns', 'enums', 'filters', 'views', 'tasks', 'events', 'logs'];
+    const tabs = ['teams', 'users', 'classes', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks', 'events', 'logs'];
 
     const getTabsValue = (pathname) => {
         let value = pathname.split("/").pop();
@@ -111,11 +111,11 @@ export default function _ProjectSettingsTabs() {
                             <StyledTab label="Teams" value={tabs[0]} component={Link} to={`${getProjectSettingsPath()}/teams`}/>
                             <StyledTab label="Users" value={tabs[1]} component={Link} to={`${getProjectSettingsPath()}/users`}/>
                             <StyledTab label="Classes" value={tabs[2]} component={Link} to={`${getProjectSettingsPath()}/classes`}/>
-                            <StyledTab label="Groups" value={tabs[3]} component={Link} to={`${getProjectSettingsPath()}/groups`}/>
-                            <StyledTab label="Buckets" value={tabs[4]} component={Link} to={`${getProjectSettingsPath()}/buckets`}/>
-                            <StyledTab label="Tags" value={tabs[5]} component={Link} to={`${getProjectSettingsPath()}/tags`}/>
-                            <StyledTab label="Columns" value={tabs[6]} component={Link} to={`${getProjectSettingsPath()}/columns`}/>
-                            <StyledTab label="Enums" value={tabs[7]} component={Link} to={`${getProjectSettingsPath()}/enums`}/>
+                            <StyledTab label="Enums" value={tabs[3]} component={Link} to={`${getProjectSettingsPath()}/enums`}/>
+                            <StyledTab label="Groups" value={tabs[4]} component={Link} to={`${getProjectSettingsPath()}/groups`}/>
+                            <StyledTab label="Buckets" value={tabs[5]} component={Link} to={`${getProjectSettingsPath()}/buckets`}/>
+                            <StyledTab label="Tags" value={tabs[6]} component={Link} to={`${getProjectSettingsPath()}/tags`}/>
+                            <StyledTab label="Columns" value={tabs[7]} component={Link} to={`${getProjectSettingsPath()}/columns`}/>
                             <StyledTab label="Filters" value={tabs[8]} component={Link} to={`${getProjectSettingsPath()}/filters`}/>
                             <StyledTab label="Views" value={tabs[9]} component={Link} to={`${getProjectSettingsPath()}/views`}/>
                             <StyledTab label="Tasks" value={tabs[10]} component={Link} to={`${getProjectSettingsPath()}/tasks`}/>
@@ -130,11 +130,11 @@ export default function _ProjectSettingsTabs() {
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/teams`} component={TeamsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/users`} component={UsersTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/classes`} component={ClassesTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/enums`} component={EnumsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/groups`} component={GroupsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/buckets`} component={BucketsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/tags`} component={TagsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/columns`} component={ColumnsTab}/>
-                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/enums`} component={EnumsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/filters`} component={FiltersTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/views`} component={ViewsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/tasks`} component={TasksTab}/>

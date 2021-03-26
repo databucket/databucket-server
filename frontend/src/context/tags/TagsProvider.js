@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import TagsContext from "./TagsContext";
 import TagsReducer from "./TagsReducer";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getTagMapper} from "../../utils/NullValueMappers";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const TagsProvider = props => {
     const initialState = {

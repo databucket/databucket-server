@@ -22,7 +22,6 @@
     "react-dom": "^16.14.0",
     "react-draggable": "^4.4.3",
     "react-json-editor-ajrm": "^2.5.13",
-    "react-material-ui-super-select": "^1.1.18",
     "react-numeric-input": "^2.2.3",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",

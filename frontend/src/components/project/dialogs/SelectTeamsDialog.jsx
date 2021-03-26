@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SelectMultiDialog from "../../utils/SelectMultiDialog";
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate,
+    getColumnCreatedAt,
     getColumnDescription,
     getColumnName
 } from "../../utils/StandardColumns";
@@ -19,7 +19,7 @@ export default function SelectTeamsDialog(props) {
     const columns = [
         getColumnName(),
         getColumnDescription(),
-        getColumnCreatedDate(),
+        getColumnCreatedAt(),
         getColumnCreatedBy()
     ]
 
@@ -30,7 +30,7 @@ export default function SelectTeamsDialog(props) {
             ids={props.rowData['teamsIds'] != null ? props.rowData['teamsIds'] : []}
             tooltipTitle={'Select teams'}
             dialogTitle={'Select teams'}
-            tableTitle={'Name: ' + (props.rowData['name'] || props.rowData['username'])}
+            tableTitle={(props.rowData['name'] || props.rowData['username'] || '-')}
             maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />

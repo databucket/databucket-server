@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import pl.databucket.dto.AuthDtoRequest;
 import pl.databucket.dto.ManageUserDtoRequest;
 import pl.databucket.entity.Project;
-import pl.databucket.entity.Role;
 import pl.databucket.entity.User;
 import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.SomeItemsNotFoundException;
@@ -36,10 +35,6 @@ public class ManageUserService {
 
     public List<User> getUsers() {
         return userRepository.findAllByOrderById();
-    }
-
-    public List<Role> getRoles() {
-        return roleRepository.findAllByOrderByIdAsc();
     }
 
     public User createUser(ManageUserDtoRequest manageUserDtoRequest) throws ItemAlreadyExistsException, SomeItemsNotFoundException {

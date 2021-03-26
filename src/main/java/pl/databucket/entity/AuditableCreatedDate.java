@@ -17,7 +17,7 @@ import java.util.Date;
 public class AuditableCreatedDate<U>
 {
     @CreatedDate
-    @Column(name = "created_date")
+    @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    private Date createdAt;
 }

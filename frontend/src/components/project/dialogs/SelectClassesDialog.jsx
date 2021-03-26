@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SelectMultiDialog from "../../utils/SelectMultiDialog";
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate,
+    getColumnCreatedAt,
     getColumnDescription,
     getColumnName
 } from "../../utils/StandardColumns";
@@ -19,7 +19,7 @@ export default function SelectClassesDialog(props) {
     const columns = [
         getColumnName(),
         getColumnDescription(),
-        getColumnCreatedDate(),
+        getColumnCreatedAt(),
         getColumnCreatedBy()
     ]
 
@@ -30,7 +30,7 @@ export default function SelectClassesDialog(props) {
             ids={props.rowData['classesIds'] != null ? props.rowData['classesIds'] : []}
             tooltipTitle={'Select classes'}
             dialogTitle={'Select classes'}
-            tableTitle={'Name: ' + (props.rowData['name'])}
+            tableTitle={(props.rowData['name'] || '-')}
             maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />

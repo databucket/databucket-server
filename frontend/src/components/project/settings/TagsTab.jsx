@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -21,10 +21,8 @@ import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnBuckets,
     getColumnClasses,
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName
 } from "../../utils/StandardColumns";
 import BucketsContext from "../../../context/buckets/BucketsContext";
@@ -32,6 +30,7 @@ import {getTagMapper} from "../../../utils/NullValueMappers";
 import ClassesContext from "../../../context/classes/ClassesContext";
 import TagsContext from "../../../context/tags/TagsContext";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function TagsTab() {
 
@@ -83,12 +82,12 @@ export default function TagsTab() {
                 columns={[
                     getColumnName(),
                     getColumnDescription(),
-                    getColumnBuckets(buckets, 'Show for buckets'),
-                    getColumnClasses(classes, 'Show by classes'),
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    getColumnBuckets(buckets, 'Available for buckets'),
+                    getColumnClasses(classes, 'Available by classes'),
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={tags != null ? tags : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

@@ -52,6 +52,10 @@ public class TaskService {
         return taskRepository.findAllByDeletedOrderById(false);
     }
 
+    public List<Task> getTasks(List<Long> ids) {
+        return taskRepository.findAllByDeletedAndIdIn(false, ids);
+    }
+
     public Task modifyTask(TaskDto taskDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
         if (taskDto.getId() == null)
             throw new ModifyByNullEntityIdException(Task.class);

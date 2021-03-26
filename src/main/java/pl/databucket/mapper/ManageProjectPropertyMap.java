@@ -16,8 +16,8 @@ public class ManageProjectPropertyMap extends PropertyMap<Project, ManageProject
         map().setUsersIds(source.getUsersIds());
 
         map().setCreatedBy(source.getCreatedBy());
-        map().setCreatedDate(source.getCreatedDate());
-        map().setLastModifiedBy(source.getLastModifiedBy());
-        map().setLastModifiedDate(source.getLastModifiedDate());
+        map().setCreatedAt(source.getCreatedAt());
+        map().setModifiedBy(source.getModifiedBy());
+        map().setModifiedAt(source.getModifiedAt());
     }
 }

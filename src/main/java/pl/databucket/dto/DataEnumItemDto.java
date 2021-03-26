@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DataEnumItemDto {
-    private String key;
-    private String textValue;
-    private String iconName;
+    private String value;
+    private String text;
+    private String icon;
 }

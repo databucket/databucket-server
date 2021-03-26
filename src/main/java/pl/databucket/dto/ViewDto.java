@@ -15,15 +15,6 @@ public class ViewDto {
     private String name;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
-    private boolean enabledDetails;
-    private boolean enabledCreation;
-    private boolean enabledModifying;
-    private boolean enabledRemoval;
-    private boolean enabledImport;
-    private boolean enabledExport;
-    private boolean enabledHistory;
-    private boolean enabledTasks;
-    private boolean enabledReservation;
     private Set<Long> classesIds;
     private Set<Long> bucketsIds;
     private Set<Long> usersIds;
@@ -31,9 +22,10 @@ public class ViewDto {
     private long columnsId;
     private Long filterId;
     private Short roleId;
+    private Short[] featuresIds;
 
     private String createdBy;
-    private Date createdDate;
-    private String lastModifiedBy;
-    private Date lastModifiedDate;
+    private Date createdAt;
+    private String modifiedBy;
+    private Date modifiedAt;
 }

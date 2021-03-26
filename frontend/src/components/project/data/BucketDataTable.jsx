@@ -1,13 +1,13 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import MaterialTable, {MTableToolbar} from 'material-table';
 import {getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableHeight, getTableRowBackgroundColor} from "../../../utils/MaterialTableHelper";
 import {useTheme} from "@material-ui/core/styles";
-import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
+import {getLastActiveView, getLastPageSize, setLastActiveView, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
 import {Grid} from "@material-ui/core";
 import ViewMenuSelector from "./ViewMenuSelector";
-import AccessTreeContext from "../../../context/accessTree/AccessTreeContext";
-import Typography from "@material-ui/core/Typography";
+import AccessContext from "../../../context/access/AccessContext";
+import MissingBucketTable from "./MissingBucketTable";
 
 
 export default function BucketDataTable() {
@@ -15,35 +15,57 @@ export default function BucketDataTable() {
     const theme = useTheme();
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [height] = useWindowDimension();
-    const accessTreeContext = useContext(AccessTreeContext);
-    const {activeBucket} = accessTreeContext;
+    const accessContext = useContext(AccessContext);
+    const {activeBucket, views} = accessContext;
+    const [state, setState] = useState({views: [], activeView: null, columns: [], data: []});
+
+    useEffect(() => {
+        if (views != null && activeBucket != null) {
+            // console.log("Active bucket: id=" + activeBucket.id + " classId=" + activeBucket.classId);
+            // console.log(activeBucket);
+            // console.log('Views:');
+            // console.log(views);
+
+            const availableViews = views.filter(view => (
+                (view.classesIds != null && view.classesIds.includes(activeBucket.classId))
+                ||
+                (view.bucketsIds != null && view.bucketsIds.includes(activeBucket.id)))
+            ).sort((a, b) => {
+                return a.name > b.name ? 1 : -1
+            });
+
+            // console.log('Available views:');
+            // console.log(availableViews);
+            let activeView = null;
+
+            if (availableViews.length > 0) {
+                const lastActiveViewId = getLastActiveView(activeBucket.id);
+                if (lastActiveViewId != null && availableViews.find(view => view.id === lastActiveViewId))
+                    activeView = availableViews.filter(view => view.id === lastActiveViewId)[0];
+                else
+                    activeView = availableViews[0];
+            }
+
+            setState(state => ({...state, views: availableViews, activeView: activeView}));
+        }
+    }, [activeBucket, views]);
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
         setLastPageSize(pageSize);
     }
 
-    const [columns] = useState([
-        {title: 'Name', field: 'name'},
-        {title: 'Surname', field: 'surname', initialEditValue: 'initial edit value'},
-    ]);
-
-    const onViewSelected = (id) => {
-        console.log("Menu -> selected view id: " + id);
+    const onViewSelected = (view) => {
+        setLastActiveView(activeBucket.id, view.id);
+        setState({...state, activeView: view});
     }
-
-    const [data] = useState([
-        {name: 'John', surname: 'Baran', birthYear: 1987, birthCity: 63},
-        {name: 'Ann', surname: 'Jonson', birthYear: 2017, birthCity: 34}
-    ]);
 
     if (activeBucket != null)
         return (
             <div style={{paddingTop: 0, paddingLeft: 0, paddingRight: 0}}>
                 <MaterialTable
-                    title={activeBucket.name}
-                    columns={columns}
-                    data={data}
+                    columns={state.columns}
+                    data={state.data}
                     options={{
                         paging: true,
                         pageSize: pageSize,
@@ -54,6 +76,7 @@ export default function BucketDataTable() {
                         selection: false,
                         filtering: false,
                         padding: 'dense',
+                        search: (state.activeView != null && state.activeView['enabledSearching']),
                         searchFieldStyle: {width: 600},
                         headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
                         maxBodyHeight: getTableHeight(height),
@@ -78,13 +101,9 @@ export default function BucketDataTable() {
                                 <Grid container direction="row">
                                     <Grid item xs={6}>
                                         <ViewMenuSelector
-                                            views={[
-                                                {id: 1, name: 'exmple view 1', description: 'This is example view for all data 1'},
-                                                {id: 2, name: 'exmple view 2', description: 'This is example view for all data 2'},
-                                                {id: 3, name: 'exmple view 3', description: 'This is example view for all data 3'}
-                                            ]}
-                                            selectedId={1}
-                                            onChange={id => onViewSelected(id)}
+                                            views={state.views}
+                                            activeView={state.activeView}
+                                            onChange={view => onViewSelected(view)}
                                         />
                                     </Grid>
                                     <Grid item xs={6}>
@@ -115,7 +134,7 @@ export default function BucketDataTable() {
             </div>
         );
     else
-        return <div><Typography>Welcome in Databucket :)</Typography></div>
+        return <MissingBucketTable />
 }
 
 // const useStyles = makeStyles((theme) => ({

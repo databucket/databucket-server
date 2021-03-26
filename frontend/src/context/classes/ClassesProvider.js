@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
 import ClassesReducer from "./ClassesReducer";
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getClassMapper} from "../../utils/NullValueMappers";
 import ClassesContext from "./ClassesContext";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const ClassesProvider = props => {
 

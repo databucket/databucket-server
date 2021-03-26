@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
 import ColumnsReducer from "./ColumnsReducer";
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getColumnsMapper} from "../../utils/NullValueMappers";
 import ColumnsContext from "./ColumnsContext";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const ColumnsProvider = props => {
 

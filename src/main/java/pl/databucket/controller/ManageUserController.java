@@ -83,16 +83,4 @@ public class ManageUserController {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }
     }
-
-    @GetMapping(value = "/roles")
-    public ResponseEntity<?> getRoles() {
-        try {
-            List<Role> roles = manageUserService.getRoles();
-            List<RoleDto> rolesDto = roles.stream().map(item -> modelMapper.map(item, RoleDto.class)).collect(Collectors.toList());
-            return new ResponseEntity<>(rolesDto, HttpStatus.OK);
-        } catch (IllegalArgumentException e1) {
-            return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
-        }
-    }
-
 }

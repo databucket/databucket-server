@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
 import BucketsContext from "./BucketsContext";
 import BucketsReducer from "./BucketsReducer";
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getBucketMapper} from "../../utils/NullValueMappers";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const BucketsProvider = props => {
 

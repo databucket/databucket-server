@@ -4,7 +4,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {getBaseUrl, getPostOptions} from "../../utils/MaterialTableHelper";
+import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
 import Typography from "@material-ui/core/Typography";
@@ -12,6 +12,7 @@ import IconButton from "@material-ui/core/IconButton";
 import CopyIcon from "@material-ui/icons/FileCopy";
 import FormControl from "@material-ui/core/FormControl";
 import {InputAdornment, OutlinedInput} from "@material-ui/core";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function ResetPasswordDialog(props) {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});

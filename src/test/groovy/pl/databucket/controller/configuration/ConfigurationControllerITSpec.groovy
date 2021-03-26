@@ -19,14 +19,14 @@ class ConfigurationControllerITSpec extends Specification {
   @Autowired
   MockMvc mockMvc
 
-  def "should return app title"() {
-    when:
-    def result = mockMvc.perform(get('/api/title'))
-
-    then:
-    result
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
-        .andExpect(jsonPath('$.title').value('Databucket'))
-  }
+//  def "should return app title"() {
+//    when:
+//    def result = mockMvc.perform(get('/api/title'))
+//
+//    then:
+//    result
+//        .andExpect(status().isOk())
+//        .andExpect(content().contentType(APPLICATION_JSON))
+//        .andExpect(jsonPath('$.title').value('Databucket'))
+//  }
 }

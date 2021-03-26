@@ -35,35 +35,8 @@ public class View extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@Column(nullable = false)
-	private boolean enabledDetails = true;
-
-	@Column(nullable = false)
-	private boolean enabledCreation = true;
-
-	@Column(nullable = false)
-	private boolean enabledModifying = true;
-
-	@Column(nullable = false)
-	private boolean enabledRemoval = true;
-
-	@Column(nullable = false)
-	private boolean enabledImport = true;
-
-	@Column(nullable = false)
-	private boolean enabledExport = true;
-
-	@Column(nullable = false)
-	private boolean enabledHistory = true;
-
-	@Column(nullable = false)
-	private boolean enabledTasks = true;
-
-	@Column(nullable = false)
-	private boolean enabledReservation = true;
-
-	@Column(nullable = false)
-	private boolean searching = true;
+	@Column(name = "features")
+	private Short[] featuresIds; // hibernate has problem with Set<Short>
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "views_classes",

@@ -115,7 +115,7 @@ export default function SelectSingleDialog(props) {
         <div>
             <Tooltip title={props.tooltipTitle}>
                 <Button
-                    startIcon={<MoreHoriz/>}
+                    endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
                 >
@@ -135,7 +135,7 @@ export default function SelectSingleDialog(props) {
                 <DialogContent dividers>
                     <MaterialTable
                         icons={getTableIcons()}
-                        title={props.tableTitle}
+                        title={props.tableTitle != null ? props.tableTitle : '-'}
                         tableRef={tableRef}
                         columns={[getColumnSelection(), ...props.columns]}
                         data={data}

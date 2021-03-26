@@ -2,7 +2,7 @@ import MaterialTable from "material-table";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions, getManagementTableHeight,
     getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
@@ -22,10 +22,10 @@ import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate, getColumnDescription,
+    getColumnCreatedAt, getColumnDescription,
     getColumnEnabled,
     getColumnExpirationDate,
-    getColumnId, getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnId, getColumnModifiedBy, getColumnModifiedAt,
     getColumnName
 } from "../utils/StandardColumns";
 import ManageUsersContext from "../../context/users/ManageUsersContext";
@@ -33,10 +33,13 @@ import SelectUsersDialog from "../project/dialogs/SelectUsersDialog";
 import RolesContext from "../../context/roles/RolesContext";
 import {getManageProjectMapper} from "../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
+import {useWindowDimension} from "../utils/UseWindowDimension";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function ProjectsTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -120,10 +123,10 @@ export default function ProjectsTab() {
                             />
                         )
                     },
-                    getColumnCreatedDate(),
+                    getColumnCreatedAt(),
                     getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    getColumnModifiedAt(),
+                    getColumnModifiedBy()
                 ]}
                 data={projects != null ? projects : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}
@@ -138,6 +141,8 @@ export default function ProjectsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getManagementTableHeight(height),
+                    minBodyHeight: getManagementTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

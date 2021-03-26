@@ -29,6 +29,7 @@ import Grid from "@material-ui/core/Grid";
 import {MessageBox} from "../utils/MessageBox";
 import {sortByKey} from "../../utils/JsonHelper";
 import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRouter";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const initialState = {
     username: "",
@@ -61,7 +62,7 @@ export default function LoginPage() {
     }
 
     const signIn = (username, password, projectId) => {
-        fetch(`${window.apiURL}/public/signin`, {
+        fetch(getBaseUrl('public/signin'), {
             method: 'POST',
             body: JSON.stringify(projectId == null ? {username, password} : {username, password, projectId}),
             headers: {'Content-Type': 'application/json'}

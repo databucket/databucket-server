@@ -55,6 +55,24 @@ export const validateItem = (data, specification) => {
                         if (value <= 0)
                             message += `${title} must be selected! `;
                     }
+
+                    if (validation === 'custom-check-enum-items') {
+                        const valueSet = new Set(data.items.map(({value}) => value));
+                        if (valueSet.size !== data.items.length)
+                            message += `Enum values must be unique! `;
+
+                        if (data.iconsEnabled === true && data.items.filter(item => item.icon == null).length > 0)
+                            message += `Every item must have defined an icon! `;
+                    }
+
+                    if (validation === 'validJsonPath') {
+                        // console.log("Check path: " + data[key]);
+                    }
+
+                    if (validation === 'validClassPropertyType') {
+                        if (data[key] === 'select' && data['enumId'] == null)
+                            message += `Enum must not be empty for 'Enum' type! `;
+                    }
                 }
             }
         }
@@ -110,9 +128,18 @@ export const getIdsStr = (inputIdsArray) => {
 
 export const getArrayLengthStr = (inputIdsArray) => {
     if (inputIdsArray != null && inputIdsArray.length > 0)
-        return `[${inputIdsArray.length}]`;
+        return `${inputIdsArray.length}`;
     else
-        return '[0]';
+        return '0';
+}
+
+export const getObjectLengthStr = (inputObject) => {
+    if (inputObject != null) {
+        const items = JSON.stringify(inputObject).trim().match(/\[{"var":/g);
+        if (items != null)
+            return `${items.length}`;
+    }
+    return '0';
 }
 
 export const getItemName = (objectCollection, id) => {
@@ -227,4 +254,12 @@ export const arraysEquals = (newData, oldData, fieldName) => {
         return newArray === oldArray;
     else
         return JSON.stringify(newArray.sort()) === JSON.stringify(oldArray.sort());
+}
+
+export const uuidV4 = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        // eslint-disable-next-line
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }

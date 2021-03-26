@@ -2,7 +2,7 @@ package pl.databucket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.databucket.dto.DataColumnsItemDto;
+import pl.databucket.dto.DataColumnsConfigDto;
 import pl.databucket.dto.DataEnumDto;
 import pl.databucket.entity.DataColumns;
 import pl.databucket.entity.DataEnum;
@@ -13,6 +13,7 @@ import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -32,7 +33,7 @@ public class DataEnumService {
         DataEnum dataEnum = new DataEnum();
         dataEnum.setName(dataEnumDto.getName());
         dataEnum.setDescription(dataEnumDto.getDescription());
-        dataEnum.setTextValues(dataEnumDto.isTextValues());
+        dataEnum.setIconsEnabled(dataEnumDto.isIconsEnabled());
         dataEnum.setItems(dataEnumDto.getItems());
         return dataEnumRepository.save(dataEnum);
     }
@@ -56,7 +57,7 @@ public class DataEnumService {
 
         dataEnum.setName(dataEnumDto.getName());
         dataEnum.setDescription(dataEnumDto.getDescription());
-        dataEnum.setTextValues(dataEnumDto.isTextValues());
+        dataEnum.setIconsEnabled(dataEnumDto.isIconsEnabled());
         dataEnum.setItems(dataEnumDto.getItems());
         return dataEnumRepository.save(dataEnum);
     }
@@ -70,9 +71,9 @@ public class DataEnumService {
         String usedByItems = "";
         List<DataColumns> dataColumnsList = dataColumnsRepository.findAllByDeletedOrderById(false);
         for (DataColumns columns : dataColumnsList)
-            for (DataColumnsItemDto columnsConfig : columns.getConfiguration())
-                if (columnsConfig.getEnumId() == dataEnumId)
-                    usedByItems += " Columns: " + columns.getName() + " -> Column: " + columnsConfig.getTitle() + ", ";
+            for (Map<String, Object> columnsConfig : columns.getConfiguration().getColumns())
+                if (columnsConfig.containsKey("enumId") && (int) columnsConfig.get("enumId") == dataEnumId)
+                    usedByItems += " Columns: " + columns.getName() + " -> Column: " + columnsConfig.get("title") + ", ";
 
         if (usedByItems.length() > 0)
             throw new ItemAlreadyUsedException("Columns", dataEnum.getName(), usedByItems);

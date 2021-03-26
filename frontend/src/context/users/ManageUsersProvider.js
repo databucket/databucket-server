@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import ManageUsersContext from "./ManageUsersContext";
 import UserReducer from "./UsersReducer";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 
 const ManageUsersProvider = props => {

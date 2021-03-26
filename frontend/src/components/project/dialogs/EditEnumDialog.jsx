@@ -62,7 +62,7 @@ const DialogContent = withStyles((theme) => ({
 
 EditEnumDialog.propTypes = {
     name: PropTypes.string.isRequired,
-    textValues: PropTypes.bool.isRequired,
+    iconsEnabled: PropTypes.bool.isRequired,
     items: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired
 }
@@ -79,13 +79,12 @@ export default function EditEnumDialog(props) {
     const getColumns = () => {
         let columnsArray = [];
         columnsArray.push({title: '#', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''});
-        columnsArray.push({title: 'Key', field: 'key'});
-        if (props.textValues)
-            columnsArray.push({title: 'Text', field: 'textValue'});
-        else
+        columnsArray.push({title: 'Value', field: 'value'});
+        columnsArray.push({title: 'Text', field: 'text'});
+        if (props.iconsEnabled)
             columnsArray.push({
-                title: 'Icon', field: 'iconName',
-                render: rowData => <DynamicIcon iconName={rowData.iconName}/>,
+                title: 'Icon', field: 'icon',
+                render: rowData => <DynamicIcon iconName={rowData.icon}/>,
                 editComponent: props => <EditIconDialog value={props.value} onChange={props.onChange}/>
             });
         return columnsArray;
@@ -96,24 +95,17 @@ export default function EditEnumDialog(props) {
     };
 
     const handleSave = () => {
-        let dataClone = JSON.parse(JSON.stringify(data));
-        for (let i = 0; i < dataClone.length; i++) {
-            let col = dataClone[i];
-            delete col['tableData'];
-            delete col['sorting'];
-            delete col['filtering'];
-        }
-        props.onChange(dataClone);
+        props.onChange(data.map(({value, text, icon}) => ({value, text, icon})));
         setOpen(false);
     }
 
     const isValid = (dataItem) => {
         let message = '';
-        if (dataItem.key == null || dataItem.key.length === 0)
-            message = "The key must not be empty"
+        if (dataItem.value == null || dataItem.value.length === 0)
+            message = "The value must not be empty"
 
-        else if (data.filter(item => item.key === dataItem.key).length > 0)
-            message = "The key must be unique"
+        else if (dataItem.text == null || dataItem.text.length === 0)
+            message = "The text must not be empty"
 
         if (message.length > 0)
             setMessageBox({open: true, severity: 'error', title: 'Error', message: message});
@@ -125,10 +117,10 @@ export default function EditEnumDialog(props) {
         <div>
             <Tooltip title='Define items'>
                 <Button
-                    startIcon={<MoreHoriz/>}
+                    endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                 >
-                    {`[${data.length}]`}
+                    {`${data.length}`}
                 </Button>
             </Tooltip>
             <Dialog
@@ -139,12 +131,12 @@ export default function EditEnumDialog(props) {
                 maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             >
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
-                    {`Values configuration`}
+                    {`Enum: ${props.name}`}
                 </DialogTitle>
                 <DialogContent dividers>
                     <MaterialTable
                         icons={getTableIcons()}
-                        title={`Column: ${props.name}`}
+                        title={`Value list`}
                         tableRef={tableRef}
                         columns={getColumns()}
                         data={data}

@@ -98,11 +98,11 @@ export default function SelectMultiDialog(props) {
         <div>
             <Tooltip title={props.tooltipTitle}>
                 <Button
-                    startIcon={<MoreHoriz/>}
+                    endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
                 >
-                    {`[${selection.length}]`}
+                    {`${selection.length}`}
                 </Button>
             </Tooltip>
             <Dialog
@@ -118,7 +118,7 @@ export default function SelectMultiDialog(props) {
                 <DialogContent dividers>
                     <MaterialTable
                         icons={getTableIcons()}
-                        title={props.tableTitle}
+                        title={props.tableTitle != null ? props.tableTitle : '-'}
                         tableRef={tableRef}
                         columns={props.columns}
                         data={data}

@@ -3,7 +3,7 @@ import SelectMultiDialog from "../../utils/SelectMultiDialog";
 import PropTypes from 'prop-types';
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate,
+    getColumnCreatedAt,
     getColumnDescription,
     getColumnEnabled,
     getColumnExpirationDate,
@@ -25,7 +25,7 @@ export default function SelectProjectsDialog(props) {
         getColumnName(),
         getColumnDescription(),
         getColumnExpirationDate(),
-        getColumnCreatedDate(),
+        getColumnCreatedAt(),
         getColumnCreatedBy()
     ]
 
@@ -36,7 +36,7 @@ export default function SelectProjectsDialog(props) {
             ids={props.rowData['projectsIds'] != null ? props.rowData['projectsIds'] : []}
             tooltipTitle={'Select projects'}
             dialogTitle={'Select projects'}
-            tableTitle={'Selected user: ' + props.rowData['username']}
+            tableTitle={(props.rowData['username'] || '-')}
             maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />

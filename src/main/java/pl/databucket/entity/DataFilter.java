@@ -8,14 +8,11 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import pl.databucket.configuration.Constants;
-import pl.databucket.dto.DataFilterItemDto;
+import pl.databucket.dto.DataFilterConfigDto;
 import org.hibernate.annotations.Filter;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -41,9 +38,13 @@ public class DataFilter extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
+	@OneToOne
+	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
+	private DataClass dataClass;
+
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private List<DataFilterItemDto> configuration;
+	private DataFilterConfigDto configuration;
 
 	@JsonIgnore
 	private Boolean deleted = false;

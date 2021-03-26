@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
 import EnumsReducer from "./EnumsReducer";
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getEnumMapper} from "../../utils/NullValueMappers";
 import EnumsContext from "./EnumsContext";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const EnumsProvider = props => {
 

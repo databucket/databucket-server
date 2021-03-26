@@ -11,15 +11,7 @@ public class ViewPropertyMap extends PropertyMap<View, ViewDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setEnabledDetails(source.isEnabledDetails());
-        map().setEnabledCreation(source.isEnabledCreation());
-        map().setEnabledModifying(source.isEnabledModifying());
-        map().setEnabledRemoval(source.isEnabledRemoval());
-        map().setEnabledImport(source.isEnabledImport());
-        map().setEnabledExport(source.isEnabledExport());
-        map().setEnabledHistory(source.isEnabledHistory());
-        map().setEnabledTasks(source.isEnabledTasks());
-        map().setEnabledReservation(source.isEnabledReservation());
+        map().setFeaturesIds(source.getFeaturesIds());
         map().setBucketsIds(source.getBucketsIds());
         map().setClassesIds(source.getClassesIds());
         map().setColumnsId(source.getDataColumns().getId());
@@ -29,8 +21,8 @@ public class ViewPropertyMap extends PropertyMap<View, ViewDto> {
         map().setTeamsIds(source.getTeamsIds());
 
         map().setCreatedBy(source.getCreatedBy());
-        map().setCreatedDate(source.getCreatedDate());
-        map().setLastModifiedBy(source.getLastModifiedBy());
-        map().setLastModifiedDate(source.getLastModifiedDate());
+        map().setCreatedAt(source.getCreatedAt());
+        map().setModifiedBy(source.getModifiedBy());
+        map().setModifiedAt(source.getModifiedAt());
     }
 }

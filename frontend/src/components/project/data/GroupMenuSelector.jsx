@@ -8,7 +8,7 @@ import List from "@material-ui/core/List";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
 import Divider from "@material-ui/core/Divider";
-import AccessTreeContext from "../../../context/accessTree/AccessTreeContext";
+import AccessContext from "../../../context/access/AccessContext";
 
 GroupMenuSelector.propTypes = {
     open: PropTypes.bool.isRequired // is the left list of buckets open?
@@ -17,13 +17,24 @@ GroupMenuSelector.propTypes = {
 export default function GroupMenuSelector(props) {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const accessTreeContext = useContext(AccessTreeContext);
-    const {accessTree, activeGroup, fetchAccessTree, setActiveGroup} = accessTreeContext;
+    const accessContext = useContext(AccessContext);
+    const {accessTree, activeGroup, fetchAccessTree, setActiveGroup, views, fetchViews, columns, fetchColumns} = accessContext;
 
     useEffect(() => {
         if (accessTree == null)
             fetchAccessTree();
     }, [accessTree, fetchAccessTree]);
+
+    useEffect(() => {
+        if (accessTree != null && accessTree.views != null && views == null)
+            fetchViews();
+    }, [accessTree, views, fetchViews]);
+
+    useEffect(() => {
+        if (views != null && columns == null)
+            fetchColumns();
+    }, [views, columns, fetchColumns]);
+
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);

@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -18,16 +18,15 @@ import {
 } from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName
 } from "../../utils/StandardColumns";
 import ClassesContext from "../../../context/classes/ClassesContext";
 import {getClassMapper} from "../../../utils/NullValueMappers";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
-import EditColumnsDialog from "../dialogs/EditColumnsDialog";
+import EditClassFieldsDialog from "../dialogs/EditClassFieldsDialog";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function ClassesTab() {
 
@@ -39,7 +38,7 @@ export default function ClassesTab() {
     const [filtering, setFiltering] = useState(false);
     const classesContext = useContext(ClassesContext);
     const {classes, fetchClasses, addClass, editClass, removeClass} = classesContext;
-    const changeableFields = ['name', 'description'];
+    const changeableFields = ['name', 'description', 'configuration'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -65,14 +64,15 @@ export default function ClassesTab() {
                     getColumnName(),
                     getColumnDescription(),
                     {
-                        title: 'Fields',
-                        field: 'schema',
+                        title: 'Properties',
+                        field: 'configuration',
                         filtering: false,
                         searchable: false,
                         sorting: false,
-                        render: rowData => getArrayLengthStr(rowData['schema']),
+                        initialEditValue: [],
+                        render: rowData => getArrayLengthStr(rowData['configuration']),
                         editComponent: props => (
-                            <EditColumnsDialog
+                            <EditClassFieldsDialog
                                 configuration={props.rowData.configuration != null ? props.rowData.configuration : []}
                                 name={props.rowData.name != null ? props.rowData.name : ''}
                                 description={props.rowData.description != null && props.rowData.description.length > 0 ? "(" + props.rowData.description + ")" : ''}
@@ -80,10 +80,10 @@ export default function ClassesTab() {
                             />
                         )
                     },
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={classes != null ? classes : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}
@@ -150,7 +150,6 @@ export default function ClassesTab() {
 
                     onRowUpdate: (newData, oldData) =>
                         new Promise((resolve, reject) => {
-
                             if (!isItemChanged(oldData, newData, changeableFields)) {
                                 setMessageBox({
                                     open: true,

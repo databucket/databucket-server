@@ -3,15 +3,15 @@ import IconButton from '@material-ui/core/IconButton';
 import ProjectIcon from '@material-ui/icons/LocalParking';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from "@material-ui/core/MenuItem";
-import AccessTreeContext from "../../../context/accessTree/AccessTreeContext";
+import AccessContext from "../../../context/access/AccessContext";
 import {getActiveProjectId} from "../../../utils/ConfigurationStorage";
 
 export default function UserProjects(props) {
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const accessTreeContext = useContext(AccessTreeContext);
-    const {accessTree} = accessTreeContext;
+    const accessContext = useContext(AccessContext);
+    const {accessTree} = accessContext;
 
     document.title = accessTree != null && accessTree.projects != null ? 'Databucket - ' + accessTree.projects.find(project => project.id === getActiveProjectId()).name : 'Databucket';
 

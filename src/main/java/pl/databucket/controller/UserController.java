@@ -8,19 +8,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.*;
-import pl.databucket.entity.Bucket;
-import pl.databucket.entity.Group;
-import pl.databucket.entity.User;
-import pl.databucket.entity.View;
+import pl.databucket.entity.*;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.SomeItemsNotFoundException;
 import pl.databucket.security.CustomUserDetails;
 import pl.databucket.security.TokenProvider;
-import pl.databucket.service.BucketService;
-import pl.databucket.service.GroupService;
-import pl.databucket.service.UserService;
-import pl.databucket.service.ViewService;
+import pl.databucket.service.*;
 
 import javax.validation.Valid;
 import java.util.*;
@@ -42,6 +36,15 @@ public class UserController {
 
     @Autowired
     private ViewService viewService;
+
+    @Autowired
+    private DataColumnsService columnsService;
+
+    @Autowired
+    private DataFilterService filterService;
+
+    @Autowired
+    private TaskService taskService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -159,6 +162,54 @@ public class UserController {
         }
 
         return accessTreeDto;
+    }
+
+    @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
+    @GetMapping(value="/views/{ids}")
+    public ResponseEntity<?> getUserViews(@PathVariable List<Long> ids) {
+        try {
+            List<View> views = viewService.getViews(ids);
+            List<UserViewDto> viewsDto = views.stream().map(item -> modelMapper.map(item, UserViewDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(viewsDto, HttpStatus.OK);
+        } catch (Exception ee) {
+            return exceptionFormatter.defaultException(ee);
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
+    @GetMapping(value="/columns/{ids}")
+    public ResponseEntity<?> getUserColumns(@PathVariable List<Long> ids) {
+        try {
+            List<DataColumns> dataColumns = columnsService.getColumns(ids);
+            List<UserColumnsDto> dataColumnsDto = dataColumns.stream().map(item -> modelMapper.map(item, UserColumnsDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(dataColumnsDto, HttpStatus.OK);
+        } catch (Exception ee) {
+            return exceptionFormatter.defaultException(ee);
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
+    @GetMapping(value="/filters/{ids}")
+    public ResponseEntity<?> getUserFilters(@PathVariable List<Long> ids) {
+        try {
+            List<DataFilter> dataFilters = filterService.getFilters(ids);
+            List<DataFilterDto> dataFiltersDto = dataFilters.stream().map(item -> modelMapper.map(item, DataFilterDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(dataFiltersDto, HttpStatus.OK);
+        } catch (Exception ee) {
+            return exceptionFormatter.defaultException(ee);
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
+    @GetMapping(value="/tasks/{ids}")
+    public ResponseEntity<?> getUserTasks(@PathVariable List<Long> ids) {
+        try {
+            List<Task> tasks = taskService.getTasks(ids);
+            List<TaskDto> tasksDto = tasks.stream().map(item -> modelMapper.map(item, TaskDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(tasksDto, HttpStatus.OK);
+        } catch (Exception ee) {
+            return exceptionFormatter.defaultException(ee);
+        }
     }
 
 }

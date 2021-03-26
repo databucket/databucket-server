@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SelectMultiDialog from "../../utils/SelectMultiDialog";
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate,
+    getColumnCreatedAt,
     getColumnDescription,
     getColumnName
 } from "../../utils/StandardColumns";
@@ -27,7 +27,7 @@ export default function SelectBucketsDialog(props) {
         getColumnName(),
         getColumnDescription(),
         { title: 'Class', field: 'classId' },
-        getColumnCreatedDate(),
+        getColumnCreatedAt(),
         getColumnCreatedBy()
     ]
 
@@ -38,7 +38,7 @@ export default function SelectBucketsDialog(props) {
             ids={props.rowData['bucketsIds'] != null ? props.rowData['bucketsIds'] : []}
             tooltipTitle={'Select buckets'}
             dialogTitle={'Select buckets'}
-            tableTitle={'Name: ' + (props.rowData['name'] || props.rowData['username'])}
+            tableTitle={(props.rowData['name'] || props.rowData['username'] || '-')}
             maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />

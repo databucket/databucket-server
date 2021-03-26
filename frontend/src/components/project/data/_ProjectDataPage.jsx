@@ -35,11 +35,12 @@ import GroupMenuSelector from "./GroupMenuSelector";
 import BucketListSelector from "./BucketListSelector";
 import InfoDialog from "../dialogs/InfoDialog";
 import BucketTabSelector from "./BucketTabSelector";
-import AccessTreeProvider from "../../../context/accessTree/AccessTreeProvider";
+import AccessProvider from "../../../context/access/AccessProvider";
 import UserProjects from "./UserProjects";
 import {MessageBox} from "../../utils/MessageBox";
 import {handleErrors} from "../../../utils/FetchHelper";
-import {getBaseUrl, getPostOptions} from "../../../utils/MaterialTableHelper";
+import {getPostOptions} from "../../../utils/MaterialTableHelper";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 const drawerWidth = 240;
 
@@ -149,7 +150,7 @@ export default function _ProjectDataPage() {
 
     if (logged) {
         return (
-            <AccessTreeProvider>
+            <AccessProvider>
                 <div className={classes.root}>
                     <AppBar
                         position="fixed"
@@ -220,14 +221,14 @@ export default function _ProjectDataPage() {
                     </Drawer>
                     <main className={classes.content}>
                         <div className={classes.toolbar}/>
-                        <BucketDataTable message={"hello"}/>
+                        <BucketDataTable />
                     </main>
                 </div>
                 <MessageBox
                     config={messageBox}
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
-            </AccessTreeProvider>
+            </AccessProvider>
         );
     } else
         return (<Redirect to="/login"/>);

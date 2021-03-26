@@ -21,7 +21,7 @@ public class TagDto {
     private Set<Long> classesIds;
 
     private String createdBy;
-    private Date createdDate;
-    private String lastModifiedBy;
-    private Date lastModifiedDate;
+    private Date createdAt;
+    private String modifiedBy;
+    private Date modifiedAt;
 }

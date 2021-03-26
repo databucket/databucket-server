@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -20,10 +20,8 @@ import {
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnClass,
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription, getColumnGroups,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName, getColumnRole, getColumnTeams, getColumnUsers
 } from "../../utils/StandardColumns";
 import BucketsContext from "../../../context/buckets/BucketsContext";
@@ -37,6 +35,7 @@ import ConfirmRemovingDialog from "../../utils/ConfirmRemovingDialog";
 import ClassesContext from "../../../context/classes/ClassesContext";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
 import TeamsContext from "../../../context/teams/TeamsContext";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function BucketsTab() {
 
@@ -143,10 +142,10 @@ export default function BucketsTab() {
                     getColumnUsers(users, roles, 'Access for users'),
                     getColumnRole(roles, 'Access by role'),
                     getColumnTeams(teams, 'Access by teams'),
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={buckets != null ? buckets : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

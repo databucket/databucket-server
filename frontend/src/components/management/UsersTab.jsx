@@ -2,7 +2,7 @@ import MaterialTable from "material-table";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getBaseUrl,
+    getManagementTableHeight,
     getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor, getUserIcon
 } from "../../utils/MaterialTableHelper";
@@ -27,16 +27,19 @@ import ManageUsersContext from "../../context/users/ManageUsersContext";
 import ProjectsContext from "../../context/projects/ProjectsContext";
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate,
+    getColumnCreatedAt,
     getColumnEnabled,
     getColumnExpirationDate,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
+import {useWindowDimension} from "../utils/UseWindowDimension";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function UsersTab() {
 
     const theme = useTheme();
+    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [resetPasswordDialog, setResetPasswordDialog] = useState({open: false, username: null});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -101,10 +104,10 @@ export default function UsersTab() {
                         )
                     },
                     getColumnExpirationDate(),
-                    getColumnCreatedDate(),
+                    getColumnCreatedAt(),
                     getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    getColumnModifiedAt(),
+                    getColumnModifiedBy()
                 ]}
                 data={users != null ? users : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}
@@ -119,6 +122,8 @@ export default function UsersTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    maxBodyHeight: getManagementTableHeight(height),
+                    minBodyHeight: getManagementTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

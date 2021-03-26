@@ -19,21 +19,6 @@ public class DataClassService {
     @Autowired
     private BucketRepository bucketRepository;
 
-    @Autowired
-    private TagRepository tagRepository;
-
-    @Autowired
-    private DataFilterRepository dataFilterRepository;
-
-    @Autowired
-    private DataColumnsRepository dataColumnsRepository;
-
-    @Autowired
-    private ViewRepository viewRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
 
     public DataClass createDataClass(DataClassDto dataClassDto) throws ItemAlreadyExistsException {
         if (dataClassRepository.existsByNameAndDeleted(dataClassDto.getName(), false))
@@ -42,6 +27,8 @@ public class DataClassService {
         DataClass dataClass = new DataClass();
         dataClass.setName(dataClassDto.getName());
         dataClass.setDescription(dataClassDto.getDescription());
+        if (dataClassDto.getConfiguration() != null && dataClassDto.getConfiguration().size() > 0)
+            dataClass.setConfiguration(dataClassDto.getConfiguration());
         return dataClassRepository.save(dataClass);
     }
 
@@ -64,6 +51,11 @@ public class DataClassService {
 
         dataClass.setName(dataClassDto.getName());
         dataClass.setDescription(dataClassDto.getDescription());
+
+        if (dataClassDto.getConfiguration() != null && dataClassDto.getConfiguration().size() > 0)
+            dataClass.setConfiguration(dataClassDto.getConfiguration());
+        else
+            dataClass.setConfiguration(null);
         return dataClassRepository.save(dataClass);
     }
 

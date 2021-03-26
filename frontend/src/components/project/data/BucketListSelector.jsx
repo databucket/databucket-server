@@ -4,12 +4,12 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import List from "@material-ui/core/List";
 import DynamicIcon from "../../utils/DynamicIcon";
-import AccessTreeContext from "../../../context/accessTree/AccessTreeContext";
+import AccessContext from "../../../context/access/AccessContext";
 
 export default function BucketListSelector() {
 
-    const accessTreeContext = useContext(AccessTreeContext);
-    const {accessTree, activeGroup, activeBucket, addTab} = accessTreeContext;
+    const accessContext = useContext(AccessContext);
+    const {accessTree, activeGroup, activeBucket, addTab} = accessContext;
     const [buckets, setBuckets] = useState([]);
 
     useEffect(() => {

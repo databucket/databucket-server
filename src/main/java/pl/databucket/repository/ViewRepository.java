@@ -11,6 +11,6 @@ public interface ViewRepository extends JpaRepository<View, Long> {
 
     View findByIdAndDeleted(long id, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
-    List<View> findAllByDeletedAndIdIn(boolean deleted, Iterable<Long> longs);
+    List<View> findAllByDeletedAndIdIn(boolean deleted, Iterable<Long> ids);
     List<View> findAllByDeletedOrderById(boolean deleted);
 }

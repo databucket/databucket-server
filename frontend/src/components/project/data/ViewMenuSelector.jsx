@@ -7,7 +7,7 @@ import {makeStyles} from "@material-ui/core/styles";
 
 ViewMenuSelector.propTypes = {
     views: PropTypes.array.isRequired,
-    selectedId: PropTypes.number.isRequired,
+    activeView: PropTypes.object,
     onChange: PropTypes.func.isRequired
 }
 
@@ -15,7 +15,7 @@ export default function ViewMenuSelector(props) {
     const classes = useStyles();
 
     const handleSelected = (view) => {
-        props.onChange(view.id);
+        props.onChange(view);
     }
 
     const getViewName = (view) => {
@@ -26,23 +26,20 @@ export default function ViewMenuSelector(props) {
     }
 
     const getSelectedDescription = () => {
-        if (props.views.length > 0 && props.selectedId > 0) {
-            const selectedView = props.views.find(view => view.id === props.selectedId);
-            if (selectedView != null)
-                if (selectedView.description.length > 40)
-                    return selectedView.description.substring(0, 40) + "...";
-                else
-                    return selectedView.description;
-        } else
-            return '';
+        if (props.activeView != null)
+            if (props.activeView.description.length > 0)
+                return props.activeView.description;
+            else
+                return '---';
+        else
+            return '---'
     }
 
     if (props.views.length > 0)
         return (
             <div className={classes.root}>
                 <Grid container direction="row" alignItems="center">
-                    {/*<Typography className={classes.view}>View:</Typography>*/}
-                    <Select className={classes.select} value={props.selectedId}>
+                    <Select className={classes.select} value={props.activeView != null ? props.activeView.id : 0}>
                         {props.views.map((view) => (
                             <MenuItem
                                 key={view.id}
@@ -63,7 +60,13 @@ export default function ViewMenuSelector(props) {
             </div>
         );
     else
-        return (<Typography>- no views -</Typography>);
+        return (
+            <Typography
+                variant="h6"
+                className={classes.description}
+            >
+                {'Create a dedicated view for this bucket or assign an existing one.'}
+            </Typography>);
 };
 
 const useStyles = makeStyles((theme) => ({

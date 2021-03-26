@@ -152,7 +152,7 @@ public class PublicController {
             return new ResponseEntity<>(authDtoResponse, status);
 
         } catch (AuthenticationException e) {
-            return exceptionFormatter.customException(e, HttpStatus.UNAUTHORIZED);
+            return exceptionFormatter.customException(userDto.getUsername(), e, HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

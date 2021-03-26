@@ -155,6 +155,10 @@ public class BucketService {
         return bucketRepository.findAllByDeletedOrderById(false);
     }
 
+    public List<Bucket> getBuckets(List<Long> ids) {
+        return bucketRepository.findAllByDeletedAndIdIn(false, ids);
+    }
+
     public Bucket modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
         if (bucketDto.getId() == null)
             throw new ModifyByNullEntityIdException(Bucket.class);

@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -18,16 +18,15 @@ import {
 } from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName
 } from "../../utils/StandardColumns";
 import {getEnumMapper} from "../../../utils/NullValueMappers";
 import EditEnumDialog from "../dialogs/EditEnumDialog";
 import EnumsContext from "../../../context/enums/EnumsContext";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function EnumsTab() {
 
@@ -39,10 +38,11 @@ export default function EnumsTab() {
     const [filtering, setFiltering] = useState(false);
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums, addEnum, editEnum, removeEnum} = enumsContext;
-    const changeableFields = ['name', 'description', 'textValues', 'items'];
+    const changeableFields = ['name', 'description', 'iconsEnabled', 'items'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
-        description: {title: 'Description', check: ['max250']}
+        description: {title: 'Description', check: ['max250']},
+        items: {title: 'Items', check: ['custom-check-enum-items']}
     };
 
     useEffect(() => {
@@ -65,12 +65,10 @@ export default function EnumsTab() {
                     getColumnName(),
                     getColumnDescription(),
                     {
-                        title: 'Values',
-                        field: 'textValues',
+                        title: 'Icons enabled',
+                        field: 'iconsEnabled',
                         type: 'boolean',
-                        initialEditValue: true,
-                        render: rowData => (rowData['textValues'] === true ? 'Text' : 'Images'),
-                        lookup: {true: 'Text', false: 'Images'}
+                        initialEditValue: false
                     },
                     {
                         title: 'Items', field: 'items',
@@ -78,16 +76,16 @@ export default function EnumsTab() {
                         editComponent: props => (
                             <EditEnumDialog
                                 name={props.rowData['name'] != null ? props.rowData['name'] : ''}
-                                textValues={props.rowData['textValues'] === true || props.rowData['textValues'] === 'true'}
+                                iconsEnabled={props.rowData['iconsEnabled'] === true || props.rowData['iconsEnabled'] === 'true'}
                                 items={props.rowData['items'] != null ? props.rowData['items'] : []}
                                 onChange={props.onChange}
                             />
                         )
                     },
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={enums != null ? enums : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

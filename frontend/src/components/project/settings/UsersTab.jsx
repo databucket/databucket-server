@@ -2,7 +2,6 @@ import MaterialTable from "material-table";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../../utils/MessageBox";
 import {
-    getBaseUrl,
     getPageSizeOptions, getPutOptions, getSettingsTableHeight, getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor, getUserIcon
 } from "../../../utils/MaterialTableHelper";
@@ -21,14 +20,13 @@ import {handleErrors} from "../../../utils/FetchHelper";
 import RolesContext from "../../../context/roles/RolesContext";
 import UsersContext from "../../../context/users/UsersContext";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedDate,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
 } from "../../utils/StandardColumns";
 import {getManageUserMapper} from "../../../utils/NullValueMappers";
 import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
 import TeamsContext from "../../../context/teams/TeamsContext";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function UsersTab() {
 
@@ -95,10 +93,10 @@ export default function UsersTab() {
                             />
                         )
                     },
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={users != null ? users : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

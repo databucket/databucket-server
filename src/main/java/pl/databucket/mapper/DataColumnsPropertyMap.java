@@ -11,11 +11,12 @@ public class DataColumnsPropertyMap extends PropertyMap<DataColumns, DataColumns
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
+        map().setClassId(source.getDataClass().getId());
         map().setConfiguration(source.getConfiguration());
 
         map().setCreatedBy(source.getCreatedBy());
-        map().setCreatedDate(source.getCreatedDate());
-        map().setLastModifiedBy(source.getLastModifiedBy());
-        map().setLastModifiedDate(source.getLastModifiedDate());
+        map().setCreatedAt(source.getCreatedAt());
+        map().setModifiedBy(source.getModifiedBy());
+        map().setModifiedAt(source.getModifiedAt());
     }
 }

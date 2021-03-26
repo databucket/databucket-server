@@ -24,6 +24,13 @@ public class ExceptionFormatter {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    public ResponseEntity<Map<String, Object>> customException(String userName, Exception e, HttpStatus status) {
+        logger.warn("[" + userName + "] " + e.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", e.getMessage());
+        return new ResponseEntity<>(response, status);
+    }
+
     public ResponseEntity<Map<String, Object>> customException(Exception e, HttpStatus status) {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.warn("[" + userName + "] " + e.getMessage());

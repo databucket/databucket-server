@@ -22,8 +22,8 @@ public class ManageProjectDto {
     private Set<Long> usersIds;
 
     private String createdBy;
-    private Date createdDate;
-    private String lastModifiedBy;
-    private Date lastModifiedDate;
+    private Date createdAt;
+    private String modifiedBy;
+    private Date modifiedAt;
 
 }

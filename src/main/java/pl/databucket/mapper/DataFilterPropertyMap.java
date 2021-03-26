@@ -12,10 +12,11 @@ public class DataFilterPropertyMap extends PropertyMap<DataFilter, DataFilterDto
         map().setName(source.getName());
         map().setDescription(source.getDescription());
         map().setConfiguration(source.getConfiguration());
+        map().setClassId(source.getDataClass().getId());
 
         map().setCreatedBy(source.getCreatedBy());
-        map().setCreatedDate(source.getCreatedDate());
-        map().setLastModifiedBy(source.getLastModifiedBy());
-        map().setLastModifiedDate(source.getLastModifiedDate());
+        map().setCreatedAt(source.getCreatedAt());
+        map().setModifiedBy(source.getModifiedBy());
+        map().setModifiedAt(source.getModifiedAt());
     }
 }

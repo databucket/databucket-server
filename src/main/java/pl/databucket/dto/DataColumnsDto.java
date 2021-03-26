@@ -5,7 +5,6 @@ import lombok.Setter;
 import pl.databucket.configuration.Constants;
 import javax.validation.constraints.Size;
 import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
@@ -15,10 +14,11 @@ public class DataColumnsDto {
     private String name;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
-    private List<DataColumnsItemDto> configuration;
+    private Long classId;
+    private DataColumnsConfigDto configuration;
 
     private String createdBy;
-    private Date createdDate;
-    private String lastModifiedBy;
-    private Date lastModifiedDate;
+    private Date createdAt;
+    private String modifiedBy;
+    private Date modifiedAt;
 }

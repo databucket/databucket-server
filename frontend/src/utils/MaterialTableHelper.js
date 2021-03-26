@@ -22,29 +22,6 @@ import DisabledUserIcon from "@material-ui/icons/NotInterested";
 import ExpiredUserIcon from "@material-ui/icons/EventBusy";
 import Tooltip from "@material-ui/core/Tooltip";
 
-export const getPageableUlr = (endpoint, query, enableFilters) => {
-
-    let url = `${window.apiURL}/${endpoint}?size=${query.pageSize}&page=${query.page}`;
-
-    if (query.orderBy != null && query.orderBy.field != null)
-        url += `&sort=${query.orderBy.field}`;
-    if (query.orderDirection === 'desc')
-        url += ',desc';
-
-    if (enableFilters && query.filters.length > 0)
-        for (const filter of query.filters)
-            if (filter.column.type === 'boolean')
-                url += `&${filter.column.field}=${filter.value === 'checked'}`;
-            else
-                url += `&${filter.column.field}=${escape(filter.value)}`;
-
-    return url;
-}
-
-export const getBaseUrl = (endpoint) => {
-    return `${window.apiURL}/${endpoint}`;
-}
-
 const reverseMapping = (payload) => {
     let newPayload = JSON.parse(JSON.stringify(payload));
 
@@ -245,6 +222,11 @@ export const getTableHeight = (height) => {
     return `${tableHeight}vh`;
 }
 
+export const getManagementTableHeight = (height) => {
+    const tableHeight = ((height - 64 - 64 - 40) / height * 100).toFixed(2);
+    return `${tableHeight}vh`;
+}
+
 export const getSettingsTableHeight = (height) => {
     const tableHeight = ((height - 64 - 64 + 10) / height * 100).toFixed(2);
     return `${tableHeight}vh`;
@@ -252,5 +234,10 @@ export const getSettingsTableHeight = (height) => {
 
 export const getDialogTableHeight = (height, custom) => {
     const tableHeight = ((height - 64 - 64 - 52 - 2) / height * 100).toFixed(2) - custom;
+    return `${tableHeight}vh`;
+}
+
+export const getFilterDialogTableHeight = (height, custom) => {
+    const tableHeight = ((height - 64 - 64 - 193) / height * 100).toFixed(2) - custom;
     return `${tableHeight}vh`;
 }

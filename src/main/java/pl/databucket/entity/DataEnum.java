@@ -9,7 +9,6 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import pl.databucket.configuration.Constants;
-import pl.databucket.dto.DataColumnsItemDto;
 import pl.databucket.dto.DataEnumItemDto;
 import pl.databucket.tenant.TenantSupport;
 
@@ -37,8 +36,8 @@ public class DataEnum extends Auditable<String> implements TenantSupport {
 	@Column(name = "enum_name", length = Constants.NAME_MAX)
 	private String name;
 
-	@Column(name = "text_values")
-	private boolean textValues;
+	@Column(name = "icons_enabled")
+	private boolean iconsEnabled;
 
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;

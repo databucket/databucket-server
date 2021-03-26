@@ -12,6 +12,7 @@ import {clearToken, getToken, getUsername} from "../../utils/ConfigurationStorag
 import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
 import {Redirect} from "react-router-dom";
 import {getProjectDataPath} from "../../route/AppRouter";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const initialState = {
     password: "",
@@ -27,7 +28,7 @@ export default function ChangePasswordPage() {
     const handleChangePassword = () => {
         const username = getUsername();
         if (newPassword === newPasswordConfirmation) {
-            fetch(`${window.apiURL}/users/password/change`, {
+            fetch(getBaseUrl('users/password/change'), {
                 method: 'POST',
                 body: JSON.stringify({username, password, newPassword}),
                 headers: fetchHelper(getToken())

@@ -6,7 +6,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Tabs from "@material-ui/core/Tabs";
 import {lighten, makeStyles, withStyles} from "@material-ui/core/styles";
 import {getAppBarBackgroundColor} from "../../../utils/Themes";
-import AccessTreeContext from "../../../context/accessTree/AccessTreeContext";
+import AccessContext from "../../../context/access/AccessContext";
 
 const useStyles = makeStyles((theme) => ({
     tabs: {
@@ -34,8 +34,8 @@ const StyledTab = withStyles(styles)(Tab)
 
 export default function BucketTabSelector() {
     const classes = useStyles();
-    const accessTreeContext = useContext(AccessTreeContext);
-    const {bucketsTabs, activeBucket, setActiveBucket, removeTab} = accessTreeContext;
+    const accessContext = useContext(AccessContext);
+    const {bucketsTabs, activeBucket, setActiveBucket, removeTab} = accessContext;
     let removing = false;
 
     const getBucketName = (name) => {

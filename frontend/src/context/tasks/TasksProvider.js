@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
 import TasksReducer from "./TasksReducer";
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getTasksMapper} from "../../utils/NullValueMappers";
 import TasksContext from "./TasksContext";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const TasksProvider = props => {
 

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SelectMultiDialog from "../../utils/SelectMultiDialog";
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate
+    getColumnCreatedAt
 } from "../../utils/StandardColumns";
 import {getRolesNames} from "../../../utils/JsonHelper";
 import SelectMultiRolesLookup from "../../lookup/SelectMultiRolesLookup";
@@ -32,7 +32,7 @@ export default function SelectUsersDialog(props) {
                 />
             )
         },
-        getColumnCreatedDate(),
+        getColumnCreatedAt(),
         getColumnCreatedBy()
     ]
 
@@ -43,7 +43,7 @@ export default function SelectUsersDialog(props) {
             ids={props.rowData['usersIds'] != null ? props.rowData['usersIds'] : []}
             tooltipTitle={'Select users'}
             dialogTitle={'Select users'}
-            tableTitle={'Name: ' + props.rowData['name']}
+            tableTitle={(props.rowData['name'] || '-')}
             maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />

@@ -8,10 +8,11 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import pl.databucket.configuration.Constants;
-import pl.databucket.dto.JsonSchemaDto;
+import pl.databucket.dto.DataClassItemDto;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -31,7 +32,7 @@ public class DataClass extends Auditable<String> implements TenantSupport {
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
 
-    @Column(name = "class_name", length = Constants.NAME_MAX, unique = true)
+    @Column(name = "class_name", length = Constants.NAME_MAX)
     private String name;
 
     @Column(length = Constants.DESCRIPTION_MAX)
@@ -39,7 +40,7 @@ public class DataClass extends Auditable<String> implements TenantSupport {
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
-    private JsonSchemaDto jsonSchema;
+    private List<DataClassItemDto> configuration;
 
     @ManyToMany(mappedBy = "dataClasses")
     private Set<View> views;

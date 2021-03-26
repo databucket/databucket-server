@@ -21,8 +21,8 @@ public class BucketPropertyMap extends PropertyMap<Bucket, BucketDto> {
         map().setTeamsIds(source.getTeamsIds());
 
         map().setCreatedBy(source.getCreatedBy());
-        map().setCreatedDate(source.getCreatedDate());
-        map().setLastModifiedBy(source.getLastModifiedBy());
-        map().setLastModifiedDate(source.getLastModifiedDate());
+        map().setCreatedAt(source.getCreatedAt());
+        map().setModifiedBy(source.getModifiedBy());
+        map().setModifiedAt(source.getModifiedAt());
     }
 }

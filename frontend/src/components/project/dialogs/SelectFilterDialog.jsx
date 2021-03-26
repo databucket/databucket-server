@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     getColumnCreatedBy,
-    getColumnCreatedDate,
+    getColumnCreatedAt,
     getColumnDescription,
     getColumnName
 } from "../../utils/StandardColumns";
@@ -19,7 +19,7 @@ export default function SelectFilterDialog(props) {
     const columns = [
         getColumnName(),
         getColumnDescription(),
-        getColumnCreatedDate(),
+        getColumnCreatedAt(),
         getColumnCreatedBy()
     ]
 
@@ -30,7 +30,7 @@ export default function SelectFilterDialog(props) {
             id={props.rowData['filterId'] != null ? props.rowData['filterId'] : -1}
             tooltipTitle={'Select filter'}
             dialogTitle={'Select filter'}
-            tableTitle={'Name: ' + props.rowData['name']}
+            tableTitle={(props.rowData['name'] || '-')}
             maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />

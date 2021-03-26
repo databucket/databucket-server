@@ -221,11 +221,14 @@ export const getLastActiveView = (bucketId) => {
     const lastActiveView = getActiveProjectContextProperty(LAST_ACTIVE_VIEW);
 
     if (lastActiveView != null)
-        return lastActiveView[bucketId];
+        return lastActiveView[`${bucketId}`];
 }
 
 export const setLastActiveView = (bucketId, viewId) => {
     let lastActiveView = getActiveProjectContextProperty(LAST_ACTIVE_VIEW);
-    lastActiveView[bucketId] = viewId;
+    if (lastActiveView == null)
+        lastActiveView = {};
+
+    lastActiveView[`${bucketId}`] = viewId;
     setActiveProjectContextProperty(LAST_ACTIVE_VIEW, lastActiveView);
 }

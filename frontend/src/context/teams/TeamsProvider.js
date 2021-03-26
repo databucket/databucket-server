@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import TeamsContext from "./TeamsContext";
 import TeamsReducer from "./TeamsReducer";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getTeamMapper} from "../../utils/NullValueMappers";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const TeamsProvider = props => {
     const initialState = {

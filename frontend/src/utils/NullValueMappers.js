@@ -23,15 +23,15 @@ export const getBucketMapper = () => {
 }
 
 export const getClassMapper = () => {
-    return {description: ''};
+    return {description: '', configuration: []};
 }
 
 export const getColumnsMapper = () => {
-    return {description: '', configuration: []};
+    return {description: '', configuration: [], classId: 'none'};
 }
 
 export const getFiltersMapper = () => {
-    return {description: '', configuration: []};
+    return {description: '', configuration: [], classId: 'none'};
 }
 
 export const getTasksMapper = () => {
@@ -43,7 +43,7 @@ export const getEventsMapper = () => {
 }
 
 export const getViewsMapper = () => {
-    return {description: '', roleId: 0};
+    return {description: '', roleId: 0, featuresIds: []};
 }
 
 export const getColumnMapper = () => {

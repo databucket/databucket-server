@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -18,15 +18,14 @@ import {
 } from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName
 } from "../../utils/StandardColumns";
 import {getTasksMapper} from "../../../utils/NullValueMappers";
 import TasksContext from "../../../context/tasks/TasksContext";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function TasksTab() {
 
@@ -71,7 +70,7 @@ export default function TasksTab() {
                         sorting: false,
                         // render: rowData => getArrayLengthStr(rowData['configuration']),
                         // editComponent: props => (
-                        //     <EditConditionsDialog
+                        //     <EditFilterRulesDialog
                         //         configuration={props.rowData.configuration != null ? props.rowData.configuration : []}
                         //         name={props.rowData.name != null ? props.rowData.name : ''}
                         //         description={props.rowData.description != null && props.rowData.description.length > 0 ? "(" + props.rowData.description + ")" : ''}
@@ -79,10 +78,10 @@ export default function TasksTab() {
                         //     />
                         // )
                     },
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={tasks != null ? tasks : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -20,10 +20,8 @@ import {
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnBuckets,
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName, getColumnRole, getColumnShortName, getColumnTeams, getColumnUsers
 } from "../../utils/StandardColumns";
 import BucketsContext from "../../../context/buckets/BucketsContext";
@@ -33,6 +31,7 @@ import RolesContext from "../../../context/roles/RolesContext";
 import {getGroupMapper} from "../../../utils/NullValueMappers";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
 import TeamsContext from "../../../context/teams/TeamsContext";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
 
 export default function GroupsTab() {
 
@@ -103,10 +102,10 @@ export default function GroupsTab() {
                     getColumnUsers(users, roles, 'Access for user'),
                     getColumnRole(roles, 'Access by role'),
                     getColumnTeams(teams, 'Access by team'),
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={groups != null ? groups : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

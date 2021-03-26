@@ -25,16 +25,16 @@ public class Auditable<U>
     private U createdBy;
 
     @CreatedDate
-    @Column(name = "created_date")
+    @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    private Date createdAt;
 
     @LastModifiedBy
-    @Column(name = "last_modified_by", length = Constants.NAME_MAX)
-    private U lastModifiedBy;
+    @Column(name = "modified_by", length = Constants.NAME_MAX)
+    private U modifiedBy;
 
     @LastModifiedDate
-    @Column(name = "last_modified_date")
+    @Column(name = "modified_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModifiedDate;
+    private Date modifiedAt;
 }

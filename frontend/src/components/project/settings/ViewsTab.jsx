@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -21,10 +21,8 @@ import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnBuckets,
     getColumnClasses, getColumnColumns,
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription, getColumnFilter,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
+    getColumnModifiedBy, getColumnModifiedAt,
     getColumnName, getColumnRole, getColumnTeams, getColumnUsers
 } from "../../utils/StandardColumns";
 import {getViewsMapper} from "../../../utils/NullValueMappers";
@@ -37,6 +35,8 @@ import ColumnsContext from "../../../context/columns/ColumnsContext";
 import FiltersContext from "../../../context/filters/FiltersContext";
 import {useWindowDimension} from "../../utils/UseWindowDimension";
 import TeamsContext from "../../../context/teams/TeamsContext";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
+import SelectMultiViewFeaturesLookup from "../../lookup/SelectMultiViewFeaturesLookup";
 
 export default function ViewsTab() {
 
@@ -62,7 +62,7 @@ export default function ViewsTab() {
     const {teams, fetchTeams} = teamsContext;
     const viewsContext = useContext(ViewsContext);
     const {views, fetchViews, addView, editView, removeView} = viewsContext;
-    const changeableFields = ['name', 'description', 'enabledDetails', 'enabledCreation', 'enabledModifying', 'enabledRemoval', 'enabledHistory', 'enabledReservation', 'enabledTasks', 'classesIds', 'bucketsIds', 'usersIds', 'columnsId', 'filterId', 'grantAccess', 'roleId', 'teamsIds'];
+    const changeableFields = ['name', 'description', 'classesIds', 'bucketsIds', 'usersIds', 'columnsId', 'filterId', 'featuresIds', 'grantAccess', 'roleId', 'teamsIds'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']},
@@ -127,20 +127,16 @@ export default function ViewsTab() {
                     getColumnFilter(filters),
                     getColumnBuckets(buckets, 'Show in buckets'),
                     getColumnClasses(classes, 'Show by classes'),
-                    {title: 'Details', field: 'enabledDetails', type: 'boolean'},
-                    {title: 'Creation', field: 'enabledCreation', type: 'boolean'},
-                    {title: 'Modifying', field: 'enabledModifying', type: 'boolean'},
-                    {title: 'Removal', field: 'enabledRemoval', type: 'boolean'},
-                    {title: 'History', field: 'enabledHistory', type: 'boolean'},
-                    {title: 'Tasks', field: 'enabledTasks', type: 'boolean'},
-                    {title: 'Reservation', field: 'enabledReservation', type: 'boolean'},
                     getColumnUsers(users, roles, 'Access for user'),
                     getColumnRole(roles, 'Access by role'),
                     getColumnTeams(teams, 'Access by team'),
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    {
+                        title: 'Enabled features', field: 'featuresIds', filtering: false, sorting: false,// initialEditValue: [],
+                        render: rowData => rowData.featuresIds != null ? `[${rowData.featuresIds.length}]` : '[0]',
+                        editComponent: props => <SelectMultiViewFeaturesLookup rowData={props.rowData} onChange={props.onChange}/>
+                    },
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={views != null ? views : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

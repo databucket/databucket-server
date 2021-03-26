@@ -5,7 +5,7 @@ import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../../utils/ConfigurationStorage";
 import {
-    getBaseUrl, getDeleteOptions,
+    getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor
@@ -18,17 +18,18 @@ import {
 } from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedDate,
     getColumnDescription,
-    getColumnLastModifiedBy, getColumnLastModifiedDate,
-    getColumnName
+    getColumnModifiedBy, getColumnModifiedAt,
+    getColumnName, getColumnClass
 } from "../../utils/StandardColumns";
 import {getColumnsMapper} from "../../../utils/NullValueMappers";
 import ColumnsContext from "../../../context/columns/ColumnsContext";
 import EditColumnsDialog from "../dialogs/EditColumnsDialog";
 import CloneIcon from '@material-ui/icons/ViewStream'
 import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {getBaseUrl} from "../../../utils/UrlBuilder";
+import ClassesContext from "../../../context/classes/ClassesContext";
+import {getClassById} from "../../utils/PropertiesTable";
 
 export default function ColumnsTab() {
 
@@ -38,13 +39,20 @@ export default function ColumnsTab() {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
+    const classesContext = useContext(ClassesContext);
+    const {classes, fetchClasses, classesLookup} = classesContext;
     const columnsContext = useContext(ColumnsContext);
     const {columns, fetchColumns, addColumns, editColumns, removeColumns} = columnsContext;
-    const changeableFields = ['name', 'description', 'configuration'];
+    const changeableFields = ['name', 'description', 'configuration', 'classId'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
+
+    useEffect(() => {
+        if (classes == null)
+            fetchClasses();
+    }, [classes, fetchClasses]);
 
     useEffect(() => {
         if (columns == null)
@@ -78,26 +86,28 @@ export default function ColumnsTab() {
                 columns={[
                     getColumnName(),
                     getColumnDescription(),
+                    getColumnClass(classesLookup, 'Class support'),
                     {
-                        title: 'Configuration',
+                        title: 'Columns',
                         field: 'configuration',
                         filtering: false,
                         searchable: false,
                         sorting: false,
-                        render: rowData => getArrayLengthStr(rowData['configuration']),
+                        initialEditValue: {fields: [], columns: []},
+                        render: rowData => getArrayLengthStr(rowData['configuration']['columns']),
                         editComponent: props => (
                             <EditColumnsDialog
-                                configuration={props.rowData.configuration != null ? props.rowData.configuration : []}
+                                configuration={props.rowData.configuration != null ? props.rowData.configuration : {fields: [], columns: []}}
+                                dataClass={getClassById(classes, props.rowData.classId)}
                                 name={props.rowData.name != null ? props.rowData.name : ''}
-                                description={props.rowData.description != null && props.rowData.description.length > 0 ? "(" + props.rowData.description + ")" : ''}
                                 onChange={props.onChange}
                             />
                         )
                     },
-                    getColumnCreatedDate(),
-                    getColumnCreatedBy(),
-                    getColumnLastModifiedDate(),
-                    getColumnLastModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={columns != null ? columns : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}

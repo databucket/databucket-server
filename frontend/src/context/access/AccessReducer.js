@@ -1,6 +1,6 @@
 import {getLastActiveBucket, getLastActiveGroup, getLastOpenedBuckets, setLastActiveBucket, setLastActiveGroup, setLastOpenedBuckets} from "../../utils/ConfigurationStorage";
 
-const AccessTreeReducer = (state, action) => {
+const AccessReducer = (state, action) => {
     switch (action.type) {
         case "FETCH_ACCESS_TREE":
             const accessTree = action.payload;
@@ -39,6 +39,36 @@ const AccessTreeReducer = (state, action) => {
                 activeBucket: activeBucket,
                 accessTree: accessTree,
                 bucketsTabs: bucketsTabs
+            };
+        case "FETCH_VIEWS":
+            return {
+                ...state,
+                views: action.payload
+            };
+        case "FETCH_COLUMNS":
+            return {
+                ...state,
+                columns: action.payload
+            };
+        case "FETCH_FILTERS":
+            return {
+                ...state,
+                filters: action.payload
+            };
+        case "FETCH_TASKS":
+            return {
+                ...state,
+                tasks: action.payload
+            };
+        case "FETCH_TAGS":
+            return {
+                ...state,
+                tags: action.payload
+            };
+        case "FETCH_USERS":
+            return {
+                ...state,
+                users: action.payload
             };
         case "SET_ACTIVE_GROUP":
             setLastActiveGroup(action.payload.id);
@@ -96,4 +126,4 @@ const AccessTreeReducer = (state, action) => {
     }
 };
 
-export default AccessTreeReducer;
+export default AccessReducer;

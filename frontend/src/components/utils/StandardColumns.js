@@ -215,16 +215,16 @@ export const getColumnExpirationDate = () => {
     };
 };
 
-export const getColumnCreatedDate = () => {
+export const getColumnCreatedAt = () => {
     return {
-        title: 'Created date',
-        field: 'createdDate',
+        title: 'Created at',
+        field: 'createdAt',
         type: 'datetime',
         editable: 'never',
         filtering: false,
         render: rowData => (
             <div>
-                {rowData != null ? rowData['createdDate'] != null ? new Date(rowData['createdDate']).toLocaleString() : null : null}
+                {rowData != null ? rowData['createdAt'] != null ? new Date(rowData['createdAt']).toLocaleString() : null : null}
             </div>
         )
     };
@@ -238,26 +238,26 @@ export const getColumnCreatedBy = () => {
     };
 };
 
-export const getColumnLastModifiedDate = () => {
+export const getColumnModifiedAt = () => {
     return {
-        title: 'Modified date',
-        field: 'lastModifiedDate',
+        title: 'Modified at',
+        field: 'modifiedAt',
         type: 'datetime',
         editable: 'never',
         filtering: false,
         render: rowData => (
             <div>
-                {rowData != null ? rowData['lastModifiedDate'] != null ? new Date(rowData['lastModifiedDate']).toLocaleString() : null : null}
+                {rowData != null ? rowData['modifiedAt'] != null ? new Date(rowData['modifiedAt']).toLocaleString() : null : null}
             </div>
         )
 
     };
 };
 
-export const getColumnLastModifiedBy = () => {
+export const getColumnModifiedBy = () => {
     return {
         title: 'Modified by',
-        field: 'lastModifiedBy',
+        field: 'modifiedBy',
         editable: 'never'
     };
 };

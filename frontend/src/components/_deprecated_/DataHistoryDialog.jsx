@@ -194,7 +194,7 @@ export default class DataHistoryDialog extends React.Component {
               // pageSize: 15,
               // paginationType: 'stepped',
               // pageSizeOptions: [15, 20, 25, 30],
-              // actionsColumnIndex: -1,
+              actionsColumnIndex: -1,
               sorting: false,
               search: false,
               filtering: false,

@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import GroupsContext from "./GroupsContext";
 import GroupsReducer from "./GroupsReducer";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getGroupMapper} from "../../utils/NullValueMappers";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const GroupsProvider = props => {
     const initialState = {

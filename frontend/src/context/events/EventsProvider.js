@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
 import EventsReducer from "./EventsReducer";
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getEventsMapper} from "../../utils/NullValueMappers";
 import EventsContext from "./EventsContext";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const EventsProvider = props => {
 

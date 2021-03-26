@@ -11,12 +11,12 @@ public class DataEnumPropertyMap extends PropertyMap<DataEnum, DataEnumDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setTextValues(source.isTextValues());
+        map().setIconsEnabled(source.isIconsEnabled());
         map().setItems(source.getItems());
 
         map().setCreatedBy(source.getCreatedBy());
-        map().setCreatedDate(source.getCreatedDate());
-        map().setLastModifiedBy(source.getLastModifiedBy());
-        map().setLastModifiedDate(source.getLastModifiedDate());
+        map().setCreatedAt(source.getCreatedAt());
+        map().setModifiedBy(source.getModifiedBy());
+        map().setModifiedAt(source.getModifiedAt());
     }
 }

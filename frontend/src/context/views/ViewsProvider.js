@@ -1,10 +1,11 @@
 import React, {useReducer} from 'react';
 import ViewsReducer from "./ViewsReducer";
-import {getBaseUrl, getGetOptions} from "../../utils/MaterialTableHelper";
+import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getViewsMapper} from "../../utils/NullValueMappers";
 import ViewsContext from "./ViewsContext";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const ViewsProvider = props => {
 
@@ -17,9 +18,9 @@ const ViewsProvider = props => {
     const fetchViews = () => {
         fetch(getBaseUrl('views'), getGetOptions())
             .then(handleErrors)
-            .then(classes => dispatch({
+            .then(views => dispatch({
                 type: "FETCH_VIEWS",
-                payload: convertNullValuesInCollection(classes, getViewsMapper())
+                payload: convertNullValuesInCollection(views, getViewsMapper())
             }))
             .catch(err => console.log(err));
     }
