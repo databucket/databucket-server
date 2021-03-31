@@ -8,9 +8,9 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class DataFilterConfigDto {
+public class TaskConfigDto {
 
     private List<Map<String, Object>> properties;
-    private Map<String, Object> logic;
+    private Map<String, Object> actions;
 
 }

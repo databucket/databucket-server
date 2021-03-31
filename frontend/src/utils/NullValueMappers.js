@@ -35,7 +35,7 @@ export const getFiltersMapper = () => {
 }
 
 export const getTasksMapper = () => {
-    return {description: ''};
+    return {description: '', classId: 'none'};
 }
 
 export const getEventsMapper = () => {

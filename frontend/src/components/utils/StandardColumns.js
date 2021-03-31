@@ -1,12 +1,12 @@
 import React from 'react';
 import {getAdminMemberRolesLookup, getArrayLengthStr, getItemName, getRoleName} from "../../utils/JsonHelper";
-import SelectBucketsDialog from "../project/dialogs/SelectBucketsDialog";
-import SelectClassesDialog from "../project/dialogs/SelectClassesDialog";
-import SelectUsersDialog from "../project/dialogs/SelectUsersDialog";
-import SelectGroupsDialog from "../project/dialogs/SelectGroupsDialog";
-import SelectColumnsDialog from "../project/dialogs/SelectColumnsDialog";
-import SelectFilterDialog from "../project/dialogs/SelectFilterDialog";
-import SelectTeamsDialog from "../project/dialogs/SelectTeamsDialog";
+import SelectBucketsDialog from "../dialogs/SelectBucketsDialog";
+import SelectClassesDialog from "../dialogs/SelectClassesDialog";
+import SelectUsersDialog from "../dialogs/SelectUsersDialog";
+import SelectGroupsDialog from "../dialogs/SelectGroupsDialog";
+import SelectColumnsDialog from "../dialogs/SelectColumnsDialog";
+import SelectFilterDialog from "../dialogs/SelectFilterDialog";
+import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
 
 export const getColumnId = () => {
     return {

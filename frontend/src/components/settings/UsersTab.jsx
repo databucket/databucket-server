@@ -2,8 +2,7 @@ import MaterialTable from "material-table";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getManagementTableHeight,
-    getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor,
+    getPageSizeOptions, getPutOptions, getSettingsTableHeight, getTableHeaderBackgroundColor,
     getTableIcons, getTableRowBackgroundColor, getUserIcon
 } from "../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
@@ -16,24 +15,17 @@ import {
 } from "../../utils/JsonHelper";
 import Refresh from "@material-ui/icons/Refresh";
 import FilterList from "@material-ui/icons/FilterList";
-import ResetPasswordIcon from "@material-ui/icons/VpnKey";
-import SelectMultiRolesLookup from "../lookup/SelectMultiRolesLookup";
-import SelectProjectsDialog from "../dialogs/SelectProjectsDialog";
 import {useTheme} from "@material-ui/core/styles";
 import {handleErrors} from "../../utils/FetchHelper";
-import ResetPasswordDialog from "./ResetPasswordDialog";
 import RolesContext from "../../context/roles/RolesContext";
-import ManageUsersContext from "../../context/users/ManageUsersContext";
-import ProjectsContext from "../../context/projects/ProjectsContext";
+import UsersContext from "../../context/users/UsersContext";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedAt,
-    getColumnEnabled,
-    getColumnExpirationDate,
     getColumnModifiedBy, getColumnModifiedAt,
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
+import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
 import {useWindowDimension} from "../utils/UseWindowDimension";
+import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function UsersTab() {
@@ -41,17 +33,17 @@ export default function UsersTab() {
     const theme = useTheme();
     const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [resetPasswordDialog, setResetPasswordDialog] = useState({open: false, username: null});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
     const tableRef = createRef();
-    const usersContext = useContext(ManageUsersContext);
-    const {users, fetchUsers, addUser, editUser} = usersContext;
+    const usersContext = useContext(UsersContext);
+    const {users, fetchUsers, editUser} = usersContext;
     const rolesContext = useContext(RolesContext);
     const {roles, fetchRoles} = rolesContext;
-    const projectsContext = useContext(ProjectsContext);
-    const {projects, fetchProjects, notifyProjects} = projectsContext;
-    const changeableFields = ['id', 'username', 'enabled', 'expirationDate', 'rolesIds', 'projectsIds'];
+    const teamsContext = useContext(TeamsContext);
+    const {teams, fetchTeams, notifyTeams} = teamsContext;
+
+    const changeableFields = ['id', 'username', 'rolesIds', 'teamsIds'];
     const userSpecification = {
         username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']}
     };
@@ -67,9 +59,10 @@ export default function UsersTab() {
     }, [roles, fetchRoles]);
 
     useEffect(() => {
-        if (projects == null)
-            fetchProjects();
-    }, [projects, fetchProjects]);
+        if (teams == null)
+            fetchTeams();
+    }, [teams, fetchTeams]);
+
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
@@ -84,30 +77,26 @@ export default function UsersTab() {
                 tableRef={tableRef}
                 columns={[
                     {filtering: false, cellStyle: { width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
-                    getColumnEnabled(),
-                    {title: 'Name', field: 'username', editable: 'onAdd', filtering: true},
+                    {title: 'Name', field: 'username', editable: 'onAdd', filtering: true,},
                     {
-                        title: 'Roles', field: 'rolesIds', filtering: false, sorting: false,
-                        render: rowData => getRolesNames(roles, rowData['rolesIds']),
-                        editComponent: props => <SelectMultiRolesLookup rowData={props.rowData} roles={roles}
-                                                                        onChange={props.onChange}/>
+                        title: 'Roles', field: 'rolesIds', filtering: false, editable: 'never', sorting: false,
+                        render: rowData => getRolesNames(roles, rowData['rolesIds'])
                     },
                     {
-                        title: 'Projects', field: 'projectsIds', filtering: false, searchable: false, sorting: false,
-                        render: rowData => getArrayLengthStr(rowData['projectsIds']),
+                        title: 'Teams', field: 'teamsIds', filtering: false, searchable: false, sorting: false,
+                        render: rowData => getArrayLengthStr(rowData['teamsIds']),
                         editComponent: props => (
-                            <SelectProjectsDialog
-                                projects={projects != null ? projects : []}
+                            <SelectTeamsDialog
+                                teams={teams != null ? teams : []}
                                 rowData={props.rowData}
                                 onChange={props.onChange}
                             />
                         )
                     },
-                    getColumnExpirationDate(),
-                    getColumnCreatedAt(),
-                    getColumnCreatedBy(),
-                    getColumnModifiedAt(),
-                    getColumnModifiedBy()
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
                 data={users != null ? users : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}
@@ -122,21 +111,14 @@ export default function UsersTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getManagementTableHeight(height),
-                    minBodyHeight: getManagementTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
                     Container: props => <div {...props} />
                 }}
                 actions={[
-                    rowData => ({
-                        icon: () => <ResetPasswordIcon/>,
-                        tooltip: 'Reset Password',
-                        onClick: (event, rowData) => {
-                            setResetPasswordDialog({open: true, username: rowData.username});
-                        }
-                    }),
                     {
                         icon: () => <Refresh/>,
                         tooltip: 'Refresh',
@@ -152,34 +134,6 @@ export default function UsersTab() {
                     }
                 ]}
                 editable={{
-                    onRowAdd: newData =>
-                        new Promise((resolve, reject) => {
-                            let message = validateItem(newData, userSpecification);
-                            if (message != null) {
-                                setMessageBox({
-                                    open: true,
-                                    severity: 'warning',
-                                    title: 'Item is not valid',
-                                    message: message
-                                });
-                                reject();
-                                return;
-                            }
-
-                            fetch(getBaseUrl('manage/users'), getPostOptions(newData))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                    reject();
-                                })
-                                .then((user) => {
-                                    if (user != null) {
-                                        addUser(convertNullValuesInObject(user, getManageUserMapper()));
-                                        notifyProjects('USER', user.id, user['projectsIds']);
-                                        resolve();
-                                    }
-                                });
-                        }),
                     onRowUpdate: (newData, oldData) =>
                         new Promise((resolve, reject) => {
                             if (!isItemChanged(oldData, newData, changeableFields)) {
@@ -207,7 +161,7 @@ export default function UsersTab() {
 
                             const payload = getSelectedValues(newData, changeableFields);
 
-                            fetch(getBaseUrl('manage/users'), getPutOptions(payload))
+                            fetch(getBaseUrl('users'), getPutOptions(payload))
                                 .then(handleErrors)
                                 .catch(error => {
                                     setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
@@ -216,18 +170,13 @@ export default function UsersTab() {
                                 .then((user) => {
                                     if (user != null) {
                                         editUser(convertNullValuesInObject(user, getManageUserMapper()));
-                                        if (!arraysEquals(newData, oldData, 'projectsIds'))
-                                            notifyProjects('USER', user.id, user['projectsIds']);
+                                        if (!arraysEquals(newData, oldData, 'teamsIds'))
+                                            notifyTeams('USER', user.id, user['teamsIds']);
                                         resolve();
                                     }
                                 });
                         })
                 }}
-            />
-            <ResetPasswordDialog
-                open={resetPasswordDialog.open}
-                username={resetPasswordDialog.username}
-                onClose={() => setResetPasswordDialog({...resetPasswordDialog, open: false})}
             />
             <MessageBox
                 config={messageBox}

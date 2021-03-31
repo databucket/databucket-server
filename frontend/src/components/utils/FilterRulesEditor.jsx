@@ -28,11 +28,11 @@ export default function FilterRulesEditor(props) {
 
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
-    const [fields, setFields] = useState(mergeProperties(props.configuration.fields, props.dataClass));
+    const [properties, setFields] = useState(mergeProperties(props.configuration.properties, props.dataClass));
     const [state, setState] = useState({config: {}, tree: {}});
 
     useEffect(() => {
-        const conf = createConfig(fields, props.tags, props.users, props.dataClass, enums);
+        const conf = createConfig(properties, props.tags, props.users, props.dataClass, enums);
         if (Object.keys(state.tree).length === 0) {
             const initialTree = QbUtils.checkTree(getInitialTree(props.configuration.logic, conf), conf);
             setState({config: conf, tree: initialTree});
@@ -41,7 +41,7 @@ export default function FilterRulesEditor(props) {
         }
 
         // eslint-disable-next-line
-    }, [fields]);
+    }, [properties]);
 
     useEffect(() => {
         if (enums == null)
@@ -72,14 +72,14 @@ export default function FilterRulesEditor(props) {
 
     const onChange = (tree, config) => {
         setState({config, tree});
-        props.onChange({fields, config, tree});
+        props.onChange({properties, config, tree});
     };
 
-    const handleChangeFields = (fields) => {
+    const handleChangeFields = (properties) => {
         const config = state.config;
         const tree = state.tree;
-        setFields(fields);
-        props.onChange({fields, config, tree});
+        setFields(properties);
+        props.onChange({properties, config, tree});
     }
 
     return (
@@ -95,7 +95,7 @@ export default function FilterRulesEditor(props) {
                 {renderResult({tree: state.tree, config: state.config})}
             </div>}
             {props.activeTab === 0 && <div/>}
-            {props.activeTab === 1 && <PropertiesTable data={fields} onChange={handleChangeFields}/>}
+            {props.activeTab === 1 && <PropertiesTable data={properties} onChange={handleChangeFields}/>}
         </div>
     );
 };
@@ -114,7 +114,7 @@ const createConfig = (propFields, tags, users, dataClass, enums) => {
         fields['tagId'] = tagId(tagList);
     fields['reserved'] = reserved;
     fields['owner'] = owner(userList);
-    fields['properties'] = properties;
+    properties['properties'] = properties;
     fields['createdBy'] = createdBy(userList);
     fields['createdAt'] = createdAt;
     fields['modifiedBy'] = modifiedBy(userList);

@@ -1,7 +1,7 @@
 import React from "react";
 import {BrowserRouter, Redirect, Switch} from 'react-router-dom';
 import LoginPage from '../components/login/LoginPage';
-import _ProjectSettingsTabs from '../components/project/settings/_ProjectSettingsTabs';
+import _ProjectSettingsTabs from '../components/settings/_ProjectSettingsTabs';
 import NotFoundPage from '../components/NotFoundPage';
 import PublicRoute from './PublicRoute'
 import ProjectRoute from './ProjectRoute'
@@ -9,7 +9,7 @@ import ManagementRoute from './ManagementRoute';
 import _ManagementTabs from "../components/management/_ManagementTabs";
 import ChangePasswordPage from "../components/login/ChangePasswordPage";
 import {hasProject} from "../utils/ConfigurationStorage";
-import ProjectRouteInternal from "../components/project/ProjectRouteInternal";
+import ProjectRouteInternal from "../components/data/ProjectRouteInternal";
 import ChangePasswordRoute from "./ChangePasswordRoute";
 
 export default function AppRouter() {

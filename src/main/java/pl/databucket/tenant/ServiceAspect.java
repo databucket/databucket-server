@@ -25,8 +25,6 @@ public class ServiceAspect {
             + " || execution(* pl.databucket.service.DataClassService.*(..)) "
             + " || execution(* pl.databucket.service.DataColumnsService.*(..)) "
             + " || execution(* pl.databucket.service.DataFilterService.*(..)) "
-            + " || execution(* pl.databucket.service.EventLogService.*(..)) "
-            + " || execution(* pl.databucket.service.EventService.*(..)) "
             + " || execution(* pl.databucket.service.TagService.*(..)) "
             + " || execution(* pl.databucket.service.TaskService.*(..)) "
             + " || execution(* pl.databucket.service.ViewService.*(..)) "

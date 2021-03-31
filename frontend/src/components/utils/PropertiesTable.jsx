@@ -1,5 +1,5 @@
-import {getFilterDialogTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableIcons, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
-import SelectEnumDialog from "../project/dialogs/SelectEnumDialog";
+import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableIcons, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
@@ -107,8 +107,8 @@ export default function PropertiesTable(props) {
                     filtering: false,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getFilterDialogTableHeight(height, 10),
-                    minBodyHeight: getFilterDialogTableHeight(height, 10),
+                    maxBodyHeight: getPropertiesTableHeight(height, 10),
+                    minBodyHeight: getPropertiesTableHeight(height, 10),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -129,7 +129,7 @@ export default function PropertiesTable(props) {
                                 return;
                             }
 
-                            newData.uuid = uuidV4();
+                            newData['uuid'] = uuidV4();
 
                             setData([...data, newData]);
                             resolve();
@@ -168,9 +168,20 @@ export default function PropertiesTable(props) {
                             resolve();
                         }),
                     onRowDelete: oldData =>
-                        new Promise((resolve) => {
-                            setData(data.filter(column => column.tableData.id !== oldData.tableData.id))
-                            resolve();
+                        new Promise((resolve, reject) => {
+                            if (!props.used.includes(oldData.uuid)) {
+                                setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
+                                resolve();
+                            } else {
+                                setMessageBox({
+                                    open: true,
+                                    severity: 'error',
+                                    title: 'The property can not be removed',
+                                    message: 'This property is used!'
+                                });
+                                reject();
+                            }
+
                         }),
                 }}
                 actions={[
@@ -195,11 +206,6 @@ export default function PropertiesTable(props) {
         </div>
     );
 };
-
-export const getClassById = (classes, id) => {
-    const dataClass = (classes != null && id != null && id !== 'none') ? classes.filter(c => c.id === parseInt(id)) : [];
-    return dataClass.length > 0 ? dataClass[0] : null;
-}
 
 export const mergeProperties = (properties, dataClass) => {
     let newProperties = properties != null ? properties : [];

@@ -9,10 +9,10 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Filter;
 import pl.databucket.configuration.Constants;
+import pl.databucket.dto.TaskConfigDto;
 import pl.databucket.tenant.TenantSupport;
 
 import javax.persistence.*;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,30 +40,45 @@ public class Task extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
+	@OneToOne
+	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
+	private DataClass dataClass; // class support
+
 	@ManyToMany
 	@JoinTable(name = "tasks_buckets",
 			joinColumns = {@JoinColumn(name = "task_id") },
 			inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
-	private Set<Bucket> buckets;
+	private Set<Bucket> buckets; // visible in buckets
 
 	@ManyToMany
 	@JoinTable(name = "tasks_dataclasses",
 			joinColumns = {@JoinColumn(name = "task_id")},
 			inverseJoinColumns = {@JoinColumn(name = "class_id")})
-	private Set<DataClass> dataClasses;
+	private Set<DataClass> dataClasses; // visible by classes
+
+	@OneToOne
+	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
+	private DataFilter dataFilter;
 
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private Map<String, Object> configuration;
+	private TaskConfigDto configuration;
 
 	@JsonIgnore
 	private Boolean deleted = false;
 
-	public Set<Long> getListOfBuckets() {
-		return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+	public Set<Long> getBucketsIds() {
+		if (buckets != null && buckets.size() > 0)
+			return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
+		else
+			return null;
 	}
-	public Set<Long> getListOfDataClasses() {
-		return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
+
+	public Set<Long> getClassesIds() {
+		if (dataClasses != null && dataClasses.size() > 0)
+			return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
+		else
+			return null;
 	}
 }
 

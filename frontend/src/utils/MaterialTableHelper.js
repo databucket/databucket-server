@@ -237,7 +237,7 @@ export const getDialogTableHeight = (height, custom) => {
     return `${tableHeight}vh`;
 }
 
-export const getFilterDialogTableHeight = (height, custom) => {
-    const tableHeight = ((height - 64 - 64 - 193) / height * 100).toFixed(2) - custom;
+export const getPropertiesTableHeight = (height, custom) => {
+    const tableHeight = ((height - 64 - 64 - 143) / height * 100).toFixed(2) - custom;
     return `${tableHeight}vh`;
 }

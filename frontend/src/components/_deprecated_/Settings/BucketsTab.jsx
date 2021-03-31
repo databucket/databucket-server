@@ -17,7 +17,7 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import DynamicIcon from '../../utils/DynamicIcon';
-import EditIconDialog from '../../project/dialogs/EditIconDialog';
+import EditIconDialog from '../../dialogs/EditIconDialog';
 import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();

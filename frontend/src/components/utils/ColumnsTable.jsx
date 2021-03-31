@@ -1,5 +1,5 @@
-import {getFilterDialogTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableIcons, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
-import {isItemChanged, validateItem} from "../../utils/JsonHelper";
+import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableIcons, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import {getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import MaterialTable from "material-table";
@@ -96,8 +96,8 @@ export default function ColumnsTable(props) {
                     filtering: false,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getFilterDialogTableHeight(height, 10),
-                    minBodyHeight: getFilterDialogTableHeight(height, 10),
+                    maxBodyHeight: getPropertiesTableHeight(height, 10),
+                    minBodyHeight: getPropertiesTableHeight(height, 10),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -181,17 +181,4 @@ export default function ColumnsTable(props) {
             />
         </div>
     );
-};
-
-export const getClassById = (classes, id) => {
-    const dataClass = (classes != null && id != null && id !== 'none') ? classes.filter(c => c.id === parseInt(id)) : [];
-    return dataClass.length > 0 ? dataClass[0] : null;
-}
-
-const getPropertyTitle = (properties, uuid) => {
-    const propertiesFiltered = properties.filter(property => property.uuid === uuid)
-    if (propertiesFiltered.length > 0)
-        return propertiesFiltered[0].title
-    else
-        return "-undefined-"
 }

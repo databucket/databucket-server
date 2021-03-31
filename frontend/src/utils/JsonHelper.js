@@ -58,6 +58,7 @@ export const validateItem = (data, specification) => {
 
                     if (validation === 'custom-check-enum-items') {
                         const valueSet = new Set(data.items.map(({value}) => value));
+
                         if (valueSet.size !== data.items.length)
                             message += `Enum values must be unique! `;
 
@@ -112,6 +113,16 @@ export const convertNullValuesInObject = (inputObject, mappers) => {
                 inputObject[key] = mappers[key];
     }
     return inputObject;
+}
+
+export const convertPropertiesDates = (actionProperties, defProperties) => {
+    return actionProperties.map(property => {
+        const propertyDef = defProperties.filter(propDef => propDef.uuid === property.uuid)[0];
+        if (['date', 'datetime', 'time'].includes(propertyDef.type)) {
+            return {...property, value: new Date(property.value)};
+        } else
+            return property;
+    });
 }
 
 export const getIdsStr = (inputIdsArray) => {
@@ -257,9 +268,22 @@ export const arraysEquals = (newData, oldData, fieldName) => {
 }
 
 export const uuidV4 = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         // eslint-disable-next-line
         const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
+}
+
+export const getClassById = (classes, id) => {
+    const dataClass = (classes != null && id != null && id !== 'none') ? classes.filter(c => c.id === parseInt(id)) : [];
+    return dataClass.length > 0 ? dataClass[0] : null;
+}
+
+export const getPropertyByUuid = (properties, uuid) => {
+    return properties.filter(property => property.uuid === uuid)[0];
+}
+
+export const getPropertyTitle = (properties, uuid) => {
+    return getPropertyByUuid(properties, uuid).title;
 }

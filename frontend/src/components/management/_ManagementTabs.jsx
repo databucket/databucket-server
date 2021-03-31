@@ -17,7 +17,7 @@ import ManagementRoute from "../../route/ManagementRoute";
 import ProjectsProvider from "../../context/projects/ProjectsProvider";
 import ManageUsersProvider from "../../context/users/ManageUsersProvider";
 import RolesProvider from "../../context/roles/RolesProvider";
-import UserProfile from "../project/data/UserProfile";
+import UserProfile from "../data/UserProfile";
 
 const useStyles = makeStyles(theme => ({
     appBar: {

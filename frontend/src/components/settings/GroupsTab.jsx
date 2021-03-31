@@ -1,61 +1,77 @@
 import MaterialTable from "material-table";
-import React, {createRef, useContext, useEffect, useState} from "react";
-import {MessageBox} from "../utils/MessageBox";
-import {
-    getDeleteOptions, getManagementTableHeight,
-    getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
-} from "../../utils/MaterialTableHelper";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
-import {
-    arraysEquals,
-    convertNullValuesInObject,
-    getArrayLengthStr,
-    getSelectedValues,
-    isItemChanged,
-    validateItem
-} from "../../utils/JsonHelper";
+import React, {useContext, useEffect, useState} from "react";
 import Refresh from "@material-ui/icons/Refresh";
 import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
-import {handleErrors} from "../../utils/FetchHelper";
-import ProjectsContext from "../../context/projects/ProjectsContext";
+import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
-    getColumnCreatedBy,
-    getColumnCreatedAt, getColumnDescription,
-    getColumnEnabled,
-    getColumnExpirationDate,
-    getColumnId, getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName
+    getDeleteOptions,
+    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableIcons, getTableRowBackgroundColor
+} from "../../utils/MaterialTableHelper";
+import {handleErrors} from "../../utils/FetchHelper";
+import {
+    arraysEquals,
+    convertNullValuesInObject,
+    isItemChanged,
+    validateItem
+} from "../../utils/JsonHelper";
+import {MessageBox} from "../utils/MessageBox";
+import {
+    getColumnBuckets,
+    getColumnDescription,
+    getColumnModifiedBy, getColumnModifiedAt,
+    getColumnName, getColumnRole, getColumnShortName, getColumnTeams, getColumnUsers
 } from "../utils/StandardColumns";
-import ManageUsersContext from "../../context/users/ManageUsersContext";
-import SelectUsersDialog from "../dialogs/SelectUsersDialog";
+import BucketsContext from "../../context/buckets/BucketsContext";
+import GroupsContext from "../../context/groups/GroupsContext";
+import UsersContext from "../../context/users/UsersContext";
 import RolesContext from "../../context/roles/RolesContext";
-import {getManageProjectMapper} from "../../utils/NullValueMappers";
-import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
+import {getGroupMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
+import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
-export default function ProjectsTab() {
+export default function GroupsTab() {
 
     const theme = useTheme();
     const [height] = useWindowDimension();
+    const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
-    const tableRef = createRef();
-    const projectsContext = useContext(ProjectsContext);
-    const {projects, fetchProjects, addProject, editProject, removeProject} = projectsContext;
-    const usersContext = useContext(ManageUsersContext);
-    const {users, fetchUsers, notifyUsers} = usersContext;
     const rolesContext = useContext(RolesContext);
     const {roles, fetchRoles} = rolesContext;
-    const changeableFields = ['id', 'enabled', 'name', 'description', 'usersIds', 'expirationDate'];
-    const projectSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
+    const groupContext = useContext(GroupsContext);
+    const {groups, fetchGroups, addGroup, editGroup, removeGroup} = groupContext;
+    const bucketsContext = useContext(BucketsContext);
+    const {buckets, fetchBuckets, notifyBuckets} = bucketsContext;
+    const usersContext = useContext(UsersContext);
+    const {users, fetchUsers, notifyUsers} = usersContext;
+    const teamsContext = useContext(TeamsContext);
+    const {teams, fetchTeams} = teamsContext;
+    const changeableFields = ['name', 'shortName', 'description', 'bucketsIds', 'usersIds', 'roleId', 'teamsIds'];
+    const fieldsSpecification = {
+        name: {title: 'Name', check: ['min5', 'max30']},
+        shortName: {title: 'Short name', check: ['notEmpty', 'min1', 'max5']},
         description: {title: 'Description', check: ['max250']}
     };
+
+    useEffect(() => {
+        if (roles == null)
+            fetchRoles();
+    }, [roles, fetchRoles]);
+
+    useEffect(() => {
+        if (groups == null)
+            fetchGroups();
+    }, [groups, fetchGroups]);
+
+    useEffect(() => {
+        if (buckets == null)
+            fetchBuckets();
+    }, [buckets, fetchBuckets]);
 
     useEffect(() => {
         if (users == null)
@@ -63,72 +79,35 @@ export default function ProjectsTab() {
     }, [users, fetchUsers]);
 
     useEffect(() => {
-        if (projects == null)
-            fetchProjects();
-    }, [projects, fetchProjects]);
-
-    useEffect(() => {
-        if (roles == null)
-            fetchRoles();
-    }, [roles, fetchRoles]);
+        if (teams == null)
+            fetchTeams();
+    }, [teams, fetchTeams]);
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
         setLastPageSize(pageSize);
     }
 
-    const onRemove = (remove) => {
-        if (remove) {
-            // TODO temporary interruption action
-            setConfirmRemove({open: false, id: 0, name: ''});
-            setMessageBox({open: true, severity: 'info', title: 'This action is under development!', message: ''});
-            if (remove) return;
-
-            setTimeout(() => {
-                fetch(getBaseUrl(`manage/projects/${confirmRemove.id}`), getDeleteOptions())
-                    .then(handleErrors)
-                    .catch(error => {
-                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                    })
-                    .then(() => {
-                        removeProject(confirmRemove.id);
-                    });
-            }, 100);
-        }
-
-        setConfirmRemove({open: false, id: 0, name: ''});
-    }
-
     return (
         <div>
             <MaterialTable
                 icons={getTableIcons()}
-                title='Projects'
+                title='Groups'
                 tableRef={tableRef}
                 columns={[
-                    getColumnId(),
-                    getColumnEnabled(),
+                    getColumnShortName(),
                     getColumnName(),
                     getColumnDescription(),
-                    getColumnExpirationDate(),
-                    {
-                        title: 'Users', field: 'usersIds', filtering: false, searchable: false, sorting: false,
-                        render: rowData => getArrayLengthStr(rowData['usersIds']),
-                        editComponent: props => (
-                            <SelectUsersDialog
-                                users={users != null ? users : []}
-                                roles={roles != null ? roles : []}
-                                rowData={props.rowData}
-                                onChange={props.onChange}
-                            />
-                        )
-                    },
-                    getColumnCreatedAt(),
-                    getColumnCreatedBy(),
-                    getColumnModifiedAt(),
-                    getColumnModifiedBy()
+                    getColumnBuckets(buckets, 'Assigned buckets'),
+                    getColumnUsers(users, roles, 'Access for user'),
+                    getColumnRole(roles, 'Access by role'),
+                    getColumnTeams(teams, 'Access by team'),
+                    // getColumnCreatedBy(),
+                    // getColumnCreatedAt(),
+                    getColumnModifiedBy(),
+                    getColumnModifiedAt()
                 ]}
-                data={projects != null ? projects : []}
+                data={groups != null ? groups : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}
                 options={{
                     pageSize: pageSize,
@@ -141,8 +120,8 @@ export default function ProjectsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getManagementTableHeight(height),
-                    minBodyHeight: getManagementTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(height),
+                    minBodyHeight: getSettingsTableHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -153,20 +132,19 @@ export default function ProjectsTab() {
                         icon: () => <Refresh/>,
                         tooltip: 'Refresh',
                         isFreeAction: true,
-                        onClick: () => fetchProjects()
+                        onClick: () => fetchGroups()
                     },
                     {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)
-
                     }
                 ]}
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let message = validateItem(newData, projectSpecification);
+                            let message = validateItem(newData, fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -178,16 +156,17 @@ export default function ProjectsTab() {
                                 return;
                             }
 
-                            fetch(getBaseUrl('manage/projects'), getPostOptions(newData))
+                            fetch(getBaseUrl('groups'), getPostOptions(newData))
                                 .then(handleErrors)
                                 .catch(error => {
                                     reject();
                                     setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                 })
-                                .then((project) => {
-                                    if (project != null) {
-                                        addProject(convertNullValuesInObject(project, getManageProjectMapper()));
-                                        notifyUsers('PROJECT', project.id, project['usersIds']);
+                                .then((group) => {
+                                    if (group != null) {
+                                        addGroup(convertNullValuesInObject(group, getGroupMapper()));
+                                        notifyUsers('GROUP', group.id, group['usersIds']);
+                                        notifyBuckets('GROUP', group.id, group['bucketsIds']);
                                         resolve();
                                     }
                                 });
@@ -207,7 +186,7 @@ export default function ProjectsTab() {
                                 return;
                             }
 
-                            let message = validateItem(newData, projectSpecification);
+                            let message = validateItem(newData, fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -219,40 +198,47 @@ export default function ProjectsTab() {
                                 return;
                             }
 
-                            const payload = getSelectedValues(newData, changeableFields);
-
-                            fetch(getBaseUrl('manage/projects'), getPutOptions(payload))
+                            fetch(getBaseUrl('groups'), getPutOptions(newData))
                                 .then(handleErrors)
                                 .catch(error => {
                                     setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                     reject();
                                 })
-                                .then((project) => {
-                                    if (project != null) {
-                                        editProject(convertNullValuesInObject(project, getManageProjectMapper()));
+                                .then((group) => {
+                                    if (group != null) {
+                                        editGroup(convertNullValuesInObject(group, getGroupMapper()));
                                         if (!arraysEquals(newData, oldData, 'usersIds'))
-                                            notifyUsers('PROJECT', project.id, project['usersIds']);
+                                            notifyUsers('GROUP', group.id, group['usersIds']);
+                                        if (!arraysEquals(newData, oldData, 'bucketsIds'))
+                                            notifyBuckets('GROUP', group.id, group['bucketsIds']);
                                         resolve();
                                     }
                                 });
                         }),
 
                     onRowDelete: oldData =>
-                        new Promise((resolve) => {
-                            setConfirmRemove({open: true, id: oldData.id, name: oldData.name});
-                            resolve();
+                        new Promise((resolve, reject) => {
+                            setTimeout(() => {
+                                fetch(getBaseUrl(`groups/${oldData.id}`), getDeleteOptions())
+                                    .then(handleErrors)
+                                    .catch(error => {
+                                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                        reject();
+                                    })
+                                    .then(() => {
+                                        removeGroup(oldData.id);
+                                        notifyUsers('GROUP', oldData.id, []);
+                                        notifyBuckets('GROUP', oldData.id, []);
+                                        resolve();
+                                    });
+
+                            }, 100);
                         }),
                 }}
             />
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
-            />
-            <ConfirmRemovingDialog
-                open={confirmRemove.open}
-                name={confirmRemove.name}
-                message={'Remove project:'}
-                onClose={(remove) => onRemove(remove)}
             />
         </div>
     )
