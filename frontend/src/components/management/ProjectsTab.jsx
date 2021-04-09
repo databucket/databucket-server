@@ -79,19 +79,20 @@ export default function ProjectsTab() {
 
     const onRemove = (remove) => {
         if (remove) {
-            // TODO temporary interruption action
             setConfirmRemove({open: false, id: 0, name: ''});
             setMessageBox({open: true, severity: 'info', title: 'This action is under development!', message: ''});
-            if (remove) return;
 
             setTimeout(() => {
+                let e = false;
                 fetch(getBaseUrl(`manage/projects/${confirmRemove.id}`), getDeleteOptions())
                     .then(handleErrors)
                     .catch(error => {
+                        e = true;
                         setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                     })
                     .then(() => {
-                        removeProject(confirmRemove.id);
+                        if (!e)
+                            removeProject(confirmRemove.id);
                     });
             }, 100);
         }
@@ -237,11 +238,11 @@ export default function ProjectsTab() {
                                 });
                         }),
 
-                    onRowDelete: oldData =>
-                        new Promise((resolve) => {
-                            setConfirmRemove({open: true, id: oldData.id, name: oldData.name});
-                            resolve();
-                        }),
+                    // onRowDelete: oldData =>
+                    //     new Promise((resolve) => {
+                    //         setConfirmRemove({open: true, id: oldData.id, name: oldData.name});
+                    //         resolve();
+                    //     }),
                 }}
             />
             <MessageBox

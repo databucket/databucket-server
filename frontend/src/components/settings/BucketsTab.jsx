@@ -101,15 +101,22 @@ export default function BucketsTab() {
 
     const onRemove = (remove) => {
         if (remove) {
+            let e = false;
             fetch(getBaseUrl(`buckets/${confirmRemove.id}`), getDeleteOptions())
                 .then(handleErrors)
                 .catch(error => {
-                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                    e = true;
+                    if (error.includes('already used by items'))
+                        setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                    else
+                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                 })
                 .then(() => {
-                    removeBucket(confirmRemove.id);
-                    notifyGroups('BUCKET', confirmRemove.id, []);
-                    notifyUsers('BUCKET', confirmRemove.id, []);
+                    if (!e) {
+                        removeBucket(confirmRemove.id);
+                        notifyGroups('BUCKET', confirmRemove.id, []);
+                        notifyUsers('BUCKET', confirmRemove.id, []);
+                    }
                 });
         }
 

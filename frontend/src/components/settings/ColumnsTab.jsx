@@ -218,15 +218,22 @@ export default function ColumnsTab() {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
+                                let e = false;
                                 fetch(getBaseUrl(`columns/${oldData.id}`), getDeleteOptions())
                                     .then(handleErrors)
                                     .catch(error => {
-                                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                        e = true;
+                                        if (error.includes('already used by items'))
+                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                        else
+                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                         reject();
                                     })
                                     .then(() => {
-                                        removeColumns(oldData.id);
-                                        resolve();
+                                        if (!e) {
+                                            removeColumns(oldData.id);
+                                            resolve();
+                                        }
                                     });
 
                             }, 100);
@@ -238,5 +245,5 @@ export default function ColumnsTab() {
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
         </div>
-    )
+    );
 }

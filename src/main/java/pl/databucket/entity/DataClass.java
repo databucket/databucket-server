@@ -45,6 +45,9 @@ public class DataClass extends Auditable<String> implements TenantSupport {
     @ManyToMany(mappedBy = "dataClasses")
     private Set<View> views;
 
+    @ManyToMany(mappedBy = "buckets")
+    private Set<Tag> tags;
+
     @JsonIgnore
     private Boolean deleted = false;
 }

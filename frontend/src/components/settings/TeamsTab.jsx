@@ -29,6 +29,9 @@ import RolesContext from "../../context/roles/RolesContext";
 import {getTeamMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import BucketsContext from "../../context/buckets/BucketsContext";
+import ViewsContext from "../../context/views/ViewsContext";
+import GroupsContext from "../../context/groups/GroupsContext";
 
 export default function TeamsTab() {
 
@@ -44,6 +47,12 @@ export default function TeamsTab() {
     const {teams, fetchTeams, addTeam, editTeam, removeTeam} = teamContext;
     const usersContext = useContext(UsersContext);
     const {users, fetchUsers, notifyUsers} = usersContext;
+    const bucketContext = useContext(BucketsContext);
+    const {notifyBuckets} = bucketContext;
+    const viewsContext = useContext(ViewsContext);
+    const {notifyViews} = viewsContext;
+    const groupsContext = useContext(GroupsContext);
+    const {notifyGroups} = groupsContext;
     const changeableFields = ['name', 'description', 'usersIds'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
@@ -194,16 +203,26 @@ export default function TeamsTab() {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
+                                let e = false;
                                 fetch(getBaseUrl(`teams/${oldData.id}`), getDeleteOptions())
                                     .then(handleErrors)
                                     .catch(error => {
-                                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                        e = true;
+                                        if (error.includes('already used by items'))
+                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                        else
+                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                         reject();
                                     })
                                     .then(() => {
-                                        removeTeam(oldData.id);
-                                        notifyUsers('TEAM', oldData.id, []);
-                                        resolve();
+                                        if (!e) {
+                                            removeTeam(oldData.id);
+                                            notifyUsers('TEAM', oldData.id, []);
+                                            notifyBuckets('TEAM', oldData.id, []);
+                                            notifyGroups('TEAM', oldData.id, []);
+                                            notifyViews('TEAM', oldData.id, []);
+                                            resolve();
+                                        }
                                     });
 
                             }, 100);
@@ -215,5 +234,5 @@ export default function TeamsTab() {
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
         </div>
-    )
+    );
 }

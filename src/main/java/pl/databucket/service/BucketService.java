@@ -45,6 +45,12 @@ public class BucketService {
     private DataClassRepository dataClassRepository;
 
     @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
+    private ViewRepository viewRepository;
+
+    @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     Logger logger = LoggerFactory.getLogger(BucketService.class);
@@ -243,6 +249,16 @@ public class BucketService {
 
         bucket.setUsers(null);
         bucket.setTeams(null);
+
+        for (Tag tag : bucket.getTags()) {
+            tag.getBuckets().remove(bucket);
+            tagRepository.save(tag);
+        }
+
+        for (View view : bucket.getViews()) {
+            view.getBuckets().remove(bucket);
+            viewRepository.save(view);
+        }
 
         bucket.setDeleted(true);
         bucketRepository.save(bucket);

@@ -53,6 +53,9 @@ const ViewsProvider = props => {
             case "USER":
                 itemsTargetFieldName = "usersIds";
                 break;
+            case "TEAM":
+                itemsTargetFieldName = "teamsIds";
+                break;
             default:
                 console.log("Undefined notification source!");
                 return;

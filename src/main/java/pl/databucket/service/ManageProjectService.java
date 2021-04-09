@@ -88,6 +88,15 @@ public class ManageProjectService {
         if (project == null)
             throw new ItemNotFoundException(Project.class, projectId);
 
+        for (User user : project.getUsers()) {
+            user.getProjects().remove(project);
+            userRepository.save(user);
+        }
+
+        // TODO Remove all artefacts and links between them
+        // Teams, Classes, Enums, Groups, Buckets, Tags, Columns, Filters, Views, Tasks
+
+
         project.setDeleted(true);
         projectRepository.save(project);
     }

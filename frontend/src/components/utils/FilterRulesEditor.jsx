@@ -120,6 +120,9 @@ const createConfig = (propFields, tags, users, dataClass, enums) => {
     fields['modifiedBy'] = modifiedBy(userList);
     fields['modifiedAt'] = modifiedAt;
 
+    console.log('fields:');
+    console.log(JSON.stringify(fields));
+
     return {...InitialConfig, fields: fields};
 };
 
@@ -172,7 +175,7 @@ const tagId = (tagList) => {
         fieldSettings: {
             listValues: tagList
         },
-        valueSources: ["value"]
+        // valueSources: ["value"]
     }
 };
 

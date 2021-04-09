@@ -62,6 +62,9 @@ const BucketsProvider = props => {
             case "VIEW":
                 itemsTargetFieldName = "viewsIds";
                 break;
+            case "TEAM":
+                itemsTargetFieldName = "teamsIds";
+                break;
             default:
                 console.log("Undefined notification source!");
                 return;

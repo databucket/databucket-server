@@ -3,8 +3,7 @@ package pl.databucket.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.databucket.dto.TeamDto;
-import pl.databucket.entity.Team;
-import pl.databucket.entity.User;
+import pl.databucket.entity.*;
 import pl.databucket.exception.ItemAlreadyExistsException;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
@@ -22,6 +21,15 @@ public class TeamService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private BucketRepository bucketRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
+    private ViewRepository viewRepository;
 
     private final Misc misc = new Misc();
 
@@ -85,6 +93,21 @@ public class TeamService {
         for (User user : team.getUsers()) {
             user.getTeams().remove(team);
             userRepository.save(user);
+        }
+
+        for (Bucket bucket : team.getBuckets()) {
+            bucket.getTeams().remove(team);
+            bucketRepository.save(bucket);
+        }
+
+        for (Group group : team.getGroups()) {
+            group.getTeams().remove(team);
+            groupRepository.save(group);
+        }
+
+        for (View view : team.getViews()) {
+            view.getTeams().remove(team);
+            viewRepository.save(view);
         }
 
         team.setDeleted(true);

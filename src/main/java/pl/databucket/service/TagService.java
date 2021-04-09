@@ -91,6 +91,9 @@ public class TagService {
         if (tag == null)
             throw new ItemNotFoundException(Tag.class, tagId);
 
+        tag.setBuckets(null);
+        tag.setDataClasses(null);
+
         tag.setDeleted(true);
         tagRepository.save(tag);
     }

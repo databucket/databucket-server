@@ -117,6 +117,9 @@ public class TaskService {
         if (task == null)
             throw new ItemNotFoundException(Task.class, taskId);
 
+        task.setBuckets(null);
+        task.setDataClasses(null);
+
         task.setDeleted(true);
         taskRepository.save(task);
     }

@@ -56,6 +56,9 @@ public class Bucket extends Auditable<String> implements TenantSupport {
     @ManyToMany(mappedBy = "buckets")
     private Set<View> views;
 
+    @ManyToMany(mappedBy = "buckets")
+    private Set<Tag> tags;
+
     @ManyToMany
     @JoinTable(name = "buckets_teams",
             joinColumns = {@JoinColumn(name = "bucket_id")},

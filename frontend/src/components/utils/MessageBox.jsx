@@ -24,7 +24,7 @@ export const MessageBox = (props) => {
                 }}
                 open={props.config.open}
                 onClose={props.onClose}
-                autoHideDuration={6000}
+                autoHideDuration={9000}
                 // message={props.message}
                 // action={
                 //     <React.Fragment>

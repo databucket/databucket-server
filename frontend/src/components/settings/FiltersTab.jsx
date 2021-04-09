@@ -236,15 +236,22 @@ export default function FiltersTab() {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
+                                let e = false;
                                 fetch(getBaseUrl(`filters/${oldData.id}`), getDeleteOptions())
                                     .then(handleErrors)
                                     .catch(error => {
-                                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                        e = true;
+                                        if (error.includes('already used by items'))
+                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                        else
+                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                         reject();
                                     })
                                     .then(() => {
-                                        removeFilter(oldData.id);
-                                        resolve();
+                                        if (!e) {
+                                            removeFilter(oldData.id);
+                                            resolve();
+                                        }
                                     });
 
                             }, 100);
@@ -256,5 +263,5 @@ export default function FiltersTab() {
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
         </div>
-    )
+    );
 }

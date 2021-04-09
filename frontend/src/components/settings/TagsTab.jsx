@@ -198,16 +198,23 @@ export default function TagsTab() {
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
+                                let e = false;
                                 fetch(getBaseUrl(`tags/${oldData.id}`), getDeleteOptions())
                                     .then(handleErrors)
                                     .catch(error => {
-                                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                        e = true;
+                                        if (error.includes('already used by items'))
+                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                        else
+                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                         reject();
                                     })
                                     .then(() => {
-                                        removeTag(oldData.id);
-                                        notifyBuckets('TAG', oldData.id, []);
-                                        resolve();
+                                        if (!e) {
+                                            removeTag(oldData.id);
+                                            notifyBuckets('TAG', oldData.id, []);
+                                            resolve();
+                                        }
                                     });
 
                             }, 100);
@@ -219,5 +226,5 @@ export default function TagsTab() {
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
         </div>
-    )
+    );
 }

@@ -3,13 +3,18 @@ package pl.databucket.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.databucket.entity.DataClass;
+import pl.databucket.entity.View;
 import pl.databucket.exception.*;
 import pl.databucket.dto.DataColumnsDto;
 import pl.databucket.entity.DataColumns;
 import pl.databucket.repository.DataClassRepository;
 import pl.databucket.repository.DataColumnsRepository;
+import pl.databucket.repository.ViewRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -20,6 +25,10 @@ public class DataColumnsService {
 
     @Autowired
     private DataClassRepository dataClassRepository;
+
+    @Autowired
+    private ViewRepository viewRepository;
+
 
     public DataColumns createColumns(DataColumnsDto dataColumnsDto) throws ItemNotFoundException {
         DataColumns dataColumns = new DataColumns();
@@ -72,11 +81,19 @@ public class DataColumnsService {
         return columnsRepository.save(dataColumns);
     }
 
-    public void deleteColumns(long columnsId) throws ItemNotFoundException {
+    public void deleteColumns(long columnsId) throws ItemNotFoundException, ItemAlreadyUsedException {
         DataColumns columns = columnsRepository.findByIdAndDeleted(columnsId, false);
 
         if (columns == null)
             throw new ItemNotFoundException(DataColumns.class, columnsId);
+
+        Map<String, List<String>> usedByItems = new HashMap<>();
+        List<View> views = viewRepository.findAllByDeletedAndDataColumns(false, columns);
+        if (views.size() > 0)
+            usedByItems.put("views", views.stream().map(View::getName).collect(Collectors.toList()));
+
+        if (usedByItems.size() > 0)
+            throw new ItemAlreadyUsedException("Column", columns.getName(), usedByItems.toString());
 
         columns.setDeleted(true);
         columnsRepository.save(columns);

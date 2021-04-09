@@ -5,12 +5,20 @@ import org.springframework.stereotype.Service;
 import pl.databucket.dto.DataFilterDto;
 import pl.databucket.entity.DataClass;
 import pl.databucket.entity.DataFilter;
+import pl.databucket.entity.Task;
+import pl.databucket.entity.View;
+import pl.databucket.exception.ItemAlreadyUsedException;
 import pl.databucket.exception.ItemNotFoundException;
 import pl.databucket.exception.ModifyByNullEntityIdException;
 import pl.databucket.repository.DataClassRepository;
 import pl.databucket.repository.DataFilterRepository;
+import pl.databucket.repository.TaskRepository;
+import pl.databucket.repository.ViewRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -21,6 +29,12 @@ public class DataFilterService {
 
     @Autowired
     private DataClassRepository dataClassRepository;
+
+    @Autowired
+    private ViewRepository viewRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
 
     public DataFilter createFilter(DataFilterDto dataFilterDto) throws ItemNotFoundException {
@@ -70,11 +84,24 @@ public class DataFilterService {
         return filterRepository.save(dataFilter);
     }
 
-    public void deleteFilter(long filterId) throws ItemNotFoundException {
+    public void deleteFilter(long filterId) throws ItemNotFoundException, ItemAlreadyUsedException {
         DataFilter dataFilter = filterRepository.findByIdAndDeleted(filterId, false);
 
         if (dataFilter == null)
             throw new ItemNotFoundException(DataFilter.class, filterId);
+
+        Map<String, List<String>> usedByItems = new HashMap<>();
+
+        List<Task> tasks = taskRepository.findAllByDeletedAndDataFilter(false, dataFilter);
+        if (tasks.size() > 0)
+            usedByItems.put("tasks", tasks.stream().map(Task::getName).collect(Collectors.toList()));
+
+        List<View> views = viewRepository.findAllByDeletedAndDataFilter(false, dataFilter);
+        if (views.size() > 0)
+            usedByItems.put("views", views.stream().map(View::getName).collect(Collectors.toList()));
+
+        if (usedByItems.size() > 0)
+            throw new ItemAlreadyUsedException("Filter", dataFilter.getName(), usedByItems.toString());
 
         dataFilter.setDeleted(true);
         filterRepository.save(dataFilter);

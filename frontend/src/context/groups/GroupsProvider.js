@@ -55,6 +55,9 @@ const GroupsProvider = props => {
             case "BUCKET":
                 itemsTargetFieldName = "bucketsIds";
                 break;
+            case "TEAM":
+                itemsTargetFieldName = "teamsIds";
+                break;
             default:
                 console.log("Undefined notification source!");
                 return;
