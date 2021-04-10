@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import clsx from 'clsx';
 import {makeStyles, useTheme} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -35,12 +35,12 @@ import GroupMenuSelector from "./GroupMenuSelector";
 import BucketListSelector from "./BucketListSelector";
 import InfoDialog from "../dialogs/InfoDialog";
 import BucketTabSelector from "./BucketTabSelector";
-import AccessProvider from "../../context/access/AccessProvider";
 import UserProjects from "./UserProjects";
 import {MessageBox} from "../utils/MessageBox";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import AccessContext from "../../context/access/AccessContext";
 
 const drawerWidth = 240;
 
@@ -109,12 +109,31 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function _ProjectDataPage() {
+export default function ProjectData() {
     const classes = useStyles();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const theme = useTheme();
     const [open, setOpen] = useState(isLeftPanelOpen());
     const [logged, setLogged] = useState(hasToken() && hasProject());
+    const accessContext = useContext(AccessContext);
+    const {projects, views, filters, fetchAccessTree, columns, fetchSessionColumns, fetchSessionFilters} = accessContext;
+
+    useEffect(() => {
+        if (projects == null)
+            fetchAccessTree();
+    }, [projects, fetchAccessTree]);
+
+    useEffect(() => {
+        if (views != null && columns == null)
+            fetchSessionColumns();
+        // eslint-disable-next-line
+    }, [views]);
+
+    useEffect(() => {
+        if (views != null && filters == null)
+            fetchSessionFilters();
+        // eslint-disable-next-line
+    }, [views]);
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -150,7 +169,7 @@ export default function _ProjectDataPage() {
 
     if (logged) {
         return (
-            <AccessProvider>
+            <div>
                 <div className={classes.root}>
                     <AppBar
                         position="fixed"
@@ -228,7 +247,7 @@ export default function _ProjectDataPage() {
                     config={messageBox}
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
-            </AccessProvider>
+            </div>
         );
     } else
         return (<Redirect to="/login"/>);

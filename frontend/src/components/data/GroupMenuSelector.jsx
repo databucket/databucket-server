@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext} from 'react';
 import PropTypes from "prop-types";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -18,23 +18,7 @@ export default function GroupMenuSelector(props) {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const accessContext = useContext(AccessContext);
-    const {accessTree, activeGroup, fetchAccessTree, setActiveGroup, views, fetchViews, columns, fetchColumns} = accessContext;
-
-    useEffect(() => {
-        if (accessTree == null)
-            fetchAccessTree();
-    }, [accessTree, fetchAccessTree]);
-
-    useEffect(() => {
-        if (accessTree != null && accessTree.views != null && views == null)
-            fetchViews();
-    }, [accessTree, views, fetchViews]);
-
-    useEffect(() => {
-        if (views != null && columns == null)
-            fetchColumns();
-    }, [views, columns, fetchColumns]);
-
+    const {groups, activeGroup, setActiveGroup} = accessContext;
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -50,7 +34,7 @@ export default function GroupMenuSelector(props) {
     }
 
     const getSelectedName = () => {
-        if (accessTree != null && accessTree.groups.length > 0) {
+        if (groups != null && groups.length > 0) {
             if (props.open && activeGroup.name != null)
                 return activeGroup.name.length > 17 ? activeGroup.name.substring(0, 15) + "..." : activeGroup.name;
             else
@@ -65,7 +49,7 @@ export default function GroupMenuSelector(props) {
             return shortName;
     }
 
-    if (accessTree != null && accessTree.groups.length > 0)
+    if (groups != null && groups.length > 0)
         return (
             <div>
                 <List>
@@ -83,7 +67,7 @@ export default function GroupMenuSelector(props) {
                     onClose={handleClose}
                     PaperProps={{style: {minWidth: 100}}}
                 >
-                    {accessTree.groups.map((group) => (
+                    {groups.map((group) => (
                         <MenuItem
                             key={group.id}
                             selected={group.id === activeGroup.id}

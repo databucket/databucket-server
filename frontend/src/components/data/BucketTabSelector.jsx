@@ -36,7 +36,7 @@ export default function BucketTabSelector() {
     const classes = useStyles();
     const accessContext = useContext(AccessContext);
     const {bucketsTabs, activeBucket, setActiveBucket, removeTab} = accessContext;
-    let removing = false;
+    let removing = false; // indicate whether changing tab is invoked by selection or by removing
 
     const getBucketName = (name) => {
         return name.length > 17 ? name.substring(0, 15) + "..." : name;

@@ -165,18 +165,6 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
-    @GetMapping(value="/views/{ids}")
-    public ResponseEntity<?> getUserViews(@PathVariable List<Long> ids) {
-        try {
-            List<View> views = viewService.getViews(ids);
-            List<UserViewDto> viewsDto = views.stream().map(item -> modelMapper.map(item, UserViewDto.class)).collect(Collectors.toList());
-            return new ResponseEntity<>(viewsDto, HttpStatus.OK);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
-        }
-    }
-
-    @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
     @GetMapping(value="/columns/{ids}")
     public ResponseEntity<?> getUserColumns(@PathVariable List<Long> ids) {
         try {

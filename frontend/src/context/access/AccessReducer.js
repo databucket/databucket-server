@@ -37,35 +37,33 @@ const AccessReducer = (state, action) => {
                 ...state,
                 activeGroup: activeGroup,
                 activeBucket: activeBucket,
-                accessTree: accessTree,
+                projects: accessTree.projects,
+                groups: accessTree.groups,
+                buckets: accessTree.buckets,
+                views: accessTree.views,
                 bucketsTabs: bucketsTabs
             };
-        case "FETCH_VIEWS":
-            return {
-                ...state,
-                views: action.payload
-            };
-        case "FETCH_COLUMNS":
+        case "FETCH_SESSION_COLUMNS":
             return {
                 ...state,
                 columns: action.payload
             };
-        case "FETCH_FILTERS":
+        case "FETCH_SESSION_FILTERS":
             return {
                 ...state,
                 filters: action.payload
             };
-        case "FETCH_TASKS":
+        case "FETCH_SESSION_TASKS":
             return {
                 ...state,
                 tasks: action.payload
             };
-        case "FETCH_TAGS":
+        case "FETCH_SESSION_TAGS":
             return {
                 ...state,
                 tags: action.payload
             };
-        case "FETCH_USERS":
+        case "FETCH_SESSION_USERS":
             return {
                 ...state,
                 users: action.payload
@@ -103,21 +101,29 @@ const AccessReducer = (state, action) => {
             const updatedTabs = state.bucketsTabs.filter(bucket => bucket.id !== action.payload.id);
             setLastOpenedBuckets(updatedTabs);
 
-            if (activeTabIndex > updatedTabs.length - 1) {
-                const newActiveBucket = updatedTabs[updatedTabs.length - 1];
-                setLastActiveBucket(newActiveBucket != null ? newActiveBucket.id : -1);
-                return {
-                    ...state,
-                    activeBucket: newActiveBucket,
-                    bucketsTabs: updatedTabs
-                };
-            } else {
-                const newActiveBucket = state.bucketsTabs[activeTabIndex];
-                setLastActiveBucket(newActiveBucket != null ? newActiveBucket.id : -1);
+            // change active tab when removing active tab
+            if (state.activeBucket.id === action.payload.id) {
+                if (activeTabIndex > updatedTabs.length - 1) {
+                    const newActiveBucket = updatedTabs[updatedTabs.length - 1];
+                    setLastActiveBucket(newActiveBucket != null ? newActiveBucket.id : -1);
+                    return {
+                        ...state,
+                        activeBucket: newActiveBucket,
+                        bucketsTabs: updatedTabs
+                    };
+                } else {
+                    const newActiveBucket = updatedTabs[activeTabIndex];
+                    setLastActiveBucket(newActiveBucket != null ? newActiveBucket.id : -1);
 
+                    return {
+                        ...state,
+                        activeBucket: newActiveBucket,
+                        bucketsTabs: updatedTabs
+                    }
+                }
+            } else {
                 return {
                     ...state,
-                    activeBucket: newActiveBucket,
                     bucketsTabs: updatedTabs
                 }
             }

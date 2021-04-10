@@ -12,5 +12,6 @@ public class DataFilterConfigDto {
 
     private List<Map<String, Object>> properties;
     private Map<String, Object> logic;
+    private Map<String, Object> tree;
 
 }

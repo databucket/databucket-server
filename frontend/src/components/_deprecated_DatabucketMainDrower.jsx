@@ -9,7 +9,7 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import DatabucketTable from './DatabucketTable';
+import _deprecated_DatabucketTable from './_deprecated_DatabucketTable';
 import { withStyles } from '@material-ui/core';
 import SettingsDialog from './_deprecated_/Settings/SettingsDialog';
 import SelectorGroup from './SelectorGroup';
@@ -640,7 +640,7 @@ class DatabucketMainDrawer extends React.Component {
                 </Drawer>
                 <main className={classes.content}>
                     <div className={classes.toolbar} />
-                    <DatabucketTable
+                    <_deprecated_DatabucketTable
                         selected={this.state.tableInputObject}
                         allTags={this.state.allTags}
                         allTasks={this.state.allTasks}

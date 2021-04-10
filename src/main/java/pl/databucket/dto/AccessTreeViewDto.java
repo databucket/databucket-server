@@ -9,6 +9,10 @@ import java.util.Set;
 public class AccessTreeViewDto {
     private Long id;
     private String name;
+    private String description;
     private Set<Long> classesIds;
     private Set<Long> bucketsIds;
+    private long columnsId;
+    private Long filterId;
+    private Short[] featuresIds;
 }

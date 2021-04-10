@@ -9,7 +9,7 @@ import ManagementRoute from './ManagementRoute';
 import _ManagementTabs from "../components/management/_ManagementTabs";
 import ChangePasswordPage from "../components/login/ChangePasswordPage";
 import {hasProject} from "../utils/ConfigurationStorage";
-import ProjectRouteInternal from "../components/data/ProjectRouteInternal";
+import _ProjectRouteInternal from "../components/data/_ProjectRouteInternal";
 import ChangePasswordRoute from "./ChangePasswordRoute";
 
 export default function AppRouter() {
@@ -21,7 +21,7 @@ export default function AppRouter() {
                 <ProjectRoute path="/project/settings" component={_ProjectSettingsTabs}/>
                 <ChangePasswordRoute exact path="/change-password" component={ChangePasswordPage}/>
                 <ManagementRoute path="/management" component={_ManagementTabs}/>
-                <ProjectRoute path="/project" component={ProjectRouteInternal}/>
+                <ProjectRoute path="/project" component={_ProjectRouteInternal}/>
                 <PublicRoute path="*" component={NotFoundPage}/>
             </Switch>
         </BrowserRouter>

@@ -8,6 +8,7 @@ import {Grid} from "@material-ui/core";
 import ViewMenuSelector from "./ViewMenuSelector";
 import AccessContext from "../../context/access/AccessContext";
 import MissingBucketTable from "./MissingBucketTable";
+import {isFeatureEnabled, FEATURE_SEARCH} from "../utils/ViewFeatures";
 
 
 export default function BucketDataTable() {
@@ -21,11 +22,6 @@ export default function BucketDataTable() {
 
     useEffect(() => {
         if (views != null && activeBucket != null) {
-            // console.log("Active bucket: id=" + activeBucket.id + " classId=" + activeBucket.classId);
-            // console.log(activeBucket);
-            // console.log('Views:');
-            // console.log(views);
-
             const availableViews = views.filter(view => (
                 (view.classesIds != null && view.classesIds.includes(activeBucket.classId))
                 ||
@@ -34,10 +30,7 @@ export default function BucketDataTable() {
                 return a.name > b.name ? 1 : -1
             });
 
-            // console.log('Available views:');
-            // console.log(availableViews);
             let activeView = null;
-
             if (availableViews.length > 0) {
                 const lastActiveViewId = getLastActiveView(activeBucket.id);
                 if (lastActiveViewId != null && availableViews.find(view => view.id === lastActiveViewId))
@@ -60,6 +53,11 @@ export default function BucketDataTable() {
         setState({...state, activeView: view});
     }
 
+    if (state.activeView != null) {
+        console.log('Active view: ');
+        console.log(state.activeView);
+    }
+
     if (activeBucket != null)
         return (
             <div style={{paddingTop: 0, paddingLeft: 0, paddingRight: 0}}>
@@ -76,7 +74,7 @@ export default function BucketDataTable() {
                         selection: false,
                         filtering: false,
                         padding: 'dense',
-                        search: (state.activeView != null && state.activeView['enabledSearching']),
+                        search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
                         searchFieldStyle: {width: 600},
                         headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
                         maxBodyHeight: getTableHeight(height),
@@ -134,7 +132,7 @@ export default function BucketDataTable() {
             </div>
         );
     else
-        return <MissingBucketTable />
+        return <MissingBucketTable/>
 }
 
 // const useStyles = makeStyles((theme) => ({

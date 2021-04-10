@@ -86,7 +86,8 @@ export default function EditFilterRulesDialog(props) {
         if (configuration != null) {
             const logic = QbUtils.jsonLogicFormat(configuration.tree, configuration.config).logic;
             const properties = configuration.properties;
-            props.onChange({properties, logic});
+            const tree = configuration.tree;
+            props.onChange({properties, logic, tree});
         }
         setOpen(false);
     }

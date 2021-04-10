@@ -11,9 +11,9 @@ export default function UserProjects(props) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const accessContext = useContext(AccessContext);
-    const {accessTree} = accessContext;
+    const {projects} = accessContext;
 
-    document.title = accessTree != null && accessTree.projects != null ? 'Databucket - ' + accessTree.projects.find(project => project.id === getActiveProjectId()).name : 'Databucket';
+    document.title = projects != null ? 'Databucket - ' + projects.find(project => project.id === getActiveProjectId()).name : 'Databucket';
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -29,7 +29,7 @@ export default function UserProjects(props) {
         }
     }
 
-    if (accessTree != null && accessTree.projects != null && accessTree.projects.length > 1)
+    if (projects != null && projects.length > 1)
         return (
             <div>
                 <IconButton
@@ -56,7 +56,7 @@ export default function UserProjects(props) {
                     open={open}
                     onClose={handleClose}
                 >
-                    {accessTree.projects.sort((a, b) => {
+                    {projects.sort((a, b) => {
                         return a.name > b.name ? 1 : -1
                     }).map((project) => (
                         <MenuItem

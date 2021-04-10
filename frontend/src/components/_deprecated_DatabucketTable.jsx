@@ -55,7 +55,7 @@ function handleErrors(res) {
     }
 }
 
-class DatabucketTable extends React.Component {
+class _deprecated_DatabucketTable extends React.Component {
 
     constructor(props) {
         super(props);
@@ -662,4 +662,4 @@ class DatabucketTable extends React.Component {
     }
 }
 
-export default DatabucketTable;
+export default _deprecated_DatabucketTable;

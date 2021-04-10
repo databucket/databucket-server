@@ -9,24 +9,24 @@ import AccessContext from "../../context/access/AccessContext";
 export default function BucketListSelector() {
 
     const accessContext = useContext(AccessContext);
-    const {accessTree, activeGroup, activeBucket, addTab} = accessContext;
-    const [buckets, setBuckets] = useState([]);
+    const {groups, buckets, activeGroup, activeBucket, addTab} = accessContext;
+    const [filteredBuckets, setFilteredBuckets] = useState([]);
 
     useEffect(() => {
-        if (accessTree != null) {
-            if (accessTree.groups != null && accessTree.groups.length > 0) {
-                let buckets = [];
+        if (buckets != null) {
+            if (groups != null && groups.length > 0) {
+                let fBuckets = [];
                 if (activeGroup.bucketsIds != null)
                     activeGroup.bucketsIds.forEach(id => {
-                        buckets = [...buckets, accessTree.buckets.find(bucket => bucket.id === id)];
+                        fBuckets = [...fBuckets, buckets.find(bucket => bucket.id === id)];
                     });
-                setBuckets(buckets);
+                setFilteredBuckets(fBuckets);
             } else
-                setBuckets(accessTree.buckets);
+                setFilteredBuckets(buckets);
         } else
-            setBuckets([]);
+            setFilteredBuckets([]);
 
-    }, [accessTree, activeGroup]);
+    }, [groups, buckets, activeGroup]);
 
     const onClick = (bucket) => {
         addTab(bucket);
@@ -38,7 +38,7 @@ export default function BucketListSelector() {
 
     return (
         <List>
-            {buckets.map((bucket) => (
+            {filteredBuckets.map((bucket) => (
                 <ListItem
                     button
                     selected={activeBucket != null ? bucket.id === activeBucket.id : false}

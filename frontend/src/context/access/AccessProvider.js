@@ -3,22 +3,23 @@ import AccessContext from "./AccessContext";
 import AccessReducer from "./AccessReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {convertNullValuesInCollection} from "../../utils/JsonHelper";
-import {getViewsMapper} from "../../utils/NullValueMappers";
 import {getBaseUrl, getBaseUrlWithIds} from "../../utils/UrlBuilder";
 
 
 const AccessProvider = props => {
 
     const initialState = {
-        accessTree: null,
         activeGroup: null,
         activeBucket: null,
         bucketsTabs: [],
+        projects: null,
+        groups: null,
+        buckets: null,
         views: null,
         columns: null,
         filters: null,
-        tasks: null
+        tasks: null,
+        tags: null
     }
 
     const [state, dispatch] = useReducer(AccessReducer, initialState);
@@ -33,52 +34,48 @@ const AccessProvider = props => {
             .catch(err => console.log(err));
     }
 
-    const fetchViews = () => {
-        const ids = getViewsIds();
-        if (ids.length > 0)
-            fetch(getBaseUrlWithIds('users/views', ids), getGetOptions())
+    const fetchSessionColumns = () => {
+        const columnsIds = [...new Set(state.views.map(({columnsId}) => columnsId))];
+        if (columnsIds.length > 0)
+            fetch(getBaseUrlWithIds('users/columns', columnsIds), getGetOptions())
                 .then(handleErrors)
-                .then(views => dispatch({
-                    type: "FETCH_VIEWS",
-                    payload: convertNullValuesInCollection(views, getViewsMapper())
+                .then(columns => dispatch({
+                    type: "FETCH_SESSION_COLUMNS",
+                    payload: columns
                 }))
                 .catch(err => console.log(err));
     }
 
-    const getViewsIds = () => {
-        return state.accessTree.views.map(({id}) => id);
+    const fetchSessionFilters = () => {
+        const filtersIds = [...new Set(state.views.map(({filterId}) => filterId).filter(id => id != null))];
+        if (filtersIds.length > 0)
+            fetch(getBaseUrlWithIds('users/filters', filtersIds), getGetOptions())
+                .then(handleErrors)
+                .then(filters => dispatch({
+                    type: "FETCH_SESSION_FILTERS",
+                    payload: filters
+                }))
+                .catch(err => console.log(err));
     }
 
-    const fetchColumns = () => {
-        fetch(getBaseUrlWithIds('users/columns', getColumnsIds()), getGetOptions())
-            .then(handleErrors)
-            .then(columns => dispatch({
-                type: "FETCH_COLUMNS",
-                payload: columns
-            }))
-            .catch(err => console.log(err));
-    }
-
-    const getColumnsIds = () => {
-        return [...new Set(state.views.map(({columnsId}) => columnsId))];
-    }
-
-    const fetchFilters = () => {
-        fetch(getBaseUrl('users/filters'), getGetOptions())
-            .then(handleErrors)
-            .then(filters => dispatch({
-                type: "FETCH_FILTERS",
-                payload: filters
-            }))
-            .catch(err => console.log(err));
-    }
-
-    const fetchTasks = () => {
+    const fetchSessionTasks = () => {
+        // TODO find all tasks ids that must be loaded
         fetch(getBaseUrl('users/tasks'), getGetOptions())
             .then(handleErrors)
             .then(tasks => dispatch({
-                type: "FETCH_TASKS",
+                type: "FETCH_SESSION_TASKS",
                 payload: tasks
+            }))
+            .catch(err => console.log(err));
+    }
+
+    const fetchSessionTags = () => {
+        // TODO find all tags ids that must be loaded
+        fetch(getBaseUrl('users/tags'), getGetOptions())
+            .then(handleErrors)
+            .then(tags => dispatch({
+                type: "FETCH_SESSION_TAGS",
+                payload: tags
             }))
             .catch(err => console.log(err));
     }
@@ -114,10 +111,12 @@ const AccessProvider = props => {
     return (
         <AccessContext.Provider value={
             {
-                accessTree: state.accessTree,
                 activeGroup: state.activeGroup,
                 activeBucket: state.activeBucket,
                 bucketsTabs: state.bucketsTabs,
+                projects: state.projects,
+                groups: state.groups,
+                buckets: state.buckets,
                 views: state.views,
                 columns: state.columns,
                 filters: state.filters,
@@ -127,10 +126,10 @@ const AccessProvider = props => {
                 setActiveBucket,
                 addTab,
                 removeTab,
-                fetchViews,
-                fetchColumns,
-                fetchFilters,
-                fetchTasks
+                fetchSessionColumns,
+                fetchSessionFilters,
+                fetchSessionTasks,
+                fetchSessionTags
             }
         }>
             {props.children}

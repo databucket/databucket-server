@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from "prop-types";
 import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
-import {Grid, Select} from "@material-ui/core";
+import {Grid, IconButton, Menu} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
+import ViewListIcon from "@material-ui/icons/MoreVert";
 
 ViewMenuSelector.propTypes = {
     views: PropTypes.array.isRequired,
@@ -13,6 +14,17 @@ ViewMenuSelector.propTypes = {
 
 export default function ViewMenuSelector(props) {
     const classes = useStyles();
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     const handleSelected = (view) => {
         props.onChange(view);
@@ -27,10 +39,10 @@ export default function ViewMenuSelector(props) {
 
     const getSelectedDescription = () => {
         if (props.activeView != null)
-            if (props.activeView.description.length > 0)
+            if (props.activeView.description != null && props.activeView.description.length > 0)
                 return props.activeView.description;
             else
-                return '---';
+                return props.activeView.name;
         else
             return '---'
     }
@@ -38,18 +50,16 @@ export default function ViewMenuSelector(props) {
     if (props.views.length > 0)
         return (
             <div className={classes.root}>
-                <Grid container direction="row" alignItems="center">
-                    <Select className={classes.select} value={props.activeView != null ? props.activeView.id : 0}>
-                        {props.views.map((view) => (
-                            <MenuItem
-                                key={view.id}
-                                value={view.id}
-                                onClick={() => handleSelected(view)}
-                            >
-                                {getViewName(view)}
-                            </MenuItem>
-                        ))}
-                    </Select>
+                <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
+                    <IconButton
+                        className={classes.select}
+                        aria-label="more"
+                        aria-controls="long-menu"
+                        aria-haspopup="true"
+                        onClick={handleClick}
+                    >
+                        <ViewListIcon/>
+                    </IconButton>
                     <Typography
                         variant="h6"
                         className={classes.description}
@@ -57,30 +67,53 @@ export default function ViewMenuSelector(props) {
                         {getSelectedDescription()}
                     </Typography>
                 </Grid>
+                <Menu
+                    id="long-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={open}
+                    onClose={handleClose}
+                    PaperProps={{
+                        style: {
+                            // maxHeight: 48 * 4.5,
+                            minWidth: '15ch'
+                        },
+                    }}
+                >
+                    {props.views.map((view) => (
+                        <MenuItem
+                            key={view.id}
+                            selected={view.id === props.activeView.id}
+                            onClick={() => handleSelected(view)}
+                        >
+                            {getViewName(view)}
+                        </MenuItem>
+                    ))}
+                </Menu>
             </div>
         );
     else
         return (
             <Typography
                 variant="h6"
+                color={'error'}
                 className={classes.description}
             >
-                {'Create a dedicated view for this bucket or assign an existing one.'}
+                {'You do not have permission to any view of this bucket.'}
             </Typography>);
 };
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        flexGrow: 1,
+        flexGrow: 1
     },
     view: {
         paddingLeft: theme.spacing(2),
         padding: theme.spacing(1)
     },
     select: {
-        marginLeft: '20px',
-        marginRight: '10px',
-        padding: theme.spacing(0)
+        marginLeft: '5px',
+        padding: theme.spacing(1)
     },
     description: {
         padding: theme.spacing(2),

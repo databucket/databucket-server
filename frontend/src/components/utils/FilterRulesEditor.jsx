@@ -16,8 +16,10 @@ FilterRulesEditor.propTypes = {
     onChange: PropTypes.func.isRequired
 }
 
-const getInitialTree = (loadedInitLogic, config) => {
-    if (loadedInitLogic && Object.keys(loadedInitLogic).length > 0) {
+const getInitialTree = (loadedInitLogic, tree, config) => {
+    if (tree && Object.keys(tree).length > 0) {
+        return QbUtils.loadTree(tree);
+    } else if (loadedInitLogic && Object.keys(loadedInitLogic).length > 0) {
         return QbUtils.loadFromJsonLogic(loadedInitLogic, config);
     } else {
         return QbUtils.loadTree({id: QbUtils.uuid(), type: "group"});
@@ -34,7 +36,7 @@ export default function FilterRulesEditor(props) {
     useEffect(() => {
         const conf = createConfig(properties, props.tags, props.users, props.dataClass, enums);
         if (Object.keys(state.tree).length === 0) {
-            const initialTree = QbUtils.checkTree(getInitialTree(props.configuration.logic, conf), conf);
+            const initialTree = QbUtils.checkTree(getInitialTree(props.configuration.logic, props.configuration.tree, conf), conf);
             setState({config: conf, tree: initialTree});
         } else {
             setState({config: conf, tree: state.tree});
@@ -119,9 +121,6 @@ const createConfig = (propFields, tags, users, dataClass, enums) => {
     fields['createdAt'] = createdAt;
     fields['modifiedBy'] = modifiedBy(userList);
     fields['modifiedAt'] = modifiedAt;
-
-    console.log('fields:');
-    console.log(JSON.stringify(fields));
 
     return {...InitialConfig, fields: fields};
 };

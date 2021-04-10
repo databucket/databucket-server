@@ -61,6 +61,11 @@ export default function LoginPage() {
         signIn(username, password, null);
     }
 
+    const handleKeypress = e => {
+        if (e.key === 'Enter')
+            handleSignIn();
+    };
+
     const signIn = (username, password, projectId) => {
         fetch(getBaseUrl('public/signin'), {
             method: 'POST',
@@ -118,6 +123,7 @@ export default function LoginPage() {
                         type='text'
                         value={username}
                         onChange={onChange}
+                        onKeyPress={(event) => handleKeypress(event)}
                     />
                 </FormControl>
                 <FormControl className="LoginInputText">
@@ -128,6 +134,7 @@ export default function LoginPage() {
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={onChange}
+                        onKeyPress={(event) => handleKeypress(event)}
                         endAdornment={
                             <InputAdornment position="end">
                                 <IconButton
@@ -145,6 +152,7 @@ export default function LoginPage() {
                     <Button
                         variant="contained"
                         color="primary"
+                        size={'large'}
                         disabled={!(username.length > 0 && password.length > 0)}
                         onClick={() => {
                             handleSignIn();
