@@ -1,6 +1,7 @@
 package pl.databucket.security;
 
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,10 +16,17 @@ import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static pl.databucket.security.Constants.*;
-
 @Component
 public class TokenProvider implements Serializable {
+
+    public static final String AUTHORITIES_KEY = "a-key";
+    public static final String PROJECT_ID = "p-id";
+
+    @Value("${jwt.secret}")
+    private String singingKey;
+
+    @Value("${jwt.expire.hours}")
+    private long expireHours;
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
@@ -35,7 +43,7 @@ public class TokenProvider implements Serializable {
 
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(SIGNING_KEY)
+                .setSigningKey(singingKey)
                 .parseClaimsJws(token)
                 .getBody();
     }
@@ -53,9 +61,9 @@ public class TokenProvider implements Serializable {
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
                 .claim(PROJECT_ID, projectId)
-                .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
+                .signWith(SignatureAlgorithm.HS256, singingKey)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + expireHours * 60 * 60 * 1000))
                 .compact();
     }
 
@@ -66,7 +74,7 @@ public class TokenProvider implements Serializable {
 
     UsernamePasswordAuthenticationToken getAuthentication(final String token, final CustomUserDetails customUserDetails) {
 
-        final JwtParser jwtParser = Jwts.parser().setSigningKey(SIGNING_KEY);
+        final JwtParser jwtParser = Jwts.parser().setSigningKey(singingKey);
         final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token);
         final Claims claims = claimsJws.getBody();
 

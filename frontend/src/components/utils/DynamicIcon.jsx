@@ -1,8 +1,8 @@
 import React from 'react';
-import ErrorIcon from '@material-ui/icons/Error';
-import * as Icons from '@material-ui/icons';
 
-export default function DynamicIcon({ iconName, color}) {
-    const Icon = Icons[iconName];
-    return Icon ? color != null ? <Icon color={color}/> : <Icon /> : <ErrorIcon color="error"/>;
-} 
+export default function DynamicIcon({iconName, color}) {
+    if (color != null)
+        return (<span className="material-icons" color={color}>{iconName}</span>);
+    else
+        return (<span className="material-icons">{iconName}</span>);
+}

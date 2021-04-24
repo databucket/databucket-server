@@ -1,6 +1,5 @@
 import React, {useContext, useState} from 'react';
 import IconButton from '@material-ui/core/IconButton';
-import ProjectIcon from '@material-ui/icons/LocalParking';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from "@material-ui/core/MenuItem";
 import AccessContext from "../../context/access/AccessContext";
@@ -39,7 +38,7 @@ export default function UserProjects(props) {
                     onClick={handleMenu}
                     color="inherit"
                 >
-                    <ProjectIcon/>
+                    <span className="material-icons">exit_to_app</span>
                 </IconButton>
                 <Menu
                     id="menu-appbar"
@@ -56,18 +55,20 @@ export default function UserProjects(props) {
                     open={open}
                     onClose={handleClose}
                 >
-                    {projects.sort((a, b) => {
-                        return a.name > b.name ? 1 : -1
-                    }).map((project) => (
-                        <MenuItem
-                            key={project.id}
-                            value={project.id}
-                            selected={project.id === getActiveProjectId()}
-                            onClick={() => handleSelected(project)}
-                        >
-                            {project.name}
-                        </MenuItem>
-                    ))}
+                    {projects
+                        .filter(project => project.id !== getActiveProjectId())
+                        .sort((a, b) => {
+                            return a.name > b.name ? 1 : -1
+                        })
+                        .map((project) => (
+                            <MenuItem
+                                key={project.id}
+                                value={project.id}
+                                onClick={() => handleSelected(project)}
+                            >
+                                {project.name}
+                            </MenuItem>
+                        ))}
                 </Menu>
             </div>
         );

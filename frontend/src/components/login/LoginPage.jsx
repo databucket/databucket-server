@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import "./LoginPage.css";
 import Button from "@material-ui/core/Button";
-import Logo from "../../images/logo.png";
-import LogoDark from "../../images/logo_dark.png";
+// import Logo from "../../images/databucket-logo.png";
+// import LogoDark from "../../images/logo_dark.png";
 import {
     Avatar, Input, InputAdornment, InputLabel,
     ListItem,
@@ -19,7 +19,7 @@ import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
     setToken,
     setActiveProjectId,
-    setRoles, getThemeName, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut
+    setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut
 } from '../../utils/ConfigurationStorage';
 import {Link, Redirect} from 'react-router-dom';
 import FormControl from "@material-ui/core/FormControl";
@@ -243,7 +243,7 @@ export default function LoginPage() {
 
     return (
         <div className="ContainerClass">
-            {getThemeName() === 'light' ? <img src={Logo} alt=''/> : <img src={LogoDark} alt=''/>}
+            {/*{getThemeName() === 'light' ? <img src={Logo} alt=''/> : <img src={LogoDark} alt=''/>}*/}
             {paper()}
             <MessageBox
                 config={messageBox}

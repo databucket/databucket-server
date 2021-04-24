@@ -57,16 +57,16 @@ export default function ColumnsTable(props) {
                         editComponent: props => <SelectSingleFieldLookup selected={props.rowData.uuid} properties={properties} onChange={props.onChange}/>
                     },
                     {title: 'Hidden', field: 'hidden', type: 'boolean', initialEditValue: false, cellStyle: {width: '1%'}},
-                    {
-                        title: 'Align', field: 'align', type: 'string', editable: 'always',
-                        lookup: {
-                            'center': 'Center',
-                            'inherit': 'Inherit',
-                            'justify': 'Justify',
-                            'left': 'Left',
-                            'right': 'Right'
-                        }, initialEditValue: 'center'
-                    },
+                    // {
+                    //     title: 'Align', field: 'align', type: 'string', editable: 'always',
+                    //     lookup: {
+                    //         'center': 'Center',
+                    //         'inherit': 'Inherit',
+                    //         'justify': 'Justify',
+                    //         'left': 'Left',
+                    //         'right': 'Right'
+                    //     }, initialEditValue: 'center'
+                    // },
                     {title: 'Format', field: 'format', type: 'string', editable: 'always', emptyValue: ''},
                     {title: 'Width', field: 'width', type: 'string', editable: 'always', emptyValue: ''},
                     {

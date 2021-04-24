@@ -207,6 +207,27 @@ export const getAdminMemberRolesLookup = (roles) => {
         return {};
 }
 
+export const createEnumLookup = (enumObj) => {
+    return enumObj.items.reduce((obj, item) => {
+        return {
+            ...obj,
+            [item.value]: item.text,
+        };
+    }, {});
+}
+
+export const createTagLookup = (tags) => {
+    if (tags != null && tags.length > 0)
+        return tags.reduce((obj, item) => {
+            return {
+                ...obj,
+                [item.id]: item.name,
+            };
+        }, {});
+    else
+        return {};
+}
+
 export const getRolesNames = (roles, rolesIds) => {
     if (roles != null && rolesIds != null && rolesIds.length > 0 && roles.length > 0) {
         if (rolesIds.length === 1)

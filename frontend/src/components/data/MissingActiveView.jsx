@@ -2,7 +2,7 @@ import React from 'react';
 import {Typography} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 
-export default function MissingBucketTable() {
+export default function MissingActiveView() {
     const classes = useStyles();
     return (
         <Typography
@@ -10,7 +10,7 @@ export default function MissingBucketTable() {
             color={'error'}
             className={classes.message}
         >
-            {'You do not have permission to any bucket.'}
+            {'You do not have permission to any view of this bucket.'}
         </Typography>);
 }
 

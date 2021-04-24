@@ -68,38 +68,4 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
         }
     }
 
-    private void createColumns() {
-//        if (!columnsRepository.existsByNameAndDeleted(Constants.COLUMNS_DEFAULT, false)) {
-//            List<ColumnDto> dc = new ArrayList<>();
-//            dc.add(new ColumnDto("Id", "data_id", "numeric", "never", true, true));
-//            dc.add(new ColumnDto("Tag", "tag_id", "numeric", "always", true, true));
-//            dc.add(new ColumnDto("Reserved", "reserved", "boolean", "always", true, true));
-//            dc.add(new ColumnDto("Reserved by", "reserved_by", "string", "never", true, true));
-//            dc.add(new ColumnDto("Created by", "created_by", "string", "never", true, true));
-//            dc.add(new ColumnDto("Created date", "created_date", "datetime", "never", true, true));
-//            dc.add(new ColumnDto("Last modified by", "last_modified_by", "string", "never", true, true));
-//            dc.add(new ColumnDto("Last modified date", "last_modified_date", "datetime", "never", true, true));
-//
-//            DataColumns columns = new DataColumns();
-//            columns.setName(Constants.COLUMNS_DEFAULT);
-//            columns.setDescription("Default columns");
-//            columns.setColumns(dc);
-//
-//            columnsRepository.save(columns);
-//        }
-    }
-
-    private void createViews() {
-//        if (!viewRepository.existsByNameAndDeleted(Constants.VIEWS_DEFAULT, false)) {
-//            View view = new View();
-//            DataColumns columns = columnsRepository.findColumnsByName(Constants.COLUMNS_DEFAULT);
-//
-//            view.setName(Constants.VIEWS_DEFAULT);
-//            view.setDescription("Default view");
-//            viewRepository.save(view);
-//
-//            view.setDataColumns(columns);
-//            viewRepository.save(view);
-//        }
-    }
 }

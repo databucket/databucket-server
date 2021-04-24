@@ -77,7 +77,7 @@ export default function EditClassFieldsDialog(props) {
 
     return (
         <div>
-            <Tooltip title={'Configure columns'}>
+            <Tooltip title={'Configure properties'}>
                 <Button
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
@@ -96,7 +96,7 @@ export default function EditClassFieldsDialog(props) {
                     {'Define class properties'}
                 </DialogTitle>
                 <DialogContent dividers>
-                    <PropertiesTable data={data} onChange={setData}/>
+                    <PropertiesTable data={data} onChange={setData} title={''}/>
                 </DialogContent>
             </Dialog>
         </div>

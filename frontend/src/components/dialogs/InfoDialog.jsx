@@ -5,7 +5,14 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import InfoIcon from "@material-ui/icons/InfoOutlined";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItem from "@material-ui/core/ListItem";
-import Logo from "../../images/logo.png";
+import DatabucketLogo from "../../images/databucket-logo.png";
+import SpringBootLogo from "../../images/spring-boot-logo.png";
+import PostgresqlLogo from "../../images/postgresql-logo.png";
+import ReactLogo from "../../images/react-js-logo.png";
+import MaterialLogo from "../../images/material-ui-logo.png";
+import GithubLogo from "../../images/github-logo-white.png";
+import DockerLogo from "../../images/docker-logo.png";
+import TravisLogo from "../../images/travis-ci-logo.png";
 import {version} from "../../../package.json";
 import Link from "@material-ui/core/Link";
 
@@ -33,14 +40,24 @@ export default function InfoDialog() {
                 fullWidth={true}
                 // maxWidth={props.maxWidth}
             >
-                <img src={Logo} alt=''/>
+                <img src={DatabucketLogo} alt=''/>
                 <div style={{margin: '20px'}}>
                     <Typography color='secondary'>Version: <b>{version}</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="primary">www.databucket.pl</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-app' color="textSecondary">Source code</Link><br/>
-                    <Link target='_blank' href='https://github.com/databucket/databucket-app/issues' color="textSecondary">Report a bug</Link><br/>
-                    <Link target='_blank' href='https://github.com/databucket/databucket-app/blob/master/LICENSE' color="textSecondary">Licence</Link><br/>
+                    <Link target='_blank' href='https://github.com/databucket/databucket-app/issues' color="textSecondary">Report a bug, propose a new feature, ask a question...</Link><br/>
+                    <Link target='_blank' href='https://github.com/databucket/databucket-app/blob/master/LICENSE' color="textSecondary">Licence: Apache License 2.0</Link><br/>
                 </div>
+                <div style={{marginLeft: '20px', marginBottom: '5px'}}>
+                    <img src={SpringBootLogo} alt='Spring Boot' width='45' style={{margin: '5px', marginRight: '13px'}}/>
+                    <img src={PostgresqlLogo} alt='PostgreSQL' width='45' style={{marginLeft: '5px', margin: '0px'}}/>
+                    <img src={ReactLogo} alt='React.js' width='75' style={{margin: '0px'}}/>
+                    <img src={MaterialLogo} alt='Material UI' width='56' style={{margin: '0px'}}/>
+                    <img src={GithubLogo} alt='Github' width='70' style={{margin: '0px'}}/>
+                    <img src={DockerLogo} alt='Docker' width='50' style={{marginLeft: '5px'}}/>
+                    <img src={TravisLogo} alt='TravisCi' width='42' style={{marginLeft: '10px', marginBottom: '3px'}}/>
+                </div>
+
             </Dialog>
         </div>
     );

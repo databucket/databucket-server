@@ -115,6 +115,85 @@ export default function ActionPropertiesTable(props) {
             return null;
     }
 
+    const getEditable = () => {
+        let editable = {};
+
+        if (properties.length > 0)
+            editable = {
+                ...editable,
+                onRowAdd: newData =>
+                    new Promise((resolve, reject) => {
+                        let message = validateItem(newData, fieldsSpecification);
+                        let message2 = validateValue(newData);
+                        let message3 = validatePropertyDuplicates(newData);
+
+                        if (message != null || message2 != null || message3) {
+                            setMessageBox({
+                                open: true,
+                                severity: 'warning',
+                                title: 'Item is not valid',
+                                message: message || message2 || message3
+                            });
+                            reject();
+                            return;
+                        }
+
+                        setData([...data, newData]);
+                        resolve();
+                    })
+            };
+
+        editable = {
+            ...editable,
+            onRowUpdate: (newData, oldData) =>
+                new Promise((resolve, reject) => {
+                    if (!isItemChanged(oldData, newData, changeableFields)) {
+                        setMessageBox({
+                            open: true,
+                            severity: 'info',
+                            title: 'Nothing changed',
+                            message: ''
+                        });
+                        reject();
+                        return;
+                    }
+
+                    let message = validateItem(newData, fieldsSpecification);
+                    let message2 = validateValue(newData);
+                    let message3 = validatePropertyDuplicates(newData);
+                    if (message != null || message2 != null || message3) {
+                        setMessageBox({
+                            open: true,
+                            severity: 'warning',
+                            title: 'Item is not valid',
+                            message: message || message2 || message3
+                        });
+                        reject();
+                        return;
+                    }
+
+                    const updated = data.map(column => {
+                        if (column.tableData.id === oldData.tableData.id)
+                            return newData;
+                        return column;
+                    });
+                    setData(updated);
+                    resolve();
+                })
+        };
+
+        editable = {
+            ...editable,
+            onRowDelete: oldData =>
+                new Promise((resolve) => {
+                    setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
+                    resolve();
+                })
+        };
+
+        return editable;
+    }
+
     return (
         <div>
             <MaterialTable
@@ -187,67 +266,7 @@ export default function ActionPropertiesTable(props) {
                 components={{
                     Container: props => <div {...props} />
                 }}
-                editable={{
-                    onRowAdd: newData =>
-                        new Promise((resolve, reject) => {
-                            let message = validateItem(newData, fieldsSpecification);
-                            let message2 = validateValue(newData);
-                            let message3 = validatePropertyDuplicates(newData);
-                            if (message != null || message2 != null || message3) {
-                                setMessageBox({
-                                    open: true,
-                                    severity: 'warning',
-                                    title: 'Item is not valid',
-                                    message: message || message2 || message3
-                                });
-                                reject();
-                                return;
-                            }
-
-                            setData([...data, newData]);
-                            resolve();
-                        }),
-                    onRowUpdate: (newData, oldData) =>
-                        new Promise((resolve, reject) => {
-                            if (!isItemChanged(oldData, newData, changeableFields)) {
-                                setMessageBox({
-                                    open: true,
-                                    severity: 'info',
-                                    title: 'Nothing changed',
-                                    message: ''
-                                });
-                                reject();
-                                return;
-                            }
-
-                            let message = validateItem(newData, fieldsSpecification);
-                            let message2 = validateValue(newData);
-                            let message3 = validatePropertyDuplicates(newData);
-                            if (message != null || message2 != null || message3) {
-                                setMessageBox({
-                                    open: true,
-                                    severity: 'warning',
-                                    title: 'Item is not valid',
-                                    message: message || message2 || message3
-                                });
-                                reject();
-                                return;
-                            }
-
-                            const updated = data.map(column => {
-                                if (column.tableData.id === oldData.tableData.id)
-                                    return newData;
-                                return column;
-                            });
-                            setData(updated);
-                            resolve();
-                        }),
-                    onRowDelete: oldData =>
-                        new Promise((resolve) => {
-                            setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
-                            resolve();
-                        }),
-                }}
+                editable={getEditable()}
                 actions={[
                     rowData => ({
                         icon: () => <ArrowDropDown/>,

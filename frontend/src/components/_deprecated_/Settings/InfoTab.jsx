@@ -1,7 +1,7 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
-import Logo from '../../../images/logo.png';
+import Logo from '../../../images/databucket-logo.png';
 import {version} from '../../../../package.json';
 
 

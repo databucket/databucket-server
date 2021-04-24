@@ -5,7 +5,6 @@ import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pl.databucket.service.UserService;
@@ -16,10 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static pl.databucket.security.Constants.HEADER_AUTHORIZATION;
-import static pl.databucket.security.Constants.TOKEN_PREFIX;
-
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String HEADER_AUTHORIZATION = "Authorization";
 
     @Autowired
     private UserService userService;

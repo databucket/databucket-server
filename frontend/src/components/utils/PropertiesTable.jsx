@@ -60,7 +60,7 @@ export default function PropertiesTable(props) {
         <div>
             <MaterialTable
                 icons={getTableIcons()}
-                title={'Class origin or defined properties:'}
+                title={props.title}
                 tableRef={tableRef}
                 columns={[
                     {title: '#', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''},
@@ -169,10 +169,7 @@ export default function PropertiesTable(props) {
                         }),
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
-                            if (!props.used.includes(oldData.uuid)) {
-                                setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
-                                resolve();
-                            } else {
+                            if (props.used != null && props.used.includes(oldData.uuid)) {
                                 setMessageBox({
                                     open: true,
                                     severity: 'error',
@@ -180,8 +177,10 @@ export default function PropertiesTable(props) {
                                     message: 'This property is used!'
                                 });
                                 reject();
+                            } else {
+                                setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
+                                resolve();
                             }
-
                         }),
                 }}
                 actions={[

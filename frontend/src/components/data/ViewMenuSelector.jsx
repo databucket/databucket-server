@@ -8,7 +8,7 @@ import ViewListIcon from "@material-ui/icons/MoreVert";
 
 ViewMenuSelector.propTypes = {
     views: PropTypes.array.isRequired,
-    activeView: PropTypes.object,
+    activeView: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired
 }
 
@@ -38,69 +38,56 @@ export default function ViewMenuSelector(props) {
     }
 
     const getSelectedDescription = () => {
-        if (props.activeView != null)
-            if (props.activeView.description != null && props.activeView.description.length > 0)
-                return props.activeView.description;
-            else
-                return props.activeView.name;
+        if (props.activeView.description != null && props.activeView.description.length > 0)
+            return props.activeView.description;
         else
-            return '---'
+            return props.activeView.name;
     }
 
-    if (props.views.length > 0)
-        return (
-            <div className={classes.root}>
-                <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
-                    <IconButton
-                        className={classes.select}
-                        aria-label="more"
-                        aria-controls="long-menu"
-                        aria-haspopup="true"
-                        onClick={handleClick}
-                    >
-                        <ViewListIcon/>
-                    </IconButton>
-                    <Typography
-                        variant="h6"
-                        className={classes.description}
-                    >
-                        {getSelectedDescription()}
-                    </Typography>
-                </Grid>
-                <Menu
-                    id="long-menu"
-                    anchorEl={anchorEl}
-                    keepMounted
-                    open={open}
-                    onClose={handleClose}
-                    PaperProps={{
-                        style: {
-                            // maxHeight: 48 * 4.5,
-                            minWidth: '15ch'
-                        },
-                    }}
+    return (
+        <div className={classes.root}>
+            <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
+                <IconButton
+                    className={classes.select}
+                    aria-label="more"
+                    aria-controls="long-menu"
+                    aria-haspopup="true"
+                    onClick={handleClick}
                 >
-                    {props.views.map((view) => (
-                        <MenuItem
-                            key={view.id}
-                            selected={view.id === props.activeView.id}
-                            onClick={() => handleSelected(view)}
-                        >
-                            {getViewName(view)}
-                        </MenuItem>
-                    ))}
-                </Menu>
-            </div>
-        );
-    else
-        return (
-            <Typography
-                variant="h6"
-                color={'error'}
-                className={classes.description}
+                    <ViewListIcon/>
+                </IconButton>
+                <Typography
+                    variant="h6"
+                    className={classes.description}
+                >
+                    {getSelectedDescription()}
+                </Typography>
+            </Grid>
+            <Menu
+                id="long-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={open}
+                onClose={handleClose}
+                PaperProps={{
+                    style: {
+                        // maxHeight: 48 * 4.5,
+                        minWidth: '15ch'
+                    },
+                }}
             >
-                {'You do not have permission to any view of this bucket.'}
-            </Typography>);
+                {props.views.map((view) => (
+                    <MenuItem
+                        key={view.id}
+                        selected={view.id === props.activeView.id}
+                        onClick={() => handleSelected(view)}
+                    >
+                        {getViewName(view)}
+                    </MenuItem>
+                ))}
+            </Menu>
+        </div>
+    );
 };
 
 const useStyles = makeStyles((theme) => ({

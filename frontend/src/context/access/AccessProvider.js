@@ -44,6 +44,12 @@ const AccessProvider = props => {
                     payload: columns
                 }))
                 .catch(err => console.log(err));
+        else
+            dispatch({
+                type: "FETCH_SESSION_COLUMNS",
+                payload: []
+            })
+
     }
 
     const fetchSessionFilters = () => {
@@ -56,11 +62,16 @@ const AccessProvider = props => {
                     payload: filters
                 }))
                 .catch(err => console.log(err));
+        else
+            dispatch({
+                type: "FETCH_SESSION_FILTERS",
+                payload: []
+            })
     }
 
     const fetchSessionTasks = () => {
-        // TODO find all tasks ids that must be loaded
-        fetch(getBaseUrl('users/tasks'), getGetOptions())
+        // TODO find all tasks ids that must be loaded. Temporarily load all.
+        fetch(getBaseUrl('tasks'), getGetOptions())
             .then(handleErrors)
             .then(tasks => dispatch({
                 type: "FETCH_SESSION_TASKS",
@@ -70,8 +81,8 @@ const AccessProvider = props => {
     }
 
     const fetchSessionTags = () => {
-        // TODO find all tags ids that must be loaded
-        fetch(getBaseUrl('users/tags'), getGetOptions())
+        // TODO find all tags ids that must be loaded. Temporarily load all.
+        fetch(getBaseUrl('tags'), getGetOptions())
             .then(handleErrors)
             .then(tags => dispatch({
                 type: "FETCH_SESSION_TAGS",
@@ -121,6 +132,7 @@ const AccessProvider = props => {
                 columns: state.columns,
                 filters: state.filters,
                 tasks: state.tasks,
+                tags: state.tags,
                 fetchAccessTree,
                 setActiveGroup,
                 setActiveBucket,

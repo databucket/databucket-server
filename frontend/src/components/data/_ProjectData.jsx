@@ -13,7 +13,6 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import SettingsIcon from '@material-ui/icons/Settings';
 import UserProfile from "./UserProfile";
 import {
     clearActiveProjectId, clearToken,
@@ -41,8 +40,174 @@ import {handleErrors} from "../../utils/FetchHelper";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
+import EnumsContext from "../../context/enums/EnumsContext";
+import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
 
 const drawerWidth = 240;
+
+export default function ProjectData() {
+    const classes = useStyles();
+    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const theme = useTheme();
+    const [open, setOpen] = useState(isLeftPanelOpen());
+    const [logged, setLogged] = useState(hasToken() && hasProject());
+    const enumsContext = useContext(EnumsContext);
+    const {enums, fetchEnums} = enumsContext;
+    const accessContext = useContext(AccessContext);
+    const {projects, views, filters, fetchAccessTree, columns, fetchSessionColumns, fetchSessionFilters, tags, fetchSessionTags} = accessContext;
+
+    useEffect(() => {
+        if (projects == null) {
+            fetchAccessTree();
+        }
+        // eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        if (views != null && columns == null) {
+            fetchSessionColumns();
+        }
+        // eslint-disable-next-line
+    }, [views]);
+
+    useEffect(() => {
+        if (views != null && filters == null)
+            fetchSessionFilters();
+        // eslint-disable-next-line
+    }, [views]);
+
+    useEffect(() => {
+        if (tags == null)
+            fetchSessionTags();
+        // eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        if (enums == null)
+            fetchEnums();
+    }, [enums, fetchEnums]);
+
+    const handleDrawerOpen = () => {
+        setOpen(true);
+        setLeftPanelOpen(true);
+    };
+
+    const handleDrawerClose = () => {
+        setOpen(false);
+        setLeftPanelOpen(false);
+    };
+
+    const handleLogout = () => {
+        logOut();
+        setLogged(hasToken());
+    }
+
+    const onChangeProject = (projectId) => {
+        clearActiveProjectId();
+        const options = getPostOptions({projectId});
+        clearToken();
+
+        fetch(getBaseUrl('users/change-project'), options)
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+            })
+            .then(data => {
+                setToken(data.token);
+                setActiveProjectId(projectId);
+                window.location.reload();
+            });
+    };
+
+    if (!logged)
+        return (<Redirect to="/login"/>);
+
+    if (projects == null || enums == null || columns == null)
+        return (<CenteredWaitingCircularProgress />);
+
+    return (
+        <div>
+            <div className={classes.root}>
+                <AppBar
+                    position="fixed"
+                    className={clsx(classes.appBar, {
+                        [classes.appBarShift]: open,
+                    })}
+                    style={{background: getAppBarBackgroundColor()}}
+                >
+                    <Toolbar>
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            onClick={handleDrawerOpen}
+                            edge="start"
+                            className={clsx(classes.menuButton, {
+                                [classes.hide]: open,
+                            })}
+                        >
+                            <MenuIcon/>
+                        </IconButton>
+                        <BucketTabSelector/>
+                        <UserProfile onLogout={handleLogout}/>
+                        <UserProjects onChangeProject={onChangeProject}/>
+                    </Toolbar>
+                </AppBar>
+                <Drawer
+                    variant="permanent"
+                    className={clsx(classes.drawer, {
+                        [classes.drawerOpen]: open,
+                        [classes.drawerClose]: !open,
+                    })}
+                    classes={{
+                        paper: clsx({
+                            [classes.drawerOpen]: open,
+                            [classes.drawerClose]: !open,
+                        }),
+                    }}
+                >
+                    <div className={classes.toolbar}>
+                        <IconButton onClick={handleDrawerClose}>
+                            {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
+                        </IconButton>
+                    </div>
+                    <Divider/>
+                    <GroupMenuSelector open={open}/>
+                    <BucketListSelector/>
+                    <div className={classes.grow}/>
+                    <Divider/>
+                    <List>
+                        <InfoDialog/>
+                        {
+                            hasAdminRole() ? (
+                                <ListItem button component={Link} to={getProjectSettingsPath() + "/" + getLastSettingsPageName()}>
+                                    <ListItemIcon><span className="material-icons">settings_applications</span></ListItemIcon>
+                                    <ListItemText primary={'Settings'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
+                                </ListItem>
+                            ) : (<div/>)
+                        }
+                        {
+                            hasSuperRole() ? (
+                                <ListItem button component={Link} to={"/management/" + getLastManagementPageName()}>
+                                    <ListItemIcon><span className="material-icons">manage_accounts</span></ListItemIcon>
+                                    <ListItemText primary={'Management'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
+                                </ListItem>
+                            ) : (<div/>)
+                        }
+                    </List>
+                </Drawer>
+                <main className={classes.content}>
+                    <div className={classes.toolbar}/>
+                    <BucketDataTable/>
+                </main>
+            </div>
+            <MessageBox
+                config={messageBox}
+                onClose={() => setMessageBox({...messageBox, open: false})}
+            />
+        </div>
+    );
+}
+;
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -108,147 +273,3 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(0),
     },
 }));
-
-export default function ProjectData() {
-    const classes = useStyles();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const theme = useTheme();
-    const [open, setOpen] = useState(isLeftPanelOpen());
-    const [logged, setLogged] = useState(hasToken() && hasProject());
-    const accessContext = useContext(AccessContext);
-    const {projects, views, filters, fetchAccessTree, columns, fetchSessionColumns, fetchSessionFilters} = accessContext;
-
-    useEffect(() => {
-        if (projects == null)
-            fetchAccessTree();
-    }, [projects, fetchAccessTree]);
-
-    useEffect(() => {
-        if (views != null && columns == null)
-            fetchSessionColumns();
-        // eslint-disable-next-line
-    }, [views]);
-
-    useEffect(() => {
-        if (views != null && filters == null)
-            fetchSessionFilters();
-        // eslint-disable-next-line
-    }, [views]);
-
-    const handleDrawerOpen = () => {
-        setOpen(true);
-        setLeftPanelOpen(true);
-    };
-
-    const handleDrawerClose = () => {
-        setOpen(false);
-        setLeftPanelOpen(false);
-    };
-
-    const handleLogout = () => {
-        logOut();
-        setLogged(hasToken());
-    }
-
-    const onChangeProject = (projectId) => {
-        clearActiveProjectId();
-        const options = getPostOptions({projectId});
-        clearToken();
-
-        fetch(getBaseUrl('users/change-project'), options)
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-            })
-            .then(data => {
-                setToken(data.token);
-                setActiveProjectId(projectId);
-                window.location.reload();
-            });
-    };
-
-    if (logged) {
-        return (
-            <div>
-                <div className={classes.root}>
-                    <AppBar
-                        position="fixed"
-                        className={clsx(classes.appBar, {
-                            [classes.appBarShift]: open,
-                        })}
-                        style={{background: getAppBarBackgroundColor()}}
-                    >
-                        <Toolbar>
-                            <IconButton
-                                color="inherit"
-                                aria-label="open drawer"
-                                onClick={handleDrawerOpen}
-                                edge="start"
-                                className={clsx(classes.menuButton, {
-                                    [classes.hide]: open,
-                                })}
-                            >
-                                <MenuIcon/>
-                            </IconButton>
-                            <BucketTabSelector/>
-                            <UserProfile onLogout={handleLogout}/>
-                            <UserProjects onChangeProject={onChangeProject}/>
-                        </Toolbar>
-                    </AppBar>
-                    <Drawer
-                        variant="permanent"
-                        className={clsx(classes.drawer, {
-                            [classes.drawerOpen]: open,
-                            [classes.drawerClose]: !open,
-                        })}
-                        classes={{
-                            paper: clsx({
-                                [classes.drawerOpen]: open,
-                                [classes.drawerClose]: !open,
-                            }),
-                        }}
-                    >
-                        <div className={classes.toolbar}>
-                            <IconButton onClick={handleDrawerClose}>
-                                {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
-                            </IconButton>
-                        </div>
-                        <Divider/>
-                        <GroupMenuSelector open={open}/>
-                        <BucketListSelector/>
-                        <div className={classes.grow}/>
-                        <Divider/>
-                        <List>
-                            <InfoDialog/>
-                            {
-                                hasAdminRole() ? (
-                                    <ListItem button component={Link} to={getProjectSettingsPath() + "/" + getLastSettingsPageName()}>
-                                        <ListItemIcon><SettingsIcon/></ListItemIcon>
-                                        <ListItemText primary={'Settings'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
-                                    </ListItem>
-                                ) : (<div/>)
-                            }
-                            {
-                                hasSuperRole() ? (
-                                    <ListItem button component={Link} to={"/management/" + getLastManagementPageName()}>
-                                        <ListItemIcon><span className="material-icons">manage_accounts</span></ListItemIcon>
-                                        <ListItemText primary={'Management'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
-                                    </ListItem>
-                                ) : (<div/>)
-                            }
-                        </List>
-                    </Drawer>
-                    <main className={classes.content}>
-                        <div className={classes.toolbar}/>
-                        <BucketDataTable />
-                    </main>
-                </div>
-                <MessageBox
-                    config={messageBox}
-                    onClose={() => setMessageBox({...messageBox, open: false})}
-                />
-            </div>
-        );
-    } else
-        return (<Redirect to="/login"/>);
-}

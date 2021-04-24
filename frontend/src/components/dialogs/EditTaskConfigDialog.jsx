@@ -123,7 +123,7 @@ export default function EditTaskConfigDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     {open && activeTab === 0 && <TaskActions actions={actions} properties={properties} onChange={setActions}/>}
-                    {open && activeTab === 1 && <PropertiesTable used={getUsedUuids()} data={properties} onChange={setProperties}/>}
+                    {open && activeTab === 1 && <PropertiesTable used={getUsedUuids()} data={properties} onChange={setProperties} title={'Class origin and defined properties:'}/>}
                 </DialogContent>
             </Dialog>
             <MessageBox

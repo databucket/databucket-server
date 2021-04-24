@@ -45,9 +45,6 @@ export default function FieldSelectEnum(props) {
     const items = props.enumDef.items;
     const iconsEnabled = props.enumDef.iconsEnabled;
 
-    console.log("Items:");
-    console.log(items);
-
     const handleClick = event => {
         setAnchorEl(event.currentTarget);
     };

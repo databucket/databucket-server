@@ -136,7 +136,7 @@ export default function BucketsTab() {
                         field: 'iconName',
                         searchable: false,
                         filtering: false,
-                        initialEditValue: 'PanoramaFishEye',
+                        initialEditValue: 'panorama_fish_eye',
                         render: rowData => <DynamicIcon iconName={rowData.iconName} />,
                         editComponent: props => <EditIconDialog value={props.value} onChange={props.onChange}/>
                     },
