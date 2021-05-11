@@ -2,8 +2,7 @@ import MaterialTable from "material-table";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getPageSizeOptions, getPutOptions, getSettingsTableHeight, getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor, getUserIcon
+    getPageSizeOptions, getPutOptions, getSettingsTableHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, getUserIcon
 } from "../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
@@ -27,6 +26,7 @@ import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+// import TableIcons from "../utils/TableIcons";
 
 export default function UsersTab() {
 
@@ -72,7 +72,7 @@ export default function UsersTab() {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title='Users'
                 tableRef={tableRef}
                 columns={[

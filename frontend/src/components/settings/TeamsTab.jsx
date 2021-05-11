@@ -7,8 +7,7 @@ import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage
 import {
     getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
+    getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
@@ -32,6 +31,7 @@ import {getBaseUrl} from "../../utils/UrlBuilder";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import ViewsContext from "../../context/views/ViewsContext";
 import GroupsContext from "../../context/groups/GroupsContext";
+// import TableIcons from "../utils/TableIcons";
 
 export default function TeamsTab() {
 
@@ -82,7 +82,7 @@ export default function TeamsTab() {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title='Teams'
                 tableRef={tableRef}
                 columns={[

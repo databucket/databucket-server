@@ -7,8 +7,7 @@ import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage
 import {
     getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
+    getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
@@ -27,6 +26,7 @@ import EditEnumDialog from "../dialogs/EditEnumDialog";
 import EnumsContext from "../../context/enums/EnumsContext";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+// import TableIcons from "../utils/TableIcons";
 
 export default function EnumsTab() {
 
@@ -58,7 +58,7 @@ export default function EnumsTab() {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title='Enums'
                 tableRef={tableRef}
                 columns={[

@@ -58,7 +58,7 @@ export const setActiveProjectId = (projectId) => {
 }
 
 export const getActiveProjectId = () => {
-    return parseInt(localStorage.getItem(PROJECT_ID));
+    return parseInt(localStorage.getItem(PROJECT_ID), 10);
 }
 
 export const clearActiveProjectId = () => {
@@ -102,7 +102,7 @@ export const getThemeName = () => {
 
 export const getLastPageSizeOnDialog = () => {
     if (localStorage.getItem(LAST_PAGE_SIZE_DIALOG) != null)
-        return parseInt(localStorage.getItem(LAST_PAGE_SIZE_DIALOG));
+        return parseInt(localStorage.getItem(LAST_PAGE_SIZE_DIALOG), 10);
     else
         return 10;
 }
@@ -113,7 +113,7 @@ export const setLastPageSizeOnDialog = (size) => {
 
 export const getLastPageSize = () => {
     if (localStorage.getItem(LAST_PAGE_SIZE) != null)
-        return parseInt(localStorage.getItem(LAST_PAGE_SIZE));
+        return parseInt(localStorage.getItem(LAST_PAGE_SIZE), 10);
     else
         return 15;
 }
@@ -182,7 +182,7 @@ export const getLastActiveGroup = () => {
     const lastActiveGroup = getActiveProjectContextProperty(LAST_ACTIVE_GROUP);
 
     if (lastActiveGroup != null)
-        return parseInt(lastActiveGroup);
+        return parseInt(lastActiveGroup, 10);
     else
         return -1;
 }
@@ -195,7 +195,7 @@ export const getLastActiveBucket = () => {
     const lastActiveBucket = getActiveProjectContextProperty(LAST_ACTIVE_BUCKET);
 
     if (lastActiveBucket != null)
-        return parseInt(lastActiveBucket);
+        return parseInt(lastActiveBucket, 10);
     else
         return -1;
 }

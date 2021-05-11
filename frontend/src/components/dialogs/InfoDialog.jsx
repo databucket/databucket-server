@@ -10,14 +10,16 @@ import SpringBootLogo from "../../images/spring-boot-logo.png";
 import PostgresqlLogo from "../../images/postgresql-logo.png";
 import ReactLogo from "../../images/react-js-logo.png";
 import MaterialLogo from "../../images/material-ui-logo.png";
-import GithubLogo from "../../images/github-logo-white.png";
+import GithubLogoDark from "../../images/github-logo-white.png";
+import GithubLogoLight from "../../images/github-logo.png";
 import DockerLogo from "../../images/docker-logo.png";
 import TravisLogo from "../../images/travis-ci-logo.png";
-import {version} from "../../../package.json";
 import Link from "@material-ui/core/Link";
+import {useTheme} from "@material-ui/core/styles";
 
 export default function InfoDialog() {
 
+    const theme = useTheme();
     const [open, setOpen] = useState(false);
 
     const handleClickOpen = () => {
@@ -42,7 +44,7 @@ export default function InfoDialog() {
             >
                 <img src={DatabucketLogo} alt=''/>
                 <div style={{margin: '20px'}}>
-                    <Typography color='secondary'>Version: <b>{version}</b></Typography>
+                    <Typography color='secondary'>Version: <b>3.0.0</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="primary">www.databucket.pl</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-app' color="textSecondary">Source code</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-app/issues' color="textSecondary">Report a bug, propose a new feature, ask a question...</Link><br/>
@@ -53,7 +55,7 @@ export default function InfoDialog() {
                     <img src={PostgresqlLogo} alt='PostgreSQL' width='45' style={{marginLeft: '5px', margin: '0px'}}/>
                     <img src={ReactLogo} alt='React.js' width='75' style={{margin: '0px'}}/>
                     <img src={MaterialLogo} alt='Material UI' width='56' style={{margin: '0px'}}/>
-                    <img src={GithubLogo} alt='Github' width='70' style={{margin: '0px'}}/>
+                    <img src={theme.palette.type === 'light' ? GithubLogoLight : GithubLogoDark} alt='Github' width='70' style={{margin: '0px'}}/>
                     <img src={DockerLogo} alt='Docker' width='50' style={{marginLeft: '5px'}}/>
                     <img src={TravisLogo} alt='TravisCi' width='42' style={{marginLeft: '10px', marginBottom: '3px'}}/>
                 </div>

@@ -36,7 +36,6 @@ dependencies {
   implementation 'org.springframework:spring-tx'
   implementation 'org.postgresql:postgresql'
   implementation 'com.fasterxml.jackson.core:jackson-core'
-  implementation 'com.jayway.jsonpath:json-path'
   implementation 'org.projectlombok:lombok'
   implementation 'net.kaczmarzyk:specification-arg-resolver:2.6.2'
 

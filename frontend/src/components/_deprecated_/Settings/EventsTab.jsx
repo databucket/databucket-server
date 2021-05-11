@@ -174,7 +174,7 @@ class EventsTab extends React.Component {
         return (
             <div>
                 <MaterialTable
-                    icons={tableIcons}
+                    // icons={tableIcons}
                     title='Events'
                     tableRef={this.tableRef}
                     columns={this.state.columns}

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pl.databucket.database.Query;
+import pl.databucket.service.data.Query;
 import pl.databucket.dto.BucketDto;
 import pl.databucket.entity.*;
 import pl.databucket.exception.ItemAlreadyExistsException;
@@ -54,12 +54,6 @@ public class BucketService {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     Logger logger = LoggerFactory.getLogger(BucketService.class);
-
-    private String composeBucketName(long id) {
-        int projectId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId();
-        String BUCKET_PREFIX = "x-bucket";
-        return String.format("%s-%03d-%03d", BUCKET_PREFIX, projectId, id);
-    }
 
     public Bucket createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
         if (bucketRepository.existsByNameAndDeleted(bucketDto.getName(), false))
@@ -108,19 +102,17 @@ public class BucketService {
 
         bucket = bucketRepository.save(bucket);
 
-        String dataTableName = composeBucketName(bucket.getId());
-
         // Create table for data
-        String sql = "CREATE TABLE public.\"" + dataTableName + "\" ("
+        String sql = "CREATE TABLE public.\"" + bucket.getTableName() + "\" ("
                 + "data_id bigserial NOT NULL,"
                 + "tag_id bigint NULL,"
                 + "reserved boolean NOT NULL DEFAULT false,"
                 + "reserved_by character varying(50) DEFAULT NULL,"
                 + "properties jsonb NOT NULL DEFAULT '{}'::jsonb,"
                 + "created_by character varying(50) NOT NULL,"
-                + "created_date timestamp with time zone NOT NULL DEFAULT current_timestamp,"
-                + "last_updated_by character varying(50),"
-                + "last_updated_date timestamp with time zone NOT NULL DEFAULT current_timestamp,"
+                + "created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
+                + "modified_by character varying(50),"
+                + "modified_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
                 + "PRIMARY KEY (data_id),"
                 + "CONSTRAINT fk_tag_id FOREIGN KEY(tag_id) REFERENCES tags(tag_id))";
 
@@ -128,26 +120,26 @@ public class BucketService {
         jdbcTemplate.getJdbcTemplate().execute(sql);
 
         // Create table for history
-        sql = "CREATE TABLE \"" + dataTableName + "-h\" ("
+        sql = "CREATE TABLE \"" + bucket.getTableHistoryName() + "\" ("
                 + "id bigserial NOT NULL,"
                 + "data_id bigint NOT NULL,"
                 + "tag_id smallint DEFAULT NULL,"
-                + "locked boolean DEFAULT NULL,"
+                + "reserved boolean DEFAULT NULL,"
                 + "properties jsonb DEFAULT NULL,"
-                + "updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
-                + "updated_by character varying(50),"
+                + "modified_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
+                + "modified_by character varying(50),"
                 + "PRIMARY KEY (id),"
-                + "CONSTRAINT fk_tag_h_id FOREIGN KEY(data_id) REFERENCES \"" + dataTableName + "\"(data_id))";
+                + "CONSTRAINT fk_tag_h_id FOREIGN KEY(data_id) REFERENCES \"" + bucket.getTableName() + "\"(data_id))";
 
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
 
-        createBeforeDeleteTrigger(dataTableName);
+        createBeforeDeleteTrigger(bucket);
 
         // Create after insert and after update triggers if history is enabled
         if (bucket.isHistory()) {
-            createAfterInsertTrigger(dataTableName);
-            createAfterUpdateTrigger(dataTableName);
+            createAfterInsertTrigger(bucket);
+            createAfterUpdateTrigger(bucket);
         }
 
         return bucket;
@@ -155,6 +147,10 @@ public class BucketService {
 
     public Page<Bucket> getBuckets(Specification<Bucket> specification, Pageable pageable) {
         return bucketRepository.findAll(specification, pageable);
+    }
+
+    public Bucket getBucket(String bucketName) {
+        return bucketRepository.findByNameAndDeleted(bucketName, false);
     }
 
     public List<Bucket> getBuckets() {
@@ -211,16 +207,14 @@ public class BucketService {
         } else
             bucket.setTeams(null);
 
-        String dataTableName = composeBucketName(bucket.getId());
-
         if (bucket.isHistory() != bucketDto.isHistory()) {
             if (bucketDto.isHistory()) {
-                createAfterInsertTrigger(dataTableName);
-                createAfterUpdateTrigger(dataTableName);
+                createAfterInsertTrigger(bucket);
+                createAfterUpdateTrigger(bucket);
                 bucket.setHistory(true);
             } else {
-                removeAfterInsertTrigger(dataTableName);
-                removeAfterUpdateTrigger(dataTableName);
+                removeAfterInsertTrigger(bucket);
+                removeAfterUpdateTrigger(bucket);
                 bucket.setHistory(false);
             }
         }
@@ -263,23 +257,21 @@ public class BucketService {
         bucket.setDeleted(true);
         bucketRepository.save(bucket);
 
-        String dataTableName = composeBucketName(bucket.getId());
-
         // Drop bucket history table
-        Query query = new Query(dataTableName + "-h", false).dropTable();
+        Query query = new Query(bucket.getTableHistoryName()).dropTable();
         jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
 
         // Drop bucket table
-        query = new Query(dataTableName, false).dropTable();
+        query = new Query(bucket.getTableName()).dropTable();
         jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
     }
 
-    private void createBeforeDeleteTrigger(String dataTableName) {
-        removeBeforeDeleteTrigger(dataTableName);
+    private void createBeforeDeleteTrigger(Bucket bucket) {
+        removeBeforeDeleteTrigger(bucket);
 
         String sql = "CREATE TRIGGER trigger_before_delete\n" +
                 "BEFORE DELETE\n" +
-                "ON \"" + dataTableName + "\"" +
+                "ON \"" + bucket.getTableName() + "\"" +
                 "FOR EACH ROW\n" +
                 "EXECUTE PROCEDURE before_delete()";
 
@@ -287,12 +279,12 @@ public class BucketService {
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
-    private void createAfterInsertTrigger(String dataTableName) {
-        removeAfterInsertTrigger(dataTableName);
+    private void createAfterInsertTrigger(Bucket bucket) {
+        removeAfterInsertTrigger(bucket);
 
         String sql = "CREATE TRIGGER trigger_after_insert\n" +
                 "AFTER INSERT\n" +
-                "ON \"" + dataTableName + "\"\n" +
+                "ON \"" + bucket.getTableName() + "\"\n" +
                 "FOR EACH ROW\n" +
                 "EXECUTE PROCEDURE after_insert()";
 
@@ -300,12 +292,12 @@ public class BucketService {
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
-    private void createAfterUpdateTrigger(String bucketName) {
-        removeAfterUpdateTrigger(bucketName);
+    private void createAfterUpdateTrigger(Bucket bucket) {
+        removeAfterUpdateTrigger(bucket);
 
         String sql = "CREATE TRIGGER trigger_after_update\n" +
                 "AFTER UPDATE\n" +
-                "ON \"" + bucketName + "\"\n" +
+                "ON \"" + bucket.getTableName() + "\"\n" +
                 "FOR EACH ROW\n" +
                 "EXECUTE PROCEDURE after_update()";
 
@@ -313,20 +305,20 @@ public class BucketService {
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
-    private void removeBeforeDeleteTrigger(String bucketName) {
-        String sql = "DROP TRIGGER IF EXISTS trigger_before_delete on \"" + bucketName + "\"";
+    private void removeBeforeDeleteTrigger(Bucket bucket) {
+        String sql = "DROP TRIGGER IF EXISTS trigger_before_delete on \"" + bucket.getTableName() + "\"";
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
-    private void removeAfterInsertTrigger(String bucketName) {
-        String sql = "DROP TRIGGER IF EXISTS trigger_after_insert on \"" + bucketName + "\"";
+    private void removeAfterInsertTrigger(Bucket bucket) {
+        String sql = "DROP TRIGGER IF EXISTS trigger_after_insert on \"" + bucket.getTableName() + "\"";
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
-    private void removeAfterUpdateTrigger(String bucketName) {
-        String sql = "DROP TRIGGER IF EXISTS trigger_after_update on \"" + bucketName + "\"";
+    private void removeAfterUpdateTrigger(Bucket bucket) {
+        String sql = "DROP TRIGGER IF EXISTS trigger_after_update on \"" + bucket.getTableName() + "\"";
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
     }
@@ -335,7 +327,7 @@ public class BucketService {
         return bucketRepository.findAllByDeletedOrderById(false).stream().filter(bucket -> hasUserAccessToBucket(bucket, user)).collect(Collectors.toList());
     }
 
-    private boolean hasUserAccessToBucket(Bucket bucket, User user) {
+    public boolean hasUserAccessToBucket(Bucket bucket, User user) {
         boolean accessForUser = bucket.getUsers().size() > 0 && bucket.getUsers().contains(user);
 
         if (accessForUser)

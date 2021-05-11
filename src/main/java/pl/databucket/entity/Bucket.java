@@ -99,4 +99,12 @@ public class Bucket extends Auditable<String> implements TenantSupport {
             return null;
     }
 
+    public String getTableName() {
+        return String.format("x-bucket-%d", id);
+    }
+
+    public String getTableHistoryName() {
+        return getTableName() + "-h";
+    }
+
 }

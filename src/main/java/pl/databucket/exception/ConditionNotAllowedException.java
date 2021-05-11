@@ -1,6 +1,6 @@
 package pl.databucket.exception;
 
-import pl.databucket.database.Condition;
+import pl.databucket.service.data.Condition;
 
 public class ConditionNotAllowedException extends Exception {
 

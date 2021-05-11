@@ -11,8 +11,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
-    getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
+    getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
 import {
@@ -25,6 +24,7 @@ import Button from "@material-ui/core/Button";
 import RadioChecked from "@material-ui/icons/RadioButtonChecked";
 import RadioUnchecked from "@material-ui/icons/RadioButtonUnchecked";
 import {useWindowDimension} from "./UseWindowDimension";
+// import TableIcons from "./TableIcons";
 
 const styles = (theme) => ({
     root: {
@@ -134,7 +134,7 @@ export default function SelectSingleDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <MaterialTable
-                        icons={getTableIcons()}
+                        // icons={TableIcons}
                         title={props.tableTitle != null ? props.tableTitle : '-'}
                         tableRef={tableRef}
                         columns={[getColumnSelection(), ...props.columns]}

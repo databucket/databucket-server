@@ -117,7 +117,7 @@ class TagsTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                icons={tableIcons}
+                // icons={tableIcons}
                 title="Tags"
                 tableRef={this.tableRef}
                 columns={this.state.columns}

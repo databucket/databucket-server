@@ -7,8 +7,7 @@ import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage
 import {
     getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
+    getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
@@ -31,6 +30,7 @@ import ClassesContext from "../../context/classes/ClassesContext";
 import EditTaskConfigDialog, {getActionsType} from "../dialogs/EditTaskConfigDialog";
 import FiltersContext from "../../context/filters/FiltersContext";
 import TagsContext from "../../context/tags/TagsContext";
+// import TableIcons from "../utils/TableIcons";
 
 export default function TasksTab() {
 
@@ -89,7 +89,7 @@ export default function TasksTab() {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title='Tasks'
                 tableRef={tableRef}
                 columns={[

@@ -7,8 +7,7 @@ import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage
 import {
     getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
+    getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
@@ -29,6 +28,7 @@ import CloneIcon from '@material-ui/icons/ViewStream'
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import ClassesContext from "../../context/classes/ClassesContext";
+// import TableIcons from "../utils/TableIcons";
 
 export default function ColumnsTab() {
 
@@ -79,7 +79,7 @@ export default function ColumnsTab() {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title='Columns'
                 tableRef={tableRef}
                 columns={[

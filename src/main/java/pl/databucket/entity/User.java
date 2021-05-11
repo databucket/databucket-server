@@ -87,6 +87,13 @@ public class User extends Auditable<String> implements Serializable {
             return false;
     }
 
+    public boolean isAdminUser() {
+        if (roles != null && roles.size() > 0)
+            return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_ADMIN));
+        else
+            return false;
+    }
+
     public boolean isExpired() {
         return (expirationDate != null && expirationDate.before(new Date()));
     }

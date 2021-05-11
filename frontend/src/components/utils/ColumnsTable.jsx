@@ -1,4 +1,4 @@
-import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableIcons, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
 import {getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
@@ -10,6 +10,7 @@ import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
 import {useWindowDimension} from "./UseWindowDimension";
 import SelectSingleFieldLookup, {commonFields} from "../lookup/SelectSingleFieldLookup";
+// import TableIcons from "./TableIcons";
 
 export default function ColumnsTable(props) {
 
@@ -44,7 +45,7 @@ export default function ColumnsTable(props) {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title={'Class origin or defined properties:'}
                 tableRef={tableRef}
                 columns={[

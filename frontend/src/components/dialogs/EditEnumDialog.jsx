@@ -12,7 +12,6 @@ import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
-    getTableIcons,
     getTableRowBackgroundColor, moveDown, moveUp
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
@@ -25,6 +24,7 @@ import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import {MessageBox} from "../utils/MessageBox";
 import {useWindowDimension} from "../utils/UseWindowDimension";
+// import TableIcons from "../utils/TableIcons";
 
 const styles = (theme) => ({
     root: {
@@ -135,7 +135,7 @@ export default function EditEnumDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <MaterialTable
-                        icons={getTableIcons()}
+                        // icons={TableIcons}
                         title={`Value list`}
                         tableRef={tableRef}
                         columns={getColumns()}

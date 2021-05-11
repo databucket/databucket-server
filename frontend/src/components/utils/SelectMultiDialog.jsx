@@ -12,7 +12,6 @@ import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
-    getTableIcons,
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
@@ -25,6 +24,7 @@ import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
 import {useWindowDimension} from "./UseWindowDimension";
+// import TableIcons from "./TableIcons";
 
 const styles = (theme) => ({
     root: {
@@ -117,7 +117,7 @@ export default function SelectMultiDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <MaterialTable
-                        icons={getTableIcons()}
+                        // icons={TableIcons}
                         title={props.tableTitle != null ? props.tableTitle : '-'}
                         tableRef={tableRef}
                         columns={props.columns}

@@ -151,7 +151,7 @@ class GroupsTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                icons={tableIcons}
+                // icons={tableIcons}
                 title='Groups'
                 tableRef={this.tableRef}
                 columns={this.state.columns}

@@ -344,7 +344,7 @@ class TaskConfigurationEditorDialog extends React.Component {
             <div>
               {this.state.activeStep === 0 ? (
                 <MaterialTable
-                  icons={tableIcons}
+                  // icons={tableIcons}
                   title="Conditions"
                   tableRef={this.tableConditionsRef}
                   columns={this.state.conditionsColumns}
@@ -462,7 +462,7 @@ class TaskConfigurationEditorDialog extends React.Component {
                     {this.state.data.actions.type === 'modify' ? (
                       <div>
                         <MaterialTable
-                          icons={tableIcons}
+                          // icons={tableIcons}
                           title="Modify properties"
                           tableRef={this.tableActionsRef}
                           columns={this.state.propertiesColumns}

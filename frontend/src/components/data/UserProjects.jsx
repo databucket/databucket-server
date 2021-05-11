@@ -4,6 +4,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from "@material-ui/core/MenuItem";
 import AccessContext from "../../context/access/AccessContext";
 import {getActiveProjectId} from "../../utils/ConfigurationStorage";
+import {Tooltip} from "@material-ui/core";
 
 export default function UserProjects(props) {
 
@@ -31,15 +32,11 @@ export default function UserProjects(props) {
     if (projects != null && projects.length > 1)
         return (
             <div>
-                <IconButton
-                    aria-label="account of current user"
-                    aria-controls="menu-appbar"
-                    aria-haspopup="true"
-                    onClick={handleMenu}
-                    color="inherit"
-                >
-                    <span className="material-icons">exit_to_app</span>
-                </IconButton>
+                <Tooltip title={'Select project'}>
+                    <IconButton onClick={handleMenu} color={'inherit'}>
+                        <span className="material-icons">exit_to_app</span>
+                    </IconButton>
+                </Tooltip>
                 <Menu
                     id="menu-appbar"
                     anchorEl={anchorEl}

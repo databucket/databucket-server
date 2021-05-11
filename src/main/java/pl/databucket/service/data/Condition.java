@@ -1,4 +1,4 @@
-package pl.databucket.database;
+package pl.databucket.service.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,14 +28,32 @@ public class Condition {
 		this.rightSource = SourceType.s_const;
 		this.rightValue = value;
 	}
+
+	private Object convertToColumnName(Object value) {
+		if (value instanceof String)
+			switch((String) value) {
+				case "id": return "data_id";
+				case "tagId": return "tag_id";
+				case "reserved": return "reserved";
+				case "owner": return "reserved_by";
+				case "properties": return "properties";
+				case "createdBy": return "created_by";
+				case "createdAt": return "created_at";
+				case "modifiedBy": return "modified_by";
+				case "modifiedAt": return "modified_at";
+				default: return value;
+			}
+		else
+			return value;
+	}
 	
 	public Condition(Map<String, Object> conditionMap) {
 		this.leftSource = SourceType.fromString((String) conditionMap.get(C.LEFT_SOURCE));
 		this.operator = Operator.fromString((String) conditionMap.get(C.OPERATOR));
 		this.rightSource = SourceType.fromString((String) conditionMap.get(C.RIGHT_SOURCE));
 		
-		this.leftValue = conditionMap.get(C.LEFT_VALUE);
-		this.rightValue = conditionMap.get(C.RIGHT_VALUE);
+		this.leftValue = convertToColumnName(conditionMap.get(C.LEFT_VALUE));
+		this.rightValue = convertToColumnName(conditionMap.get(C.RIGHT_VALUE));
 				
 		if ((operator.equals(Operator.in) || operator.equals(Operator.notIn)) && rightSource.equals(SourceType.s_const) && !(rightValue instanceof List)) {
 			String rValue = (String) rightValue;

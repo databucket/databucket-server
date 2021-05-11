@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.AuthDtoRequest;
 import pl.databucket.dto.ManageUserDtoRequest;
 import pl.databucket.dto.ManageUserDtoResponse;
-import pl.databucket.dto.RoleDto;
-import pl.databucket.entity.Role;
 import pl.databucket.entity.User;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ItemAlreadyExistsException;
@@ -75,9 +73,9 @@ public class ManageUserController {
     }
 
     @PostMapping(value = "/password/reset")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody AuthDtoRequest usauthDtoRequestrDto) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody AuthDtoRequest authDtoRequest) {
         try {
-            manageUserService.resetPassword(usauthDtoRequestrDto);
+            manageUserService.resetPassword(authDtoRequest);
             return new ResponseEntity<>(null, HttpStatus.OK);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);

@@ -120,7 +120,7 @@ class BucketsTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                icons={tableIcons}
+                // icons={tableIcons}
                 title='Buckets'
                 tableRef={this.tableRef}
                 columns={this.state.columns}

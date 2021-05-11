@@ -1,4 +1,4 @@
-package pl.databucket.database;
+package pl.databucket.service.data;
 
 public enum ResultField {
 	TOTAL,

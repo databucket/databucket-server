@@ -114,7 +114,6 @@ const AccessReducer = (state, action) => {
                 } else {
                     const newActiveBucket = updatedTabs[activeTabIndex];
                     setLastActiveBucket(newActiveBucket != null ? newActiveBucket.id : -1);
-
                     return {
                         ...state,
                         activeBucket: newActiveBucket,

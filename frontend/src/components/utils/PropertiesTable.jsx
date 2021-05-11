@@ -1,4 +1,4 @@
-import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableIcons, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
 import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
@@ -10,6 +10,7 @@ import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/Conf
 import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
 import {useWindowDimension} from "./UseWindowDimension";
+// import TableIcons from "./TableIcons";
 
 
 export default function PropertiesTable(props) {
@@ -59,7 +60,7 @@ export default function PropertiesTable(props) {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title={props.title}
                 tableRef={tableRef}
                 columns={[

@@ -43,16 +43,6 @@ public class ManageProjectController {
         }
     }
 
-//    @GetMapping
-//    public ResponseEntity<?> getProjects(ProjectSpecification specification, Pageable pageable) {
-//        try {
-//            Page<Project> projectPage = projectService.getProjects(specification, pageable);
-//            return new ResponseEntity<>(new ProjectPageResponse(projectPage, modelMapper), HttpStatus.OK);
-//        } catch (Exception ee) {
-//            return exceptionFormatter.defaultException(ee);
-//        }
-//    }
-
     @GetMapping
     public ResponseEntity<?> getProjects() {
         try {

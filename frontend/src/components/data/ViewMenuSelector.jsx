@@ -2,9 +2,8 @@ import React, {useState} from 'react';
 import PropTypes from "prop-types";
 import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
-import {Grid, IconButton, Menu} from "@material-ui/core";
+import {Grid, IconButton, Menu, Tooltip} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import ViewListIcon from "@material-ui/icons/MoreVert";
 
 ViewMenuSelector.propTypes = {
     views: PropTypes.array.isRequired,
@@ -47,15 +46,16 @@ export default function ViewMenuSelector(props) {
     return (
         <div className={classes.root}>
             <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
-                <IconButton
-                    className={classes.select}
-                    aria-label="more"
-                    aria-controls="long-menu"
-                    aria-haspopup="true"
-                    onClick={handleClick}
-                >
-                    <ViewListIcon/>
-                </IconButton>
+                <Tooltip title={'Select view'}>
+                    <IconButton
+                        className={classes.select}
+                        aria-controls="long-menu"
+                        onClick={handleClick}
+                        color={'inherit'}
+                    >
+                        <span className="material-icons">double_arrow</span>
+                    </IconButton>
+                </Tooltip>
                 <Typography
                     variant="h6"
                     className={classes.description}
@@ -99,13 +99,13 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(1)
     },
     select: {
-        marginLeft: '5px',
+        marginLeft: '10px',
         padding: theme.spacing(1)
     },
     description: {
         padding: theme.spacing(2),
         whiteSpace: "nowrap",
         overflow: "hidden",
-        textOverflow: "ellipsis",
+        textOverflow: "ellipsis"
     }
 }));

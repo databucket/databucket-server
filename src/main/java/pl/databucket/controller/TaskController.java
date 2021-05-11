@@ -2,8 +2,6 @@ package pl.databucket.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +10,6 @@ import pl.databucket.dto.TaskDto;
 import pl.databucket.entity.Task;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.exception.ModifyByNullEntityIdException;
-import pl.databucket.response.TaskPageResponse;
 import pl.databucket.service.TaskService;
 
 import javax.validation.Valid;

@@ -9,6 +9,7 @@ import SetDarkTheme from "@material-ui/icons/Brightness4";
 import {getUsername, saveThemeName} from "../../utils/ConfigurationStorage";
 import CustomThemeContext from "../../context/theme/CustomThemeContext";
 import Button from "@material-ui/core/Button";
+import {Tooltip} from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     oneLine: {
@@ -60,15 +61,11 @@ export default function UserProfile(props) {
 
     return (
         <div>
-            <IconButton
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-            >
-                <AccountCircle/>
-            </IconButton>
+            <Tooltip title={'User profile'}>
+                <IconButton onClick={handleMenu} color={'inherit'}>
+                    <AccountCircle/>
+                </IconButton>
+            </Tooltip>
             <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}

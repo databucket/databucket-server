@@ -42,6 +42,7 @@ import {getBaseUrl} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
 import EnumsContext from "../../context/enums/EnumsContext";
 import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
+import UsersContext from "../../context/users/UsersContext";
 
 const drawerWidth = 240;
 
@@ -53,20 +54,25 @@ export default function ProjectData() {
     const [logged, setLogged] = useState(hasToken() && hasProject());
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
+    const usersContext = useContext(UsersContext);
+    const {users, fetchUsers} = usersContext;
     const accessContext = useContext(AccessContext);
     const {projects, views, filters, fetchAccessTree, columns, fetchSessionColumns, fetchSessionFilters, tags, fetchSessionTags} = accessContext;
 
     useEffect(() => {
-        if (projects == null) {
+        if (users == null)
+            fetchUsers();
+    }, []);
+
+    useEffect(() => {
+        if (projects == null)
             fetchAccessTree();
-        }
         // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
-        if (views != null && columns == null) {
+        if (views != null && columns == null)
             fetchSessionColumns();
-        }
         // eslint-disable-next-line
     }, [views]);
 
@@ -180,7 +186,7 @@ export default function ProjectData() {
                         {
                             hasAdminRole() ? (
                                 <ListItem button component={Link} to={getProjectSettingsPath() + "/" + getLastSettingsPageName()}>
-                                    <ListItemIcon><span className="material-icons">settings_applications</span></ListItemIcon>
+                                    <ListItemIcon><span className="material-icons">settings</span></ListItemIcon>
                                     <ListItemText primary={'Settings'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
                                 </ListItem>
                             ) : (<div/>)

@@ -39,19 +39,19 @@ export const validateItem = (data, specification) => {
 
                 if (data.hasOwnProperty(key) && data[key] != null && data[key].length > 0) {
                     if (validation.includes('min')) {
-                        let min = parseInt(validation.substring(3));
+                        let min = parseInt(validation.substring(3), 10);
                         if (data[key].length < min)
                             message += `${title} must be at least ${min} characters long! `;
                     }
 
                     if (validation.includes('max')) {
-                        let max = parseInt(validation.substring(3));
+                        let max = parseInt(validation.substring(3), 10);
                         if (data[key].length > max)
                             message += `${title} can be up to ${max} characters long! `;
                     }
 
                     if (validation === 'selected') {
-                        let value = parseInt(data[key]);
+                        let value = parseInt(data[key], 10);
                         if (value <= 0)
                             message += `${title} must be selected! `;
                     }
@@ -297,7 +297,7 @@ export const uuidV4 = () => {
 }
 
 export const getClassById = (classes, id) => {
-    const dataClass = (classes != null && id != null && id !== 'none') ? classes.filter(c => c.id === parseInt(id)) : [];
+    const dataClass = (classes != null && id != null && id !== 'none') ? classes.filter(c => c.id === parseInt(id, 10)) : [];
     return dataClass.length > 0 ? dataClass[0] : null;
 }
 

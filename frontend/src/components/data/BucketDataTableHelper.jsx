@@ -12,99 +12,88 @@ export default function prepareViewColumns(columns, tags, enums) {
         });
 }
 
-const getIconName = (items, value) => {
-    // console.log('getIconName: (items, value)');
-    // console.log(items);
-    // console.log(value);
-    const filteredItems = items.filter(item => (item.value === value));
-    if (filteredItems.length > 0)
-        return filteredItems[0].icon;
-    else
-        return null;
-}
-
 const prepareColumn = (column, properties, tags, enums) => {
     switch (column.uuid) {
         case "uuid_data_id":
             return {
                 title: "Id",
-                field: 'id',
+                field: 'Id',
+                source: 'id',
                 type: 'numeric',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden
             };
         case "uuid_tag_id":
             const tagLookup = createTagLookup(tags);
             return {
                 title: "Tag",
-                field: 'tagId',
+                field: 'Tag',
+                source: 'tagId',
                 type: 'numeric',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden,
                 lookup: tagLookup
             };
         case "uuid_reserved":
             return {
                 title: "Reserved",
-                field: 'reserved',
+                field: 'Reserved',
+                source: 'reserved',
                 type: 'boolean',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden
             };
         case "uuid_owner":
             return {
                 title: "Owner",
-                field: 'owner',
+                field: 'Owner',
+                source: 'owner',
                 type: 'string',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden
             };
         case "uuid_created_at":
             return {
                 title: "Created at",
-                field: 'createdAt',
+                field: 'Created at',
+                source: 'createdAt',
                 type: 'datetime',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden
             };
         case "uuid_created_by":
             return {
                 title: "Created by",
-                field: 'createdBy',
+                field: 'Created by',
+                source: 'createdBy',
                 type: 'string',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden
             };
         case "uuid_modified_at":
             return {
                 title: "Modified at",
-                field: 'modifiedAt',
+                field: 'Modified at',
+                source: 'modifiedAt',
                 type: 'datetime',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden
             };
         case "uuid_modified_by":
             return {
                 title: "Modified by",
-                field: 'modifiedBy',
+                field: 'Modified by',
+                source: 'modifiedBy',
                 type: 'string',
                 editable: column.editable,
                 filtering: column.filtering,
-                // align: column.align,
                 hidden: column.hidden
             };
         default:
@@ -113,16 +102,15 @@ const prepareColumn = (column, properties, tags, enums) => {
                 const enumObj = enums.filter(en => en.id === property.enumId)[0];
 
                 if (enumObj.iconsEnabled) {
-                    const colField = "prop_" + property.path.replace(".", "#");
                     return {
                         title: property.title,
-                        field: colField,
+                        field: property.title,
+                        source: property.path,
                         type: 'numeric',
                         editable: column.editable,
                         filtering: column.filtering,
-                        // align: column.align,
                         hidden: column.hidden,
-                        render: rowData => <TableDynamicIcon iconName={getIconName(enumObj.items, rowData[colField])}/>,
+                        render: rowData => <TableDynamicIcon iconName={getIconName(enumObj.items, rowData[column.field])}/>,
                         editComponent: props =>
                             <LookupIconDialog
                                 selectedIconName={getIconName(enumObj.items, props.rowData[column.field])}
@@ -134,11 +122,11 @@ const prepareColumn = (column, properties, tags, enums) => {
                     const propLookup = createEnumLookup(enumObj);
                     return {
                         title: property.title,
-                        field: "prop_" + property.path.replace(".", "#"),
+                        field: property.title,
+                        source: property.path,
                         type: property.type !== 'select' ? property.type : 'numeric',
                         editable: column.editable,
                         filtering: column.filtering,
-                        // align: column.align,
                         hidden: column.hidden,
                         lookup: propLookup
                     };
@@ -146,14 +134,22 @@ const prepareColumn = (column, properties, tags, enums) => {
             } else
                 return {
                     title: property.title,
-                    field: "prop_" + property.path.replace(".", "#"),
+                    field: property.title,
+                    source: property.path,
                     type: property.type,
                     editable: column.editable,
                     filtering: column.filtering,
-                    // align: column.align,
                     hidden: column.hidden
                 };
     }
+}
+
+const getIconName = (items, value) => {
+    const filteredItems = items.filter(item => (item.value === value));
+    if (filteredItems.length > 0)
+        return filteredItems[0].icon;
+    else
+        return null;
 }
 
 export const getBucketTags = (activeBucket, tags) => {
@@ -181,4 +177,139 @@ export const getActiveView = (bucketViews, lastActiveViewId) => {
             return bucketViews[0];
     } else
         return null;
+}
+
+export const convertDataBeforeAdd = (columns, inputDataRow) => {
+    console.log('convertDataBeforeAdd:');
+    console.log("Columns:");
+    console.log(JSON.stringify(columns));
+    console.log("dataRow:");
+    console.log(JSON.stringify(inputDataRow));
+    let payload = {properties: {}};
+    try {
+        for (let key in inputDataRow) {
+            if (inputDataRow.hasOwnProperty(key)) {
+                const source = getColumnSource(columns, key);
+                const fieldType = getFieldType(columns, key);
+                if (fieldType === 'numeric') {
+                    payload[source] = parseInt(inputDataRow[key], 10);
+                } else if (fieldType === 'datetime' || fieldType === 'date' || fieldType === 'time') {
+                    payload[source] = toIsoString(inputDataRow[key]);
+                } else {
+                    payload[source] = inputDataRow[key];
+                }
+
+                if (source.startsWith('$')) {
+                    const path = source.substring(2);
+                    setJsonValueByPath(path, payload[source], payload.properties);
+                    delete payload[source];
+                }
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
+    return payload;
+}
+
+export const convertDataBeforeModify = (columns, newData, oldDataRow) => {
+    const readOnlyColumns = ['id', 'owner', 'createdAt', 'createdBy', 'modifiedAt', 'modifiedBy'];
+
+    let payload = {propertiesToSet: {}};
+    let hasUpdateProperties = false;
+
+    try {
+        for (let key in newData) {
+            if (newData.hasOwnProperty(key)) {
+                let source = getColumnSource(columns, key);
+                if (readOnlyColumns.indexOf(source) < 0) {
+                    const newItem = newData[key];
+                    const oldItem = oldDataRow[key];
+
+                    if (newItem !== oldItem) {
+                        const fieldType = getFieldType(columns, key);
+                        if (newItem != null) {
+                            let value = newItem;
+                            if (fieldType === 'numeric')
+                                value = parseInt(newData[key], 10);
+                            else if (fieldType === 'datetime' || fieldType === 'date' || fieldType === 'time')
+                                value = toIsoString(newData[key]);
+
+                            if (source.startsWith('$')) {
+                                payload.propertiesToSet[source] = value;
+                                hasUpdateProperties = true;
+                            } else
+                                payload[source] = value;
+                        } else {
+                            if (source.startsWith('$')) {
+                                payload.propertiesToSet[source] = null;
+                                hasUpdateProperties = true;
+                            } else
+                                payload[source] = null;
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
+    if (!hasUpdateProperties)
+        delete payload['propertiesToSet'];
+
+    return payload;
+}
+
+export const getColumnSource = (columns, fieldName) => {
+    let c = columns.filter(c => (c.field === fieldName))[0];
+    return c.source;
+}
+
+const getFieldType = (columns, fieldName) => {
+    const c = columns.filter(column => (column.field === fieldName))[0];
+    return c.type;
+}
+
+export const getDataRowId = (columns, data) => {
+    return data.Id;
+    // let dataIdColumn = this.state.columns.filter(c => (c.source === 'data_id'))[0];
+    // return data[dataIdColumn.field];
+}
+
+const setJsonValueByPath = (path, val, obj) => {
+    let fields = path.split('.');
+    let result = obj;
+    for (let i = 0, n = fields.length; i < n && result !== undefined; i++) {
+        let field = fields[i];
+        if (i === n - 1) {
+            result[field] = val;
+        } else {
+            if (typeof result[field] === 'undefined') {
+                result[field] = {};
+            }
+            result = result[field];
+        }
+    }
+}
+
+const toIsoString = (aDate) => {
+    let tzo = -aDate.getTimezoneOffset(),
+        dif = tzo >= 0 ? '+' : '-',
+        pad = function (num) {
+            let norm = Math.floor(Math.abs(num));
+            return (norm < 10 ? '0' : '') + norm;
+        };
+    return aDate.getFullYear() +
+        '-' + pad(aDate.getMonth() + 1) +
+        '-' + pad(aDate.getDate()) +
+        'T' + pad(aDate.getHours()) +
+        ':' + pad(aDate.getMinutes()) +
+        ':' + pad(aDate.getSeconds()) +
+        ".000" +
+        dif + pad(tzo / 60) + pad(tzo % 60);
+}
+
+export const getFetchColumns = (tableColumns) => {
+    return tableColumns.map(col => ({field: col.source, title: col.title}));
 }

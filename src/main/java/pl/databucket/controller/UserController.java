@@ -155,7 +155,8 @@ public class UserController {
             if (allUserBucketsIds.size() > 0) {
                 AccessTreeGroupDto orphanedBucketsGroupDto = new AccessTreeGroupDto();
                 orphanedBucketsGroupDto.setId(0L);
-                orphanedBucketsGroupDto.setShortName("***");
+                orphanedBucketsGroupDto.setShortName("ORP");
+                orphanedBucketsGroupDto.setName("Orphaned");
                 orphanedBucketsGroupDto.setBucketsIds(allUserBucketsIds);
                 accessTreeDto.getGroups().add(orphanedBucketsGroupDto);
             }

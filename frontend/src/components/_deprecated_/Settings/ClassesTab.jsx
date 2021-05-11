@@ -103,7 +103,7 @@ class ClassesTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                icons={tableIcons}
+                // icons={tableIcons}
                 title='Classes'
                 tableRef={this.tableRef}
                 columns={this.state.columns}

@@ -13,10 +13,15 @@ export const LightTheme = createMuiTheme({
     palette: {
         type: 'light',
         primary: {
-            main: '#0d47a1'
+            main: '#0d47a1',
+            contrastText: '#ebf2fd',
         },
         secondary: {
             main: '#ff9800'
+        },
+        text: {
+            primary: '#4A4A4A',
+            // secondary: '#e31f00' # MaterialTable buttons
         }
     },
 });

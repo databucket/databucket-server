@@ -7,8 +7,7 @@ import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage
 import {
     getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
+    getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
@@ -31,6 +30,7 @@ import ClassesContext from "../../context/classes/ClassesContext";
 import TagsContext from "../../context/tags/TagsContext";
 import UsersContext from "../../context/users/UsersContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+// import TableIcons from "../utils/TableIcons";
 
 export default function FiltersTab() {
 
@@ -95,7 +95,7 @@ export default function FiltersTab() {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title='Filters'
                 tableRef={tableRef}
                 columns={[

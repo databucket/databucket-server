@@ -1,66 +1,81 @@
 package pl.databucket.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.databucket.entity.Bucket;
+import pl.databucket.entity.User;
+import pl.databucket.exception.BucketNotFoundException;
 import pl.databucket.exception.ExceptionFormatter;
-import pl.databucket.exception.ItemNotFoundException;
-import pl.databucket.response.DataResponse;
-import pl.databucket.service.DataService;
-
-import static org.springframework.http.ResponseEntity.ok;
+import pl.databucket.exception.NoAccessToBucketException;
+import pl.databucket.service.BucketService;
+import pl.databucket.service.UserService;
+import pl.databucket.service.data.DataService;
+import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api")
 @RestController
 public class DataHistoryController {
 
-  private final ExceptionFormatter exceptionFormatter;
-  private final DataService service;
+    private final ExceptionFormatter exceptionFormatter;
+    private final DataService service;
 
-  public DataHistoryController(DataService service) {
-    this.service = service;
-    this.exceptionFormatter = new ExceptionFormatter(DataHistoryController.class);
-  }
+    @Autowired
+    private BucketService bucketService;
 
-  @GetMapping(value = {
-          "/bucket/{bucketName}/data/{dataId}/history"},
-          produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> getDataHistory(
-          @PathVariable("bucketName") String bucketName, 
-          @PathVariable("dataId") Integer dataId) {
+    @Autowired
+    private UserService userService;
 
-    DataResponse response = new DataResponse();
-    
-    try {
-      response.setHistory(service.getDataHistory(bucketName, dataId));
-      return ok(response);
-    } catch (ItemNotFoundException e) {
-      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
-    } catch (Exception ee) {
-      return exceptionFormatter.defaultException(ee);
+    public DataHistoryController(DataService service) {
+        this.service = service;
+        this.exceptionFormatter = new ExceptionFormatter(DataHistoryController.class);
     }
-  }
 
-  @GetMapping(value = {
-          "/bucket/{bucketName}/data/{dataId}/history/properties/{ids}"},
-          produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> getDataHistoryProperties(
-          @PathVariable String bucketName,
-          @PathVariable Integer dataId,
-          @PathVariable Integer[] ids) {
+    @GetMapping(value = {
+            "/bucket/{bucketName}/data/{id}/history"},
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getDataHistory(
+            @PathVariable String bucketName,
+            @PathVariable Long id) {
 
-    DataResponse response = new DataResponse();
+        Bucket bucket = bucketService.getBucket(bucketName);
+        if (bucket == null)
+            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
 
-    try {
-      response.setHistory(service.getDataHistoryProperties(bucketName, dataId, ids));
-      return ok(response);
-    } catch (ItemNotFoundException e) {
-      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
-    } catch (Exception ee) {
-      return exceptionFormatter.defaultException(ee);
+        try {
+            User user = userService.getCurrentUser();
+            if (bucketService.hasUserAccessToBucket(bucket, user)) {
+                return new ResponseEntity<>(service.getDataHistory(bucket, id), HttpStatus.OK);
+            } else
+                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
     }
-  }
 
+    @GetMapping(value = {
+            "/bucket/{bucketName}/data/{id}/history/{ids}"},
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getDataHistoryProperties(
+            @PathVariable String bucketName,
+            @PathVariable Long id,
+            @PathVariable List<Long> ids) {
+
+        Bucket bucket = bucketService.getBucket(bucketName);
+        if (bucket == null)
+            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+
+        try {
+            User user = userService.getCurrentUser();
+            if (bucketService.hasUserAccessToBucket(bucket, user)) {
+                return new ResponseEntity<>(service.getDataHistoryProperties(bucket, id, ids), HttpStatus.OK);
+            } else
+                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
 }

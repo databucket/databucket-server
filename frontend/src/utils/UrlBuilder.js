@@ -20,6 +20,26 @@ export const getPageableUlr = (endpoint, query, enableFilters) => {
     return url;
 }
 
+export const getDataUrl = (bucket) => {
+    return `${origin}/api/bucket/${bucket.name}/data`;
+}
+
+export const getDataReserveUrl = (bucket, number, random) => {
+    return random ? `${origin}/api/bucket/${bucket.name}/data/reserve?limit=${number}&sort=random` : `${origin}/api/bucket/${bucket.name}/data/reserve?limit=${number}`;
+}
+
+export const getDataByIdUrl = (bucket, id) => {
+    return `${origin}/api/bucket/${bucket.name}/data/${id}`;
+}
+
+export const getDataHistoryUrl = (bucket, id) => {
+    return `${origin}/api/bucket/${bucket.name}/data/${id}/history`;
+}
+
+export const getDataHistoryPropertiesUrl = (bucket, id, idA, idB) => {
+    return `${origin}/api/bucket/${bucket.name}/data/${id}/history/${idA},${idB}`;
+}
+
 export const getBaseUrl = (endpoint) => {
     return `${origin}/api/${endpoint}`;
 }

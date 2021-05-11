@@ -3,8 +3,7 @@ import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getDeleteOptions, getManagementTableHeight,
-    getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor,
-    getTableIcons, getTableRowBackgroundColor
+    getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
@@ -35,6 +34,7 @@ import {getManageProjectMapper} from "../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+// import TableIcons from "../utils/TableIcons";
 
 export default function ProjectsTab() {
 
@@ -103,7 +103,7 @@ export default function ProjectsTab() {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title='Projects'
                 tableRef={tableRef}
                 columns={[

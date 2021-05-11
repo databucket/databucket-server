@@ -1,4 +1,4 @@
-import {getPropertiesTableHeight, getTableHeaderBackgroundColor, getTableIcons, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import {getPropertiesTableHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
 import {convertPropertiesDates, getPropertyByUuid, getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
@@ -10,6 +10,7 @@ import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
 import {useWindowDimension} from "./UseWindowDimension";
 import moment from 'moment';
+// import TableIcons from "./TableIcons";
 
 ActionPropertiesTable.propTypes = {
     data: PropTypes.array,
@@ -197,7 +198,7 @@ export default function ActionPropertiesTable(props) {
     return (
         <div>
             <MaterialTable
-                icons={getTableIcons()}
+                // icons={TableIcons}
                 title={'Modify properties:'}
                 tableRef={tableRef}
                 columns={[

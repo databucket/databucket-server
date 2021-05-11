@@ -148,7 +148,7 @@ class ViewsTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                icons={tableIcons}
+                // icons={tableIcons}
                 title='Views'
                 tableRef={this.tableRef}
                 columns={this.state.columns}

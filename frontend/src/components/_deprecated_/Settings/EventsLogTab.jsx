@@ -121,7 +121,7 @@ class EventsLogTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                icons={tableIcons}
+                // icons={tableIcons}
                 title='Events log'
                 tableRef={this.tableRef}
                 columns={this.state.columns}
