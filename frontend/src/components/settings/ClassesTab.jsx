@@ -26,7 +26,6 @@ import {getClassMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import EditClassFieldsDialog from "../dialogs/EditClassFieldsDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-// import TableIcons from "../utils/TableIcons";
 
 export default function ClassesTab() {
 
@@ -57,7 +56,7 @@ export default function ClassesTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title='Classes'
                 tableRef={tableRef}
                 columns={[

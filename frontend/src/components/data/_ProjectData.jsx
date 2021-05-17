@@ -40,9 +40,7 @@ import {handleErrors} from "../../utils/FetchHelper";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
-import EnumsContext from "../../context/enums/EnumsContext";
 import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
-import UsersContext from "../../context/users/UsersContext";
 
 const drawerWidth = 240;
 
@@ -52,46 +50,49 @@ export default function ProjectData() {
     const theme = useTheme();
     const [open, setOpen] = useState(isLeftPanelOpen());
     const [logged, setLogged] = useState(hasToken() && hasProject());
-    const enumsContext = useContext(EnumsContext);
-    const {enums, fetchEnums} = enumsContext;
-    const usersContext = useContext(UsersContext);
-    const {users, fetchUsers} = usersContext;
     const accessContext = useContext(AccessContext);
-    const {projects, views, filters, fetchAccessTree, columns, fetchSessionColumns, fetchSessionFilters, tags, fetchSessionTags} = accessContext;
+    const {
+        fetchAccessTree,
+        projects,
+        views,
+        columns, fetchSessionColumns,
+        filters, fetchSessionFilters,
+        fetchSessionTags,
+        tasks, fetchSessionTasks,
+        enums, fetchSessionEnums,
+        fetchSessionUsers
+    } = accessContext;
 
     useEffect(() => {
-        if (users == null)
-            fetchUsers();
+        fetchSessionUsers();
     }, []);
 
     useEffect(() => {
-        if (projects == null)
-            fetchAccessTree();
-        // eslint-disable-next-line
+        fetchAccessTree();
     }, []);
 
     useEffect(() => {
         if (views != null && columns == null)
             fetchSessionColumns();
-        // eslint-disable-next-line
     }, [views]);
 
     useEffect(() => {
-        if (views != null && filters == null)
+        if (views != null && tasks != null && filters == null)
             fetchSessionFilters();
-        // eslint-disable-next-line
-    }, [views]);
+    }, [views, tasks]);
 
     useEffect(() => {
-        if (tags == null)
-            fetchSessionTags();
-        // eslint-disable-next-line
+        fetchSessionTags();
     }, []);
 
     useEffect(() => {
-        if (enums == null)
-            fetchEnums();
-    }, [enums, fetchEnums]);
+        fetchSessionEnums();
+    }, []);
+
+    useEffect(() => {
+        if (views != null && tasks == null)
+            fetchSessionTasks();
+    }, [views]);
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -128,7 +129,7 @@ export default function ProjectData() {
     if (!logged)
         return (<Redirect to="/login"/>);
 
-    if (projects == null || enums == null || columns == null)
+    if (projects == null || enums == null || columns == null || filters == null || tasks == null)
         return (<CenteredWaitingCircularProgress />);
 
     return (

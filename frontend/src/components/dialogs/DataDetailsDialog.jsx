@@ -8,13 +8,13 @@ import IconButton from '@material-ui/core/IconButton';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import JSONInput from 'react-json-editor-ajrm';
+import JSONInput from 'react-json-editor-ajrm/index';
 import locale from 'react-json-editor-ajrm/locale/en';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import {Divider} from '@material-ui/core';
 import {createTagLookup} from "../../utils/JsonHelper";
-import {getTableHeaderBackgroundColor} from "../../utils/MaterialTableHelper";
+import {getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../utils/MaterialTableHelper";
 
 const titleStyles = theme => ({
     root: {
@@ -132,7 +132,8 @@ export default function DataDetailsDialog(props) {
                     search: false,
                     filtering: false,
                     padding: 'dense',
-                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)}
+                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
                     Container: props => <div {...props} />

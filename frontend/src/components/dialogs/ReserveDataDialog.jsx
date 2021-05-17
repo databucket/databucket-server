@@ -7,7 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import {getUsername, hasAdminRole} from "../../utils/ConfigurationStorage";
 import FormControl from "@material-ui/core/FormControl";
 import Button from "@material-ui/core/Button";
-import UsersContext from "../../context/users/UsersContext";
+import AccessContext from "../../context/access/AccessContext";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -69,8 +69,8 @@ export default function ReserveDataDialog(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const usersContext = useContext(UsersContext);
-    const {users} = usersContext;
+    const accessContext = useContext(AccessContext);
+    const {users} = accessContext;
     const [state, setState] = useState({random: false, number: 1, username: getUsername()});
 
     const handleMenu = (event) => {

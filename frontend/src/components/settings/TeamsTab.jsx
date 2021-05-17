@@ -31,7 +31,6 @@ import {getBaseUrl} from "../../utils/UrlBuilder";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import ViewsContext from "../../context/views/ViewsContext";
 import GroupsContext from "../../context/groups/GroupsContext";
-// import TableIcons from "../utils/TableIcons";
 
 export default function TeamsTab() {
 
@@ -82,7 +81,7 @@ export default function TeamsTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title='Teams'
                 tableRef={tableRef}
                 columns={[

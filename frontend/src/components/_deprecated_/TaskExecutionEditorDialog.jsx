@@ -589,7 +589,7 @@ class TaskExecutionEditorDialog extends React.Component {
               case 1: return (
                 <div>
                   <MaterialTable
-                    // icons={tableIcons}
+
                     title="Conditions"
                     tableRef={this.tableConditionsRef}
                     columns={this.state.conditionsColumns}
@@ -720,7 +720,6 @@ class TaskExecutionEditorDialog extends React.Component {
                   {this.state.data.actions.type === 'modify' ? (
                     <div>
                       <MaterialTable
-                        // icons={tableIcons}
                         title="Modify properties"
                         tableRef={this.tableActionsRef}
                         columns={this.state.propertiesColumns}

@@ -35,44 +35,58 @@ export const validateItem = (data, specification) => {
             let check = spec['check'];
             for (const validation of check) {
                 if (validation === 'notEmpty' && (!data.hasOwnProperty(key) || data[key] == null || data[key].length === 0))
-                    message += `${title} can not be empty! `;
+                    message += `>>> ${title} can not be empty! `;
 
                 if (data.hasOwnProperty(key) && data[key] != null && data[key].length > 0) {
                     if (validation.includes('min')) {
                         let min = parseInt(validation.substring(3), 10);
                         if (data[key].length < min)
-                            message += `${title} must be at least ${min} characters long! `;
+                            message += `>>> ${title} must be at least ${min} characters long! `;
                     }
 
                     if (validation.includes('max')) {
                         let max = parseInt(validation.substring(3), 10);
                         if (data[key].length > max)
-                            message += `${title} can be up to ${max} characters long! `;
+                            message += `>>> ${title} can be up to ${max} characters long! `;
                     }
 
                     if (validation === 'selected') {
                         let value = parseInt(data[key], 10);
                         if (value <= 0)
-                            message += `${title} must be selected! `;
+                            message += `>>> ${title} must be selected! `;
                     }
 
                     if (validation === 'custom-check-enum-items') {
                         const valueSet = new Set(data.items.map(({value}) => value));
 
                         if (valueSet.size !== data.items.length)
-                            message += `Enum values must be unique! `;
+                            message += `>>> Enum values must be unique! `;
 
                         if (data.iconsEnabled === true && data.items.filter(item => item.icon == null).length > 0)
-                            message += `Every item must have defined an icon! `;
+                            message += `>>> Every item must have defined an icon! `;
                     }
 
                     if (validation === 'validJsonPath') {
-                        // console.log("Check path: " + data[key]);
+                        const subPaths = data[key].split(".");
+                        if (subPaths[0] !== '$')
+                            message += `>>> The path must start with a '$' character! `;
+
+                        const myRegEx  = /[^a-zA-Z0-9_\\(\\)\\-]/i;
+                        for (let i = 1; i < subPaths.length; i++) {
+                            const valid = !(myRegEx.test(subPaths[i]));
+                            if (!valid) {
+                                message += `>>> The path can contain the following characters only '$.a-zA-Z0-9_-()'! `;
+                                break;
+                            }
+                        }
+
+                        if (data[key].includes(".."))
+                            message += `>>> The path can contain double dots! `;
                     }
 
                     if (validation === 'validClassPropertyType') {
                         if (data[key] === 'select' && data['enumId'] == null)
-                            message += `Enum must not be empty for 'Enum' type! `;
+                            message += `>>> Enum must not be empty for 'Enum' type! `;
                     }
                 }
             }

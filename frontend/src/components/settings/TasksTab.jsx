@@ -27,10 +27,9 @@ import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import ClassesContext from "../../context/classes/ClassesContext";
-import EditTaskConfigDialog, {getActionsType} from "../dialogs/EditTaskConfigDialog";
+import TaskEditConfigDialog, {getActionsType} from "../dialogs/TaskEditConfigDialog";
 import FiltersContext from "../../context/filters/FiltersContext";
 import TagsContext from "../../context/tags/TagsContext";
-// import TableIcons from "../utils/TableIcons";
 
 export default function TasksTab() {
 
@@ -89,7 +88,7 @@ export default function TasksTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title='Tasks'
                 tableRef={tableRef}
                 columns={[
@@ -108,7 +107,7 @@ export default function TasksTab() {
                         initialEditValue: {properties: [], actions: { type: 'remove', setTag: false, tagId: 0, setSock: false, lock: false, properties: [] }},
                         render: rowData => getActionsType(rowData.configuration.actions),
                         editComponent: props => (
-                            <EditTaskConfigDialog
+                            <TaskEditConfigDialog
                                 configuration={props.rowData.configuration}
                                 name={props.rowData.name != null ? props.rowData.name : ''}
                                 dataClass={getClassById(classes, props.rowData.classId)}

@@ -221,6 +221,7 @@ public class DataService {
         while (!done && tryCount > 0) {
             try {
                 dataIds = transactionTemplate.execute(paramTransactionStatus -> {
+                    System.out.println("execute transaction");
                     List<Long> listOfIds = jdbcTemplate.queryForList(selectQuery.toString(logger, paramMap), paramMap, Long.class);
                     if (listOfIds.size() > 0) {
                         Condition condition = new Condition(COL.DATA_ID, Operator.in, listOfIds);

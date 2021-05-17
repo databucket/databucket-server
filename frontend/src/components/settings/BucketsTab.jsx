@@ -35,7 +35,6 @@ import ClassesContext from "../../context/classes/ClassesContext";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-// import TableIcons from "../utils/TableIcons";
 
 export default function BucketsTab() {
 
@@ -126,7 +125,7 @@ export default function BucketsTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title='Buckets'
                 tableRef={tableRef}
                 columns={[

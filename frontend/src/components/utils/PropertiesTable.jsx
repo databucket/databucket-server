@@ -60,7 +60,7 @@ export default function PropertiesTable(props) {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title={props.title}
                 tableRef={tableRef}
                 columns={[

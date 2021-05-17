@@ -167,7 +167,7 @@ class FiltersTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                // icons={tableIcons}
+
                 title='Filters'
                 tableRef={this.tableRef}
                 columns={this.state.columns}

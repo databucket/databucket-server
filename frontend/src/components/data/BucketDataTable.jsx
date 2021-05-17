@@ -26,20 +26,18 @@ import {
     FEATURE_CREATION,
     FEATURE_REMOVAL,
     FEATURE_RESERVATION,
-    FEATURE_TASKS,
     FEATURE_EXPORT
 } from "../utils/ViewFeatures";
-import prepareViewColumns, {
+import prepareTableColumns, {
     convertDataBeforeAdd,
     convertDataBeforeModify,
     getActiveView,
-    getBucketTags,
+    getBucketTags, getBucketTasks,
     getBucketViews,
     getColumnSource,
     getFetchColumns
 } from "./BucketDataTableHelper";
 import MissingActiveView from "./MissingActiveView";
-import EnumsContext from "../../context/enums/EnumsContext";
 import Refresh from "@material-ui/icons/Refresh";
 import RateReviewOutlined from "@material-ui/icons/RateReviewOutlined";
 import History from "@material-ui/icons/History";
@@ -51,75 +49,82 @@ import DataDetailsDialog from "../dialogs/DataDetailsDialog";
 import DataHistoryDialog from "../dialogs/DataHistoryDialog";
 import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 
+// declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
+const tableRef = createRef();
+
 export default function BucketDataTable() {
 
     const theme = useTheme();
-    const tableRef = createRef();
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [height] = useWindowDimension();
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
-    const {buckets, activeBucket, views, columns, filters, tags} = accessContext;
-    const enumsContext = useContext(EnumsContext);
-    const {enums} = enumsContext;
-    const [state, setState] = useState(
-        {
-            bucketViews: [],    // all views available for active bucket that user has access
-            bucketTags: [],
-            activeView: null,
-            columnsDef: [],     // pure columns definition
-            filterDef: null,    // pure filter definition
-            tableColumns: [],   // columns prepared for material table
-            isDataDetailsDialogOpened: false,
-            isHistoryDialogOpened: false,
-            isTaskExecutionDialogOpened: false,
-            dataRow: null,
-            dataRowId: 0,
-            history: []
-        }
-    );
+    const {buckets, activeBucket, views, columns, filters, tags, tasks, enums} = accessContext;
+    const [detailsState, setDetailsState] = useState({
+        open: false,
+        dataRow: null,
+    });
+    const [historyState, setHistoryState] = useState({
+        open: false,
+        dataRowId: 0,
+        history: []
+    });
+    // const [taskState, setTaskState] = useState({
+    //     open: false
+    // });
+    const [state, setState] = useState({
+        bucketViews: [],    // all views available for active bucket that user has access
+        bucketTags: [],
+        bucketTasks: [],
+        activeView: null,
+        columnsDef: [],     // pure columns definition
+        filterDef: null,    // pure filter definition
+        tableColumns: [],   // columns prepared for material table
+    });
 
+    // active bucket is changed
     useEffect(() => {
         const bucketViews = getBucketViews(activeBucket, views);
         if (bucketViews.length > 0 && tags != null && enums != null && views != null && columns != null) {
             const bucketTags = getBucketTags(activeBucket, tags);
+            const bucketTasks = getBucketTasks(activeBucket, tasks);
             const lastActiveViewId = activeBucket != null ? getLastActiveView(activeBucket.id) : null;
             const activeView = getActiveView(bucketViews, lastActiveViewId);
             const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
-            const tableColumns = prepareViewColumns(columnsDef, bucketTags, enums);
+            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums);
             const filterDef = filters.filter(f => f.id === activeView.filterId)[0];
             setState({
                 ...state,
                 bucketViews: bucketViews,
                 bucketTags: bucketTags,
+                bucketTasks: bucketTasks,
                 activeView: activeView,
                 columnsDef: columnsDef,
                 filterDef: filterDef,
                 tableColumns: tableColumns
             });
+            reloadData();
         } else
             setState({
                 ...state,
                 bucketViews: [],
                 bucketTags: [],
+                bucketTasks: [],
                 activeView: null,
                 columnsDef: [],
                 filterDef: null,
-                tableColumns: [],
-                isDataDetailsDialogOpened: false,
-                isHistoryDialogOpened: false,
-                isTaskExecutionDialogOpened: false,
-                dataRow: null
+                tableColumns: []
             });
 
     }, [activeBucket, enums, tags, views, columns, filters]);
 
+    // active view is changed
     const onViewSelected = (view) => {
         setLastActiveView(activeBucket.id, view.id);
         const columnsDef = columns.filter(col => col.id === view.columnsId)[0];
         const filterDef = filters.filter(f => f.id === view.filterId)[0];
-        const tableColumns = prepareViewColumns(columnsDef, state.bucketTags, enums);
+        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums);
         setState({
             ...state,
             activeView: view,
@@ -127,11 +132,12 @@ export default function BucketDataTable() {
             filterDef: filterDef,
             tableColumns: tableColumns
         });
+        reloadData();
     }
 
-    const showTaskExecutionEditorDialog = () => {
-        console.log('showTaskExecutionEditorDialog:');
-    }
+    // const showTaskExecutionEditorDialog = () => {
+    //     console.log('showTaskExecutionEditorDialog:');
+    // }
 
     const onOpenDataDetailsDialog = (rowData) => {
         let resultOk = true;
@@ -141,12 +147,12 @@ export default function BucketDataTable() {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                 resultOk = false;
             })
-            .then(result => {
+            .then(dataRow => {
                 if (resultOk) {
-                    setState({
-                        ...state,
-                        dataRow: result,
-                        isDataDetailsDialogOpened: true
+                    setDetailsState({
+                        ...detailsState,
+                        dataRow: dataRow,
+                        open: true
                     });
                 }
             });
@@ -162,10 +168,10 @@ export default function BucketDataTable() {
                     resultOk = false;
                 })
                 .then(() => {
-                    resultOk && refresh();
+                    resultOk && reloadData();
                 });
         }
-        setState({...state, isDataDetailsDialogOpened: false});
+        setDetailsState({...detailsState, open: false});
     }
 
     const onOpenDataHistoryDialog = (rowData) => {
@@ -176,28 +182,40 @@ export default function BucketDataTable() {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                 resultOk = false;
             })
-            .then(result => {
+            .then(resultHistory => {
                 if (resultOk) {
-                    setState({
-                        ...state,
+                    setHistoryState({
+                        ...historyState,
                         dataRowId: rowData.Id,
-                        history: result,
-                        isHistoryDialogOpened: true
+                        history: resultHistory,
+                        open: true
                     });
                 }
             });
     }
 
     const onCloseDataHistoryDialog = () => {
-        setState({...state, isHistoryDialogOpened: false});
+        setHistoryState({...historyState, open: false});
+    }
+
+    const getActiveViewFilterLogic = () => {
+        if (state.activeView.filterId != null) {
+            const filterDef = filters.filter(f => f.id === state.activeView.filterId);
+            if (filterDef.length > 0)
+                return filterDef[0].configuration.logic;
+            else {
+                console.error(`The linked filter (id=${state.activeView.filterId}) doesn't exist in the filter list!`)
+                return null;
+            }
+        } else
+            return null;
     }
 
     const onDataReserve = ({random, number, username}) => {
-        let payload = {conditions: null};
-        if (username !== getUsername()) {
-            console.log(username);
-            payload.targetOwnerUsername = username;
-        }
+        let payload = {
+            targetOwnerUsername: username !== getUsername() ? username : null,
+            logic: getActiveViewFilterLogic()
+        };
 
         let resultOk = true;
         fetch(getDataReserveUrl(activeBucket, number, random), getPostOptions(payload))
@@ -206,9 +224,9 @@ export default function BucketDataTable() {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                 resultOk = false;
             })
-            .then(() => {
-                if (resultOk)
-                    refresh();
+            .then((response) => {
+                if (resultOk && !response.hasOwnProperty("message") && response.message !== 'No data meets the given requirements!')
+                    reloadData();
             });
     }
 
@@ -223,7 +241,11 @@ export default function BucketDataTable() {
                     const leftSource = filter.column.source.endsWith('()') ? 'function' : 'property';
 
                     if (filter.column.type === 'numeric')
-                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                        if (Array.isArray(filter.value)) {
+                            if (filter.value.length > 0)
+                                allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                        } else
+                            allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: '=', right_source: 'const', right_value: parseFloat(filter.value)});
                     else if (filter.column.type === 'boolean')
                         allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: '=', right_source: 'const', right_value: (filter.value === 'checked')});
                     else if (Array.isArray(filter.value))
@@ -234,10 +256,12 @@ export default function BucketDataTable() {
                 } else {
                     if (filter.column.type === 'numeric')
                         if (Array.isArray(filter.value)) {
-                            if (filter.value.length > 0)
-                                allConditions.push({left_source: 'field', left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                            if (filter.value.length > 0) {
+                                const numericList = filter.value.map(value => parseFloat(value));
+                                allConditions.push({left_source: 'field', left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: numericList});
+                            }
                         } else
-                            allConditions.push({left_source: 'field', left_value: filter.column.source, operator: '=', right_source: 'const', right_value: filter.value});
+                            allConditions.push({left_source: 'field', left_value: filter.column.source, operator: '=', right_source: 'const', right_value: parseFloat(filter.value)});
                     else if (filter.column.type === 'boolean')
                         allConditions.push({left_source: 'field', left_value: filter.column.source, operator: '=', right_source: 'const', right_value: (filter.value === 'checked')});
                     else {
@@ -259,139 +283,125 @@ export default function BucketDataTable() {
         return allConditions;
     }
 
-    const refresh = () => {
-        console.log('Refresh');
+    const reloadData = () => {
         tableRef.current !== null && tableRef.current.onQueryChange();
     }
 
-    const getActions = (rowData) => {
+    // const tasksAction = {
+    //     icon: () => <span className="material-icons">edit_note</span>,
+    //     tooltip: 'Task execution',
+    //     isFreeAction: true,
+    //     onClick: () => {
+    //         showTaskExecutionEditorDialog()
+    //     }
+    // };
+
+    const filterAction = {
+        icon: () => filtering ? <FilterList color={'primary'}/> : <FilterList/>,
+        tooltip: 'Enable/disable filter',
+        isFreeAction: true,
+        onClick: () => {
+            setFiltering(!filtering);
+            tableRef.current.state.query.filters.length > 0 && reloadData();
+        }
+    };
+
+    const refreshAction = {
+        icon: () => <Refresh/>,
+        tooltip: 'Refresh',
+        isFreeAction: true,
+        onClick: () => {
+            reloadData();
+        }
+    };
+
+    const detailsAction = {
+        icon: () => <RateReviewOutlined/>,
+        tooltip: 'Data details',
+        onClick: (event, rowData) => {
+            onOpenDataDetailsDialog(rowData);
+        }
+    };
+
+    const historyAction = {
+        icon: () => <History/>,
+        tooltip: 'Data history',
+        onClick: (event, rowData) => {
+            onOpenDataHistoryDialog(rowData);
+        }
+    };
+
+    const getActions = () => {
         let actions = [];
-
-        // if (isFeatureEnabled(FEATURE_RESERVATION, state.activeView))
-        //     actions.push({
-        //         icon: () => <span className="material-icons">add_task</span>,
-        //         tooltip: 'Reserve data',
-        //         isFreeAction: true,
-        //         onClick: () => {
-        //             handleOpenReserveDataDialog()
-        //         }
-        //     });
-
-        if (isFeatureEnabled(FEATURE_TASKS, state.activeView))
-            actions.push({
-                icon: () => <span className="material-icons">edit_note</span>,
-                tooltip: 'Task execution',
-                isFreeAction: true,
-                onClick: () => {
-                    showTaskExecutionEditorDialog()
-                }
-            });
-
-        actions.push({
-            icon: () => <FilterList/>,
-            tooltip: 'Enable/disable filter',
-            isFreeAction: true,
-            onClick: () => setFiltering(!filtering)
-        });
-
-        actions.push({
-            icon: () => <Refresh/>,
-            tooltip: 'Refresh',
-            isFreeAction: true,
-            onClick: () => {
-                refresh();
-            }
-        });
-
-        if (isFeatureEnabled(FEATURE_DETAILS, state.activeView))
-            actions.push({
-                icon: () => <RateReviewOutlined/>,
-                tooltip: 'Data details',
-                onClick: (event, rowData) => {
-                    onOpenDataDetailsDialog(rowData);
-                }
-            });
-
-        if (isFeatureEnabled(FEATURE_HISTORY, state.activeView))
-            actions.push(rowData => ({
-                icon: () => <History/>,
-                tooltip: 'Data history',
-                onClick: (event, rowData) => {
-                    onOpenDataHistoryDialog(rowData);
-                }
-            }));
-
+        actions.push(refreshAction);
+        // if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) actions.push(tasksAction);
+        actions.push(filterAction);
+        if (isFeatureEnabled(FEATURE_DETAILS, state.activeView)) actions.push(detailsAction);
+        if (isFeatureEnabled(FEATURE_HISTORY, state.activeView)) actions.push(historyAction);
         return actions;
     }
+
+    const onRowAddAction = (newData) => new Promise((resolve, reject) => {
+        let resultOk = true;
+        fetch(getDataUrl(activeBucket), getPostOptions(convertDataBeforeAdd(state.tableColumns, newData)))
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                resultOk = false;
+            })
+            .then(() => {
+                resultOk ? resolve() : reject();
+            });
+    });
+
+    const onRowUpdateAction = (newData, oldData) => new Promise((resolve, reject) => {
+        let payload = convertDataBeforeModify(state.tableColumns, newData, oldData);
+        let resultOk = true;
+        if (Object.keys(payload).length > 0) {
+            fetch(getDataByIdUrl(activeBucket, newData.Id), getPutOptions(payload))
+                .then(handleErrors)
+                .catch(error => {
+                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                    resultOk = false;
+                })
+                .then(() => {
+                    resultOk ? resolve() : reject();
+                });
+        } else {
+            setMessageBox({
+                open: true,
+                severity: 'info',
+                title: 'Nothing changed',
+                message: ''
+            });
+            reject();
+        }
+    });
+
+    const onRowDeleteAction = (oldData) => new Promise((resolve, reject) => {
+        let resultOk = true;
+        fetch(getDataByIdUrl(activeBucket, oldData.Id), getDeleteOptions())
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                resultOk = false;
+            })
+            .then(() => {
+                resultOk ? resolve() : reject();
+            });
+    });
 
     const getEditable = () => {
         let editable = {};
 
         if (isFeatureEnabled(FEATURE_CREATION, state.activeView))
-            editable = {
-                ...editable,
-                onRowAdd: newData =>
-                    new Promise((resolve, reject) => {
-                        let resultOk = true;
-                        fetch(getDataUrl(activeBucket), getPostOptions(convertDataBeforeAdd(state.tableColumns, newData)))
-                            .then(handleErrors)
-                            .catch(error => {
-                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                resultOk = false;
-                            })
-                            .then(() => {
-                                resultOk ? resolve() : reject();
-                            });
-                    })
-            };
+            editable = {...editable, onRowAdd: (newData) => onRowAddAction(newData)};
 
         if (isFeatureEnabled(FEATURE_MODIFYING, state.activeView))
-            editable = {
-                ...editable,
-                onRowUpdate: (newData, oldData) =>
-                    new Promise((resolve, reject) => {
-                        let payload = convertDataBeforeModify(state.tableColumns, newData, oldData);
-                        let resultOk = true;
-                        if (Object.keys(payload).length > 0) {
-                            fetch(getDataByIdUrl(activeBucket, newData.Id), getPutOptions(payload))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                    resultOk = false;
-                                })
-                                .then(() => {
-                                    resultOk ? resolve() : reject();
-                                });
-                        } else {
-                            setMessageBox({
-                                open: true,
-                                severity: 'info',
-                                title: 'Nothing changed',
-                                message: ''
-                            });
-                            reject();
-                        }
-
-                    })
-            };
+            editable = {...editable, onRowUpdate: (newData, oldData) => onRowUpdateAction(newData, oldData)};
 
         if (isFeatureEnabled(FEATURE_REMOVAL, state.activeView))
-            editable = {
-                ...editable,
-                onRowDelete: oldData =>
-                    new Promise((resolve, reject) => {
-                        let resultOk = true;
-                        fetch(getDataByIdUrl(activeBucket, oldData.Id), getDeleteOptions())
-                            .then(handleErrors)
-                            .catch(error => {
-                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                resultOk = false;
-                            })
-                            .then(() => {
-                                resultOk ? resolve() : reject();
-                            });
-                    })
-            };
+            editable = {...editable, onRowDelete: oldData => onRowDeleteAction(oldData)};
 
         return editable;
     }
@@ -431,7 +441,8 @@ export default function BucketDataTable() {
 
                                 let payload = {
                                     columns: getFetchColumns(state.tableColumns),
-                                    conditions: consolidateAllConditions(query.search, query.filters)
+                                    conditions: consolidateAllConditions(query.search, query.filters),
+                                    logic: getActiveViewFilterLogic()
                                 }
 
                                 let resultOk = true;
@@ -462,6 +473,7 @@ export default function BucketDataTable() {
                         paginationType: 'stepped',
                         pageSizeOptions: getPageSizeOptionsOnDialog(),
                         actionsColumnIndex: -1,
+                        debounceInterval: 700,
                         sorting: true,
                         selection: false,
                         filtering: filtering,
@@ -519,18 +531,18 @@ export default function BucketDataTable() {
                 />
 
                 <DataDetailsDialog
-                    open={state.isDataDetailsDialogOpened}
-                    dataRow={state.dataRow}
+                    open={detailsState.open}
+                    dataRow={detailsState.dataRow}
                     tags={tags}
                     onChange={(dataRow, changed) => onCloseDataDetailsDialog(dataRow, changed)}
                 />
 
                 <DataHistoryDialog
                     bucket={activeBucket}
-                    dataRowId={state.dataRowId}
-                    history={state.history}
-                    tags={state.tags}
-                    open={state.isHistoryDialogOpened}
+                    dataRowId={historyState.dataRowId}
+                    history={historyState.history}
+                    tags={tags}
+                    open={historyState.open}
                     onClose={() => onCloseDataHistoryDialog()}
                 />
             </div>

@@ -63,6 +63,11 @@ const AccessReducer = (state, action) => {
                 ...state,
                 tags: action.payload
             };
+        case "FETCH_SESSION_ENUMS":
+            return {
+                ...state,
+                enums: action.payload
+            };
         case "FETCH_SESSION_USERS":
             return {
                 ...state,

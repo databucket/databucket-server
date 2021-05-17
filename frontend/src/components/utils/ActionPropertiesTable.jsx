@@ -198,7 +198,7 @@ export default function ActionPropertiesTable(props) {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title={'Modify properties:'}
                 tableRef={tableRef}
                 columns={[

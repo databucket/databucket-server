@@ -45,7 +45,7 @@ export default function ColumnsTable(props) {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title={'Class origin or defined properties:'}
                 tableRef={tableRef}
                 columns={[

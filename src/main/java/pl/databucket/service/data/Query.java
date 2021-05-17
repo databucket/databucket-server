@@ -181,22 +181,26 @@ public class Query {
                 String functionName = sValue.substring(lastDot + 1);
                 switch (functionName) {
                     case "length()":
-                        return "jsonb_array_length(a.properties #> '{" + getPGPropertyArray(fName) + "}')";
+                        return "jsonb_array_length(properties #> '{" + getPGPropertyArray(fName) + "}')";
                     case "isNotNull()":
-                        return "(a.properties #>> '{" + getPGPropertyArray(fName) + "}' is not null)";
+                        return "(properties #>> '{" + getPGPropertyArray(fName) + "}' is not null)";
                     case "isNull()":
-                        return "(a.properties #>> '{" + getPGPropertyArray(fName) + "}' is null)";
+                        return "(properties #>> '{" + getPGPropertyArray(fName) + "}' is null)";
                     case "notExists()":
-                        return "(a.properties #> '{" + getPGPropertyArray(fName) + "}' is null)";
+                        return "(properties #> '{" + getPGPropertyArray(fName) + "}' is null)";
                     case "exists()":
-                        return "(a.properties #> '{" + getPGPropertyArray(fName) + "}' is not null)";
+                        return "(properties #> '{" + getPGPropertyArray(fName) + "}' is not null)";
                     default:
                         return sValue;
                 }
             } else
                 return sValue;
         } else if (sourceType.equals(SourceType.s_property)) {
-            return "properties #> '" + getPGPropertyArray((String) value) + "'";
+            String sValue = (String) value;
+            if (sValue.startsWith("$."))
+                return "properties #> '{" + getPGPropertyArray(sValue) + "}'";
+            else
+                return sValue;
         } else if (sourceType.equals(SourceType.s_field)) {
             return (String) value;
         } else if (sourceType.equals(SourceType.s_const)) {
@@ -238,7 +242,7 @@ public class Query {
 
                 // eg.: 5 in $.jsonArray   >>> v1 @> '[v2]'
             } else if (condition.getRightSource().equals(SourceType.s_property)) {
-                v1 = "a.properties #> '{" + getPGPropertyArray(condition.getRightValue().toString()) + "}'";
+                v1 = "properties #> '{" + getPGPropertyArray(condition.getRightValue().toString()) + "}'";
                 op = "@>";
                 if (condition.getLeftValue() instanceof String) {
                     v2 = "'[\"" + condition.getLeftValue() + "\"]'";
@@ -259,7 +263,7 @@ public class Query {
                     }
                 }
                 op = "@>";
-                v2 = "(a.properties #> '{" + getPGPropertyArray(condition.getLeftValue().toString()) + "}')";
+                v2 = "(properties #> '{" + getPGPropertyArray(condition.getLeftValue().toString()) + "}')";
 
                 // property not used in this condition
             } else {
@@ -275,8 +279,10 @@ public class Query {
                 }
             }
 
-            // LIKE, NOT LIKE, SIMILAR TO, NOT SIMILAR TO, MATCHES, NOT MATCH operator
-        } else if (condition.getOperator().equals(Operator.like)
+
+        }
+        // LIKE, NOT LIKE, SIMILAR TO, NOT SIMILAR TO, MATCHES, NOT MATCH operator
+        else if (condition.getOperator().equals(Operator.like)
                 || condition.getOperator().equals(Operator.notLike)
                 || condition.getOperator().equals(Operator.similarTo)
                 || condition.getOperator().equals(Operator.notSimilarTo)
@@ -288,14 +294,14 @@ public class Query {
             String leftValue, rightValue;
 
             if (condition.getLeftSource().equals(SourceType.s_property))
-                leftValue = "a.properties #>> '{" + getPGPropertyArray((String) condition.getLeftValue()) + "}'";
+                leftValue = "properties #>> '{" + getPGPropertyArray((String) condition.getLeftValue()) + "}'";
             else
-                leftValue = "(a." + condition.getLeftValue() + ")::varchar";
+                leftValue = "(" + condition.getLeftValue() + ")::varchar";
 
             if (condition.getRightSource().equals(SourceType.s_property))
-                rightValue = "a.properties #>> '{" + getPGPropertyArray((String) condition.getRightValue()) + "}'";
+                rightValue = "properties #>> '{" + getPGPropertyArray((String) condition.getRightValue()) + "}'";
             else
-                rightValue = "(a." + condition.getRightValue() + ")::varchar";
+                rightValue = "" + condition.getRightValue();
 
             if (paramMap != null) {
                 v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), leftValue, paramMap);
@@ -308,19 +314,52 @@ public class Query {
             }
         } else {
             if (paramMap != null) {
-                v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
+                if (condition.getLeftSource().equals(SourceType.s_property)) {
+                    if (condition.getRightValue() instanceof Integer)
+                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::int";
+                    else if (condition.getRightValue() instanceof Float)
+                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::float";
+                    else if (condition.getRightValue() instanceof Boolean)
+                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::bool";
+//                    else if (condition.getRightValue() == null)
+//                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text";
+                    else
+                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text";
+                } else
+                    v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
                 op = condition.getOperator().toString();
-                if (condition.getLeftSource().equals(SourceType.s_property) && condition.getRightValue() instanceof Boolean)
-                    v2 = Boolean.toString((boolean) condition.getRightValue());
-                else
-                    v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(),
-                            paramMap);
+                if (condition.getLeftSource().equals(SourceType.s_property)) {
+                    if (condition.getRightValue() == null)
+                        v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), "null", paramMap);
+                    else if (condition.getRightValue() instanceof String)
+                        v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), "\"" + condition.getRightValue() + "\"", paramMap);
+                    else
+                        v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
+                } else
+                    v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
             } else {
-                v1 = getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null);
+                if (condition.getLeftSource().equals(SourceType.s_property)) {
+                    if (condition.getRightValue() instanceof Integer)
+                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::int";
+                    else if (condition.getRightValue() instanceof Float)
+                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::float";
+                    else if (condition.getRightValue() instanceof Boolean)
+                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::bool";
+//                    else if (condition.getRightValue() == null)
+//                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::text";
+                    else
+                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::text";
+                } else
+                    v1 = getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null);
                 op = condition.getOperator().toString();
-                if (condition.getLeftSource().equals(SourceType.s_property) && condition.getRightValue() instanceof Boolean)
-                    v2 = Boolean.toString((boolean) condition.getRightValue());
-                else
+                if (condition.getLeftSource().equals(SourceType.s_property)) {
+                    if (condition.getRightValue() == null)
+                        v2 = getConditionStringValue(null, condition.getRightSource(), "null", null);
+                    else if (condition.getRightValue() instanceof String)
+                        v2 = getConditionStringValue(null, condition.getRightSource(), "\"" + condition.getRightValue() + "\"", null);
+                    else
+                        v2 = getConditionStringValue(null, condition.getRightSource(), condition.getRightValue(), null);
+                } else
                     v2 = getConditionStringValue(null, condition.getRightSource(), condition.getRightValue(), null);
             }
         }
@@ -338,7 +377,7 @@ public class Query {
 
                 switch (functionName) {
                     case "length()":
-                        resultFiled = "jsonb_array_length(properties #> '{" + getPGPropertyArray(filedJsonPath) + "}')";
+                        resultFiled = "coalesce(jsonb_array_length(properties #> '{" + getPGPropertyArray(filedJsonPath) + "}'), 0)";
                         break;
 
                     case "isNotNull()":
@@ -437,14 +476,22 @@ public class Query {
 
     private String convertField(String field) {
         switch (field) {
-            case "id": return COL.DATA_ID;
-            case "tagId": return COL.TAG_ID;
-            case "owner": return COL.RESERVED_BY;
-            case "createdBy": return COL.CREATED_BY;
-            case "createdAt": return COL.CREATED_AT;
-            case "modifiedBy": return COL.MODIFIED_BY;
-            case "modifiedAt": return COL.MODIFIED_AT;
-            default: return field;
+            case "id":
+                return COL.DATA_ID;
+            case "tagId":
+                return COL.TAG_ID;
+            case "owner":
+                return COL.RESERVED_BY;
+            case "createdBy":
+                return COL.CREATED_BY;
+            case "createdAt":
+                return COL.CREATED_AT;
+            case "modifiedBy":
+                return COL.MODIFIED_BY;
+            case "modifiedAt":
+                return COL.MODIFIED_AT;
+            default:
+                return field;
         }
     }
 
@@ -478,7 +525,7 @@ public class Query {
 
     public String convertWithStream(Map<String, Object> map) {
         return map.keySet().stream()
-                .map(key -> key + "=" + map.get(key))
+                .map(key -> key + (map.get(key) != null ? "(" + map.get(key).getClass().getSimpleName() + ")=" : "=") + map.get(key))
                 .collect(Collectors.joining(", ", "{", "}"));
     }
 

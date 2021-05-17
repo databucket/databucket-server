@@ -3,13 +3,13 @@ import {createEnumLookup, createTagLookup} from "../../utils/JsonHelper";
 import LookupIconDialog from "./EditLookupIconDialog";
 import TableDynamicIcon from "../utils/TableDynamicIcon";
 
-export default function prepareViewColumns(columns, tags, enums) {
-    if (columns == null)
-        return [];
-    else
+export default function prepareTableColumns(columns, tags, enums) {
+    if (columns != null)
         return columns.configuration.columns.filter(col => col.enabled).map(col => {
             return prepareColumn(col, columns.configuration.properties, tags, enums);
         });
+    else
+        return [];
 }
 
 const prepareColumn = (column, properties, tags, enums) => {
@@ -106,14 +106,14 @@ const prepareColumn = (column, properties, tags, enums) => {
                         title: property.title,
                         field: property.title,
                         source: property.path,
-                        type: 'numeric',
+                        type: 'string',
                         editable: column.editable,
                         filtering: column.filtering,
                         hidden: column.hidden,
-                        render: rowData => <TableDynamicIcon iconName={getIconName(enumObj.items, rowData[column.field])}/>,
+                        render: rowData => <TableDynamicIcon iconName={getIconName(enumObj.items, rowData[property.title])}/>,
                         editComponent: props =>
                             <LookupIconDialog
-                                selectedIconName={getIconName(enumObj.items, props.rowData[column.field])}
+                                selectedIconName={getIconName(enumObj.items, props.rowData[property.title])}
                                 items={enumObj.items}
                                 onChange={props.onChange}
                             />
@@ -124,7 +124,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                         title: property.title,
                         field: property.title,
                         source: property.path,
-                        type: property.type !== 'select' ? property.type : 'numeric',
+                        type: 'string',
                         editable: column.editable,
                         filtering: column.filtering,
                         hidden: column.hidden,
@@ -156,6 +156,10 @@ export const getBucketTags = (activeBucket, tags) => {
     return tags.filter(tag => (tag.bucketsIds != null && tag.bucketsIds.includes(activeBucket.id)) || (tag.classesIds != null && tag.classesIds.includes(activeBucket.classId)));
 }
 
+export const getBucketTasks = (activeBucket, tasks) => {
+    return tasks.filter(task => (task.bucketsIds != null && task.bucketsIds.includes(activeBucket.id)) || (task.classesIds != null && task.classesIds.includes(activeBucket.classId)));
+}
+
 export const getBucketViews = (activeBucket, views) => {
     if (views != null && activeBucket != null) {
         return views.filter(view => (
@@ -180,11 +184,6 @@ export const getActiveView = (bucketViews, lastActiveViewId) => {
 }
 
 export const convertDataBeforeAdd = (columns, inputDataRow) => {
-    console.log('convertDataBeforeAdd:');
-    console.log("Columns:");
-    console.log(JSON.stringify(columns));
-    console.log("dataRow:");
-    console.log(JSON.stringify(inputDataRow));
     let payload = {properties: {}};
     try {
         for (let key in inputDataRow) {
@@ -201,7 +200,7 @@ export const convertDataBeforeAdd = (columns, inputDataRow) => {
 
                 if (source.startsWith('$')) {
                     const path = source.substring(2);
-                    setJsonValueByPath(path, payload[source], payload.properties);
+                    setJsonValueByPath(path, inputDataRow[key], payload.properties);
                     delete payload[source];
                 }
             }
@@ -213,7 +212,7 @@ export const convertDataBeforeAdd = (columns, inputDataRow) => {
     return payload;
 }
 
-export const convertDataBeforeModify = (columns, newData, oldDataRow) => {
+export const convertDataBeforeModify = (columns, newData, oldData) => {
     const readOnlyColumns = ['id', 'owner', 'createdAt', 'createdBy', 'modifiedAt', 'modifiedBy'];
 
     let payload = {propertiesToSet: {}};
@@ -225,16 +224,16 @@ export const convertDataBeforeModify = (columns, newData, oldDataRow) => {
                 let source = getColumnSource(columns, key);
                 if (readOnlyColumns.indexOf(source) < 0) {
                     const newItem = newData[key];
-                    const oldItem = oldDataRow[key];
+                    const oldItem = oldData[key];
 
                     if (newItem !== oldItem) {
                         const fieldType = getFieldType(columns, key);
                         if (newItem != null) {
                             let value = newItem;
                             if (fieldType === 'numeric')
-                                value = parseInt(newData[key], 10);
+                                value = parseInt(newItem, 10);
                             else if (fieldType === 'datetime' || fieldType === 'date' || fieldType === 'time')
-                                value = toIsoString(newData[key]);
+                                value = toIsoString(newItem);
 
                             if (source.startsWith('$')) {
                                 payload.propertiesToSet[source] = value;

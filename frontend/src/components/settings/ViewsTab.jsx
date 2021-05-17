@@ -36,7 +36,6 @@ import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SelectMultiViewFeaturesLookup from "../lookup/SelectMultiViewFeaturesLookup";
-// import TableIcons from "../utils/TableIcons";
 
 export default function ViewsTab() {
 
@@ -117,7 +116,7 @@ export default function ViewsTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title='Views'
                 tableRef={tableRef}
                 columns={[

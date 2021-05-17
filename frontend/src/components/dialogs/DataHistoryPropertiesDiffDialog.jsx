@@ -12,6 +12,8 @@ import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
+import ReactDiffViewer from "react-diff-viewer";
+import {useTheme} from "@material-ui/core";
 
 const styles = theme => ({
     root: {
@@ -47,6 +49,7 @@ const DialogContent = withStyles(theme => ({
 
 export default function DataHistoryPropertiesDiffDialog(props) {
 
+    const theme = useTheme();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [state, setState] = useState({
         bucket: null,
@@ -69,8 +72,6 @@ export default function DataHistoryPropertiesDiffDialog(props) {
     }, [props.bucket, props.dataRowId, props.history, props.selectedRow]);
 
     const handleClickOpen = () => {
-        console.log("handleClickOpen");
-        console.log(state);
         let oValue = '';
         let nValue = '';
         const previousId = getPreviousId(state.history, state.selectedRow);
@@ -139,14 +140,13 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                     Properties difference
                 </DialogTitle>
                 <DialogContent dividers>
-                    {/*<ReactDiffViewer*/}
-                    {/*    oldValue={state.oldValue}*/}
-                    {/*    newValue={state.newValue}*/}
-                    {/*    splitView={true}*/}
-                    {/*    disableWordDiff={false}*/}
-                    {/*/>*/}
-                    {/*Nowa porównywarka:*/}
-                    {/*https://www.npmjs.com/package/react-diff-view*/}
+                    <ReactDiffViewer
+                        useDarkTheme={theme.palette.type === 'dark'}
+                        oldValue={state.oldValue}
+                        newValue={state.newValue}
+                        splitView={true}
+                        disableWordDiff={false}
+                    />
                 </DialogContent>
                 <MessageBox
                     config={messageBox}

@@ -180,7 +180,7 @@ export default class DataHistoryDialog extends React.Component {
           </DialogTitle>
         <DialogContent dividers>
           <MaterialTable
-            // icons={tableIcons}
+
             // title={this.state.title}
             tableRef={this.tableRef}
             columns={this.state.columns}

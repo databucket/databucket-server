@@ -51,14 +51,14 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
-EditTaskConfigDialog.propTypes = {
+TaskEditConfigDialog.propTypes = {
     configuration: PropTypes.object.isRequired, // actions, properties
     name: PropTypes.string.isRequired,
     dataClass: PropTypes.object,
     onChange: PropTypes.func.isRequired
 }
 
-export default function EditTaskConfigDialog(props) {
+export default function TaskEditConfigDialog(props) {
     const classes = useStyles();
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})

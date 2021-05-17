@@ -30,7 +30,6 @@ import ClassesContext from "../../context/classes/ClassesContext";
 import TagsContext from "../../context/tags/TagsContext";
 import UsersContext from "../../context/users/UsersContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-// import TableIcons from "../utils/TableIcons";
 
 export default function FiltersTab() {
 
@@ -95,7 +94,6 @@ export default function FiltersTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
                 title='Filters'
                 tableRef={tableRef}
                 columns={[

@@ -26,7 +26,6 @@ import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-// import TableIcons from "../utils/TableIcons";
 
 export default function UsersTab() {
 
@@ -72,7 +71,7 @@ export default function UsersTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title='Users'
                 tableRef={tableRef}
                 columns={[

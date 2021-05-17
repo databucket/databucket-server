@@ -18,9 +18,9 @@ const EnumsProvider = props => {
     const fetchEnums = () => {
         fetch(getBaseUrl('enums'), getGetOptions())
             .then(handleErrors)
-            .then(classes => dispatch({
+            .then(enums => dispatch({
                 type: "FETCH_ENUMS",
-                payload: convertNullValuesInCollection(classes, getEnumMapper())
+                payload: convertNullValuesInCollection(enums, getEnumMapper())
             }))
             .catch(err => console.log(err));
     }

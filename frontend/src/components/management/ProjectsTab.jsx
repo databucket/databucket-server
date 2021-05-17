@@ -34,7 +34,6 @@ import {getManageProjectMapper} from "../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-// import TableIcons from "../utils/TableIcons";
 
 export default function ProjectsTab() {
 
@@ -103,7 +102,7 @@ export default function ProjectsTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
+
                 title='Projects'
                 tableRef={tableRef}
                 columns={[

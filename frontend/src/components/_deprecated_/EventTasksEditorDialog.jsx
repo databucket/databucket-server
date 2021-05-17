@@ -193,7 +193,6 @@ export default class EventTasksEditorDialog extends React.Component {
                     </DialogTitle>
                     <DialogContent dividers>
                         <MaterialTable
-                            // icons={tableIcons}
                             title="Task list"
                             tableRef={this.tableRef}
                             columns={this.state.columns}

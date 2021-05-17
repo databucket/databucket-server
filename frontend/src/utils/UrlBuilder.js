@@ -44,6 +44,14 @@ export const getBaseUrl = (endpoint) => {
     return `${origin}/api/${endpoint}`;
 }
 
+export const getSessionUrl = (endpoint) => {
+    return `${origin}/api/session/${endpoint}`;
+}
+
+export const getSessionUrlWithIds = (endpoint, ids) => {
+    return `${origin}/api/session/${endpoint}/${ids}`;
+}
+
 export const getBaseUrlWithIds = (endpoint, ids) => {
     return `${origin}/api/${endpoint}/${ids}`;
 }

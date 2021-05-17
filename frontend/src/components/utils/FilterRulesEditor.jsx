@@ -61,12 +61,10 @@ export default function FilterRulesEditor(props) {
     const renderResult = ({tree, config}) => {
         const pureSql = JSON.stringify(QbUtils.sqlFormat(tree, config));
         if (pureSql != null) {
-            const sql = pureSql.substring(1, pureSql.length - 1);
+            const sql = pureSql.substring(1, pureSql.length - 1).replaceAll("prop.", "").replaceAll("*", ".");
             return (
                 <div style={{margin: '10px'}}>
                     <Typography>{sql}</Typography>
-                    {/*<div>JsonLogic: <pre>{JSON.stringify(QbUtils.jsonLogicFormat(tree, config).logic)}</pre></div>*/}
-                    {/*<div>Json: <pre>{JSON.stringify(tree)}</pre></div>*/}
                 </div>
             );
         } else return (<div/>);

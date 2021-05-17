@@ -155,7 +155,7 @@ class TasksTab extends React.Component {
         return (
             <div>           
             <MaterialTable
-                // icons={tableIcons}
+
                 title='Tasks'
                 tableRef={this.tableRef}
                 columns={this.state.columns}

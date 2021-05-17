@@ -34,7 +34,6 @@ import {
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-// import TableIcons from "../utils/TableIcons";
 
 export default function UsersTab() {
 
@@ -79,7 +78,6 @@ export default function UsersTab() {
     return (
         <div>
             <MaterialTable
-                // icons={TableIcons}
                 title='Users'
                 tableRef={tableRef}
                 columns={[

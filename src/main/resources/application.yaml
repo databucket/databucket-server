@@ -3,7 +3,7 @@ databucket:
 
 jwt:
   secret: veryverysecret
-  expire.hours: 2
+  expire.hours: 24
 
 server:
   port: 8080

@@ -184,7 +184,7 @@ class ColumnsTab extends React.Component {
     render() {
         return (
             <MaterialTable
-                // icons={tableIcons}
+
                 title='Columns'
                 tableRef={this.tableRef}
                 columns={this.state.columns}

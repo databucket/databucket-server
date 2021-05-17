@@ -3,7 +3,8 @@ import AccessContext from "./AccessContext";
 import AccessReducer from "./AccessReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {getBaseUrl, getBaseUrlWithIds} from "../../utils/UrlBuilder";
+import {getBaseUrl, getSessionUrl, getSessionUrlWithIds} from "../../utils/UrlBuilder";
+import {hasAdminRole} from "../../utils/ConfigurationStorage";
 
 
 const AccessProvider = props => {
@@ -19,76 +20,73 @@ const AccessProvider = props => {
         columns: null,
         filters: null,
         tasks: null,
-        tags: null
+        tags: null,
+        enums: null,
+        users: null
     }
 
     const [state, dispatch] = useReducer(AccessReducer, initialState);
 
     const fetchAccessTree = () => {
-        fetch(getBaseUrl('users/access-tree'), getGetOptions())
+        fetch(getSessionUrl('access-tree'), getGetOptions())
             .then(handleErrors)
-            .then(accessTree => dispatch({
-                type: "FETCH_ACCESS_TREE",
-                payload: accessTree
-            }))
+            .then(accessTree => dispatch({type: "FETCH_ACCESS_TREE", payload: accessTree}))
             .catch(err => console.log(err));
     }
 
     const fetchSessionColumns = () => {
         const columnsIds = [...new Set(state.views.map(({columnsId}) => columnsId))];
         if (columnsIds.length > 0)
-            fetch(getBaseUrlWithIds('users/columns', columnsIds), getGetOptions())
+            fetch(getSessionUrlWithIds('columns', columnsIds), getGetOptions())
                 .then(handleErrors)
-                .then(columns => dispatch({
-                    type: "FETCH_SESSION_COLUMNS",
-                    payload: columns
-                }))
+                .then(columns => dispatch({type: "FETCH_SESSION_COLUMNS", payload: columns}))
                 .catch(err => console.log(err));
         else
-            dispatch({
-                type: "FETCH_SESSION_COLUMNS",
-                payload: []
-            })
-
+            dispatch({type: "FETCH_SESSION_COLUMNS", payload: []});
     }
 
     const fetchSessionFilters = () => {
-        const filtersIds = [...new Set(state.views.map(({filterId}) => filterId).filter(id => id != null))];
-        if (filtersIds.length > 0)
-            fetch(getBaseUrlWithIds('users/filters', filtersIds), getGetOptions())
+        const viewFiltersIds = [...new Set(state.views.map(({filterId}) => filterId).filter(id => id != null))];
+        const tasksFiltersIds = [...new Set(state.tasks.map(({filterId}) => filterId).filter(id => id != null))];
+        const filtersIds = [...new Set([...viewFiltersIds, ...tasksFiltersIds])];
+        if (filtersIds.length > 0) {
+            fetch(getSessionUrlWithIds('filters', filtersIds), getGetOptions())
                 .then(handleErrors)
-                .then(filters => dispatch({
-                    type: "FETCH_SESSION_FILTERS",
-                    payload: filters
-                }))
+                .then(filters => dispatch({type: "FETCH_SESSION_FILTERS", payload: filters}))
                 .catch(err => console.log(err));
-        else
-            dispatch({
-                type: "FETCH_SESSION_FILTERS",
-                payload: []
-            })
+        } else
+            dispatch({type: "FETCH_SESSION_FILTERS", payload: []})
     }
 
     const fetchSessionTasks = () => {
-        // TODO find all tasks ids that must be loaded. Temporarily load all.
         fetch(getBaseUrl('tasks'), getGetOptions())
             .then(handleErrors)
-            .then(tasks => dispatch({
-                type: "FETCH_SESSION_TASKS",
-                payload: tasks
-            }))
+            .then(tasks => dispatch({type: "FETCH_SESSION_TASKS", payload: tasks}))
             .catch(err => console.log(err));
     }
 
     const fetchSessionTags = () => {
-        // TODO find all tags ids that must be loaded. Temporarily load all.
         fetch(getBaseUrl('tags'), getGetOptions())
             .then(handleErrors)
-            .then(tags => dispatch({
-                type: "FETCH_SESSION_TAGS",
-                payload: tags
-            }))
+            .then(tags => dispatch({type: "FETCH_SESSION_TAGS", payload: tags}))
             .catch(err => console.log(err));
+    }
+
+    const fetchSessionEnums = () => {
+        fetch(getBaseUrl('enums'), getGetOptions())
+            .then(handleErrors)
+            .then(enums => dispatch({type: "FETCH_SESSION_ENUMS", payload: enums}))
+            .catch(err => console.log(err));
+    }
+
+    const fetchSessionUsers = () => {
+        if (hasAdminRole()) {
+            fetch(getBaseUrl('users'), getGetOptions())
+                .then(handleErrors)
+                .then(users => dispatch({type: "FETCH_SESSION_USERS", payload: users}))
+                .catch(err => console.log(err));
+        } else
+            dispatch({type: "FETCH_SESSION_USERS", payload: []});
     }
 
     const setActiveGroup = (group) => {
@@ -133,6 +131,8 @@ const AccessProvider = props => {
                 filters: state.filters,
                 tasks: state.tasks,
                 tags: state.tags,
+                enums: state.enums,
+                users: state.users,
                 fetchAccessTree,
                 setActiveGroup,
                 setActiveBucket,
@@ -141,7 +141,9 @@ const AccessProvider = props => {
                 fetchSessionColumns,
                 fetchSessionFilters,
                 fetchSessionTasks,
-                fetchSessionTags
+                fetchSessionTags,
+                fetchSessionEnums,
+                fetchSessionUsers
             }
         }>
             {props.children}

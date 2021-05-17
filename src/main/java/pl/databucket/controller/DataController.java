@@ -153,7 +153,7 @@ public class DataController {
             @PathVariable String bucketName,
             @RequestParam(required = false, defaultValue = "1") Optional<Integer> page,
             @RequestParam(required = false, defaultValue = "1") Optional<Integer> limit,
-            @RequestParam(required = false, defaultValue = "data_id") Optional<String> sort,
+            @RequestParam(required = false, defaultValue = "id") Optional<String> sort,
             @RequestBody(required = false) DataGetDto dataGetDto) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -183,10 +183,6 @@ public class DataController {
                 List<Condition> conditions = null;
                 if (dataGetDto != null && dataGetDto.getConditions() != null)
                     conditions = FieldValidator.validateListOfConditions(dataGetDto.getConditions(), true);
-
-//                List<Map<String, Object>> columns = null;
-//                if (dataGetDto != null && dataGetDto.getColumns() != null)
-//                    columns = FieldValidator.validateListOfColumns(dataGetDto.getColumns());
 
                 Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDto.getColumns()), Optional.ofNullable(conditions), page, limit, sort);
 
@@ -233,7 +229,7 @@ public class DataController {
                     conditions = new ArrayList<>();
 
                 String targetOwnerUsername = user.getUsername();
-                if (user.isAdminUser())
+                if (user.isAdminUser() && dataReserveDto.getTargetOwnerUsername() != null)
                     targetOwnerUsername = dataReserveDto.getTargetOwnerUsername();
 
                 List<Long> dataIds = dataService.reserveData(user, bucket, conditions, Optional.of(limit), sort, targetOwnerUsername);

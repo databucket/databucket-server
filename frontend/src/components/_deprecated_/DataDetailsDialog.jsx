@@ -163,7 +163,7 @@ class DataDetailsDialog extends React.Component {
         </DialogTitle>
         <Divider />
         <MaterialTable
-            // icons={tableIcons}
+
             tableRef={this.tableRef}
             columns={this.state.columns}
             data={[this.state.dataRow]}

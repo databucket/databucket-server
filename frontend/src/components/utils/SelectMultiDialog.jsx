@@ -117,7 +117,6 @@ export default function SelectMultiDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <MaterialTable
-                        // icons={TableIcons}
                         title={props.tableTitle != null ? props.tableTitle : '-'}
                         tableRef={tableRef}
                         columns={props.columns}

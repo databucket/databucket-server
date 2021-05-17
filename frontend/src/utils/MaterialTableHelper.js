@@ -59,7 +59,7 @@ export const getDeleteOptions = () => {
 }
 
 export const getPageSizeOptions = () => {
-    return [15, 20, 25, 30, 35, 40, 50];
+    return [10, 15, 20, 25, 30, 35, 40, 50];
 }
 
 export const getPageSizeOptionsOnDialog = () => {
