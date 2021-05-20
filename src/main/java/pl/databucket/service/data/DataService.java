@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import pl.databucket.dto.CustomColumnDto;
-import pl.databucket.dto.DataCreateDto;
-import pl.databucket.dto.DataDto;
-import pl.databucket.dto.DataModifyDto;
+import pl.databucket.dto.*;
 import pl.databucket.entity.Bucket;
 import pl.databucket.entity.User;
 import pl.databucket.exception.ConditionNotAllowedException;
@@ -98,11 +95,10 @@ public class DataService {
         return jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
     }
 
-    public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, Optional<List<Condition>> inConditions, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
+    public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, QueryRule queryRule, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
 
         List<CustomColumnDto> columns = null;
         Map<String, Object> paramMap = new HashMap<>();
-        List<Condition> conditions = new ArrayList<>();
 
         // prepare custom columns
         if (inColumns.isPresent()) {
@@ -123,21 +119,18 @@ public class DataService {
             }
         }
 
-        if (inConditions.isPresent())
-            conditions = inConditions.get();
-
         if (bucket.isProtectedData() && !user.isAdminUser())
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+            queryRule.getConditions().add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
 
         Query queryCount = new Query(bucket.getTableName())
                 .select(COL.COUNT)
                 .from()
-                .where(conditions, paramMap);
+                .where(queryRule, paramMap);
 
         Query queryData = new Query(bucket.getTableName())
                 .selectData(columns)
                 .from()
-                .where(conditions, paramMap)
+                .where(queryRule, paramMap)
                 .orderBy(sort)
                 .limitPage(paramMap, limit, page);
 
@@ -156,18 +149,27 @@ public class DataService {
         return result;
     }
 
-    public int modifyData(User user, Bucket bucket, Optional<List<Long>> dataIdArray, DataModifyDto dataModifyDto) throws IOException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException, ConditionNotAllowedException {
-        List<Condition> conditions = new ArrayList<>();
+    public String getQuery(QueryRule queryRule) throws UnknownColumnException, ConditionNotAllowedException {
+        Map<String, Object> paramMap = new HashMap<>();
+        Query selectQuery = new Query("bucket")
+                .select(COL.COUNT)
+                .from()
+                .where(queryRule, paramMap);
+        return selectQuery.toString(logger, paramMap);
+    }
+
+    public int modifyData(User user, Bucket bucket, Optional<List<Long>> dataIdArray, DataModifyDto dataModifyDto, QueryRule queryRule) throws IOException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException, ConditionNotAllowedException {
+
         if (dataIdArray.isPresent()) {
-            conditions.add(new Condition(COL.DATA_ID, Operator.in, dataIdArray.get()));
+            queryRule.getConditions().add(new Condition(COL.DATA_ID, Operator.in, dataIdArray.get()));
         } else if (dataModifyDto.getConditions() != null) {
             List<Map<String, Object>> bodyConditions = dataModifyDto.getConditions();
             for (Map<String, Object> bodyCondition : bodyConditions)
-                conditions.add(new Condition(bodyCondition));
+                queryRule.getConditions().add(new Condition(bodyCondition));
         }
 
         if (bucket.isProtectedData() && !user.isAdminUser())
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+            queryRule.getConditions().add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
 
         Map<String, Object> paramMap = new HashMap<>();
 
@@ -194,23 +196,23 @@ public class DataService {
                 .update()
                 .set(paramMap)
                 .removeAndSetProperties(!properties, dataModifyDto)
-                .where(conditions, paramMap);
+                .where(queryRule, paramMap);
 
         return this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
     }
 
-    public List<Long> reserveData(User user, Bucket bucket, List<Condition> conditions, Optional<Integer> limit, Optional<String> sort, String targetOwnerUsername) throws UnknownColumnException, ConditionNotAllowedException, UnexpectedException {
+    public List<Long> reserveData(User user, Bucket bucket, QueryRule queryRule, Optional<Integer> limit, Optional<String> sort, String targetOwnerUsername) throws UnknownColumnException, ConditionNotAllowedException, UnexpectedException {
 
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 
         Map<String, Object> paramMap = new HashMap<>();
-        conditions.add(new Condition(COL.RESERVED, Operator.equal, false));
+        queryRule.getConditions().add(new Condition(COL.RESERVED, Operator.equal, false));
 
         Query selectQuery = new Query(bucket.getTableName())
                 .select(COL.DATA_ID)
                 .from()
-                .where(conditions, paramMap)
+                .where(queryRule, paramMap)
                 .orderBy(sort)
                 .limitPage(paramMap, limit, Optional.empty());
 
@@ -279,16 +281,16 @@ public class DataService {
         return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
     }
 
-    public int deleteDataByRules(User user, Bucket bucket, List<Condition> conditions) throws UnknownColumnException, ConditionNotAllowedException {
+    public int deleteDataByRules(User user, Bucket bucket, QueryRule queryRule) throws UnknownColumnException, ConditionNotAllowedException {
         Map<String, Object> paramMap = new HashMap<>();
 
         if (bucket.isProtectedData() && !user.isAdminUser())
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+            queryRule.getConditions().add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
 
         Query query = new Query(bucket.getTableName())
                 .delete()
                 .from()
-                .where(conditions, paramMap);
+                .where(queryRule, paramMap);
 
         return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
     }

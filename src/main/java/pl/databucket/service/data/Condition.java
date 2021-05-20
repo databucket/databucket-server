@@ -22,7 +22,7 @@ public class Condition {
 	}
 	
 	public Condition(String field, Operator operator, Object value) {
-		this.leftSource = field.startsWith("$") ? SourceType.s_property : SourceType.s_field;
+		this.leftSource = field.startsWith("$") ? field.endsWith("()") ? SourceType.s_function : SourceType.s_property : SourceType.s_field;
 		this.leftValue = field;
 		this.operator = operator;
 		this.rightSource = SourceType.s_const;

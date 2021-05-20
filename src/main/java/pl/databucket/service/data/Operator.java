@@ -1,22 +1,28 @@
 package pl.databucket.service.data;
 
 public enum Operator {
-	
+
+	not("!"),
+	and("and"),
+	or("or"),
+
 	equal("="),
+	notEqual("<>"),
 	grater(">"),
 	graterEqual(">="),
 	less("<"),
 	lessEqual("<="),
-	notEqual("<>"),
 
-	in("IN"),
-	notIn("NOT IN"),
+	isNotEmpty("!!"),
 
-	like("LIKE"),
-	notLike("NOT LIKE"),
+	in("in"),
+	notIn("!in"),
 
-	similarTo("SIMILAR TO"),
-	notSimilarTo("NOT SIMILAR TO"),
+	like("like"),
+	notLike("!like"),
+
+	similarTo("similar"),
+	notSimilarTo("!similar"),
 
 	matchesCS("~"),
 	notMatchCS("!~"),
@@ -36,10 +42,20 @@ public enum Operator {
 	
 	public static Operator fromString(String text) {
         for (Operator operator : Operator.values()) {
-            if (operator.symbol.equalsIgnoreCase(text.toUpperCase())) {
+            if (operator.symbol.equalsIgnoreCase(text.toLowerCase().replace("==", "=").replace("!=", "<>"))) {
                 return operator;
             }
         }
         return null;
     }
+
+    public static Operator getInverted(Operator operator) {
+		switch (operator) {
+			case grater: return less;
+			case less: return grater;
+			case graterEqual: return lessEqual;
+			case lessEqual: return graterEqual;
+			default: return null;
+		}
+	}
 }

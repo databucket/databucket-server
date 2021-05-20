@@ -13,11 +13,15 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.AuthDtoRequest;
 import pl.databucket.dto.AuthDtoResponse;
 import pl.databucket.dto.AuthProjectDto;
+import pl.databucket.dto.DataGetDto;
 import pl.databucket.entity.Project;
 import pl.databucket.entity.User;
 import pl.databucket.exception.ExceptionFormatter;
 import pl.databucket.repository.UserRepository;
+import pl.databucket.response.MessageResponse;
 import pl.databucket.security.TokenProvider;
+import pl.databucket.service.data.DataService;
+import pl.databucket.service.data.QueryRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +37,9 @@ public class PublicController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DataService dataService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -153,6 +160,24 @@ public class PublicController {
 
         } catch (AuthenticationException e) {
             return exceptionFormatter.customException(userDto.getUsername(), e, HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    @PostMapping(value = "/query")
+    public ResponseEntity<?> getQuery(@RequestBody(required = false) DataGetDto dataGetDto) {
+        try {
+            return new ResponseEntity<>(new MessageResponse(dataService.getQuery(new QueryRule(dataGetDto))), HttpStatus.OK);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    @PostMapping(value = "/query-rules")
+    public ResponseEntity<?> getQueryRules(@RequestBody(required = false) DataGetDto dataGetDto) {
+        try {
+            return new ResponseEntity<>(new QueryRule(dataGetDto), HttpStatus.OK);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

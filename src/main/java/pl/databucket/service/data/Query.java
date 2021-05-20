@@ -1,6 +1,7 @@
 package pl.databucket.service.data;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -131,17 +132,18 @@ public class Query {
         return this;
     }
 
+    public Query where(QueryRule queryRule, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
+        String rules = generateQueryRulesString("n", queryRule, paramMap);
+        if (rules.length() > 0)
+            query += " WHERE " + rules;
+        return this;
+    }
+
     public Query where(Condition condition, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
         if (condition != null) {
             query += " WHERE " + generateConditionString("n", condition, paramMap);
         }
         return this;
-    }
-
-    public void where(Condition condition) throws UnknownColumnException, ConditionNotAllowedException {
-        if (condition != null) {
-            query += " WHERE " + generateConditionString(null, condition, null);
-        }
     }
 
     public Query where(List<Condition> conditions, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
@@ -154,20 +156,6 @@ public class Query {
                 query += " WHERE " + condStr.substring(0, condStr.length() - " and ".length());
             } else if (conditions.size() > 0)
                 where(conditions.get(0), paramMap);
-        }
-        return this;
-    }
-
-    public Query where(List<Condition> conditions) throws UnknownColumnException, ConditionNotAllowedException {
-        if (conditions != null) {
-            if (conditions.size() > 1) {
-                String condStr = "";
-                for (Condition condition : conditions) {
-                    condStr += generateConditionString(null, condition, null) + " and ";
-                }
-                query += " WHERE " + condStr.substring(0, condStr.length() - " and ".length());
-            } else if (conditions.size() > 0)
-                where(conditions.get(0));
         }
         return this;
     }
@@ -226,7 +214,41 @@ public class Query {
         return null;
     }
 
-    private String generateConditionString(String uniqueName, Condition condition, Map<String, Object> paramMap) throws ConditionNotAllowedException {
+    private String generateQueryRulesString(String uniqueName, QueryRule queryRule, Map<String, Object> paramMap) throws ConditionNotAllowedException, UnknownColumnException {
+        List<String> allConditions = new ArrayList<>();
+
+        if (queryRule.getConditions().size() > 0)
+            if (queryRule.getConditions().size() > 1)
+                for (int i = 0; i < queryRule.getConditions().size(); i++)
+                    allConditions.add(generateConditionString(uniqueName + i, queryRule.getConditions().get(i), paramMap));
+            else {
+                if (queryRule.getOperator().equals(Operator.not))
+                    allConditions.add("not(" + generateConditionString(uniqueName + 0, queryRule.getConditions().get(0), paramMap) + ")");
+                else
+                    allConditions.add(generateConditionString(uniqueName + 0, queryRule.getConditions().get(0), paramMap));
+            }
+
+        if (queryRule.getQueryRules().size() > 0) {
+            if (queryRule.getQueryRules().size() > 1) {
+                List<String> qrConditions = new ArrayList<>();
+                for (int i = 0; i < queryRule.getQueryRules().size(); i++) {
+                    QueryRule qr = queryRule.getQueryRules().get(i);
+                    qrConditions.add(generateQueryRulesString(uniqueName + i, qr, paramMap));
+                }
+                allConditions.add("(" + String.join(" " + queryRule.getOperator().toString() + " ", qrConditions) + ")");
+            } else {
+                QueryRule qr = queryRule.getQueryRules().get(0);
+                if (queryRule.getOperator().equals(Operator.not))
+                    allConditions.add("not(" + generateQueryRulesString(uniqueName + 0, qr, paramMap) + ")");
+                else
+                    allConditions.add(generateQueryRulesString(uniqueName + 0, qr, paramMap));
+            }
+        }
+
+        return String.join(" " + queryRule.getOperator().toString() + " ", allConditions);
+    }
+
+    private String generateConditionString(String uniqueName, Condition condition, Map<String, Object> paramMap) throws ConditionNotAllowedException, UnknownColumnException {
         String sFormat = "%s %s %s";
         String v1;
         String op;
@@ -268,19 +290,12 @@ public class Query {
                 // property not used in this condition
             } else {
                 sFormat = "%s %s (%s)";
-                if (paramMap != null) {
-                    v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
-                    op = condition.getOperator().toString();
-                    v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
-                } else {
-                    v1 = getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null);
-                    op = condition.getOperator().toString();
-                    v2 = getConditionStringValue(null, condition.getRightSource(), condition.getRightValue(), null);
-                }
+                v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
+                op = condition.getOperator().toString();
+                v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
             }
-
-
         }
+
         // LIKE, NOT LIKE, SIMILAR TO, NOT SIMILAR TO, MATCHES, NOT MATCH operator
         else if (condition.getOperator().equals(Operator.like)
                 || condition.getOperator().equals(Operator.notLike)
@@ -303,65 +318,40 @@ public class Query {
             else
                 rightValue = "" + condition.getRightValue();
 
-            if (paramMap != null) {
-                v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), leftValue, paramMap);
-                op = condition.getOperator().toString();
-                v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), rightValue, paramMap);
-            } else {
-                v1 = getConditionStringValue(null, condition.getLeftSource(), leftValue, null);
-                op = condition.getOperator().toString();
-                v2 = getConditionStringValue(null, condition.getRightSource(), rightValue, null);
-            }
+
+            v1 = getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap);
+            op = condition.getOperator().toString();
+            v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), rightValue, paramMap);
+
         } else {
-            if (paramMap != null) {
-                if (condition.getLeftSource().equals(SourceType.s_property)) {
-                    if (condition.getRightValue() instanceof Integer)
-                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::int";
-                    else if (condition.getRightValue() instanceof Float)
-                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::float";
-                    else if (condition.getRightValue() instanceof Boolean)
-                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::bool";
-//                    else if (condition.getRightValue() == null)
-//                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text";
-                    else
-                        v1 = "(" + getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text";
+            if (condition.getLeftSource().equals(SourceType.s_property)) {
+                if (condition.getRightValue() instanceof Integer)
+                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::int";
+                else if (condition.getRightValue() instanceof Float)
+                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::float";
+                else if (condition.getRightValue() instanceof Boolean)
+                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::bool";
+                else if (isValidDate((String) condition.getRightValue()) != null) {
+                    Timestamp date = isValidDate((String) condition.getRightValue());
+                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text::timestamp";
                 } else
-                    v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
-                op = condition.getOperator().toString();
-                if (condition.getLeftSource().equals(SourceType.s_property)) {
-                    if (condition.getRightValue() == null)
-                        v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), "null", paramMap);
-                    else if (condition.getRightValue() instanceof String)
-                        v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), "\"" + condition.getRightValue() + "\"", paramMap);
-                    else
-                        v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
-                } else
-                    v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
-            } else {
-                if (condition.getLeftSource().equals(SourceType.s_property)) {
-                    if (condition.getRightValue() instanceof Integer)
-                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::int";
-                    else if (condition.getRightValue() instanceof Float)
-                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::float";
-                    else if (condition.getRightValue() instanceof Boolean)
-                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::bool";
-//                    else if (condition.getRightValue() == null)
-//                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::text";
-                    else
-                        v1 = "(" + getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null) + ")::text";
-                } else
-                    v1 = getConditionStringValue(null, condition.getLeftSource(), condition.getLeftValue(), null);
-                op = condition.getOperator().toString();
-                if (condition.getLeftSource().equals(SourceType.s_property)) {
-                    if (condition.getRightValue() == null)
-                        v2 = getConditionStringValue(null, condition.getRightSource(), "null", null);
-                    else if (condition.getRightValue() instanceof String)
-                        v2 = getConditionStringValue(null, condition.getRightSource(), "\"" + condition.getRightValue() + "\"", null);
-                    else
-                        v2 = getConditionStringValue(null, condition.getRightSource(), condition.getRightValue(), null);
-                } else
-                    v2 = getConditionStringValue(null, condition.getRightSource(), condition.getRightValue(), null);
-            }
+                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text";
+            } else if (condition.getLeftSource().equals(SourceType.s_function)) {
+                v1 = "(" + getField((String) condition.getLeftValue()) + ")";
+            } else
+                v1 = getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap);
+
+            op = condition.getOperator().toString();
+
+            if (condition.getLeftSource().equals(SourceType.s_property)) {
+                if (condition.getRightValue() == null)
+                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "null", paramMap);
+                else if (condition.getRightValue() instanceof String)
+                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "\"" + condition.getRightValue() + "\"", paramMap);
+                else
+                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), condition.getRightValue(), paramMap);
+            } else
+                v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), condition.getRightValue(), paramMap);
         }
 
         return String.format(sFormat, v1, op, v2);
@@ -369,7 +359,7 @@ public class Query {
 
     private String getField(String fieldName) throws UnknownColumnException {
         if (fieldName.startsWith("$.")) {
-            if (fieldName.endsWith(")")) {
+            if (fieldName.endsWith("()")) {
                 int lastDot = fieldName.lastIndexOf('.');
                 String filedJsonPath = fieldName.substring(0, lastDot);
                 String functionName = fieldName.substring(lastDot + 1);
@@ -381,19 +371,15 @@ public class Query {
                         break;
 
                     case "isNotNull()":
+                    case "exists()":
+                    case "isNotEmpty()":
                         resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is not null";
                         break;
 
                     case "isNull()":
-                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is null";
-                        break;
-
                     case "notExists()":
-                        resultFiled = "properties #> '{" + getPGPropertyArray(filedJsonPath) + "}' is null";
-                        break;
-
-                    case "exists()":
-                        resultFiled = "properties #> '{" + getPGPropertyArray(filedJsonPath) + "}' is not null";
+                    case "isEmpty()":
+                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is null";
                         break;
 
                     default:
@@ -428,7 +414,7 @@ public class Query {
     }
 
     private java.sql.Timestamp isValidDate(String inDate) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setLenient(false);
         try {
             return new java.sql.Timestamp(dateFormat.parse(inDate.trim()).getTime());

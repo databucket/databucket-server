@@ -10,16 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.dto.*;
 import pl.databucket.entity.Tag;
 import pl.databucket.response.MessageResponse;
-import pl.databucket.service.data.Condition;
-import pl.databucket.service.data.FieldValidator;
+import pl.databucket.service.data.*;
 import pl.databucket.entity.Bucket;
 import pl.databucket.entity.User;
 import pl.databucket.exception.*;
 import pl.databucket.response.DataResponse;
 import pl.databucket.service.BucketService;
-import pl.databucket.service.data.DataService;
 import pl.databucket.service.UserService;
-import pl.databucket.service.data.ResultField;
 
 import java.util.*;
 
@@ -82,7 +79,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, ids, dataModifyDto);
+                int count = dataService.modifyData(user, bucket, ids, dataModifyDto, new QueryRule(dataModifyDto));
 
                 return new ResponseEntity<>(new MessageResponse("Number of modified data: " + count), HttpStatus.OK);
             } else
@@ -163,28 +160,18 @@ public class DataController {
         try {
             DataResponse response = new DataResponse();
 
-            if (page.isPresent()) {
-                FieldValidator.mustBeGraterThen0("page", page.get());
+            if (page.isPresent())
                 response.setPage(page.get());
-            }
 
-            if (limit.isPresent()) {
-                FieldValidator.mustBeGraterOrEqual0("limit", limit.get());
+            if (limit.isPresent())
                 response.setLimit(limit.get());
-            }
 
-            if (sort.isPresent()) {
-                FieldValidator.validateSort(sort.get());
+            if (sort.isPresent())
                 response.setSort(sort.get());
-            }
 
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                List<Condition> conditions = null;
-                if (dataGetDto != null && dataGetDto.getConditions() != null)
-                    conditions = FieldValidator.validateListOfConditions(dataGetDto.getConditions(), true);
-
-                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDto.getColumns()), Optional.ofNullable(conditions), page, limit, sort);
+                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDto.getColumns()), new QueryRule(dataGetDto), page, limit, sort);
 
                 long total = (long) result.get(ResultField.TOTAL);
                 response.setTotal(total);
@@ -222,17 +209,11 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                List<Condition> conditions;
-                if (dataReserveDto != null && dataReserveDto.getConditions() != null)
-                    conditions = FieldValidator.validateListOfConditions(dataReserveDto.getConditions(), false);
-                else
-                    conditions = new ArrayList<>();
-
                 String targetOwnerUsername = user.getUsername();
                 if (user.isAdminUser() && dataReserveDto.getTargetOwnerUsername() != null)
                     targetOwnerUsername = dataReserveDto.getTargetOwnerUsername();
 
-                List<Long> dataIds = dataService.reserveData(user, bucket, conditions, Optional.of(limit), sort, targetOwnerUsername);
+                List<Long> dataIds = dataService.reserveData(user, bucket, new QueryRule(dataReserveDto), Optional.of(limit), sort, targetOwnerUsername);
                 if (dataIds != null && dataIds.size() == 1) {
                     DataDto dataDto = dataService.getData(user, bucket, dataIds.get(0));
                     return new ResponseEntity<>(dataDto, HttpStatus.OK);
@@ -260,9 +241,8 @@ public class DataController {
 
         try {
             User user = userService.getCurrentUser();
-            List<Condition> conditions = FieldValidator.validateListOfConditions(dataRemoveDto.getConditions(), false);
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.deleteDataByRules(user, bucket, conditions);
+                int count = dataService.deleteDataByRules(user, bucket, new QueryRule(dataRemoveDto));
                 return new ResponseEntity<>(new MessageResponse("Number of removed data: " + count), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);

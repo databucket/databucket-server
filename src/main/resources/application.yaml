@@ -1,6 +1,3 @@
-databucket:
-  title: Databucket
-
 jwt:
   secret: veryverysecret
   expire.hours: 24
