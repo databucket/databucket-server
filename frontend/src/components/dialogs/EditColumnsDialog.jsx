@@ -146,7 +146,7 @@ export default function EditColumnsDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent dividers style={{height:'75vh'}}>
                     {activeTab === 0 && <ColumnsTable columns={columns} properties={properties} onChange={setColumns}/>}
                     {activeTab === 1 && <PropertiesTable used={getUsedUuids()} data={properties} onChange={setProperties} title={'Class origin and defined properties:'}/>}
                 </DialogContent>

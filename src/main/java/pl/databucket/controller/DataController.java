@@ -66,7 +66,7 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @PutMapping(value = "/{ids}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = {"", "/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
             @PathVariable String bucketName,
             @PathVariable Optional<List<Long>> ids,
@@ -80,13 +80,14 @@ public class DataController {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
                 int count = dataService.modifyData(user, bucket, ids, dataModifyDto, new QueryRule(dataModifyDto));
-
-                return new ResponseEntity<>(new MessageResponse("Number of modified data: " + count), HttpStatus.OK);
+                return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("is not present in table \"tags\""))
                 return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDto.getTagId()), HttpStatus.NOT_ACCEPTABLE);
+            else if (e.getMessage().contains("cannot cast jsonb null"))
+                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
                 return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
@@ -135,7 +136,7 @@ public class DataController {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
                 int count = dataService.deleteDataByIds(user, bucket, ids);
-                return new ResponseEntity<>(new MessageResponse("Number of removed data: " + count), HttpStatus.OK);
+                return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (Exception ee) {
@@ -160,13 +161,13 @@ public class DataController {
         try {
             DataResponse response = new DataResponse();
 
-            if (page.isPresent())
+            if (page.isPresent() && limit.get() > 0)
                 response.setPage(page.get());
 
             if (limit.isPresent())
                 response.setLimit(limit.get());
 
-            if (sort.isPresent())
+            if (sort.isPresent() && limit.get() > 0)
                 response.setSort(sort.get());
 
             User user = userService.getCurrentUser();
@@ -176,18 +177,24 @@ public class DataController {
                 long total = (long) result.get(ResultField.TOTAL);
                 response.setTotal(total);
 
-                if (page.isPresent() && limit.isPresent()) {
+                if (page.isPresent() && limit.isPresent() && limit.get() > 0) {
                     response.setTotalPages((int) Math.ceil(total / (float) limit.get()));
                 }
 
-                response.setData(result.get(ResultField.DATA));
+                if (limit.get() > 0)
+                    response.setData(result.get(ResultField.DATA));
 
                 if (response.getData() == null && limit.get() > 0)
-                    return new ResponseEntity<>(new MessageResponse("No data meets the given requirements!"), HttpStatus.OK);
+                    return new ResponseEntity<>(new MessageResponse("No data matches the rules!"), HttpStatus.OK);
                 else
                     return new ResponseEntity<>(response, HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("cannot cast jsonb null"))
+                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
+            else
+                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
@@ -220,9 +227,14 @@ public class DataController {
                 } else if (dataIds != null && dataIds.size() > 1) {
                     return new ResponseEntity<>(dataIds, HttpStatus.OK);
                 } else
-                    return new ResponseEntity<>(new MessageResponse("No data meets the given requirements!"), HttpStatus.OK);
+                    return new ResponseEntity<>(new MessageResponse("No data matches the rules!"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("cannot cast jsonb null"))
+                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
+            else
+                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
@@ -243,9 +255,14 @@ public class DataController {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
                 int count = dataService.deleteDataByRules(user, bucket, new QueryRule(dataRemoveDto));
-                return new ResponseEntity<>(new MessageResponse("Number of removed data: " + count), HttpStatus.OK);
+                return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("cannot cast jsonb null"))
+                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
+            else
+                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }

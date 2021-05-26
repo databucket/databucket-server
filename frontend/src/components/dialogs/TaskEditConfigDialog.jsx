@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {makeStyles, withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -16,6 +16,7 @@ import {getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "
 import Tab from "@material-ui/core/Tab";
 import TaskActions from "../utils/TaskActions";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
+import TagsContext from "../../context/tags/TagsContext";
 
 
 const styles = (theme) => ({
@@ -52,6 +53,7 @@ const DialogContent = withStyles((theme) => ({
 }))(MuiDialogContent);
 
 TaskEditConfigDialog.propTypes = {
+    rowData: PropTypes.object.isRequired,
     configuration: PropTypes.object.isRequired, // actions, properties
     name: PropTypes.string.isRequired,
     dataClass: PropTypes.object,
@@ -59,12 +61,34 @@ TaskEditConfigDialog.propTypes = {
 }
 
 export default function TaskEditConfigDialog(props) {
+
     const classes = useStyles();
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})
     const [open, setOpen] = useState(false);
     const [actions, setActions] = useState(props.configuration.actions);
     const [properties, setProperties] = useState(null);
+    const tagsContext = useContext(TagsContext);
+    const {tags, fetchTags} = tagsContext;
+    const [filteredTags, setFilteredTags] = useState(null);
+
+    useEffect(() => {
+        if (tags == null)
+            fetchTags();
+    }, [tags, fetchTags]);
+
+    useEffect(() => {
+        const fTags = tags.filter(tag =>
+            (Array.isArray(tag.bucketsIds) && Array.isArray(props.rowData.bucketsIds) && tag.bucketsIds.some(item => props.rowData.bucketsIds.includes(item))) ||
+            (tag.classesIds != null && tag.classesIds.includes(parseInt(props.rowData.classId, 10)))
+        );
+        setFilteredTags(fTags);
+    }, [tags, props.rowData]);
+
+    useEffect(() => {
+        if (tags == null)
+            fetchTags();
+    }, [tags, fetchTags]);
 
     useEffect(() => {
         setProperties(mergeProperties(props.configuration.properties, props.dataClass));
@@ -121,9 +145,25 @@ export default function TaskEditConfigDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers>
-                    {open && activeTab === 0 && <TaskActions actions={actions} properties={properties} onChange={setActions}/>}
-                    {open && activeTab === 1 && <PropertiesTable used={getUsedUuids()} data={properties} onChange={setProperties} title={'Class origin and defined properties:'}/>}
+                <DialogContent dividers style={{height:'75vh'}}>
+                    {open && activeTab === 0 &&
+                    <TaskActions
+                        actions={actions}
+                        properties={properties}
+                        tags={filteredTags}
+                        onChange={setActions}
+                        pageSize={null}
+                        customHeight={20}
+                    />}
+                    {open && activeTab === 1 &&
+                    <PropertiesTable
+                        used={getUsedUuids()}
+                        data={properties}
+                        onChange={setProperties}
+                        title={'Class origin and defined properties:'}
+                        pageSize={null}
+                        customTableWidth={5}
+                    />}
                 </DialogContent>
             </Dialog>
             <MessageBox

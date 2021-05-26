@@ -47,15 +47,36 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.sessionManagement().invalidSessionUrl("/");
+
         http.cors().and().csrf().disable().
                 authorizeRequests()
-                .antMatchers("/api/public/**", "/static/**", "/", "/favicon.ico").permitAll()
+                .antMatchers("/", "/api/public/**", "/**/static/**", "/**/favicon.ico").permitAll()
+                // need to be redirect in case browser refreshing
+                .antMatchers(
+                        "/login",
+                        "/change-password",
+                        "/project",
+                        "/project/settings/teams",
+                        "/project/settings/users",
+                        "/project/settings/classes",
+                        "/project/settings/enums",
+                        "/project/settings/groups",
+                        "/project/settings/buckets",
+                        "/project/settings/tags",
+                        "/project/settings/columns",
+                        "/project/settings/filters",
+                        "/project/settings/views",
+                        "/project/settings/tasks",
+                        "/management/projects",
+                        "/management/users"
+                        ).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http
-                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean

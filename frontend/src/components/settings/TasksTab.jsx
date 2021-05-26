@@ -88,7 +88,6 @@ export default function TasksTab() {
     return (
         <div>
             <MaterialTable
-
                 title='Tasks'
                 tableRef={tableRef}
                 columns={[
@@ -104,10 +103,11 @@ export default function TasksTab() {
                         filtering: false,
                         searchable: false,
                         sorting: false,
-                        initialEditValue: {properties: [], actions: { type: 'remove', setTag: false, tagId: 0, setSock: false, lock: false, properties: [] }},
+                        initialEditValue: {properties: [], actions: { type: 'remove', setTag: false, tagId: 0, setReserved: false, reserved: false, properties: [] }},
                         render: rowData => getActionsType(rowData.configuration.actions),
                         editComponent: props => (
                             <TaskEditConfigDialog
+                                rowData={props.rowData}
                                 configuration={props.rowData.configuration}
                                 name={props.rowData.name != null ? props.rowData.name : ''}
                                 dataClass={getClassById(classes, props.rowData.classId)}

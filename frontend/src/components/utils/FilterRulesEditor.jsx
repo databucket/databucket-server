@@ -2,10 +2,10 @@ import PropTypes from "prop-types";
 import React, {useContext, useEffect, useState} from 'react';
 import './awesome-query-builder-styles.css';
 import {Query, Builder, Utils as QbUtils} from 'react-awesome-query-builder';
-import InitialConfig from 'react-awesome-query-builder/lib/config/material';
 import EnumsContext from "../../context/enums/EnumsContext";
 import Typography from "@material-ui/core/Typography";
 import PropertiesTable, {mergeProperties} from "./PropertiesTable";
+import {createConfig, getInitialTree} from "./QueryBuilderHelper";
 
 FilterRulesEditor.propTypes = {
     activeTab: PropTypes.number.isRequired,
@@ -16,15 +16,15 @@ FilterRulesEditor.propTypes = {
     onChange: PropTypes.func.isRequired
 }
 
-const getInitialTree = (loadedInitLogic, tree, config) => {
-    if (tree && Object.keys(tree).length > 0) {
-        return QbUtils.loadTree(tree);
-    } else if (loadedInitLogic && Object.keys(loadedInitLogic).length > 0) {
-        return QbUtils.loadFromJsonLogic(loadedInitLogic, config);
-    } else {
-        return QbUtils.loadTree({id: QbUtils.uuid(), type: "group"});
-    }
-}
+// const getInitialTree = (loadedInitLogic, tree, config) => {
+//     if (tree && Object.keys(tree).length > 0) {
+//         return QbUtils.loadTree(tree);
+//     } else if (loadedInitLogic && Object.keys(loadedInitLogic).length > 0) {
+//         return QbUtils.loadFromJsonLogic(loadedInitLogic, config);
+//     } else {
+//         return QbUtils.loadTree({id: QbUtils.uuid(), type: "group"});
+//     }
+// }
 
 export default function FilterRulesEditor(props) {
 
@@ -100,132 +100,132 @@ export default function FilterRulesEditor(props) {
     );
 };
 
-const createConfig = (propFields, tags, users, dataClass, enums) => {
-    let fields = {};
+// const createConfig = (propFields, tags, users, dataClass, enums) => {
+//     let fields = {};
+//
+//     if (propFields != null && propFields.length > 0)
+//         fields['prop'] = buildPropertiesFields(propFields, dataClass, enums);
+//
+//     const userList = reduceUsersToList(users);
+//     const tagList = reduceTagsToList(tags);
+//
+//     fields['dataId'] = dataId;
+//     if (tagList.length > 0)
+//         fields['tagId'] = tagId(tagList);
+//     fields['reserved'] = reserved;
+//     fields['owner'] = owner(userList);
+//     properties['properties'] = properties;
+//     fields['createdBy'] = createdBy(userList);
+//     fields['createdAt'] = createdAt;
+//     fields['modifiedBy'] = modifiedBy(userList);
+//     fields['modifiedAt'] = modifiedAt;
+//
+//     return {...InitialConfig, fields: fields};
+// };
 
-    if (propFields != null && propFields.length > 0)
-        fields['prop'] = buildPropertiesFields(propFields, dataClass, enums);
+// const reduceUsersToList = (fullUserList) => {
+//     return fullUserList.map(({username}) => ({value: username, title: username}));
+// }
+//
+// const reduceTagsToList = (fullTagList) => {
+//     return fullTagList.map(({id, name}) => ({value: id, title: name}));
+// }
 
-    const userList = reduceUsersToList(users);
-    const tagList = reduceTagsToList(tags);
+// const buildPropertiesFields = (propFields, dataClass, enums) => {
+//     let subfields = {}
+//     propFields.forEach(field => {
+//         let subfield = {
+//             label: field.title,
+//             type: field.type.replace('string', 'text').replace('numeric', 'number')
+//         };
+//
+//         if (subfield.type === 'select') {
+//             const list = enums.find(e => e.id === field.enumId).items.map(item => ({value: item.value, title: item.text}));
+//             subfield['fieldSettings'] = {listValues: list};
+//             subfield['valueSources'] = ["value"];
+//         }
+//
+//         if (subfield.type === 'text')
+//             subfield['excludeOperators'] = ["proximity"];
+//
+//         subfields[field.path.replace(".", "*")] = subfield;
+//     });
+//
+//     return {
+//         label: "Properties",
+//         type: "!struct",
+//         subfields: subfields
+//     };
+// }
 
-    fields['dataId'] = dataId;
-    if (tagList.length > 0)
-        fields['tagId'] = tagId(tagList);
-    fields['reserved'] = reserved;
-    fields['owner'] = owner(userList);
-    properties['properties'] = properties;
-    fields['createdBy'] = createdBy(userList);
-    fields['createdAt'] = createdAt;
-    fields['modifiedBy'] = modifiedBy(userList);
-    fields['modifiedAt'] = modifiedAt;
+// const dataId = {
+//     label: 'Id',
+//     type: 'number',
+//     fieldSettings: {min: 0},
+//     preferWidgets: ['number']
+// };
+//
+// const tagId = (tagList) => {
+//     return {
+//         label: 'Tag',
+//         type: 'select',
+//         fieldSettings: {
+//             listValues: tagList
+//         },
+//         // valueSources: ["value"]
+//     }
+// };
 
-    return {...InitialConfig, fields: fields};
-};
+// const reserved = {
+//     label: 'Reserved',
+//     type: 'boolean'
+// }
+//
+// const owner = (userList) => {
+//     return {
+//         label: 'Owner',
+//         type: 'select',
+//         fieldSettings: {
+//             listValues: userList
+//         },
+//         // valueSources: ["value"]
+//     }
+// }
 
-const reduceUsersToList = (fullUserList) => {
-    return fullUserList.map(({username}) => ({value: username, title: username}));
-}
+// const properties = {
+//     label: 'Properties',
+//     type: 'text',
+//     excludeOperators: ["proximity"]
+// }
+//
+// const createdAt = {
+//     label: 'Created at',
+//     type: 'datetime'
+// }
+//
+// const createdBy = (userList) => {
+//     return {
+//         label: 'Created by',
+//         type: 'select',
+//         fieldSettings: {
+//             listValues: userList
+//         },
+//         // valueSources: ["value"]
+//     }
+// }
 
-const reduceTagsToList = (fullTagList) => {
-    return fullTagList.map(({id, name}) => ({value: id, title: name}));
-}
+// const modifiedAt = {
+//     label: 'Modified at',
+//     type: 'datetime'
+// }
 
-const buildPropertiesFields = (propFields, dataClass, enums) => {
-    let subfields = {}
-    propFields.forEach(field => {
-        let subfield = {
-            label: field.title,
-            type: field.type.replace('string', 'text').replace('numeric', 'number')
-        };
-
-        if (subfield.type === 'select') {
-            const list = enums.find(e => e.id === field.enumId).items.map(item => ({value: item.value, title: item.text}));
-            subfield['fieldSettings'] = {listValues: list};
-            subfield['valueSources'] = ["value"];
-        }
-
-        if (subfield.type === 'text')
-            subfield['excludeOperators'] = ["proximity"];
-
-        subfields[field.path.replace(".", "*")] = subfield;
-    });
-
-    return {
-        label: "Properties",
-        type: "!struct",
-        subfields: subfields
-    };
-}
-
-const dataId = {
-    label: 'Id',
-    type: 'number',
-    fieldSettings: {min: 0},
-    preferWidgets: ['number']
-};
-
-const tagId = (tagList) => {
-    return {
-        label: 'Tag',
-        type: 'select',
-        fieldSettings: {
-            listValues: tagList
-        },
-        // valueSources: ["value"]
-    }
-};
-
-const reserved = {
-    label: 'Reserved',
-    type: 'boolean'
-}
-
-const owner = (userList) => {
-    return {
-        label: 'Owner',
-        type: 'select',
-        fieldSettings: {
-            listValues: userList
-        },
-        // valueSources: ["value"]
-    }
-}
-
-const properties = {
-    label: 'Properties',
-    type: 'text',
-    excludeOperators: ["proximity"]
-}
-
-const createdAt = {
-    label: 'Created at',
-    type: 'datetime'
-}
-
-const createdBy = (userList) => {
-    return {
-        label: 'Created by',
-        type: 'select',
-        fieldSettings: {
-            listValues: userList
-        },
-        // valueSources: ["value"]
-    }
-}
-
-const modifiedAt = {
-    label: 'Modified at',
-    type: 'datetime'
-}
-
-const modifiedBy = (userList) => {
-    return {
-        label: 'Modified by',
-        type: 'select',
-        fieldSettings: {
-            listValues: userList
-        },
-        // valueSources: ["value"]
-    }
-}
+// const modifiedBy = (userList) => {
+//     return {
+//         label: 'Modified by',
+//         type: 'select',
+//         fieldSettings: {
+//             listValues: userList
+//         },
+//         // valueSources: ["value"]
+//     }
+// }

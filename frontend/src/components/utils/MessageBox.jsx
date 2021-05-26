@@ -24,15 +24,7 @@ export const MessageBox = (props) => {
                 }}
                 open={props.config.open}
                 onClose={props.onClose}
-                autoHideDuration={9000}
-                // message={props.message}
-                // action={
-                //     <React.Fragment>
-                //         <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
-                //             <CloseIcon fontSize="small" />
-                //         </IconButton>
-                //     </React.Fragment>
-                // }
+                autoHideDuration={7000}
             >
                 <Alert severity={props.config.severity}>
                     <AlertTitle>{props.config.title}</AlertTitle>

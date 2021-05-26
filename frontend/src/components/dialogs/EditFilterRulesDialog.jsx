@@ -135,7 +135,7 @@ export default function EditFilterRulesDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent dividers style={{height:'75vh'}}>
                     {open &&
                     <FilterRulesEditor
                         activeTab={activeTab}

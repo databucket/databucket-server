@@ -39,4 +39,12 @@ public class ExceptionFormatter {
         return new ResponseEntity<>(response, status);
     }
 
+    public ResponseEntity<Map<String, Object>> customException(String message, HttpStatus status) {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        logger.warn("[" + userName + "] " + message);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        return new ResponseEntity<>(response, status);
+    }
+
 }

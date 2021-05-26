@@ -110,9 +110,9 @@ public class BucketService {
                 + "reserved_by character varying(50) DEFAULT NULL,"
                 + "properties jsonb NOT NULL DEFAULT '{}'::jsonb,"
                 + "created_by character varying(50) NOT NULL,"
-                + "created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
+                + "created_at timestamp without time zone NOT NULL DEFAULT current_timestamp,"
                 + "modified_by character varying(50),"
-                + "modified_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
+                + "modified_at timestamp without time zone NOT NULL DEFAULT current_timestamp,"
                 + "PRIMARY KEY (data_id),"
                 + "CONSTRAINT fk_tag_id FOREIGN KEY(tag_id) REFERENCES tags(tag_id))";
 
@@ -126,7 +126,7 @@ public class BucketService {
                 + "tag_id smallint DEFAULT NULL,"
                 + "reserved boolean DEFAULT NULL,"
                 + "properties jsonb DEFAULT NULL,"
-                + "modified_at timestamp with time zone NOT NULL DEFAULT current_timestamp,"
+                + "modified_at timestamp without time zone NOT NULL DEFAULT current_timestamp,"
                 + "modified_by character varying(50),"
                 + "PRIMARY KEY (id),"
                 + "CONSTRAINT fk_tag_h_id FOREIGN KEY(data_id) REFERENCES \"" + bucket.getTableName() + "\"(data_id))";

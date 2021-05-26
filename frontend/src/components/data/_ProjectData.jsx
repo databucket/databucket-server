@@ -45,7 +45,7 @@ import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularP
 const drawerWidth = 240;
 
 export default function ProjectData() {
-    const classes = useStyles();
+    const styleClasses = useStyles();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const theme = useTheme();
     const [open, setOpen] = useState(isLeftPanelOpen());
@@ -55,6 +55,7 @@ export default function ProjectData() {
         fetchAccessTree,
         projects,
         views,
+        fetchSessionClasses,
         columns, fetchSessionColumns,
         filters, fetchSessionFilters,
         fetchSessionTags,
@@ -80,6 +81,10 @@ export default function ProjectData() {
         if (views != null && tasks != null && filters == null)
             fetchSessionFilters();
     }, [views, tasks]);
+
+    useEffect(() => {
+        fetchSessionClasses();
+    }, []);
 
     useEffect(() => {
         fetchSessionTags();
@@ -134,11 +139,11 @@ export default function ProjectData() {
 
     return (
         <div>
-            <div className={classes.root}>
+            <div className={styleClasses.root}>
                 <AppBar
                     position="fixed"
-                    className={clsx(classes.appBar, {
-                        [classes.appBarShift]: open,
+                    className={clsx(styleClasses.appBar, {
+                        [styleClasses.appBarShift]: open,
                     })}
                     style={{background: getAppBarBackgroundColor()}}
                 >
@@ -148,8 +153,8 @@ export default function ProjectData() {
                             aria-label="open drawer"
                             onClick={handleDrawerOpen}
                             edge="start"
-                            className={clsx(classes.menuButton, {
-                                [classes.hide]: open,
+                            className={clsx(styleClasses.menuButton, {
+                                [styleClasses.hide]: open,
                             })}
                         >
                             <MenuIcon/>
@@ -161,18 +166,18 @@ export default function ProjectData() {
                 </AppBar>
                 <Drawer
                     variant="permanent"
-                    className={clsx(classes.drawer, {
-                        [classes.drawerOpen]: open,
-                        [classes.drawerClose]: !open,
+                    className={clsx(styleClasses.drawer, {
+                        [styleClasses.drawerOpen]: open,
+                        [styleClasses.drawerClose]: !open,
                     })}
                     classes={{
                         paper: clsx({
-                            [classes.drawerOpen]: open,
-                            [classes.drawerClose]: !open,
+                            [styleClasses.drawerOpen]: open,
+                            [styleClasses.drawerClose]: !open,
                         }),
                     }}
                 >
-                    <div className={classes.toolbar}>
+                    <div className={styleClasses.toolbar}>
                         <IconButton onClick={handleDrawerClose}>
                             {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
                         </IconButton>
@@ -180,7 +185,7 @@ export default function ProjectData() {
                     <Divider/>
                     <GroupMenuSelector open={open}/>
                     <BucketListSelector/>
-                    <div className={classes.grow}/>
+                    <div className={styleClasses.grow}/>
                     <Divider/>
                     <List>
                         <InfoDialog/>
@@ -202,8 +207,8 @@ export default function ProjectData() {
                         }
                     </List>
                 </Drawer>
-                <main className={classes.content}>
-                    <div className={classes.toolbar}/>
+                <main className={styleClasses.content}>
+                    <div className={styleClasses.toolbar}/>
                     <BucketDataTable/>
                 </main>
             </div>

@@ -26,7 +26,7 @@ import {
     FEATURE_CREATION,
     FEATURE_REMOVAL,
     FEATURE_RESERVATION,
-    FEATURE_EXPORT
+    FEATURE_EXPORT, FEATURE_TASKS
 } from "../utils/ViewFeatures";
 import prepareTableColumns, {
     convertDataBeforeAdd,
@@ -48,6 +48,7 @@ import {MessageBox} from "../utils/MessageBox";
 import DataDetailsDialog from "../dialogs/DataDetailsDialog";
 import DataHistoryDialog from "../dialogs/DataHistoryDialog";
 import ReserveDataDialog from "../dialogs/ReserveDataDialog";
+import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
@@ -70,9 +71,9 @@ export default function BucketDataTable() {
         dataRowId: 0,
         history: []
     });
-    // const [taskState, setTaskState] = useState({
-    //     open: false
-    // });
+    const [taskState, setTaskState] = useState({
+        open: false
+    });
     const [state, setState] = useState({
         bucketViews: [],    // all views available for active bucket that user has access
         bucketTags: [],
@@ -135,13 +136,21 @@ export default function BucketDataTable() {
         reloadData();
     }
 
-    // const showTaskExecutionEditorDialog = () => {
-    //     console.log('showTaskExecutionEditorDialog:');
-    // }
+    const onOpenTaskExecutionEditorDialog = () => {
+        setTaskState({...taskState, open: true});
+    }
+
+    const onCloseTaskExecutionEditorDialog = () => {
+        setTaskState({...taskState, open: false});
+    }
+
+    const getRowDataId = (rowData) => {
+        return rowData['Id'];
+    }
 
     const onOpenDataDetailsDialog = (rowData) => {
         let resultOk = true;
-        fetch(getDataByIdUrl(activeBucket, rowData.Id), getGetOptions())
+        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)), getGetOptions())
             .then(handleErrors)
             .catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
@@ -176,7 +185,7 @@ export default function BucketDataTable() {
 
     const onOpenDataHistoryDialog = (rowData) => {
         let resultOk = true;
-        fetch(getDataHistoryUrl(activeBucket, rowData.Id), getGetOptions())
+        fetch(getDataHistoryUrl(activeBucket, getRowDataId(rowData)), getGetOptions())
             .then(handleErrors)
             .catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
@@ -186,7 +195,7 @@ export default function BucketDataTable() {
                 if (resultOk) {
                     setHistoryState({
                         ...historyState,
-                        dataRowId: rowData.Id,
+                        dataRowId: getRowDataId(rowData),
                         history: resultHistory,
                         open: true
                     });
@@ -212,8 +221,10 @@ export default function BucketDataTable() {
     }
 
     const onDataReserve = ({random, number, username}) => {
+        const query = tableRef.current.state.query;
         let payload = {
             targetOwnerUsername: username !== getUsername() ? username : null,
+            conditions: consolidateAllConditions(query.search, query.filters),
             logic: getActiveViewFilterLogic()
         };
 
@@ -225,8 +236,11 @@ export default function BucketDataTable() {
                 resultOk = false;
             })
             .then((response) => {
-                if (resultOk && !response.hasOwnProperty("message") && response.message !== 'No data meets the given requirements!')
-                    reloadData();
+                if (resultOk)
+                    if (response.hasOwnProperty("message"))
+                        setMessageBox({open: true, severity: 'info', title: 'Info', message: response.message});
+                    else
+                        reloadData();
             });
     }
 
@@ -272,14 +286,6 @@ export default function BucketDataTable() {
             }
         }
 
-        // TODO: convert new filter into old structure
-        // if (state.view.filter_id !== null) {
-        //     let viewFiltersArray = this.state.filters.filter(d => (d.filter_id === this.state.view.filter_id));
-        //     let viewFilters = viewFiltersArray[0];
-        //     let viewFiltersString = JSON.stringify(viewFilters.conditions).replace('@currentUser', window.USER);
-        //     allConditions = allConditions.concat(JSON.parse(viewFiltersString));
-        // }
-
         return allConditions;
     }
 
@@ -287,14 +293,14 @@ export default function BucketDataTable() {
         tableRef.current !== null && tableRef.current.onQueryChange();
     }
 
-    // const tasksAction = {
-    //     icon: () => <span className="material-icons">edit_note</span>,
-    //     tooltip: 'Task execution',
-    //     isFreeAction: true,
-    //     onClick: () => {
-    //         showTaskExecutionEditorDialog()
-    //     }
-    // };
+    const tasksAction = {
+        icon: () => <span className="material-icons">edit_note</span>,
+        tooltip: 'Task execution',
+        isFreeAction: true,
+        onClick: () => {
+            onOpenTaskExecutionEditorDialog()
+        }
+    };
 
     const filterAction = {
         icon: () => filtering ? <FilterList color={'primary'}/> : <FilterList/>,
@@ -334,7 +340,7 @@ export default function BucketDataTable() {
     const getActions = () => {
         let actions = [];
         actions.push(refreshAction);
-        // if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) actions.push(tasksAction);
+        if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) actions.push(tasksAction);
         actions.push(filterAction);
         if (isFeatureEnabled(FEATURE_DETAILS, state.activeView)) actions.push(detailsAction);
         if (isFeatureEnabled(FEATURE_HISTORY, state.activeView)) actions.push(historyAction);
@@ -358,7 +364,7 @@ export default function BucketDataTable() {
         let payload = convertDataBeforeModify(state.tableColumns, newData, oldData);
         let resultOk = true;
         if (Object.keys(payload).length > 0) {
-            fetch(getDataByIdUrl(activeBucket, newData.Id), getPutOptions(payload))
+            fetch(getDataByIdUrl(activeBucket, getRowDataId(newData)), getPutOptions(payload))
                 .then(handleErrors)
                 .catch(error => {
                     setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
@@ -380,7 +386,7 @@ export default function BucketDataTable() {
 
     const onRowDeleteAction = (oldData) => new Promise((resolve, reject) => {
         let resultOk = true;
-        fetch(getDataByIdUrl(activeBucket, oldData.Id), getDeleteOptions())
+        fetch(getDataByIdUrl(activeBucket, getRowDataId(oldData)), getDeleteOptions())
             .then(handleErrors)
             .catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
@@ -544,6 +550,13 @@ export default function BucketDataTable() {
                     tags={tags}
                     open={historyState.open}
                     onClose={() => onCloseDataHistoryDialog()}
+                />
+
+                <TaskExecutionDialog
+                    bucket={activeBucket}
+                    open={taskState.open}
+                    onClose={onCloseTaskExecutionEditorDialog}
+                    reload={reloadData}
                 />
             </div>
         );

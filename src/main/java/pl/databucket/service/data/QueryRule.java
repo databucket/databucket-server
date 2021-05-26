@@ -69,8 +69,8 @@ public class QueryRule {
                         else if (items.size() == 3) {  // between
                             String field = convertJsonLogicVariable(items.get(1));
                             Operator invertedOperator = Operator.getInverted(operator);
-                            localConditions.add(new Condition(field, operator, items.get(0)));
-                            localConditions.add(new Condition(field, invertedOperator, items.get(2)));
+                            localConditions.add(new Condition(field, invertedOperator, items.get(0)));
+                            localConditions.add(new Condition(field, operator, items.get(2)));
                         } else
                             throw new UnsupportedOperationException("Unexpected number of arguments (" + items.size() + ") for this operator " + operator.name());
                 }

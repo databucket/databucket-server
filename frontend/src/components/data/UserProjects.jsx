@@ -13,7 +13,7 @@ export default function UserProjects(props) {
     const accessContext = useContext(AccessContext);
     const {projects} = accessContext;
 
-    document.title = projects != null ? 'Databucket - ' + projects.find(project => project.id === getActiveProjectId()).name : 'Databucket';
+    document.title = (projects != null && projects.length > 0) ? 'Databucket - ' + projects.find(project => project.id === getActiveProjectId()).name : 'Databucket';
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);

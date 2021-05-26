@@ -10,8 +10,15 @@ import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/Conf
 import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
 import {useWindowDimension} from "./UseWindowDimension";
-// import TableIcons from "./TableIcons";
+import PropTypes from "prop-types";
 
+PropertiesTable.propTypes = {
+    data: PropTypes.array.isRequired,
+    title: PropTypes.string,
+    pageSize: PropTypes.number,
+    customTableWidth: PropTypes.number,
+    onChange: PropTypes.func.isRequired
+};
 
 export default function PropertiesTable(props) {
 
@@ -60,7 +67,6 @@ export default function PropertiesTable(props) {
     return (
         <div>
             <MaterialTable
-
                 title={props.title}
                 tableRef={tableRef}
                 columns={[
@@ -98,8 +104,8 @@ export default function PropertiesTable(props) {
                 data={data}
                 onChangeRowsPerPage={onChangeRowsPerPage}
                 options={{
-                    paging: true,
-                    pageSize: pageSize,
+                    paging: props.pageSize != null,
+                    pageSize: props.pageSize != null ? props.pageSize : pageSize,
                     paginationType: 'stepped',
                     pageSizeOptions: getPageSizeOptionsOnDialog(),
                     actionsColumnIndex: -1,
@@ -108,8 +114,8 @@ export default function PropertiesTable(props) {
                     filtering: false,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getPropertiesTableHeight(height, 10),
-                    minBodyHeight: getPropertiesTableHeight(height, 10),
+                    maxBodyHeight: getPropertiesTableHeight(height, props.customTableWidth != null ? props.customTableWidth : 5),
+                    minBodyHeight: getPropertiesTableHeight(height, props.customTableWidth != null ? props.customTableWidth : 5),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

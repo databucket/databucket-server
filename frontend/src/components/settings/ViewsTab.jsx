@@ -116,7 +116,6 @@ export default function ViewsTab() {
     return (
         <div>
             <MaterialTable
-
                 title='Views'
                 tableRef={tableRef}
                 columns={[

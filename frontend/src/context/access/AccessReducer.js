@@ -58,6 +58,11 @@ const AccessReducer = (state, action) => {
                 ...state,
                 tasks: action.payload
             };
+        case "FETCH_SESSION_CLASSES":
+            return {
+                ...state,
+                classes: action.payload
+            };
         case "FETCH_SESSION_TAGS":
             return {
                 ...state,

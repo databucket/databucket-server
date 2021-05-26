@@ -51,11 +51,18 @@ export const getPutOptions = (payload) => {
     });
 }
 
-export const getDeleteOptions = () => {
-    return ({
-        method: 'DELETE',
-        headers: fetchHelper(getToken())
-    });
+export const getDeleteOptions = (payload) => {
+    if (payload != null)
+        return ({
+            method: 'DELETE',
+            body: reverseMapping(payload),
+            headers: fetchHelper(getToken())
+        });
+    else
+        return ({
+            method: 'DELETE',
+            headers: fetchHelper(getToken())
+        });
 }
 
 export const getPageSizeOptions = () => {
@@ -201,6 +208,11 @@ export const getDialogTableHeight = (height, custom) => {
 }
 
 export const getPropertiesTableHeight = (height, custom) => {
+    const tableHeight = ((height - 64 - 64 - 143) / height * 100).toFixed(2) - custom;
+    return `${tableHeight}vh`;
+}
+
+export const getTaskPropertiesTableHeight = (height, custom) => {
     const tableHeight = ((height - 64 - 64 - 143) / height * 100).toFixed(2) - custom;
     return `${tableHeight}vh`;
 }

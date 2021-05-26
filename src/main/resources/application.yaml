@@ -11,7 +11,8 @@ spring:
     hibernate.ddl-auto: update
     open-in-view: true
     properties:
-      hibernate.ejb.interceptor: pl.databucket.tenant.EntityInterceptor
+      hibernate.session_factory.interceptor: pl.databucket.tenant.EntityInterceptor
+#      hibernate.ejb.interceptor: pl.databucket.tenant.EntityInterceptor
 
 #  jackson:
 #    serialization:

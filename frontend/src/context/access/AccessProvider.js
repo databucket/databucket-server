@@ -19,6 +19,7 @@ const AccessProvider = props => {
         views: null,
         columns: null,
         filters: null,
+        classes: null,
         tasks: null,
         tags: null,
         enums: null,
@@ -56,6 +57,13 @@ const AccessProvider = props => {
                 .catch(err => console.log(err));
         } else
             dispatch({type: "FETCH_SESSION_FILTERS", payload: []})
+    }
+
+    const fetchSessionClasses = () => {
+        fetch(getBaseUrl('classes'), getGetOptions())
+            .then(handleErrors)
+            .then(classes => dispatch({type: "FETCH_SESSION_CLASSES", payload: classes}))
+            .catch(err => console.log(err));
     }
 
     const fetchSessionTasks = () => {
@@ -129,6 +137,7 @@ const AccessProvider = props => {
                 views: state.views,
                 columns: state.columns,
                 filters: state.filters,
+                classes: state.classes,
                 tasks: state.tasks,
                 tags: state.tags,
                 enums: state.enums,
@@ -140,6 +149,7 @@ const AccessProvider = props => {
                 removeTab,
                 fetchSessionColumns,
                 fetchSessionFilters,
+                fetchSessionClasses,
                 fetchSessionTasks,
                 fetchSessionTags,
                 fetchSessionEnums,

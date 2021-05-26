@@ -49,6 +49,7 @@ public class DataService {
             paramMap.addValue(COL.TAG_ID, dataCreateDto.getTagId());
 
         paramMap.addValue(COL.CREATED_BY, user.getUsername());
+        paramMap.addValue(COL.MODIFIED_BY, user.getUsername());
         if (dataCreateDto.getReserved() != null) {
             paramMap.addValue(COL.RESERVED, dataCreateDto.getReserved());
             if (dataCreateDto.getReserved())
@@ -177,6 +178,7 @@ public class DataService {
             paramMap.put(COL.TAG_ID, dataModifyDto.getTagId());
 
         paramMap.put(COL.MODIFIED_BY, user.getUsername());
+        paramMap.put(COL.MODIFIED_AT, new java.sql.Timestamp(new java.util.Date().getTime()));
 
         if (dataModifyDto.getReserved() != null) {
             paramMap.put(COL.RESERVED, dataModifyDto.getReserved());

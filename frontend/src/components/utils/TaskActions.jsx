@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React from "react";
 import FormControl from "@material-ui/core/FormControl";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -8,61 +8,48 @@ import Checkbox from "@material-ui/core/Checkbox";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import PropTypes from "prop-types";
-import TagsContext from "../../context/tags/TagsContext";
 import ActionPropertiesTable from "./ActionPropertiesTable";
 
 TaskActions.propTypes = {
     actions: PropTypes.object,
     properties: PropTypes.array,
-    onChange: PropTypes.func.isRequired
+    tags: PropTypes.array,
+    onChange: PropTypes.func.isRequired,
+    customHeight: PropTypes.number,
+    pageSize: PropTypes.number
 }
 
 export default function TaskActions(props) {
 
-    const tagsContext = useContext(TagsContext);
-    const {tags, fetchTags} = tagsContext;
-    const [actions, setActions] = useState(props.actions);
-
-    useEffect(() => {
-        if (tags == null)
-            fetchTags();
-    }, [tags, fetchTags]);
-
     const handleActionTypeChange = (event) => {
-        setActions({...actions, type: event.target.value})
-        props.onChange({...actions, type: event.target.value});
+        props.onChange({...props.actions, type: event.target.value});
     }
 
     const handleActionSetTag = (event) => {
-        setActions({...actions, setTag: event.target.checked, tagId: tags[0].id});
-        props.onChange({...actions, setTag: event.target.checked, tagId: tags[0].id});
+        props.onChange({...props.actions, setTag: event.target.checked, tagId: props.tags[0].id});
     }
 
     const handleActionSetLock = (event) => {
-        setActions({...actions, setLock: event.target.checked});
-        props.onChange({...actions, setLock: event.target.checked});
+        props.onChange({...props.actions, setReserved: event.target.checked});
     }
 
-    const handleActionLockChange = (event) => {
-        setActions({...actions, lock: (event.target.value === 'true')});
-        props.onChange({...actions, lock: (event.target.value === 'true')});
+    const handleActionReserveChange = (event) => {
+        props.onChange({...props.actions, reserved: (event.target.value === 'true')});
     }
 
     const handleTagChange = (event) => {
-        setActions({...actions, tagId: event.target.value});
-        props.onChange({...actions, tagId: event.target.value});
+        props.onChange({...props.actions, tagId: event.target.value});
     }
 
     const onActionPropertiesChange = (updatedProperties) => {
-        setActions({...actions, properties: updatedProperties});
-        props.onChange({...actions, properties: updatedProperties});
+        props.onChange({...props.actions, properties: updatedProperties});
     }
 
     return (
         <div>
-            <div style={{marginLeft: '30px', marginTop: '20px'}}>
+            <div style={{marginLeft: '20px', marginTop: '10px'}}>
                 <FormControl component="fieldset">
-                    <RadioGroup row value={actions.type} onChange={handleActionTypeChange}>
+                    <RadioGroup row value={props.actions.type || ''} onChange={handleActionTypeChange}>
                         <FormControlLabel
                             value="remove"
                             control={<Radio/>}
@@ -74,15 +61,15 @@ export default function TaskActions(props) {
                             label="Modify data"
                         />
                     </RadioGroup>
-                    {actions.type === 'modify' &&
+                    {props.actions.type === 'modify' &&
                     <div>
-                        {tags != null && tags.length > 0 &&
+                        {props.tags != null && props.tags.length > 0 &&
                         <FormGroup row>
                             <FormControlLabel
                                 label="Set tag"
-                                control={<Checkbox checked={actions.setTag} onChange={handleActionSetTag}/>}
+                                control={<Checkbox checked={props.actions.setTag || false} onChange={handleActionSetTag}/>}
                             />
-                            {actions.setTag === true &&
+                            {props.actions.setTag === true &&
                             <FormControlLabel
                                 label=''
                                 labelPlacement="start"
@@ -90,9 +77,9 @@ export default function TaskActions(props) {
                                     <Select
                                         id="tag-select"
                                         onChange={handleTagChange}
-                                        value={actions.tagId}
+                                        value={props.actions.tagId}
                                     >
-                                        {tags.map(tag => (
+                                        {props.tags.map(tag => (
                                             <MenuItem key={tag.id} value={tag.id}>
                                                 {tag.name}
                                             </MenuItem>
@@ -106,10 +93,10 @@ export default function TaskActions(props) {
                         <FormGroup row>
                             <FormControlLabel
                                 label="Set reserved"
-                                control={<Checkbox checked={actions.setLock} onChange={handleActionSetLock}/>}
+                                control={<Checkbox checked={props.actions.setReserved || false} onChange={handleActionSetLock}/>}
                             />
-                            {actions.setLock === true &&
-                            <RadioGroup row value={actions.lock} onChange={handleActionLockChange}>
+                            {props.actions.setReserved === true &&
+                            <RadioGroup row value={props.actions.reserved || false} onChange={handleActionReserveChange}>
                                 <FormControlLabel
                                     value={true}
                                     control={<Radio/>}
@@ -127,11 +114,13 @@ export default function TaskActions(props) {
                     }
                 </FormControl>
             </div>
-            {actions.type === 'modify' &&
+            {props.actions.type === 'modify' &&
             <ActionPropertiesTable
-                data={actions.properties}
+                data={props.actions.properties}
                 properties={props.properties}
                 onChange={onActionPropertiesChange}
+                pageSize={props.pageSize}
+                customHeight={props.customHeight}
             />
             }
         </div>
