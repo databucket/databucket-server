@@ -1,9 +1,19 @@
-databucket:
-  title: Databucket
+jwt:
+  secret: veryverysecret
+  expire.hours: 24
 
 server:
   port: 8080
   servlet.context-path: /
 
 spring:
-  jpa.hibernate.ddl-auto: none
+  jpa:
+    hibernate.ddl-auto: update
+    open-in-view: true
+    properties:
+      hibernate.session_factory.interceptor: pl.databucket.tenant.EntityInterceptor
+#      hibernate.ejb.interceptor: pl.databucket.tenant.EntityInterceptor
+
+#  jackson:
+#    serialization:
+#      fail-on-empty-beans: false
