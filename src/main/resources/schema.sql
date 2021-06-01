@@ -1,5 +1,22 @@
 
-CREATE OR REPLACE FUNCTION before_delete() RETURNS trigger AS '
+CREATE OR REPLACE FUNCTION jsonb_merge(IN orig jsonb, IN delta jsonb) RETURNS jsonb AS '
+select
+	jsonb_object_agg(
+		coalesce(keyOrig, keyDelta),
+		case
+			when valOrig isnull then valDelta
+			when valDelta isnull then valOrig
+			when (jsonb_typeof(valOrig) <> ''object'' or jsonb_typeof(valDelta) <> ''object'') then valDelta
+			else jsonb_merge(valOrig, valDelta)
+		end
+	)
+from jsonb_each(orig) e1(keyOrig, valOrig)
+full join jsonb_each(delta) e2(keyDelta, valDelta) on keyOrig = keyDelta;
+' LANGUAGE sql;
+
+
+CREATE
+OR REPLACE FUNCTION before_delete() RETURNS trigger AS '
 DECLARE
     this_query text;
 BEGIN
@@ -8,7 +25,9 @@ BEGIN
 END;
 ' LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION after_insert() RETURNS trigger AS '
+
+CREATE
+OR REPLACE FUNCTION after_insert() RETURNS trigger AS '
 DECLARE
     this_query text;
 BEGIN
@@ -17,7 +36,9 @@ BEGIN
 END;
 ' LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION after_update() RETURNS trigger AS '
+
+CREATE
+OR REPLACE FUNCTION after_update() RETURNS trigger AS '
 DECLARE
     this_query text;
 	insert_changes boolean;

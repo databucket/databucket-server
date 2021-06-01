@@ -11,6 +11,37 @@ import java.util.*;
 
 public class ServiceUtils {
 
+    public void convertPropertiesColumns(List<Map<String, Object>> source) {
+        for (Map<String, Object> map : source) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                if (entry.getValue() != null && entry.getValue() instanceof PGobject) {
+                    String value = ((PGobject) entry.getValue()).getValue();
+                    if (value.startsWith("\"") && value.endsWith("\"")) {
+                        entry.setValue(value.substring(1, value.length() - 1));
+                    } else if (value.equals("true")) {
+                        entry.setValue(true);
+                    } else if (value.equals("false")) {
+                        entry.setValue(false);
+                    } else if (value.equals("null")) {
+                        entry.setValue(null);
+                    } else {
+                        try {
+                            Integer integerValue = Integer.parseInt(value);
+                            entry.setValue(integerValue);
+                        } catch (NumberFormatException e1) {
+                            try {
+                                Double doubleValue = Double.parseDouble(value);
+                                entry.setValue(doubleValue);
+                            } catch (NumberFormatException e2) {
+                                // do nothing
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public void convertStringToMap(List<Map<String, Object>> source, String targetItemName) throws UnexpectedException {
         try {
             ObjectMapper mapper = new ObjectMapper();

@@ -1,3 +1,11 @@
+jwt:
+  secret: veryverysecret
+  expire.hours: 24
+
+server:
+  port: 8080
+  servlet.context-path: /
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/databucket

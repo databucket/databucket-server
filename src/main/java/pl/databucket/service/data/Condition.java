@@ -48,12 +48,12 @@ public class Condition {
 	}
 	
 	public Condition(Map<String, Object> conditionMap) {
-		this.leftSource = SourceType.fromString((String) conditionMap.get(C.LEFT_SOURCE));
-		this.operator = Operator.fromString((String) conditionMap.get(C.OPERATOR));
-		this.rightSource = SourceType.fromString((String) conditionMap.get(C.RIGHT_SOURCE));
+		this.leftSource = SourceType.fromString((String) conditionMap.get(Constants.LEFT_SOURCE));
+		this.operator = Operator.fromString((String) conditionMap.get(Constants.OPERATOR));
+		this.rightSource = SourceType.fromString((String) conditionMap.get(Constants.RIGHT_SOURCE));
 		
-		this.leftValue = convertToColumnName(conditionMap.get(C.LEFT_VALUE));
-		this.rightValue = convertToColumnName(conditionMap.get(C.RIGHT_VALUE));
+		this.leftValue = convertToColumnName(conditionMap.get(Constants.LEFT_VALUE));
+		this.rightValue = convertToColumnName(conditionMap.get(Constants.RIGHT_VALUE));
 				
 		if ((operator.equals(Operator.in) || operator.equals(Operator.notIn)) && rightSource.equals(SourceType.s_const) && !(rightValue instanceof List)) {
 			String rValue = (String) rightValue;
