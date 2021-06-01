@@ -25,7 +25,7 @@ function SimpleDialog(props) {
 
     return (
         <Dialog
-            maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onClose={handleClose}
             aria-labelledby="simple-dialog-title"
             {...other}
@@ -34,7 +34,7 @@ function SimpleDialog(props) {
                 {iconsNames.map((iName, key) => (
                     <Tooltip title={iName} key={key}>
                         <IconButton onClick={() => handleItemClick(iName)}>
-                            <span className="material-icons" style={{fontSize: 34}}>{iName}</span>
+                            <span className="material-icons" style={{fontSize: 29}}>{iName}</span>
                         </IconButton>
                     </Tooltip>
                 ))}

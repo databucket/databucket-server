@@ -1,6 +1,7 @@
 package pl.databucket.service.data;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DeadlockLoserDataAccessException;
@@ -25,6 +26,7 @@ import pl.databucket.service.ServiceUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -141,6 +143,7 @@ public class DataService {
 
         if (inColumns.isPresent()) {
             List<Map<String, Object>> dataList = jdbcTemplate.queryForList(queryData.toString(logger, paramMap), paramMap);
+            serviceUtils.convertPropertiesColumns(dataList);
             result.put(ResultField.DATA, dataList);
         } else {
             List<DataDto> dataList = jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());

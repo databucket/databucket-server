@@ -64,30 +64,36 @@ public class Query {
 
     public Query removeAndSetProperties(boolean execute, DataModifyDto dataModifyDto) throws JsonProcessingException {
         if (execute) {
-            List<String> remProperties = dataModifyDto.getPropertiesToRemove();
-            Map<String, Object> setProperties = dataModifyDto.getPropertiesToSet();
-            if (remProperties != null && remProperties.size() > 0 || setProperties != null && setProperties.size() > 0) {
+            List<String> propertiesToRemove = dataModifyDto.getPropertiesToRemove();
+            Map<String, Object> propertiesToUpdate = dataModifyDto.getPropertiesToSet();
+            if (propertiesToRemove != null && propertiesToRemove.size() > 0 || propertiesToUpdate != null && propertiesToUpdate.size() > 0) {
                 if (query.contains("SET"))
-                    query += ", properties = properties ";
+                    query += ", properties = ";
                 else
-                    query += " properties = properties ";
+                    query += " properties = ";
 
+                if (propertiesToRemove != null && propertiesToRemove.size() > 0 && propertiesToUpdate != null && propertiesToUpdate.size() > 0) {
+                    String remove = "properties ";
+                    for (String prop : propertiesToRemove)
+                        remove += "#- '{" + prop.replace("$.", "").replace(".", ",") + "}' ";
 
-                if (remProperties != null && remProperties.size() > 0) {
-                    for (String prop : remProperties)
-                        query += "#- '{" + prop.replace("$.", "").replace(".", ",") + "}' ";
-                }
-
-                if (setProperties != null && setProperties.size() > 0) {
                     Map<String, Object> jsonMap = new HashMap<>();
-                    query += "|| '";
-
-                    for (Map.Entry<String, Object> prop : setProperties.entrySet()) {
+                    for (Map.Entry<String, Object> prop : propertiesToUpdate.entrySet()) {
                         String[] pathNodes = prop.getKey().replace("$.", "").split("\\.");
                         updateJson(jsonMap, pathNodes, prop.getValue());
                     }
-
-                    query += mapper.writer().writeValueAsString(jsonMap) + "'";
+                    query += "jsonb_merge(" + remove + ", '" + mapper.writer().writeValueAsString(jsonMap) + "'::jsonb)";
+                } else if (propertiesToRemove != null && propertiesToRemove.size() > 0) {
+                    query += "properties ";
+                    for (String prop : propertiesToRemove)
+                        query += "#- '{" + prop.replace("$.", "").replace(".", ",") + "}' ";
+                } else if (propertiesToUpdate != null && propertiesToUpdate.size() > 0) {
+                    Map<String, Object> jsonMap = new HashMap<>();
+                    for (Map.Entry<String, Object> prop : propertiesToUpdate.entrySet()) {
+                        String[] pathNodes = prop.getKey().replace("$.", "").split("\\.");
+                        updateJson(jsonMap, pathNodes, prop.getValue());
+                    }
+                    query += "jsonb_merge(properties, '" + mapper.writer().writeValueAsString(jsonMap) + "'::jsonb)";
                 }
             }
         }
@@ -357,6 +363,45 @@ public class Query {
         return String.format(sFormat, v1, op, v2);
     }
 
+    // returns PGObjects instead of strings
+    private String getField4Select(String fieldName) throws UnknownColumnException {
+        if (fieldName.startsWith("$.")) {
+            if (fieldName.endsWith("()")) {
+                int lastDot = fieldName.lastIndexOf('.');
+                String filedJsonPath = fieldName.substring(0, lastDot);
+                String functionName = fieldName.substring(lastDot + 1);
+                String resultFiled;
+
+                switch (functionName) {
+                    case "length()":
+                        resultFiled = "coalesce(jsonb_array_length(properties #> '{" + getPGPropertyArray(filedJsonPath) + "}'), 0)";
+                        break;
+
+                    case "isNotNull()":
+                    case "exists()":
+                    case "isNotEmpty()":
+                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is not null";
+                        break;
+
+                    case "isNull()":
+                    case "notExists()":
+                    case "isEmpty()":
+                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is null";
+                        break;
+
+                    default:
+                        throw new UnknownColumnException(fieldName);
+                }
+
+                return resultFiled;
+
+            } else
+                return "properties #> '{" + getPGPropertyArray(fieldName) + "}'";
+
+        } else
+            return fieldName;
+    }
+
     private String getField(String fieldName) throws UnknownColumnException {
         if (fieldName.startsWith("$.")) {
             if (fieldName.endsWith("()")) {
@@ -528,7 +573,7 @@ public class Query {
     private String columnsToString(String[] columns) throws UnknownColumnException {
         String result = "";
         for (String col : columns)
-            result += ", " + getField(col);
+            result += ", " + getField4Select(col);
         return result.substring(2);
     }
 
@@ -536,9 +581,9 @@ public class Query {
         String result = "";
         for (CustomColumnDto col : columns)
             if (col.getTitle() != null)
-                result += ", " + getField(col.getField()) + " as \"" + col.getTitle() + "\"";
+                result += ", " + getField4Select(col.getField()) + " as \"" + col.getTitle() + "\"";
             else
-                result += ", " + getField(col.getField());
+                result += ", " + getField4Select(col.getField());
         return result.substring(2);
     }
 

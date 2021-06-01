@@ -1,6 +1,6 @@
 package pl.databucket.service.data;
 
-public class C {
+public class Constants {
 	
 	public static final String FIELD = "field";
 	public static final String TITLE = "title";
