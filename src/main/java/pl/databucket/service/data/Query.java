@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import pl.databucket.dto.CustomColumnDto;
-import pl.databucket.dto.DataModifyDto;
+import pl.databucket.dto.DataModifyDTO;
 import pl.databucket.exception.ConditionNotAllowedException;
 import pl.databucket.exception.UnknownColumnException;
 
@@ -62,7 +62,7 @@ public class Query {
         return this;
     }
 
-    public Query removeAndSetProperties(boolean execute, DataModifyDto dataModifyDto) throws JsonProcessingException {
+    public Query removeAndSetProperties(boolean execute, DataModifyDTO dataModifyDto) throws JsonProcessingException {
         if (execute) {
             List<String> propertiesToRemove = dataModifyDto.getPropertiesToRemove();
             Map<String, Object> propertiesToUpdate = dataModifyDto.getPropertiesToSet();

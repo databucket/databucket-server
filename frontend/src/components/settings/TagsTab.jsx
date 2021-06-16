@@ -22,7 +22,7 @@ import {
     getColumnClasses,
     getColumnDescription,
     getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName
+    getColumnName, getColumnId, getColumnCreatedBy, getColumnCreatedAt
 } from "../utils/StandardColumns";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import {getTagMapper} from "../../utils/NullValueMappers";
@@ -75,16 +75,16 @@ export default function TagsTab() {
     return (
         <div>
             <MaterialTable
-
                 title='Tags'
                 tableRef={tableRef}
                 columns={[
+                    getColumnId(),
                     getColumnName(),
                     getColumnDescription(),
                     getColumnBuckets(buckets, 'Available for buckets'),
                     getColumnClasses(classes, 'Available by classes'),
-                    // getColumnCreatedBy(),
-                    // getColumnCreatedAt(),
+                    getColumnCreatedBy(),
+                    getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
                 ]}

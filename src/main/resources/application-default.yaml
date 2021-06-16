@@ -11,5 +11,3 @@ spring:
     url: jdbc:postgresql://localhost:5432/databucket
     username: databucket_user
     password: databucket_user
-    driver-class-name: org.postgresql.Driver
-    initialization-mode: always

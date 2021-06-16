@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 public class AccessTreeDto {
 
-    private List<AuthProjectDto> projects;
+    private List<AuthProjectDTO> projects;
     private List<AccessTreeGroupDto> groups;
     private List<AccessTreeBucketDto> buckets;
     private List<AccessTreeViewDto> views;

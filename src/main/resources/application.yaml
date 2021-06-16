@@ -1,9 +1,15 @@
 spring:
   jpa:
+    generate-ddl: true
     hibernate.ddl-auto: update
     open-in-view: true
     properties:
-      hibernate.session_factory.interceptor: pl.databucket.tenant.EntityInterceptor
+      hibernate:
+        session_factory.interceptor: pl.databucket.tenant.EntityInterceptor
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    initialization-mode: always
 
 logging:
   level:

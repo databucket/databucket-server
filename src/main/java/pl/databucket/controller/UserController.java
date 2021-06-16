@@ -80,9 +80,9 @@ public class UserController {
      */
     @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
     @PostMapping(value = "/change-project")
-    public ResponseEntity<?> changeProject(@Valid @RequestBody AuthDtoRequest userDto) {
+    public ResponseEntity<?> changeProject(@Valid @RequestBody AuthReqDTO userDto) {
         try {
-            AuthDtoResponse authDtoResponse = new AuthDtoResponse();
+            AuthRespDTO authDtoResponse = new AuthRespDTO();
             authDtoResponse.setToken(jwtTokenUtil.generateToken(SecurityContextHolder.getContext().getAuthentication(), userDto.getProjectId()));
             return new ResponseEntity<>(authDtoResponse, HttpStatus.OK);
         } catch (IllegalArgumentException e1) {

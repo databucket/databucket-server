@@ -19,7 +19,7 @@ import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnDescription,
     getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnClass
+    getColumnName, getColumnClass, getColumnCreatedBy, getColumnCreatedAt
 } from "../utils/StandardColumns";
 import {getColumnsMapper} from "../../utils/NullValueMappers";
 import ColumnsContext from "../../context/columns/ColumnsContext";
@@ -102,8 +102,8 @@ export default function ColumnsTab() {
                             />
                         )
                     },
-                    // getColumnCreatedBy(),
-                    // getColumnCreatedAt(),
+                    getColumnCreatedBy(),
+                    getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
                 ]}

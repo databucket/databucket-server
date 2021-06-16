@@ -20,7 +20,7 @@ import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnDescription,
     getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnUsers
+    getColumnName, getColumnUsers, getColumnCreatedBy, getColumnCreatedAt
 } from "../utils/StandardColumns";
 import TeamsContext from "../../context/teams/TeamsContext";
 import UsersContext from "../../context/users/UsersContext";
@@ -88,8 +88,8 @@ export default function TeamsTab() {
                     getColumnName(),
                     getColumnDescription(),
                     getColumnUsers(users, roles),
-                    // getColumnCreatedBy(),
-                    // getColumnCreatedAt(),
+                    getColumnCreatedBy(),
+                    getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
                 ]}

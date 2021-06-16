@@ -19,7 +19,7 @@ import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnDescription,
     getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName
+    getColumnName, getColumnCreatedBy, getColumnCreatedAt
 } from "../utils/StandardColumns";
 import {getEnumMapper} from "../../utils/NullValueMappers";
 import EditEnumDialog from "../dialogs/EditEnumDialog";
@@ -81,8 +81,8 @@ export default function EnumsTab() {
                             />
                         )
                     },
-                    // getColumnCreatedBy(),
-                    // getColumnCreatedAt(),
+                    getColumnCreatedBy(),
+                    getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
                 ]}

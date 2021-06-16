@@ -19,7 +19,7 @@ import {handleErrors} from "../../utils/FetchHelper";
 import RolesContext from "../../context/roles/RolesContext";
 import UsersContext from "../../context/users/UsersContext";
 import {
-    getColumnModifiedBy, getColumnModifiedAt,
+    getColumnModifiedBy, getColumnModifiedAt, getColumnCreatedBy, getColumnCreatedAt,
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
@@ -92,8 +92,8 @@ export default function UsersTab() {
                             />
                         )
                     },
-                    // getColumnCreatedBy(),
-                    // getColumnCreatedAt(),
+                    getColumnCreatedBy(),
+                    getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
                 ]}

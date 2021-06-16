@@ -5,7 +5,7 @@ export const iconsNames = [
     'person_remove',
     'person_search',
     'people',
-    'group',
+    'groups',
     'group_add',
     'group_remove',
     'people_alt',

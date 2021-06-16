@@ -38,7 +38,11 @@ export default function BucketListSelector() {
 
     return (
         <List>
-            {filteredBuckets.map((bucket) => (
+            {filteredBuckets
+                .sort((a, b) => {
+                    return a.name > b.name ? 1 : -1
+                })
+                .map((bucket) => (
                 <ListItem
                     button
                     selected={activeBucket != null ? bucket.id === activeBucket.id : false}

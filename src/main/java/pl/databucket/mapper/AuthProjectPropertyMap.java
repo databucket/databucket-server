@@ -1,10 +1,10 @@
 package pl.databucket.mapper;
 
 import org.modelmapper.PropertyMap;
-import pl.databucket.dto.AuthProjectDto;
+import pl.databucket.dto.AuthProjectDTO;
 import pl.databucket.entity.Project;
 
-public class AuthProjectPropertyMap extends PropertyMap<Project, AuthProjectDto> {
+public class AuthProjectPropertyMap extends PropertyMap<Project, AuthProjectDTO> {
 
     @Override
     protected void configure() {
