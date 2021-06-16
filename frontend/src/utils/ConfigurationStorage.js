@@ -73,6 +73,10 @@ export const getRoles = () => {
     return localStorage.getItem(ROLES);
 }
 
+export const hasRobotRole = () => {
+    return !!localStorage.getItem(ROLES) && localStorage.getItem(ROLES).includes("ROBOT");
+}
+
 export const hasMemberRole = () => {
     return !!localStorage.getItem(ROLES) && localStorage.getItem(ROLES).includes("MEMBER");
 }

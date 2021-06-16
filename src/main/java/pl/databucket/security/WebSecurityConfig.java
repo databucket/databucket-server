@@ -3,6 +3,7 @@ package pl.databucket.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -18,7 +19,6 @@ import javax.annotation.Resource;
 
 @Configuration
 @EnableWebSecurity
-//@EnableGlobalMethodSecurity(securedEnabled = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -49,9 +49,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.sessionManagement().invalidSessionUrl("/");
 
-        http.cors().and().csrf().disable().
-                authorizeRequests()
-                .antMatchers("/", "/api/public/**", "/**/static/**", "/**/favicon.ico").permitAll()
+        http.cors().and().csrf().disable()
+                .authorizeRequests()
+                .antMatchers(
+                        "/",
+                        "/api/public/**", // public endpoint for authorization
+                        "/**/static/**",
+                        "/**/favicon.ico"
+                ).permitAll()
                 // need to be redirect in case browser refreshing
                 .antMatchers(
                         "/login",
@@ -71,6 +76,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/management/projects",
                         "/management/users"
                         ).permitAll()
+                // swagger
+                .antMatchers(HttpMethod.GET,
+                        "/swagger-ui/**",
+                        "/v2/api-docs",
+                        "/v3/api-docs",
+                        "/webjars/**",            // swagger-ui webjars
+                        "/swagger-resources/**",  // swagger-ui resources
+                        "/configuration/**",      // swagger configuration
+                        "/**/*.html",
+                        "/**/*.css",
+                        "/**/*.js"
+                ).permitAll()
+                .antMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()

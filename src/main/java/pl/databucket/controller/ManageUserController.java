@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.databucket.dto.AuthDtoRequest;
+import pl.databucket.dto.AuthReqDTO;
 import pl.databucket.dto.ManageUserDtoRequest;
 import pl.databucket.dto.ManageUserDtoResponse;
 import pl.databucket.entity.User;
@@ -73,7 +73,7 @@ public class ManageUserController {
     }
 
     @PostMapping(value = "/password/reset")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody AuthDtoRequest authDtoRequest) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody AuthReqDTO authDtoRequest) {
         try {
             manageUserService.resetPassword(authDtoRequest);
             return new ResponseEntity<>(null, HttpStatus.OK);

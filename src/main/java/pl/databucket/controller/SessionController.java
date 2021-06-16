@@ -57,7 +57,7 @@ public class SessionController {
 
             User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
-            List<AuthProjectDto> projects = user.getProjects().stream().map(item -> modelMapper.map(item, AuthProjectDto.class)).collect(Collectors.toList());
+            List<AuthProjectDTO> projects = user.getProjects().stream().map(item -> modelMapper.map(item, AuthProjectDTO.class)).collect(Collectors.toList());
             accessTreeDto.setProjects(projects.stream().filter(project -> project.isEnabled() && !project.isExpired()).collect(Collectors.toList()));
 
             List<Group> groups = groupService.getAccessTreeGroups(user);

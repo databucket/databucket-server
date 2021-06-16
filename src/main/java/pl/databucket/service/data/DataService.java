@@ -1,7 +1,6 @@
 package pl.databucket.service.data;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DeadlockLoserDataAccessException;
@@ -26,7 +25,6 @@ import pl.databucket.service.ServiceUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -44,7 +42,7 @@ public class DataService {
     }
 
 
-    public DataDto createData(User user, Bucket bucket, DataCreateDto dataCreateDto) throws JsonProcessingException, UnexpectedException, ItemNotFoundException, UnknownColumnException, ConditionNotAllowedException, SQLException {
+    public DataDTO createData(User user, Bucket bucket, DataCreateDTO dataCreateDto) throws JsonProcessingException, UnexpectedException, ItemNotFoundException, UnknownColumnException, ConditionNotAllowedException, SQLException {
 
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
         if (dataCreateDto.getTagId() != null)
@@ -66,7 +64,7 @@ public class DataService {
         return getData(user, bucket, id);
     }
 
-    public DataDto getData(User user, Bucket bucket, long id) throws UnknownColumnException, ConditionNotAllowedException {
+    public DataDTO getData(User user, Bucket bucket, long id) throws UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         conditions.add(new Condition(COL.DATA_ID, Operator.equal, id));
 
@@ -82,7 +80,7 @@ public class DataService {
         return jdbcTemplate.queryForObject(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
     }
 
-    public List<DataDto> getData(User user, Bucket bucket, List<Long> ids) throws UnknownColumnException, ConditionNotAllowedException {
+    public List<DataDTO> getData(User user, Bucket bucket, List<Long> ids) throws UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         conditions.add(new Condition(COL.DATA_ID, Operator.in, ids));
 
@@ -146,7 +144,7 @@ public class DataService {
             serviceUtils.convertPropertiesColumns(dataList);
             result.put(ResultField.DATA, dataList);
         } else {
-            List<DataDto> dataList = jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
+            List<DataDTO> dataList = jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
             result.put(ResultField.DATA, dataList);
         }
 
@@ -162,7 +160,7 @@ public class DataService {
         return selectQuery.toString(logger, paramMap);
     }
 
-    public int modifyData(User user, Bucket bucket, Optional<List<Long>> dataIdArray, DataModifyDto dataModifyDto, QueryRule queryRule) throws IOException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException, ConditionNotAllowedException {
+    public int modifyData(User user, Bucket bucket, Optional<List<Long>> dataIdArray, DataModifyDTO dataModifyDto, QueryRule queryRule) throws IOException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException, ConditionNotAllowedException {
 
         if (dataIdArray.isPresent()) {
             queryRule.getConditions().add(new Condition(COL.DATA_ID, Operator.in, dataIdArray.get()));

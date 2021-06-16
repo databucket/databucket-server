@@ -19,7 +19,7 @@ import {
     getLastManagementPageName,
     getLastSettingsPageName,
     hasAdminRole,
-    hasProject,
+    hasProject, hasRobotRole,
     hasSuperRole,
     hasToken,
     isLeftPanelOpen,
@@ -38,7 +38,7 @@ import UserProjects from "./UserProjects";
 import {MessageBox} from "../utils/MessageBox";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
-import {getBaseUrl} from "../../utils/UrlBuilder";
+import {getBaseUrl, getSwaggerDocPath} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
 import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
 
@@ -188,23 +188,31 @@ export default function ProjectData() {
                     <div className={styleClasses.grow}/>
                     <Divider/>
                     <List>
-                        <InfoDialog/>
                         {
-                            hasAdminRole() ? (
+                            hasRobotRole() && (
+                                <ListItem button target='_blank' component={Link} to={getSwaggerDocPath()}>
+                                    <ListItemIcon><span className="material-icons">api</span></ListItemIcon>
+                                    <ListItemText primary={'API'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
+                                </ListItem>
+                            )
+                        }
+                        {
+                            hasAdminRole() && (
                                 <ListItem button component={Link} to={getProjectSettingsPath() + "/" + getLastSettingsPageName()}>
                                     <ListItemIcon><span className="material-icons">settings</span></ListItemIcon>
                                     <ListItemText primary={'Settings'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
                                 </ListItem>
-                            ) : (<div/>)
+                            )
                         }
                         {
-                            hasSuperRole() ? (
+                            hasSuperRole() && (
                                 <ListItem button component={Link} to={"/management/" + getLastManagementPageName()}>
                                     <ListItemIcon><span className="material-icons">manage_accounts</span></ListItemIcon>
                                     <ListItemText primary={'Management'} primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
                                 </ListItem>
-                            ) : (<div/>)
+                            )
                         }
+                        <InfoDialog/>
                     </List>
                 </Drawer>
                 <main className={styleClasses.content}>

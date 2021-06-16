@@ -67,7 +67,9 @@ export default function GroupMenuSelector(props) {
                     onClose={handleClose}
                     PaperProps={{style: {minWidth: 100}}}
                 >
-                    {groups.map((group) => (
+                    {groups.sort((a, b) => {
+                            return a.shortName > b.shortName ? 1 : -1
+                        }).map((group) => (
                         <MenuItem
                             key={group.id}
                             selected={group.id === activeGroup.id}

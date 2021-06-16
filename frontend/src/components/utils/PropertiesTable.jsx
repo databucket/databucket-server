@@ -4,13 +4,13 @@ import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import MaterialTable from "material-table";
-import React, {useContext, useEffect, useState} from "react";
-import EnumsContext from "../../context/enums/EnumsContext";
+import React, {useContext, useState} from "react";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
 import {useWindowDimension} from "./UseWindowDimension";
 import PropTypes from "prop-types";
+import AccessContext from "../../context/access/AccessContext";
 
 PropertiesTable.propTypes = {
     data: PropTypes.array.isRequired,
@@ -25,8 +25,7 @@ export default function PropertiesTable(props) {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [height] = useWindowDimension();
-    const enumsContext = useContext(EnumsContext);
-    const {enums, fetchEnums} = enumsContext;
+    const accessContext = useContext(AccessContext);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const data = props.data;
@@ -36,11 +35,6 @@ export default function PropertiesTable(props) {
         path: {title: 'Path', check: ['notEmpty', 'validJsonPath']},
         type: {title: 'Type', check: ['validClassPropertyType']}
     };
-
-    useEffect(() => {
-        if (enums == null)
-            fetchEnums();
-    }, [enums, fetchEnums]);
 
     const setData = (newData) => {
         props.onChange(newData);
@@ -57,7 +51,7 @@ export default function PropertiesTable(props) {
 
     const getEnumName = (rowData) => {
         if (allowEnum(rowData)) {
-            const found = enums.find(en => en.id === rowData['enumId']);
+            const found = accessContext.enums.find(en => en.id === rowData['enumId']);
             if (found)
                 return found.name;
         }
@@ -93,7 +87,7 @@ export default function PropertiesTable(props) {
                         render: rowData => getEnumName(rowData),
                         editComponent: props => allowEnum(props.rowData) ? (
                             <SelectEnumDialog
-                                enums={enums}
+                                enums={accessContext.enums}
                                 rowData={props.rowData}
                                 onChange={props.onChange}
                             />

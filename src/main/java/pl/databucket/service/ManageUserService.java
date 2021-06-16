@@ -3,7 +3,7 @@ package pl.databucket.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.databucket.dto.AuthDtoRequest;
+import pl.databucket.dto.AuthReqDTO;
 import pl.databucket.dto.ManageUserDtoRequest;
 import pl.databucket.entity.Project;
 import pl.databucket.entity.User;
@@ -76,7 +76,7 @@ public class ManageUserService {
         return userRepository.save(user);
     }
 
-    public void resetPassword(AuthDtoRequest userDto) {
+    public void resetPassword(AuthReqDTO userDto) {
         User user = userRepository.findByUsername(userDto.getUsername());
         if (user != null) {
             user.setPassword(bcryptEncoder.encode(userDto.getPassword()));

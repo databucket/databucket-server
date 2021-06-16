@@ -10,7 +10,6 @@ import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
 import {useWindowDimension} from "./UseWindowDimension";
 import SelectSingleFieldLookup, {commonFields} from "../lookup/SelectSingleFieldLookup";
-// import TableIcons from "./TableIcons";
 
 export default function ColumnsTable(props) {
 
@@ -23,7 +22,7 @@ export default function ColumnsTable(props) {
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const columns = props.columns;
     const properties = props.properties;
-    const changeableFields = ['uuid', 'enabled', 'align', 'hidden', 'format', 'width', 'enumId', 'editable', 'sorting', 'filtering'];
+    const changeableFields = ['uuid', 'enabled', 'hidden', 'editable', 'sorting', 'filtering']; // disabled: format, align, width
     const fieldsSpecification = {
         uuid: {title: 'Title', check: ['notEmpty']}
     };
@@ -68,8 +67,8 @@ export default function ColumnsTable(props) {
                     //         'right': 'Right'
                     //     }, initialEditValue: 'center'
                     // },
-                    {title: 'Format', field: 'format', type: 'string', editable: 'always', emptyValue: ''},
-                    {title: 'Width', field: 'width', type: 'string', editable: 'always', emptyValue: ''},
+                    // {title: 'Format', field: 'format', type: 'string', editable: 'always', emptyValue: ''},
+                    // {title: 'Width', field: 'width', type: 'string', editable: 'always', emptyValue: ''},
                     {
                         title: 'Editable',
                         field: 'editable',

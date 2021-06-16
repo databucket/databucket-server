@@ -1,5 +1,6 @@
 package pl.databucket.controller;
 
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -20,8 +21,9 @@ import pl.databucket.service.UserService;
 
 import java.util.*;
 
+@Api(tags="(secured)")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api/bucket/{bucketName}/data")
+@RequestMapping("/api/bucket/{bucketName}")
 @RestController
 public class DataController {
 
@@ -38,10 +40,14 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @ApiOperation(value = "Create data")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "OK", response = DataDTO.class)
+    })
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createData(
-            @PathVariable("bucketName") String bucketName,
-            @RequestBody DataCreateDto dataCreateDto) {
+            @ApiParam(value="Bucket name", example = "bucket") @PathVariable String bucketName,
+            @ApiParam(value="Payload") @RequestBody DataCreateDTO dataCreateDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
@@ -50,13 +56,13 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                DataDto dataDto = dataService.createData(user, bucket, dataCreateDto);
-                return new ResponseEntity<>(dataDto, HttpStatus.CREATED);
+                DataDTO dataDTO = dataService.createData(user, bucket, dataCreateDTO);
+                return new ResponseEntity<>(dataDTO, HttpStatus.CREATED);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataCreateDto.getTagId()), HttpStatus.NOT_ACCEPTABLE);
+                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataCreateDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
             else
                 return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
@@ -66,11 +72,20 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @ApiOperation(value = "Modify data")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
+                    value = @ExampleProperty(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}"
+                    )
+            ))
+    })
     @PutMapping(value = {"", "/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
-            @PathVariable String bucketName,
-            @PathVariable Optional<List<Long>> ids,
-            @RequestBody DataModifyDto dataModifyDto) {
+            @ApiParam(value="Bucket name", example = "bucket") @PathVariable String bucketName,
+            @ApiParam(value="ids", example = "1,2,3") @PathVariable Optional<List<Long>> ids,
+            @ApiParam(value="Payload") @RequestBody DataModifyDTO dataModifyDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
@@ -79,13 +94,13 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, ids, dataModifyDto, new QueryRule(dataModifyDto));
+                int count = dataService.modifyData(user, bucket, ids, dataModifyDTO, new QueryRule(dataModifyDTO));
                 return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDto.getTagId()), HttpStatus.NOT_ACCEPTABLE);
+                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
             else if (e.getMessage().contains("cannot cast jsonb null"))
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
@@ -96,11 +111,15 @@ public class DataController {
     }
 
 
+    @ApiOperation(value = "Get data by ids")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = DataDTO.class)
+    })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @GetMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getData(
-            @PathVariable String bucketName,
-            @PathVariable List<Long> ids) {
+            @ApiParam(value="Bucket name", example = "bucket") @PathVariable String bucketName,
+            @ApiParam(value="ids", example = "1,2,3") @PathVariable List<Long> ids) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
@@ -109,7 +128,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                List<DataDto> dataDtoList = dataService.getData(user, bucket, ids);
+                List<DataDTO> dataDtoList = dataService.getData(user, bucket, ids);
                 if (ids.size() == 1 && dataDtoList.size() == 1)
                     return new ResponseEntity<>(dataDtoList.get(0), HttpStatus.OK);
                 else
@@ -122,11 +141,20 @@ public class DataController {
     }
 
 
+    @ApiOperation(value = "Remove data by ids")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
+                    value = @ExampleProperty(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}"
+                    )
+            ))
+    })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @DeleteMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteData(
-            @PathVariable String bucketName,
-            @PathVariable List<Long> ids) {
+            @ApiParam(value="Bucket name", example = "bucket") @PathVariable String bucketName,
+            @ApiParam(value="ids", example = "1,2,3") @PathVariable List<Long> ids) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
@@ -144,15 +172,18 @@ public class DataController {
         }
     }
 
-
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @ApiOperation(value = "Get data by conditions")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = DataDTO.class)
+    })
     @PostMapping(value = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getData(
-            @PathVariable String bucketName,
-            @RequestParam(required = false, defaultValue = "1") Optional<Integer> page,
-            @RequestParam(required = false, defaultValue = "1") Optional<Integer> limit,
-            @RequestParam(required = false, defaultValue = "id") Optional<String> sort,
-            @RequestBody(required = false) DataGetDto dataGetDto) {
+            @ApiParam(value="Bucket name", example = "bucket") @PathVariable String bucketName,
+            @ApiParam(hidden = true) @RequestParam(required = false, defaultValue = "1") Optional<Integer> page,
+            @ApiParam(value="limit", example = "1") @RequestParam(required = false, defaultValue = "1") Optional<Integer> limit,
+            @ApiParam(hidden = true) @RequestParam(required = false, defaultValue = "id") Optional<String> sort,
+            @ApiParam(value="Payload") @RequestBody(required = false) DataGetDTO dataGetDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
@@ -172,7 +203,7 @@ public class DataController {
 
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDto.getColumns()), new QueryRule(dataGetDto), page, limit, sort);
+                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDTO.getColumns()), new QueryRule(dataGetDTO), page, limit, sort);
 
                 long total = (long) result.get(ResultField.TOTAL);
                 response.setTotal(total);
@@ -200,14 +231,17 @@ public class DataController {
         }
     }
 
-
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @ApiOperation(value = "Reserve data by conditions")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = DataDTO.class)
+    })
     @PostMapping(value = {"/reserve"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reserveData(
-            @PathVariable("bucketName") String bucketName,
-            @RequestParam(required = false, defaultValue = "1") Integer limit,
-            @RequestParam(required = false, defaultValue = "data_id") Optional<String> sort,
-            @RequestBody(required = false) DataReserveDto dataReserveDto) {
+            @ApiParam(value="Bucket name", example = "bucket") @PathVariable String bucketName,
+            @ApiParam(value="limit", example = "1") @RequestParam(required = false, defaultValue = "1") Integer limit,
+            @ApiParam(value="sort", example = "random") @RequestParam(required = false, defaultValue = "id") Optional<String> sort,
+            @ApiParam(value="Payload")  @RequestBody(required = false) DataReserveDTO dataReserveDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
@@ -217,12 +251,12 @@ public class DataController {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
                 String targetOwnerUsername = user.getUsername();
-                if (user.isAdminUser() && dataReserveDto.getTargetOwnerUsername() != null)
-                    targetOwnerUsername = dataReserveDto.getTargetOwnerUsername();
+                if (user.isAdminUser() && dataReserveDTO.getTargetOwnerUsername() != null)
+                    targetOwnerUsername = dataReserveDTO.getTargetOwnerUsername();
 
-                List<Long> dataIds = dataService.reserveData(user, bucket, new QueryRule(dataReserveDto), Optional.of(limit), sort, targetOwnerUsername);
+                List<Long> dataIds = dataService.reserveData(user, bucket, new QueryRule(dataReserveDTO), Optional.of(limit), sort, targetOwnerUsername);
                 if (dataIds != null && dataIds.size() == 1) {
-                    DataDto dataDto = dataService.getData(user, bucket, dataIds.get(0));
+                    DataDTO dataDto = dataService.getData(user, bucket, dataIds.get(0));
                     return new ResponseEntity<>(dataDto, HttpStatus.OK);
                 } else if (dataIds != null && dataIds.size() > 1) {
                     return new ResponseEntity<>(dataIds, HttpStatus.OK);
@@ -242,10 +276,19 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @ApiOperation(value = "Remove data by conditions")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
+                    value = @ExampleProperty(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}"
+                    )
+            ))
+    })
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteData(
-            @PathVariable String bucketName,
-            @RequestBody DataRemoveDto dataRemoveDto) {
+            @ApiParam(name = "bucketName", example = "bucket", required = true) @PathVariable String bucketName,
+            @ApiParam(value="Payload") @RequestBody DataRemoveDTO dataRemoveDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
@@ -254,7 +297,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.deleteDataByRules(user, bucket, new QueryRule(dataRemoveDto));
+                int count = dataService.deleteDataByRules(user, bucket, new QueryRule(dataRemoveDTO));
                 return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);

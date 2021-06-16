@@ -6,18 +6,18 @@ import lombok.SneakyThrows;
 import org.postgresql.util.PGobject;
 import org.springframework.jdbc.core.RowMapper;
 import pl.databucket.service.data.COL;
-import pl.databucket.dto.DataDto;
+import pl.databucket.dto.DataDTO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-public final class DataRowMapper implements RowMapper<DataDto> {
+public final class DataRowMapper implements RowMapper<DataDTO> {
 
     @SneakyThrows
     @Override
-    public DataDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-        DataDto dataDto = new DataDto();
+    public DataDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+        DataDTO dataDto = new DataDTO();
         dataDto.setId(rs.getLong(COL.DATA_ID));
         dataDto.setTagId(rs.getLong(COL.TAG_ID));
         dataDto.setReserved(rs.getBoolean(COL.RESERVED));

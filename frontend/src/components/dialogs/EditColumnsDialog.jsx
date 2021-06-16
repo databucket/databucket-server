@@ -128,7 +128,7 @@ export default function EditColumnsDialog(props) {
                 aria-labelledby="customized-dialog-title"
                 open={open}
                 fullWidth={true}
-                maxWidth='xl' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+                maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             >
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     <div className={classes.oneLine}>
