@@ -40,14 +40,12 @@ dependencies {
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
   implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
 
-
   compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.10.1'
   compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
   compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.9'
   compile group: 'org.yaml', name: 'snakeyaml', version: '1.27'
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
-
 
   testImplementation('org.springframework.boot:spring-boot-starter-test') {exclude group: 'junit', module: 'junit'}
 
@@ -64,15 +62,20 @@ dependencies {
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
-task buildFrontend(type: Exec) {
-  workingDir 'frontend'
-
+task buildFrontend() {
   String npm = 'npm'
   if (Os.isFamily(Os.FAMILY_WINDOWS)) {
     npm = 'npm.cmd'
   }
-  commandLine npm, 'install'
-  commandLine npm, 'run', 'build'
+
+  exec {
+    workingDir 'frontend'
+    commandLine npm, 'install'
+  }
+  exec {
+    workingDir 'frontend'
+    commandLine npm, 'run', 'build'
+  }
 }
 
 task copyFrontend(type: Copy) {
