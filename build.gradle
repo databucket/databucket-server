@@ -78,9 +78,11 @@ task buildFrontend() {
   }
 }
 
-task copyFrontend(type: Copy) {
-  from "frontend/build"
-  into "src/main/resources/static"
+task copyFrontend() {
+  copy {
+    from "frontend/build"
+    into "src/main/resources/static"
+  }
 }
 
 copyFrontend.dependsOn buildFrontend
