@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -59,12 +59,6 @@ export default function EditClassFieldsDialog(props) {
     const [data, setData] = useState(props.configuration);
     const [open, setOpen] = useState(false);
     const enumsContext = useContext(EnumsContext);
-    const {enums, fetchEnums} = enumsContext;
-
-    useEffect(() => {
-        if (enums == null)
-            fetchEnums();
-    }, [enums, fetchEnums]);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -96,7 +90,7 @@ export default function EditClassFieldsDialog(props) {
                     {'Define class properties'}
                 </DialogTitle>
                 <DialogContent dividers>
-                    <PropertiesTable data={data} onChange={setData} title={''}/>
+                    <PropertiesTable data={data} enums={enumsContext.enums} onChange={setData} title={''}/>
                 </DialogContent>
             </Dialog>
         </div>

@@ -57,7 +57,7 @@ export const createConfig = (propFields, tags, users, enums) => {
 }
 
 const reduceUsersToList = (fullUserList) => {
-    return fullUserList.map(({username}) => ({value: username, title: username}));
+    return [...fullUserList.map(({username}) => ({value: username, title: username})), {value: '@currentUser', title: '@currentUser'}];
 }
 
 const reduceTagsToList = (fullTagList) => {

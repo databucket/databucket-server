@@ -347,6 +347,7 @@ export default function TaskExecutionDialog(props) {
                     <PropertiesTable
                         used={getUsedUuids()}
                         data={state.properties}
+                        enums={accessContext.enums}
                         onChange={setProperties}
                         title={'Class origin and defined properties:'}
                         pageSize={null}

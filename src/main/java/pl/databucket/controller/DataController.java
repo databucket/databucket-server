@@ -94,7 +94,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, ids, dataModifyDTO, new QueryRule(dataModifyDTO));
+                int count = dataService.modifyData(user, bucket, ids, dataModifyDTO, new QueryRule(user.getUsername(), dataModifyDTO));
                 return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
@@ -203,7 +203,7 @@ public class DataController {
 
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDTO.getColumns()), new QueryRule(dataGetDTO), page, limit, sort);
+                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDTO.getColumns()), new QueryRule(user.getUsername(), dataGetDTO), page, limit, sort);
 
                 long total = (long) result.get(ResultField.TOTAL);
                 response.setTotal(total);
@@ -254,7 +254,7 @@ public class DataController {
                 if (user.isAdminUser() && dataReserveDTO.getTargetOwnerUsername() != null)
                     targetOwnerUsername = dataReserveDTO.getTargetOwnerUsername();
 
-                List<Long> dataIds = dataService.reserveData(user, bucket, new QueryRule(dataReserveDTO), Optional.of(limit), sort, targetOwnerUsername);
+                List<Long> dataIds = dataService.reserveData(user, bucket, new QueryRule(user.getUsername(), dataReserveDTO), Optional.of(limit), sort, targetOwnerUsername);
                 if (dataIds != null && dataIds.size() == 1) {
                     DataDTO dataDto = dataService.getData(user, bucket, dataIds.get(0));
                     return new ResponseEntity<>(dataDto, HttpStatus.OK);
@@ -297,7 +297,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.deleteDataByRules(user, bucket, new QueryRule(dataRemoveDTO));
+                int count = dataService.deleteDataByRules(user, bucket, new QueryRule(user.getUsername(), dataRemoveDTO));
                 return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);

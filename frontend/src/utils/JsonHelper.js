@@ -275,21 +275,24 @@ export const notifierChangeAdapter = (items, payload) => {
     const sourceObjId = payload.sourceObjectId;
     const sourceObjItemsIds = payload.sourceObjectItemsIds;
 
-    return items.map(item => {
-        if (sourceObjItemsIds != null && sourceObjItemsIds.includes(item.id)) {
-            // make sure this item is in the array
-            if (item[fieldName] == null) {
-                item[fieldName] = [];
-                item[fieldName].push(sourceObjId);
-            } else if (!item[fieldName].includes(sourceObjId))
-                item[fieldName].push(sourceObjId);
-        } else {
-            // make sure this item is not in the array
-            if (item[fieldName] != null && item[fieldName].includes(sourceObjId))
-                item[fieldName] = item[fieldName].filter(id => id !== sourceObjId);
-        }
-        return item;
-    });
+    if (items != null)
+        return items.map(item => {
+            if (sourceObjItemsIds != null && sourceObjItemsIds.includes(item.id)) {
+                // make sure this item is in the array
+                if (item[fieldName] == null) {
+                    item[fieldName] = [];
+                    item[fieldName].push(sourceObjId);
+                } else if (!item[fieldName].includes(sourceObjId))
+                    item[fieldName].push(sourceObjId);
+            } else {
+                // make sure this item is not in the array
+                if (item[fieldName] != null && item[fieldName].includes(sourceObjId))
+                    item[fieldName] = item[fieldName].filter(id => id !== sourceObjId);
+            }
+            return item;
+        });
+    else
+        return items;
 }
 
 export const arraysEquals = (newData, oldData, fieldName) => {

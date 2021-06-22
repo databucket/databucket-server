@@ -153,8 +153,6 @@ export const iconsNames = [
     'settings_applications',
     'miscellaneous_services',
     'video_settings',
-    'favorite',
-    'favorite_border',
     'language',
     'visibility',
 
@@ -221,6 +219,7 @@ export const iconsNames = [
     'tour',
     'sports_score',
     'emoji_flags',
-
+    'favorite',
+    'favorite_border'
 
 ];

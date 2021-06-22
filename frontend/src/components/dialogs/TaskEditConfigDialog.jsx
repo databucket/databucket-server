@@ -17,6 +17,7 @@ import Tab from "@material-ui/core/Tab";
 import TaskActions from "../utils/TaskActions";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
 import TagsContext from "../../context/tags/TagsContext";
+import EnumsContext from "../../context/enums/EnumsContext";
 
 
 const styles = (theme) => ({
@@ -71,11 +72,18 @@ export default function TaskEditConfigDialog(props) {
     const tagsContext = useContext(TagsContext);
     const {tags, fetchTags} = tagsContext;
     const [filteredTags, setFilteredTags] = useState(null);
+    const enumsContext = useContext(EnumsContext);
+    const {enums, fetchEnums} = enumsContext;
 
     useEffect(() => {
         if (tags == null)
             fetchTags();
     }, [tags, fetchTags]);
+
+    useEffect(() => {
+        if (enums == null)
+            fetchEnums();
+    }, [enums, fetchEnums]);
 
     useEffect(() => {
         const fTags = tags.filter(tag =>
@@ -159,6 +167,7 @@ export default function TaskEditConfigDialog(props) {
                     <PropertiesTable
                         used={getUsedUuids()}
                         data={properties}
+                        enums={enums}
                         onChange={setProperties}
                         title={'Class origin and defined properties:'}
                         pageSize={null}

@@ -85,7 +85,7 @@ export default function FilterRulesEditor(props) {
                 {renderResult({tree: state.tree, config: state.config})}
             </div>}
             {props.activeTab === 0 && <div/>}
-            {props.activeTab === 1 && <PropertiesTable data={properties} onChange={handleChangeFields}/>}
+            {props.activeTab === 1 && <PropertiesTable data={properties} enums={enums} onChange={handleChangeFields}/>}
         </div>
     );
 };

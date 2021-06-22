@@ -177,7 +177,7 @@ public class PublicController {
     @PostMapping(value = "/query")
     public ResponseEntity<?> getQuery(@RequestBody(required = false) DataGetDTO dataGetDto) {
         try {
-            return new ResponseEntity<>(new MessageResponse(dataService.getQuery(new QueryRule(dataGetDto))), HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse(dataService.getQuery(new QueryRule("fakeUserName", dataGetDto))), HttpStatus.OK);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -187,7 +187,7 @@ public class PublicController {
     @PostMapping(value = "/query-rules")
     public ResponseEntity<?> getQueryRules(@RequestBody(required = false) DataGetDTO dataGetDto) {
         try {
-            return new ResponseEntity<>(new QueryRule(dataGetDto), HttpStatus.OK);
+            return new ResponseEntity<>(new QueryRule("fakeUserName", dataGetDto), HttpStatus.OK);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
