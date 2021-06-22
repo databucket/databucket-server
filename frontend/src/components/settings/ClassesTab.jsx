@@ -26,6 +26,7 @@ import {getClassMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import EditClassFieldsDialog from "../dialogs/EditClassFieldsDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import EnumsContext from "../../context/enums/EnumsContext";
 
 export default function ClassesTab() {
 
@@ -37,11 +38,18 @@ export default function ClassesTab() {
     const [filtering, setFiltering] = useState(false);
     const classesContext = useContext(ClassesContext);
     const {classes, fetchClasses, addClass, editClass, removeClass} = classesContext;
+    const enumsContext = useContext(EnumsContext);
+    const {enums, fetchEnums} = enumsContext;
     const changeableFields = ['name', 'description', 'configuration'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
+
+    useEffect(() => {
+        if (enums == null)
+            fetchEnums();
+    }, []);
 
     useEffect(() => {
         if (classes == null)

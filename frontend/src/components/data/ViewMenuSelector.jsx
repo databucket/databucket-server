@@ -46,16 +46,18 @@ export default function ViewMenuSelector(props) {
     return (
         <div className={classes.root}>
             <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
-                <Tooltip title={'Select view'}>
-                    <IconButton
-                        className={classes.select}
-                        aria-controls="long-menu"
-                        onClick={handleClick}
-                        color={'inherit'}
-                    >
-                        <span className="material-icons">double_arrow</span>
-                    </IconButton>
-                </Tooltip>
+                { props.views.length > 1 &&
+                    <Tooltip title={'Select view'}>
+                        <IconButton
+                            className={classes.select}
+                            aria-controls="long-menu"
+                            onClick={handleClick}
+                            color={'inherit'}
+                        >
+                            <span className="material-icons">double_arrow</span>
+                        </IconButton>
+                    </Tooltip>
+                }
                 <Typography
                     variant="h6"
                     className={classes.description}

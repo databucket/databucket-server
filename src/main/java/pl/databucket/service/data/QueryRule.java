@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +17,11 @@ public class QueryRule {
     private Operator operator = Operator.and;
     private List<Condition> conditions = new ArrayList<>();
     private List<QueryRule> queryRules = new ArrayList<>();
+    private String currentUser;
 
-    public QueryRule(SearchRules searchRules) {
+    public QueryRule(String currentUser, SearchRules searchRules) {
+        this.currentUser = currentUser;
+
         if (searchRules.getLogic() != null)
             getQueryRulesFromLogic(queryRules, conditions, searchRules.getLogic());
 
@@ -87,6 +91,7 @@ public class QueryRule {
         switch (operator) {
             case equal:
             case notEqual:
+                return new Condition(convertJsonLogicVariable(firstItem), operator, retrieveCurrentUser(secondItem));
             case grater:
             case graterEqual:
             case less:
@@ -97,10 +102,19 @@ public class QueryRule {
                 if (firstItem instanceof String) {
                     return new Condition(convertJsonLogicVariable(secondItem), Operator.like, "%" + firstItem + "%");
                 } else
-                    return new Condition(convertJsonLogicVariable(firstItem), operator, secondItem);
+                    return new Condition(convertJsonLogicVariable(firstItem), operator, retrieveCurrentUser(secondItem));
             default:
                 throw new UnsupportedOperationException("");
         }
+    }
+
+    Object retrieveCurrentUser(Object obj) {
+        if (obj.equals("@currentUser"))
+            return currentUser;
+        else if (obj instanceof List)
+            Collections.replaceAll((ArrayList) obj, "@currentUser", currentUser);
+
+        return obj;
     }
 
     private String convertJsonLogicVariable(Object variable) {

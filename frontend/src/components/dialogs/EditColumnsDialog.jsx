@@ -148,7 +148,7 @@ export default function EditColumnsDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers style={{height:'75vh'}}>
                     {activeTab === 0 && <ColumnsTable columns={columns} properties={properties} onChange={setColumns}/>}
-                    {activeTab === 1 && <PropertiesTable used={getUsedUuids()} data={properties} onChange={setProperties} title={'Class origin and defined properties:'}/>}
+                    {activeTab === 1 && <PropertiesTable used={getUsedUuids()} data={properties} enums={enums} onChange={setProperties} title={'Class origin and defined properties:'}/>}
                 </DialogContent>
             </Dialog>
         </div>

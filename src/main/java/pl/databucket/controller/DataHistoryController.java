@@ -35,7 +35,7 @@ public class DataHistoryController {
     }
 
     @GetMapping(value = {
-            "/bucket/{bucketName}/data/{id}/history"},
+            "/bucket/{bucketName}/{id}/history"},
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getDataHistory(
             @PathVariable String bucketName,
@@ -57,7 +57,7 @@ public class DataHistoryController {
     }
 
     @GetMapping(value = {
-            "/bucket/{bucketName}/data/{id}/history/{ids}"},
+            "/bucket/{bucketName}/{id}/history/{ids}"},
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getDataHistoryProperties(
             @PathVariable String bucketName,

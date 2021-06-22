@@ -4,16 +4,16 @@ import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import MaterialTable from "material-table";
-import React, {useContext, useState} from "react";
+import React, {useState} from "react";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
 import {useWindowDimension} from "./UseWindowDimension";
 import PropTypes from "prop-types";
-import AccessContext from "../../context/access/AccessContext";
 
 PropertiesTable.propTypes = {
     data: PropTypes.array.isRequired,
+    enums: PropTypes.array.isRequired,
     title: PropTypes.string,
     pageSize: PropTypes.number,
     customTableWidth: PropTypes.number,
@@ -25,10 +25,10 @@ export default function PropertiesTable(props) {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [height] = useWindowDimension();
-    const accessContext = useContext(AccessContext);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const data = props.data;
+    const enums = props.enums;
     const changeableFields = ['title', 'path', 'type', 'enumId'];
     const fieldsSpecification = {
         title: {title: 'Title', check: ['notEmpty', 'min1', 'max30']},
@@ -51,7 +51,7 @@ export default function PropertiesTable(props) {
 
     const getEnumName = (rowData) => {
         if (allowEnum(rowData)) {
-            const found = accessContext.enums.find(en => en.id === rowData['enumId']);
+            const found = props.enums.find(en => en.id === rowData['enumId']);
             if (found)
                 return found.name;
         }
@@ -87,7 +87,7 @@ export default function PropertiesTable(props) {
                         render: rowData => getEnumName(rowData),
                         editComponent: props => allowEnum(props.rowData) ? (
                             <SelectEnumDialog
-                                enums={accessContext.enums}
+                                enums={enums}
                                 rowData={props.rowData}
                                 onChange={props.onChange}
                             />
