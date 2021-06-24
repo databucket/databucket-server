@@ -19,7 +19,7 @@ export const getDataUrl = (bucket) => {
 }
 
 export const getDataReserveUrl = (bucket, number, random) => {
-    return random ? `${getOrigin()}/api/bucket/${bucket.name}/reserve?limit=${number}&sort=random` : `${getOrigin()}/api/bucket/${bucket.name}/data/reserve?limit=${number}`;
+    return random ? `${getOrigin()}/api/bucket/${bucket.name}/reserve?limit=${number}&sort=random` : `${getOrigin()}/api/bucket/${bucket.name}/reserve?limit=${number}`;
 }
 
 export const getDataByIdUrl = (bucket, id) => {

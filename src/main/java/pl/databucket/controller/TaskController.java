@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/tasks")
 @RestController
 public class TaskController {
@@ -31,6 +30,7 @@ public class TaskController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createTask(@Valid @RequestBody TaskDto taskDto) {
         try {
@@ -53,6 +53,7 @@ public class TaskController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<?> modifyTask(@Valid @RequestBody TaskDto taskDto) {
         try {
@@ -66,6 +67,7 @@ public class TaskController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/{taskId}")
     public ResponseEntity<?> deleteTask(@PathVariable long taskId) {
         try {

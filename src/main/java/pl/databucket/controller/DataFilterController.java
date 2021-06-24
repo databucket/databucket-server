@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/filters")
 @RestController
 public class DataFilterController {
@@ -31,7 +30,7 @@ public class DataFilterController {
     @Autowired
     private ModelMapper modelMapper;
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createFilter(@Valid @RequestBody DataFilterDto dataFilterDto) {
         try {
@@ -54,6 +53,7 @@ public class DataFilterController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<?> modifyFilter(@Valid @RequestBody DataFilterDto dataFilterDto) {
         try {
@@ -67,6 +67,7 @@ public class DataFilterController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/{filterId}")
     public ResponseEntity<?> deleteFilters(@PathVariable long filterId) {
         try {

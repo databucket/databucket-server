@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/enums")
 @RestController
 public class DataEnumController {
@@ -29,6 +28,7 @@ public class DataEnumController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createDataEnum(@Valid @RequestBody DataEnumDto dataEnumDto) {
         try {
@@ -53,6 +53,7 @@ public class DataEnumController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<?> modifyDataEnum(@Valid @RequestBody DataEnumDto dataEnumDto) {
         try {
@@ -66,6 +67,7 @@ public class DataEnumController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/{dataEnumId}")
     public ResponseEntity<?> deleteDataEnum(@PathVariable("dataEnumId") int dataEnumId) {
         try {

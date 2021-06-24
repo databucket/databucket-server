@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/classes")
 @RestController
 public class DataClassController {
@@ -29,6 +28,7 @@ public class DataClassController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createDataClass(@Valid @RequestBody DataClassDto dataClassDto) {
         try {
@@ -53,6 +53,7 @@ public class DataClassController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<?> modifyDataClass(@Valid @RequestBody DataClassDto dataClassDto) {
         try {
@@ -66,6 +67,7 @@ public class DataClassController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/{classId}")
     public ResponseEntity<?> deleteDataClass(@PathVariable("classId") long classId) {
         try {

@@ -13,7 +13,7 @@ import pl.databucket.repository.RoleRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@PreAuthorize("hasAnyRole('SUPER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('SUPER', 'ADMIN', 'MEMBER')")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/roles")
 @RestController

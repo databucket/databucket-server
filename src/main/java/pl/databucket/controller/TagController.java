@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/tags")
 @RestController
 public class TagController {
@@ -33,6 +32,7 @@ public class TagController {
     private ModelMapper modelMapper;
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createTag(@Valid @RequestBody TagDto tagDto) {
         try {
@@ -57,6 +57,7 @@ public class TagController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<?> modifyTag(@Valid @RequestBody TagDto tagDto) {
         try {
@@ -72,6 +73,7 @@ public class TagController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/{tagId}")
     public ResponseEntity<?> deleteTags(@PathVariable long tagId) {
         try {
