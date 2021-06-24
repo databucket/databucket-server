@@ -1,5 +1,6 @@
 package pl.databucket.configuration;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -13,6 +14,9 @@ import java.io.IOException;
 @Configuration
 @EnableJpaRepositories("pl.databucket.repository")
 public class WebMvcConfiguration implements WebMvcConfigurer {
+
+    @Autowired
+    MainPageTransformerInitializer mainPageTransformerInitializer;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -30,6 +34,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                         Resource requestedResource = location.createRelative(resourcePath);
                         return requestedResource.exists() && requestedResource.isReadable() ? requestedResource : new ClassPathResource("/static/index.html");
                     }
-                });
+                })
+                .addTransformer(mainPageTransformerInitializer.initClass());
     }
 }

@@ -75,7 +75,6 @@ const buildPropertiesFields = (propFields, enums) => {
         if (subfield.type === 'select') {
             const list = enums.find(e => e.id === field.enumId).items.map(item => ({value: item.value, title: item.text}));
             subfield['fieldSettings'] = {listValues: list};
-            subfield['valueSources'] = ["value"];
         }
 
         if (subfield.type === 'text')
@@ -83,6 +82,8 @@ const buildPropertiesFields = (propFields, enums) => {
 
         if (subfield.type === 'number')
             subfield['excludeOperators'] = ["not_between", "starts_with", "ends_with"];
+
+        subfield['valueSources'] = ["value"];
 
         subfields[field.path.replace(".", "*")] = subfield;
     });
