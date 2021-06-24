@@ -11,10 +11,14 @@ import ChangePasswordPage from "../components/login/ChangePasswordPage";
 import {hasProject} from "../utils/ConfigurationStorage";
 import _ProjectRouteInternal from "../components/data/_ProjectRouteInternal";
 import ChangePasswordRoute from "./ChangePasswordRoute";
+import {getContextPath} from "../utils/UrlBuilder";
 
 export default function AppRouter() {
+
     return (
-        <BrowserRouter>
+        <BrowserRouter
+            basename={getContextPath()}
+        >
             <Switch>
                 <Redirect exact from='/' to={getProjectDataPath()}/>
                 <PublicRoute exact restricted={true} path="/login" component={LoginPage}/>
