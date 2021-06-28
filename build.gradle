@@ -1,89 +1,92 @@
 plugins {
-  id 'java'
-  id 'groovy'
-  id 'org.springframework.boot' version '2.2.4.RELEASE'
-  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    id 'groovy'
+    id 'org.springframework.boot' version '2.5.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
-group 'pl.databucket'
-version '3.0.5'
+group = 'pl.databucket'
+version = '3.0.6'
+sourceCompatibility = '8'
 
-sourceCompatibility = 1.8
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
 
 repositories {
-  mavenCentral()
-}
-
-test {
-  outputs.upToDateWhen {false}
-
-  afterSuite {desc, result ->
-    if (!desc.parent) {
-      println("${result.resultType} " +
-          "(${result.testCount} tests, " +
-          "${result.successfulTestCount} successes, " +
-          "${result.failedTestCount} failures, " +
-          "${result.skippedTestCount} skipped)")
-    }
-  }
+    mavenCentral()
 }
 
 dependencies {
-  implementation 'org.springframework.boot:spring-boot-starter'
-  implementation 'org.springframework.boot:spring-boot-starter-web'
-  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-  implementation 'org.springframework.boot:spring-boot-starter-security'
-  implementation 'org.springframework:spring-tx'
-  implementation 'org.postgresql:postgresql'
-  implementation 'com.fasterxml.jackson.core:jackson-core'
-  implementation 'org.projectlombok:lombok'
-  implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
-  implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
-  implementation group: 'commons-io', name: 'commons-io', version: '2.5'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework:spring-tx'
+    implementation 'org.postgresql:postgresql'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'org.projectlombok:lombok'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.10.0'
+    implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+    implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.12.0'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-  compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.10.1'
-  compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-  compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.9'
-  compile group: 'org.yaml', name: 'snakeyaml', version: '1.27'
-  compileOnly 'org.projectlombok:lombok'
-  annotationProcessor 'org.projectlombok:lombok'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {exclude group: 'junit', module: 'junit'}
 
-  testImplementation('org.springframework.boot:spring-boot-starter-test') {exclude group: 'junit', module: 'junit'}
+    // JUnit dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-commons:1.6.0'
 
-  // JUnit dependencies
-  testImplementation 'org.junit.jupiter:junit-jupiter'
-  testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
-  testRuntimeOnly 'org.junit.platform:junit-platform-commons:1.6.0'
+    // Spock - Mandatory dependencies
+    testImplementation 'org.codehaus.groovy:groovy-all:3.0.8'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+    testImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
+}
 
-  // Spock - Mandatory dependencies
-  testImplementation 'org.codehaus.groovy:groovy-all:3.0.1'
-  testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
-  testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.5'
+test {
+//    afterSuite {desc, result ->
+//        if (!desc.parent) {
+//            println("${result.resultType} " +
+//                    "(${result.testCount} tests, " +
+//                    "${result.successfulTestCount} successes, " +
+//                    "${result.failedTestCount} failures, " +
+//                    "${result.skippedTestCount} skipped)")
+//        }
+//    }
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
 task buildFrontend() {
-  String npm = 'npm'
-  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-    npm = 'npm.cmd'
-  }
+    String npm = 'npm'
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        npm = 'npm.cmd'
+    }
 
-  exec {
-    workingDir 'frontend'
-    commandLine npm, 'install'
-  }
-  exec {
-    workingDir 'frontend'
-    commandLine npm, 'run', 'build'
-  }
+    exec {
+        workingDir 'frontend'
+        commandLine npm, 'install'
+    }
+    exec {
+        workingDir 'frontend'
+        commandLine npm, 'run', 'build'
+    }
 }
 
 task copyFrontend() {
-  copy {
-    from "frontend/build"
-    into "src/main/resources/static"
-  }
+    copy {
+        from "frontend/build"
+        into "src/main/resources/static"
+    }
 }
 
 copyFrontend.dependsOn buildFrontend
