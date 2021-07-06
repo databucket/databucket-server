@@ -1,8 +1,7 @@
 import React, {useState} from "react";
 import "./LoginPage.css";
 import Button from "@material-ui/core/Button";
-// import Logo from "../../images/databucket-logo.png";
-// import LogoDark from "../../images/logo_dark.png";
+import Logo from "../../images/databucket-logo.png";
 import {
     Avatar, Input, InputAdornment, InputLabel,
     ListItem,
@@ -243,7 +242,7 @@ export default function LoginPage() {
 
     return (
         <div className="ContainerClass">
-            {/*{getThemeName() === 'light' ? <img src={Logo} alt=''/> : <img src={LogoDark} alt=''/>}*/}
+            {<img src={Logo} alt='' width='392' height='70'/>}
             {paper()}
             <MessageBox
                 config={messageBox}

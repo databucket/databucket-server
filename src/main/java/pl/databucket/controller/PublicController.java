@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Api(tags="(public)")
+@Api(tags="PUBLIC")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/public")

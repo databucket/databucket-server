@@ -21,7 +21,7 @@ import pl.databucket.service.UserService;
 
 import java.util.*;
 
-@Api(tags="(secured)")
+@Api(tags="SECURED")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/bucket/{bucketName}")
 @RestController

@@ -57,7 +57,8 @@ export default function BucketTabSelector() {
         removeTab(bucket);
     }
 
-    return (
+    // this const helps with tabs rendering (only on Firefox, on Chrome there is always wrong behaviour)
+    const tabs = (
         <Tabs
             value={bucketsTabs.indexOf(activeBucket)}
             variant="scrollable"
@@ -82,4 +83,6 @@ export default function BucketTabSelector() {
             ))}
         </Tabs>
     );
+
+    return tabs;
 }

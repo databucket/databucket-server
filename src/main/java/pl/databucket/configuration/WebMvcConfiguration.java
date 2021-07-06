@@ -29,10 +29,17 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                         if (resourcePath.contains("static/"))
                             resourcePath = resourcePath.substring(resourcePath.indexOf("static/"));
                         if (resourcePath.endsWith("favicon.ico"))
-                            resourcePath = "favicon.ico";
+                            resourcePath = "/favicon.ico";
 
                         Resource requestedResource = location.createRelative(resourcePath);
-                        return requestedResource.exists() && requestedResource.isReadable() ? requestedResource : new ClassPathResource("/static/index.html");
+                        if (requestedResource.exists() && requestedResource.isReadable()) {
+//                            System.out.println(">>>> 1 >>> resourcePath: " + resourcePath + " >>> location: " + location);
+                            return requestedResource;
+                        } else {
+                            ClassPathResource resource = new ClassPathResource("/static/index.html");
+//                            System.out.println(">>>> 2 >>> resourcePath: " + resourcePath + " >>> location: " + location + " >>> exists: " + resource.exists());
+                            return resource;
+                        }
                     }
                 })
                 .addTransformer(mainPageTransformerInitializer.initClass());

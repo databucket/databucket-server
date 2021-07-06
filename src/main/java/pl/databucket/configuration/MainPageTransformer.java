@@ -21,10 +21,13 @@ public class MainPageTransformer implements ResourceTransformer {
 
     @Override
     public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain) throws IOException {
-        String info = "<span id=\"context-path\" hidden>" + contextPath + "</span>";
+        if (resource.getFilename().equals("index.html")) {
+            String info = "<span id=\"context-path\" hidden>" + contextPath + "</span>";
 
-        String html = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
-        html = html.replace("<body>", "<body>" + info);
-        return new TransformedResource(resource, html.getBytes());
+            String html = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
+            html = html.replace("<body>", "<body>" + info);
+            return new TransformedResource(resource, html.getBytes());
+        } else
+            return resource;
     }
 }

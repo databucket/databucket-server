@@ -9,7 +9,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   datasource:
     driver-class-name: org.postgresql.Driver
-    initialization-mode: always
+  sql:
+    init:
+      mode: always
 
 logging:
   level:
@@ -17,3 +19,4 @@ logging:
     org.springframework.web: error
     org.hibernate: error
     pl.databucket.service.data.DataService: error
+    pl.databucket.service.BucketService: error

@@ -10,6 +10,8 @@ import pl.databucket.dto.DataDTO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Map;
 
 public final class DataRowMapper implements RowMapper<DataDTO> {
@@ -23,9 +25,13 @@ public final class DataRowMapper implements RowMapper<DataDTO> {
         dataDto.setReserved(rs.getBoolean(COL.RESERVED));
         dataDto.setOwner(rs.getString(COL.RESERVED_BY));
         dataDto.setProperties(convertPGObjectToMap((PGobject) rs.getObject(COL.PROPERTIES)));
-        dataDto.setCreatedAt(rs.getDate(COL.CREATED_AT));
+        Timestamp createdAt = rs.getTimestamp(COL.CREATED_AT);
+        if (createdAt != null)
+            dataDto.setCreatedAt(new Date(createdAt.getTime()));
         dataDto.setCreatedBy(rs.getString(COL.CREATED_BY));
-        dataDto.setModifiedAt(rs.getDate(COL.MODIFIED_AT));
+        Timestamp modifiedAt = rs.getTimestamp(COL.MODIFIED_AT);
+        if (modifiedAt != null)
+            dataDto.setModifiedAt(new Date(modifiedAt.getTime()));
         dataDto.setModifiedBy(rs.getString(COL.MODIFIED_BY));
         return dataDto;
     }

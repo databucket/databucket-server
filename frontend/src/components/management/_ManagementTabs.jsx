@@ -79,9 +79,8 @@ export default function _ManagementTabs() {
                                     <Tab label="Projects" value={tabs[0]} component={Link} to={getManagementProjectsPath()}/>
                                     <Tab label="Users" value={tabs[1]} component={Link} to={getManagementUsersPath()}/>
                                 </Tabs>
-                                <div className={classes.grow}/>
-                                {hasProject() ? (<div/>) : (<UserProfile onLogout={handleLogout}/>)}
-
+                                <div/>
+                                <UserProfile onLogout={handleLogout}/>
                             </Toolbar>
                         </AppBar>
                         <ProjectsProvider> <ManageUsersProvider> <RolesProvider>

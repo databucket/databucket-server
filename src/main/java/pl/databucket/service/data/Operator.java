@@ -37,7 +37,16 @@ public enum Operator {
 	}
 	
 	public String toString() {
-		return symbol;
+		switch (symbol) {
+			case "!like":
+				return "not like";
+			case "similar":
+				return "similar to";
+			case "!similar":
+				return "not similar to";
+			default:
+				return symbol;
+		}
 	}	
 	
 	public static Operator fromString(String text) {
