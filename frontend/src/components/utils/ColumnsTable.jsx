@@ -22,7 +22,7 @@ export default function ColumnsTable(props) {
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const columns = props.columns;
     const properties = props.properties;
-    const changeableFields = ['uuid', 'enabled', 'hidden', 'editable', 'sorting', 'filtering']; // disabled: format, align, width
+    const changeableFields = ['uuid', 'enabled', 'hidden', 'editable', 'sorting', 'filtering', 'width']; // disabled: format, align, width
     const fieldsSpecification = {
         uuid: {title: 'Title', check: ['notEmpty']}
     };
@@ -68,7 +68,7 @@ export default function ColumnsTable(props) {
                     //     }, initialEditValue: 'center'
                     // },
                     // {title: 'Format', field: 'format', type: 'string', editable: 'always', emptyValue: ''},
-                    // {title: 'Width', field: 'width', type: 'string', editable: 'always', emptyValue: ''},
+                    {title: 'Width', field: 'width', type: 'string', editable: 'always', emptyValue: ''},
                     {
                         title: 'Editable',
                         field: 'editable',

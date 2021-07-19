@@ -22,7 +22,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 type: 'numeric',
                 editable: column.editable,
                 filtering: column.filtering,
-                hidden: column.hidden
+                hidden: column.hidden,
+                width: column.width
             };
         case "uuid_tag_id":
             const tagLookup = createTagLookup(tags);
@@ -34,7 +35,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 editable: column.editable,
                 filtering: column.filtering,
                 hidden: column.hidden,
-                lookup: tagLookup
+                lookup: tagLookup,
+                width: column.width
             };
         case "uuid_reserved":
             return {
@@ -44,7 +46,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 type: 'boolean',
                 editable: column.editable,
                 filtering: column.filtering,
-                hidden: column.hidden
+                hidden: column.hidden,
+                width: column.width
             };
         case "uuid_owner":
             return {
@@ -54,7 +57,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 type: 'string',
                 editable: column.editable,
                 filtering: column.filtering,
-                hidden: column.hidden
+                hidden: column.hidden,
+                width: column.width
             };
         case "uuid_created_at":
             return {
@@ -64,7 +68,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 type: 'datetime',
                 editable: column.editable,
                 filtering: column.filtering,
-                hidden: column.hidden
+                hidden: column.hidden,
+                width: column.width
             };
         case "uuid_created_by":
             return {
@@ -74,7 +79,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 type: 'string',
                 editable: column.editable,
                 filtering: column.filtering,
-                hidden: column.hidden
+                hidden: column.hidden,
+                width: column.width
             };
         case "uuid_modified_at":
             return {
@@ -84,7 +90,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 type: 'datetime',
                 editable: column.editable,
                 filtering: column.filtering,
-                hidden: column.hidden
+                hidden: column.hidden,
+                width: column.width
             };
         case "uuid_modified_by":
             return {
@@ -94,7 +101,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 type: 'string',
                 editable: column.editable,
                 filtering: column.filtering,
-                hidden: column.hidden
+                hidden: column.hidden,
+                width: column.width
             };
         default:
             const property = properties.filter(prop => prop.uuid === column.uuid)[0];
@@ -110,6 +118,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                         editable: column.editable,
                         filtering: column.filtering,
                         hidden: column.hidden,
+                        width: column.width,
                         render: rowData => <TableDynamicIcon iconName={getIconName(enumObj.items, rowData[property.title])}/>,
                         editComponent: props =>
                             <LookupIconDialog
@@ -128,6 +137,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                         editable: column.editable,
                         filtering: column.filtering,
                         hidden: column.hidden,
+                        width: column.width,
                         lookup: propLookup
                     };
                 }
@@ -139,7 +149,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                     type: property.type,
                     editable: column.editable,
                     filtering: column.filtering,
-                    hidden: column.hidden
+                    hidden: column.hidden,
+                    width: column.width
                 };
     }
 }
