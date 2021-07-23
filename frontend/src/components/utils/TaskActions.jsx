@@ -29,8 +29,11 @@ export default function TaskActions(props) {
         props.onChange({...props.actions, setTag: event.target.checked, tagId: props.tags[0].id});
     }
 
-    const handleActionSetLock = (event) => {
-        props.onChange({...props.actions, setReserved: event.target.checked});
+    const handleActionSetReserved = (event) => {
+        if (event.target.checked === true && props.actions.reserved == null)
+            props.onChange({...props.actions, setReserved: event.target.checked, reserved: true});
+        else
+            props.onChange({...props.actions, setReserved: event.target.checked});
     }
 
     const handleActionReserveChange = (event) => {
@@ -93,7 +96,7 @@ export default function TaskActions(props) {
                         <FormGroup row>
                             <FormControlLabel
                                 label="Set reserved"
-                                control={<Checkbox checked={props.actions.setReserved || false} onChange={handleActionSetLock}/>}
+                                control={<Checkbox checked={props.actions.setReserved || false} onChange={handleActionSetReserved}/>}
                             />
                             {props.actions.setReserved === true &&
                             <RadioGroup row value={props.actions.reserved || false} onChange={handleActionReserveChange}>

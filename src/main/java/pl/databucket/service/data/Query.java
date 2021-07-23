@@ -532,12 +532,9 @@ public class Query {
         return this;
     }
 
-    public Query limitPage(Map<String, Object> paramMap, Optional<Integer> limit, Optional<Integer> page) {
-        if (limit.isPresent())
-            limit(paramMap, limit.get());
-
-        if (page.isPresent())
-            offset(paramMap, page.get() * limit.get() - limit.get());
+    public Query limitPage(Map<String, Object> paramMap, Integer limit, Integer page) {
+        limit(paramMap, limit);
+        offset(paramMap, page * limit - limit);
         return this;
     }
 

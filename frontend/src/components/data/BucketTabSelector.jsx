@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Tab from "@material-ui/core/Tab";
 import IconButton from "@material-ui/core/IconButton";
 import DynamicIcon from "../utils/DynamicIcon";
@@ -33,10 +33,17 @@ const styles = theme => ({
 const StyledTab = withStyles(styles)(Tab)
 
 export default function BucketTabSelector() {
+
     const classes = useStyles();
     const accessContext = useContext(AccessContext);
     const {bucketsTabs, activeBucket, setActiveBucket, removeTab} = accessContext;
     let removing = false; // indicate whether changing tab is invoked by selection or by removing
+
+    // This timeout allows to load Material Icons before first rendering
+    const [ delay, setDelay ] = useState(true);
+    useEffect(() => {
+        setTimeout(() => setDelay(false), 1000)
+    }, []);
 
     const getBucketName = (name) => {
         return name.length > 17 ? name.substring(0, 15) + "..." : name;
@@ -57,7 +64,6 @@ export default function BucketTabSelector() {
         removeTab(bucket);
     }
 
-    // this const helps with tabs rendering (only on Firefox, on Chrome there is always wrong behaviour)
     const tabs = (
         <Tabs
             value={bucketsTabs.indexOf(activeBucket)}
@@ -84,5 +90,5 @@ export default function BucketTabSelector() {
         </Tabs>
     );
 
-    return tabs;
+    return !delay && tabs;
 }

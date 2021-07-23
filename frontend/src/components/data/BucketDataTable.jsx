@@ -461,7 +461,7 @@ export default function BucketDataTable() {
                                     .then(result => {
                                         if (resultOk)
                                             resolve({
-                                                data: result.data,
+                                                data: result.customData,
                                                 page: result.page - 1,
                                                 totalCount: result.total,
                                             })

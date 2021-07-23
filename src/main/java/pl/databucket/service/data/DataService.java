@@ -96,7 +96,7 @@ public class DataService {
         return jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
     }
 
-    public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, QueryRule queryRule, Optional<Integer> page, Optional<Integer> limit, Optional<String> sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
+    public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, QueryRule queryRule, Integer page, Integer limit, String sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
 
         List<CustomColumnDto> columns = null;
         Map<String, Object> paramMap = new HashMap<>();
@@ -142,7 +142,7 @@ public class DataService {
         if (inColumns.isPresent()) {
             List<Map<String, Object>> dataList = jdbcTemplate.queryForList(queryData.toString(logger, paramMap), paramMap);
             serviceUtils.convertPropertiesColumns(dataList);
-            result.put(ResultField.DATA, dataList);
+            result.put(ResultField.CUSTOM_DATA, dataList);
         } else {
             List<DataDTO> dataList = jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
             result.put(ResultField.DATA, dataList);
@@ -204,7 +204,7 @@ public class DataService {
         return this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
     }
 
-    public List<Long> reserveData(User user, Bucket bucket, QueryRule queryRule, Optional<Integer> limit, Optional<String> sort, String targetOwnerUsername) throws UnknownColumnException, ConditionNotAllowedException, UnexpectedException {
+    public List<Long> reserveData(User user, Bucket bucket, QueryRule queryRule, Integer limit, String sort, String targetOwnerUsername) throws UnknownColumnException, ConditionNotAllowedException, UnexpectedException {
 
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
@@ -217,7 +217,7 @@ public class DataService {
                 .from()
                 .where(queryRule, paramMap)
                 .orderBy(sort)
-                .limitPage(paramMap, limit, Optional.empty());
+                .limitPage(paramMap, limit, 1);
 
         boolean done = false;
         int tryCount = 7;

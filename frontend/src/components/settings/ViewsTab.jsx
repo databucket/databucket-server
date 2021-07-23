@@ -126,8 +126,8 @@ export default function ViewsTab() {
                     getColumnBuckets(buckets, 'Show in buckets'),
                     getColumnClasses(classes, 'Show by classes'),
                     getColumnUsers(users, roles, 'Access for user'),
-                    getColumnRole(roles, 'Access by role'),
-                    getColumnTeams(teams, 'Access by team'),
+                    getColumnRole(roles, 'Access via role'),
+                    getColumnTeams(teams, 'Access via team'),
                     {
                         title: 'Enabled features', field: 'featuresIds', filtering: false, sorting: false,// initialEditValue: [],
                         render: rowData => rowData.featuresIds != null ? `[${rowData.featuresIds.length}]` : '[0]',
