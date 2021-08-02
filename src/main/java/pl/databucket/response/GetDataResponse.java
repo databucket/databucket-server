@@ -35,5 +35,8 @@ public class GetDataResponse {
     private List<DataDTO> data;
 
     @ApiModelProperty(hidden = true)
+    private String message;
+
+    @ApiModelProperty(hidden = true)
     private Object customData;
 }

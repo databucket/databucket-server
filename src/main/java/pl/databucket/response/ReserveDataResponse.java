@@ -21,6 +21,15 @@ public class ReserveDataResponse {
     @ApiModelProperty(position = 2, example = "id")
     private String sort;
 
-    @ApiModelProperty(position = 3)
+    @ApiModelProperty(position = 3, example = "1")
+    private int reserved;
+
+    @ApiModelProperty(position = 4, example = "10")
+    private long available;
+
+    @ApiModelProperty(hidden = true)
+    private String message;
+
+    @ApiModelProperty(position = 6)
     private List<DataDTO> data;
 }

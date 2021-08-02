@@ -133,7 +133,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, null, dataModifyDTO, new QueryRule(user.getUsername(), dataModifyDTO));
+                int count = dataService.modifyData(user, bucket, Optional.empty(), dataModifyDTO, new QueryRule(user.getUsername(), dataModifyDTO));
                 return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
@@ -247,9 +247,9 @@ public class DataController {
                     response.setCustomData(result.get(ResultField.CUSTOM_DATA));
 
                 if (response.getData() == null && response.getCustomData() == null && limit > 0)
-                    return new ResponseEntity<>(new MessageResponse("No data matches the rules!"), HttpStatus.OK);
-                else
-                    return new ResponseEntity<>(response, HttpStatus.OK);
+                    response.setMessage("No data matches the rules!");
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
@@ -279,7 +279,7 @@ public class DataController {
             return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
 
         try {
-            GetDataResponse response = new GetDataResponse();
+            ReserveDataResponse response = new ReserveDataResponse();
             response.setLimit(limit);
             response.setSort(sort);
 
@@ -289,13 +289,24 @@ public class DataController {
                 if (user.isAdminUser() && dataReserveDTO.getTargetOwnerUsername() != null)
                     targetOwnerUsername = dataReserveDTO.getTargetOwnerUsername();
 
-                List<Long> dataIds = dataService.reserveData(user, bucket, new QueryRule(user.getUsername(), dataReserveDTO), limit, sort, targetOwnerUsername);
+                QueryRule queryRule = new QueryRule(user.getUsername(), dataReserveDTO);
+                List<Long> dataIds = dataService.reserveData(user, bucket, queryRule, limit, sort, targetOwnerUsername);
+                if (dataIds != null && dataIds.size() > 0)
+                    response.setReserved(dataIds.size());
+                else
+                    response.setReserved(0);
+
+                queryRule.getConditions().add(new Condition(COL.RESERVED, Operator.notEqual, true));
+                Map<ResultField, Object> getDataResult = dataService.getData(user, bucket, Optional.empty(), queryRule, 0, 0, "id");
+                response.setAvailable((Long) getDataResult.get(ResultField.TOTAL));
+
                 if (dataIds != null && dataIds.size() > 0) {
                     List<DataDTO> dataDTOList = dataService.getData(user, bucket, dataIds);
                     response.setData(dataDTOList);
-                    return new ResponseEntity<>(response, HttpStatus.OK);
-                } else
-                    return new ResponseEntity<>(new MessageResponse("No data matches the rules!"), HttpStatus.OK);
+                } else if (limit > 0)
+                    response.setMessage("No data matches the rules!");
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {

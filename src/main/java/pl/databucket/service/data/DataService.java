@@ -128,24 +128,26 @@ public class DataService {
                 .from()
                 .where(queryRule, paramMap);
 
-        Query queryData = new Query(bucket.getTableName())
-                .selectData(columns)
-                .from()
-                .where(queryRule, paramMap)
-                .orderBy(sort)
-                .limitPage(paramMap, limit, page);
-
         long count = jdbcTemplate.queryForObject(queryCount.toString(logger, paramMap), paramMap, Long.TYPE);
         Map<ResultField, Object> result = new HashMap<>();
         result.put(ResultField.TOTAL, count);
 
-        if (inColumns.isPresent()) {
-            List<Map<String, Object>> dataList = jdbcTemplate.queryForList(queryData.toString(logger, paramMap), paramMap);
-            serviceUtils.convertPropertiesColumns(dataList);
-            result.put(ResultField.CUSTOM_DATA, dataList);
-        } else {
-            List<DataDTO> dataList = jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
-            result.put(ResultField.DATA, dataList);
+        if (limit > 0) {
+            Query queryData = new Query(bucket.getTableName())
+                    .selectData(columns)
+                    .from()
+                    .where(queryRule, paramMap)
+                    .orderBy(sort)
+                    .limitPage(paramMap, limit, page);
+
+            if (inColumns.isPresent()) {
+                List<Map<String, Object>> dataList = jdbcTemplate.queryForList(queryData.toString(logger, paramMap), paramMap);
+                serviceUtils.convertPropertiesColumns(dataList);
+                result.put(ResultField.CUSTOM_DATA, dataList);
+            } else {
+                List<DataDTO> dataList = jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
+                result.put(ResultField.DATA, dataList);
+            }
         }
 
         return result;
