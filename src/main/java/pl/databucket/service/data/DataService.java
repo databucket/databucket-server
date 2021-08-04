@@ -3,6 +3,7 @@ package pl.databucket.service.data;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -254,7 +255,7 @@ public class DataService {
                 });
 
                 done = true;
-            } catch (DeadlockLoserDataAccessException d) {
+            } catch (DeadlockLoserDataAccessException | CannotSerializeTransactionException d) {
                 tryCount -= 1;
                 try {
                     Thread.sleep(400);

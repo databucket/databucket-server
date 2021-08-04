@@ -47,3 +47,7 @@ export const getManagementProjectsPath = () => {
 export const getManagementUsersPath = () => {
     return '/management/users';
 }
+
+export const getManagementLogsPath = () => {
+    return '/management/logs';
+}

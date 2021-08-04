@@ -18,6 +18,7 @@ import ProjectsProvider from "../../context/projects/ProjectsProvider";
 import ManageUsersProvider from "../../context/users/ManageUsersProvider";
 import RolesProvider from "../../context/roles/RolesProvider";
 import UserProfile from "../data/UserProfile";
+// import LogsTab from "./LogsTab";
 
 const useStyles = makeStyles(theme => ({
     appBar: {
@@ -37,7 +38,7 @@ export default function _ManagementTabs() {
     document.title = 'Databucket';
 
     const classes = useStyles();
-    const tabs = ['projects', 'users'];
+    const tabs = ['projects', 'users', 'logs'];
     const [logged, setLogged] = useState(hasToken());
 
     const getTabsValue = (pathname) => {
@@ -78,6 +79,7 @@ export default function _ManagementTabs() {
                                       className={classes.tabs}>
                                     <Tab label="Projects" value={tabs[0]} component={Link} to={getManagementProjectsPath()}/>
                                     <Tab label="Users" value={tabs[1]} component={Link} to={getManagementUsersPath()}/>
+                                    {/*<Tab label="Logs" value={tabs[2]} component={Link} to={getManagementLogsPath()}/>*/}
                                 </Tabs>
                                 <div/>
                                 <UserProfile onLogout={handleLogout}/>
@@ -87,6 +89,7 @@ export default function _ManagementTabs() {
                             <Switch>
                                 <ManagementRoute exact path={getManagementProjectsPath()} component={ProjectsTab}/>
                                 <ManagementRoute exact path={getManagementUsersPath()} component={UsersTab}/>
+                                {/*<ManagementRoute exact path={getManagementLogsPath()} component={LogsTab}/>*/}
                                 <ManagementRoute path="/management/*" component={NotFoundPage}/>
                             </Switch>
                         </RolesProvider> </ManageUsersProvider> </ProjectsProvider>
