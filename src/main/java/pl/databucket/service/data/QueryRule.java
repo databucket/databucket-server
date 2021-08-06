@@ -4,10 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.io.InvalidObjectException;
+import java.util.*;
 
 @Getter
 @Setter
@@ -16,17 +14,18 @@ public class QueryRule {
 
     private Operator operator = Operator.and;
     private List<Condition> conditions = new ArrayList<>();
+    private List<String> strRules = new ArrayList<>(); // given in the rules as string
     private List<QueryRule> queryRules = new ArrayList<>();
     private String currentUser;
 
-    public QueryRule(String currentUser, SearchRules searchRules) {
+    public QueryRule(String currentUser, SearchRules searchRules) throws InvalidObjectException {
         this.currentUser = currentUser;
 
         if (searchRules.getLogic() != null)
-            getQueryRulesFromLogic(queryRules, conditions, searchRules.getLogic());
+            getQueryRulesFromLogic(currentUser, queryRules, conditions, searchRules.getLogic());
 
         if (searchRules.getRules() != null)
-            getQueryRulesFromRules(queryRules, searchRules.getRules());
+            getQueryRulesFromRules(currentUser, queryRules, conditions, strRules, searchRules.getRules());
 
         if (searchRules.getConditions() != null) {
             for (Map<String, Object> conditionMap : searchRules.getConditions())
@@ -34,7 +33,8 @@ public class QueryRule {
         }
     }
 
-    private void getQueryRulesFromLogic(List<QueryRule> localQueryRule, List<Condition> localConditions, Object inputLogic) {
+    private void getQueryRulesFromLogic(String localCurrentUser, List<QueryRule> localQueryRule, List<Condition> localConditions, Object inputLogic) {
+        this.currentUser = localCurrentUser;
         if (inputLogic instanceof Map) {
             Map<String, Object> inputLogicMap = (Map<String, Object>) inputLogic;
             inputLogicMap.forEach((key, value) -> {
@@ -45,9 +45,9 @@ public class QueryRule {
                     case or:
                         queryRule = new QueryRule();
                         queryRule.setOperator(Operator.fromString(key));
-                        queryRule.setQueryRules(new ArrayList<>());
+//                        queryRule.setQueryRules(new ArrayList<>());
                         localQueryRule.add(queryRule);
-                        getQueryRulesFromLogic(queryRule.getQueryRules(), queryRule.getConditions(), value);
+                        getQueryRulesFromLogic(localCurrentUser, queryRule.getQueryRules(), queryRule.getConditions(), value);
                         break;
                     case not: // not also means isEmpty in jsonLogic
                     case isNotEmpty:
@@ -61,9 +61,9 @@ public class QueryRule {
                             // e.g. !{"and": [...]}
                             queryRule = new QueryRule();
                             queryRule.setOperator(Operator.fromString(key));
-                            queryRule.setQueryRules(new ArrayList<>());
+//                            queryRule.setQueryRules(new ArrayList<>());
                             localQueryRule.add(queryRule);
-                            getQueryRulesFromLogic(queryRule.getQueryRules(), queryRule.getConditions(), value);
+                            getQueryRulesFromLogic(localCurrentUser, queryRule.getQueryRules(), queryRule.getConditions(), value);
                         }
                         break;
                     default:
@@ -80,11 +80,123 @@ public class QueryRule {
                 }
             });
         } else if (inputLogic instanceof List)
-            ((List<Object>) inputLogic).forEach(item -> getQueryRulesFromLogic(localQueryRule, localConditions, item));
+            ((List<Object>) inputLogic).forEach(item -> getQueryRulesFromLogic(localCurrentUser, localQueryRule, localConditions, item));
     }
 
-    private void getQueryRulesFromRules(List<QueryRule> queryRules, Map<String, Object> inputRules) {
-        // TODO: almost the same as in JsonLogic case
+    private void getQueryRulesFromRules(String localCurrentUser, List<QueryRule> localQueryRule, List<Condition> localConditions, List<String> localStrRules, Object inputRules) throws InvalidObjectException {
+        this.currentUser = localCurrentUser;
+        if (inputRules instanceof ArrayList)
+            for (Object inputRuleItem : (List<Object>) inputRules) {
+                // nested rules with one item witch is an operator ["and", "or", "!"]
+                if (inputRuleItem instanceof Map) {
+                    Map<String, Object> inputRuleItemMap = (Map<String, Object>) inputRuleItem;
+                    if (inputRuleItemMap.size() == 1) {
+                        inputRuleItemMap.forEach((key, value) -> {
+                            QueryRule queryRule;
+                            Operator operator = Operator.fromString(key);
+                            switch (Objects.requireNonNull(operator)) {
+                                case and:
+                                case or:
+                                    queryRule = new QueryRule();
+                                    queryRule.setOperator(operator);
+                                    queryRule.setQueryRules(new ArrayList<>());
+                                    localQueryRule.add(queryRule);
+
+                                    // Value should be an array
+                                    if (!(value instanceof ArrayList))
+                                        throw new IllegalStateException("Expected array value in the '" + key + "' item");
+
+                                    try {
+                                        getQueryRulesFromRules(localCurrentUser, queryRule.getQueryRules(), queryRule.getConditions(), queryRule.getStrRules(), value);
+                                    } catch (InvalidObjectException e) {
+                                        e.printStackTrace();
+                                    }
+                                    break;
+                                case not:
+                                    // e.g. !{"and": ...}
+                                    queryRule = new QueryRule();
+                                    queryRule.setOperator(operator);
+                                    localQueryRule.add(queryRule);
+                                    try {
+                                        getQueryRulesFromRules(localCurrentUser, queryRule.getQueryRules(), queryRule.getConditions(), queryRule.getStrRules(), value);
+                                    } catch (InvalidObjectException e) {
+                                        e.printStackTrace();
+                                    }
+                                    break;
+                                default:
+                                    throw new IllegalStateException("Expected one of the operators [and, or, !]");
+                            }
+                        });
+                    } else
+                        throw new InvalidObjectException("Expected 1 item as logic operator");
+
+                    // new rule as array ["leftFieldOrItem", "operator", "rightFieldOrItem"] e.g.: ["$.name", "like", "Jonh%"]
+                } else if (inputRuleItem instanceof ArrayList) {
+                    List<Object> ruleItem = (List<Object>) inputRuleItem;
+                    if (ruleItem.size() == 3)
+                        localConditions.add(getConditionFromRule(ruleItem.get(0), Operator.fromString((String) ruleItem.get(1)), ruleItem.get(2)));
+                    else
+                        throw new InvalidObjectException("Expected 3 items in the rule definition!");
+
+                    // whole sql condition as string, e.g.: (properties->'account' is not NULL) = true
+                } else if (inputRuleItem instanceof String) {
+                    localStrRules.add(retrieveDatabaseColumnsNames((String) inputRuleItem));
+                } else
+                    throw new InvalidObjectException("Expected Map or ArrayList in as the 'rule' item!");
+            }
+
+        // inside ! operator
+        else if (inputRules instanceof Map) {
+            Map<String, Object> inputRuleItemMap = (Map<String, Object>) inputRules;
+            if (inputRuleItemMap.size() == 1) {
+                inputRuleItemMap.forEach((key, value) -> {
+                    QueryRule queryRule;
+                    Operator operator = Operator.fromString(key);
+                    switch (Objects.requireNonNull(operator)) {
+                        case and:
+                        case or:
+                            queryRule = new QueryRule();
+                            queryRule.setOperator(operator);
+                            queryRule.setQueryRules(new ArrayList<>());
+                            localQueryRule.add(queryRule);
+
+                            // Value should be an array
+                            if (!(value instanceof ArrayList))
+                                throw new IllegalStateException("Expected array value in the '" + key + "' item");
+
+                            try {
+                                getQueryRulesFromRules(localCurrentUser, queryRule.getQueryRules(), queryRule.getConditions(), queryRule.getStrRules(), value);
+                            } catch (InvalidObjectException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case not:
+                            // e.g. !{"and": ...}
+                            queryRule = new QueryRule();
+                            queryRule.setOperator(operator);
+                            localQueryRule.add(queryRule);
+                            try {
+                                getQueryRulesFromRules(localCurrentUser, queryRule.getQueryRules(), queryRule.getConditions(), queryRule.getStrRules(), value);
+                            } catch (InvalidObjectException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        default:
+                            throw new IllegalStateException("Expected one of the operators [and, or, !]");
+                    }
+                });
+            } else
+                throw new InvalidObjectException("Expected 1 item as logic operator");
+        }
+    }
+
+    private Condition getConditionFromRule(Object leftObject, Operator operator, Object rightObject) {
+        String leftValue = (String) leftObject;
+        SourceType leftSource = leftValue.startsWith("$") ? leftValue.endsWith("()") ? SourceType.s_function : SourceType.s_property : SourceType.s_field;
+        Object rightValue = retrieveCurrentUser(rightObject);
+        SourceType rightSource = SourceType.s_const;
+
+        return new Condition(leftSource, getDatabaseColumnName(leftValue), operator, rightSource, rightValue);
     }
 
     private Condition getConditionFromJsonLogic(Operator operator, Object firstItem, Object secondItem) {
@@ -118,7 +230,7 @@ public class QueryRule {
     }
 
     private String convertJsonLogicVariable(Object variable) {
-        String var = ((Map<String, String>)variable).get("var");
+        String var = ((Map<String, String>) variable).get("var");
         if (var.startsWith("prop.$*"))
             var = var.replace("prop.", "").replace("*", ".");
         else
@@ -126,15 +238,34 @@ public class QueryRule {
         return var;
     }
 
+    private String retrieveDatabaseColumnsNames(String rule) {
+        return rule
+                .replace("id", COL.DATA_ID)
+                .replace("tagId", COL.TAG_ID)
+                .replace("owner", COL.RESERVED_BY)
+                .replace("createdBy", COL.CREATED_BY)
+                .replace("createdAt", COL.CREATED_AT)
+                .replace("modifiedBy", COL.MODIFIED_BY)
+                .replace("modifiedAt", COL.MODIFIED_AT)
+                .replace("@currentUser", this.currentUser);
+    }
+
     private String getDatabaseColumnName(String field) {
         switch (field) {
-            case "id": return COL.DATA_ID;
-            case "tagId": return COL.TAG_ID;
-            case "owner": return COL.RESERVED_BY;
-            case "createdBy": return COL.CREATED_BY;
-            case "createdAt": return COL.CREATED_AT;
-            case "modifiedBy": return COL.MODIFIED_BY;
-            case "modifiedAt": return COL.MODIFIED_AT;
+            case "id":
+                return COL.DATA_ID;
+            case "tagId":
+                return COL.TAG_ID;
+            case "owner":
+                return COL.RESERVED_BY;
+            case "createdBy":
+                return COL.CREATED_BY;
+            case "createdAt":
+                return COL.CREATED_AT;
+            case "modifiedBy":
+                return COL.MODIFIED_BY;
+            case "modifiedAt":
+                return COL.MODIFIED_AT;
             default:
                 return field;
         }

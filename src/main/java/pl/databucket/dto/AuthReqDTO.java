@@ -1,11 +1,13 @@
 package pl.databucket.dto;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class AuthReqDTO {
 
     @ApiModelProperty(position = 1, required = true, example = "username")

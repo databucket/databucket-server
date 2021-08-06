@@ -24,5 +24,5 @@ public class DataReserveDTO implements SearchRules {
     private Map<String, Object> logic; // New rules defined in frontend (property is saved as prop.$*group*itemName)
 
     @ApiModelProperty(hidden = true)
-    private Map<String, Object> rules; // New rules defined in code (property is saved as $.group.itemName)
+    private List<Object> rules; // New rules defined in code (property is saved as $.group.itemName)
 }

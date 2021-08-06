@@ -140,7 +140,7 @@ public class Query {
 
     public Query where(QueryRule queryRule, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
         String rules = generateQueryRulesString("n", queryRule, paramMap);
-        if (rules.length() > 0)
+        if (rules.length() > 3) // could be () if no rules
             query += " WHERE " + rules;
         return this;
     }
@@ -234,6 +234,9 @@ public class Query {
                     allConditions.add(generateConditionString(uniqueName + 0, queryRule.getConditions().get(0), paramMap));
             }
 
+        if (queryRule.getStrRules().size() > 0)
+            allConditions.addAll(queryRule.getStrRules());
+
         if (queryRule.getQueryRules().size() > 0) {
             if (queryRule.getQueryRules().size() > 1) {
                 List<String> qrConditions = new ArrayList<>();
@@ -251,7 +254,7 @@ public class Query {
             }
         }
 
-        return String.join(" " + queryRule.getOperator().toString() + " ", allConditions);
+        return "(" + String.join(" " + queryRule.getOperator().toString() + " ", allConditions) + ")";
     }
 
     private String generateConditionString(String uniqueName, Condition condition, Map<String, Object> paramMap) throws ConditionNotAllowedException, UnknownColumnException {
