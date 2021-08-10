@@ -80,8 +80,8 @@ const buildPropertiesFields = (propFields, enums) => {
         if (subfield.type === 'text')
             subfield['excludeOperators'] = ["proximity", "starts_with", "ends_with"];
 
-        if (subfield.type === 'number')
-            subfield['excludeOperators'] = ["not_between", "starts_with", "ends_with"];
+        if (subfield.type === 'boolean')
+            subfield['operators'] = ["equal", "not_equal", "is_empty", "is_not_empty"];
 
         subfield['valueSources'] = ["value"];
 

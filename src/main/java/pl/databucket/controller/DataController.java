@@ -126,6 +126,11 @@ public class DataController {
             @ApiParam(value="bucket name", example = "bucket") @PathVariable String bucketName,
             @ApiParam(value="payload") @RequestBody DataModifyDTO dataModifyDTO) {
 
+        if ((dataModifyDTO.getConditions() == null || dataModifyDTO.getConditions().size() == 0)
+            && (dataModifyDTO.getRules() == null || dataModifyDTO.getRules().size() == 0)
+            && dataModifyDTO.getLogic() == null)
+            return new ResponseEntity<>(new MessageResponse("Can not modify data without any rules!"), HttpStatus.NOT_ACCEPTABLE);
+
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
             return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
@@ -334,6 +339,11 @@ public class DataController {
     public ResponseEntity<?> deleteData(
             @ApiParam(name = "bucket name", example = "bucket", required = true) @PathVariable String bucketName,
             @ApiParam(value="payload") @RequestBody DataRemoveDTO dataRemoveDTO) {
+
+        if ((dataRemoveDTO.getConditions() == null || dataRemoveDTO.getConditions().size() == 0)
+                && (dataRemoveDTO.getRules() == null || dataRemoveDTO.getRules().size() == 0)
+                && dataRemoveDTO.getLogic() == null)
+            return new ResponseEntity<>(new MessageResponse("Can not remove data without any rules!"), HttpStatus.NOT_ACCEPTABLE);
 
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
