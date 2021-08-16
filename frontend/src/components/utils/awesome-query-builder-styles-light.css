@@ -46,8 +46,8 @@ body.qb-dragging .ant-tooltip {
 }
 
 .rule {
-    background-color: whitesmoke;
-    border: 1px solid transparent;
+    background-color: white;
+    border: 1px solid #f5e8c6;
     padding: 3px
 }
 
@@ -108,7 +108,7 @@ body.qb-dragging .ant-tooltip {
     left: -14px;
     width: 14px;
     height: calc(50% + 8px);
-    border-color: whitesmoke;
+    border-color: silver;
     border-style: solid;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -147,7 +147,7 @@ body.qb-dragging .ant-tooltip {
 }
 
 .group--children.hide--line > .group-or-rule-container > .group-or-rule::before, .group--children.hide--line > .group-or-rule-container > .group-or-rule::after {
-    border-color: whitesmoke;
+    border-color: silver;
 }
 
 .qb-draggable::before, .qb-draggable::after {

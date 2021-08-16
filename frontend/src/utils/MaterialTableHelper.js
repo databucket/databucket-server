@@ -70,7 +70,7 @@ export const getPageSizeOptions = () => {
 }
 
 export const getPageSizeOptionsOnDialog = () => {
-    return [10, 15, 20, 25, 30, 40];
+    return [10, 15, 20, 25, 30, 40, 50];
 }
 
 export const handleErrors = (res) => {
@@ -208,7 +208,7 @@ export const getDialogTableHeight = (height, custom) => {
 }
 
 export const getPropertiesTableHeight = (height, custom) => {
-    const tableHeight = ((height - 64 - 64 - 143) / height * 100).toFixed(2) - custom;
+    const tableHeight = ((height - 64 - 64 - 150) / height * 100).toFixed(2) - custom;
     return `${tableHeight}vh`;
 }
 

@@ -13,6 +13,9 @@ const LAST_ACTIVE_GROUP = 'last-active-group';
 const LAST_ACTIVE_BUCKET = 'last-active-bucket';
 const LAST_OPENED_BUCKETS = 'last-opened-buckets';
 const LAST_ACTIVE_VIEW = 'last-active-view';
+const LAST_SEARCHED_TEXT = 'last-searched-text';
+const DATA_DETAILS_DIALOG_SIZE = 'data-details-dialog-size';
+const DATA_FILTER_DIALOG_SIZE = 'data-filter-dialog-size';
 
 export const logOut = () => {
     clearUsername();
@@ -236,3 +239,52 @@ export const setLastActiveView = (bucketId, viewId) => {
     lastActiveView[`${bucketId}`] = viewId;
     setActiveProjectContextProperty(LAST_ACTIVE_VIEW, lastActiveView);
 }
+
+export const getLastBucketSearchedText = (bucketId) => {
+    const lastSearchedText = getActiveProjectContextProperty(LAST_SEARCHED_TEXT);
+
+    if (lastSearchedText != null)
+        return lastSearchedText[`${bucketId}`];
+    else
+        return "";
+}
+
+export const setLastBucketSearchedText = (bucketId, searchedText) => {
+    let lastSearchedText = getActiveProjectContextProperty(LAST_SEARCHED_TEXT);
+    if (lastSearchedText == null)
+        lastSearchedText = {};
+
+    lastSearchedText[`${bucketId}`] = searchedText;
+    setActiveProjectContextProperty(LAST_SEARCHED_TEXT, lastSearchedText);
+}
+
+export const clearAllSearchedText = () => {
+    setActiveProjectContextProperty(LAST_SEARCHED_TEXT, null);
+}
+
+export const getDataDetailsDialogSize = () => {
+    if (localStorage.getItem(DATA_DETAILS_DIALOG_SIZE) != null) {
+        let size = localStorage.getItem(DATA_DETAILS_DIALOG_SIZE);
+        if (size === 'true')
+            return true;
+        else
+            return size;
+    } else
+        return true;
+}
+
+export const setDataDetailsDialogSize = (size) => {
+    localStorage.setItem(DATA_DETAILS_DIALOG_SIZE, size.toString());
+}
+
+export const getDataFilterDialogSize = () => {
+    if (localStorage.getItem(DATA_FILTER_DIALOG_SIZE) != null) {
+        return localStorage.getItem(DATA_FILTER_DIALOG_SIZE);
+    } else
+        return 'md';
+}
+
+export const setDataFilterDialogSize = (size) => {
+    localStorage.setItem(DATA_FILTER_DIALOG_SIZE, size);
+}
+

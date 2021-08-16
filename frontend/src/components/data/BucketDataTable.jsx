@@ -11,7 +11,7 @@ import {
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {useTheme} from "@material-ui/core/styles";
-import {getLastActiveView, getLastPageSize, getUsername, setLastActiveView, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {getLastActiveView, getLastBucketSearchedText, getLastPageSize, getUsername, setLastActiveView, setLastBucketSearchedText, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {Grid} from "@material-ui/core";
 import ViewMenuSelector from "./ViewMenuSelector";
@@ -26,7 +26,7 @@ import {
     FEATURE_CREATION,
     FEATURE_REMOVAL,
     FEATURE_RESERVATION,
-    FEATURE_EXPORT, FEATURE_TASKS
+    FEATURE_EXPORT, FEATURE_TASKS, FEATURE_DUPLICATE, FEATURE_RICH_FILTER, FEATURE_FILTER
 } from "../utils/ViewFeatures";
 import prepareTableColumns, {
     convertDataBeforeAdd,
@@ -42,6 +42,7 @@ import Refresh from "@material-ui/icons/Refresh";
 import RateReviewOutlined from "@material-ui/icons/RateReviewOutlined";
 import History from "@material-ui/icons/History";
 import FilterList from "@material-ui/icons/FilterList";
+import DuplicateIcon from '@material-ui/icons/ViewStream'
 import {getDataByIdUrl, getDataHistoryUrl, getDataReserveUrl, getDataUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
@@ -49,6 +50,8 @@ import DataDetailsDialog from "../dialogs/DataDetailsDialog";
 import DataHistoryDialog from "../dialogs/DataHistoryDialog";
 import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
+import RichFilterDialog from "../dialogs/RichFilterDialog";
+
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
@@ -74,14 +77,17 @@ export default function BucketDataTable() {
     const [taskState, setTaskState] = useState({
         open: false
     });
+    const [richFilterState, setRichFilterState] = useState({
+        open: false
+    });
     const [state, setState] = useState({
         bucketViews: [],    // all views available for active bucket that user has access
         bucketTags: [],
         bucketTasks: [],
         activeView: null,
         columnsDef: [],     // pure columns definition
-        filterDef: null,    // pure filter definition
-        tableColumns: [],   // columns prepared for material table
+        activeLogic: null,    // the logic from active view or from rich filter
+        tableColumns: []   // columns prepared for material table,
     });
 
     // active bucket is changed
@@ -94,7 +100,9 @@ export default function BucketDataTable() {
             const activeView = getActiveView(bucketViews, lastActiveViewId);
             const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
             const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums);
-            const filterDef = filters.filter(f => f.id === activeView.filterId)[0];
+            const filteredFilters = filters.filter(f => f.id === activeView.filterId);
+            const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
+
             setState({
                 ...state,
                 bucketViews: bucketViews,
@@ -102,7 +110,7 @@ export default function BucketDataTable() {
                 bucketTasks: bucketTasks,
                 activeView: activeView,
                 columnsDef: columnsDef,
-                filterDef: filterDef,
+                activeLogic: activeLogic,
                 tableColumns: tableColumns
             });
             reloadData();
@@ -114,23 +122,44 @@ export default function BucketDataTable() {
                 bucketTasks: [],
                 activeView: null,
                 columnsDef: [],
-                filterDef: null,
+                activeLogic: null,
                 tableColumns: []
             });
 
+        setLastSearchedText();
     }, [activeBucket, enums, tags, views, columns, filters]);
+
+    const setLastSearchedText = () => {
+        // put last searched text into 'Search properties' text box
+        if (tableRef !== null && tableRef.current !== null) {
+            const searchText = getLastBucketSearchedText(activeBucket.id);
+            tableRef.current.dataManager.changeSearchText(searchText);
+            tableRef.current.setState({searchText: searchText});
+            tableRef.current.setState(tableRef.current.dataManager.getRenderState());
+        }
+    }
+
+    const handleSearchChange = (searchedText) => {
+        setLastBucketSearchedText(activeBucket.id, searchedText);
+    }
+
+    const setActiveLogic = (logic) => {
+        setState({...state, activeLogic: logic});
+        reloadData();
+    }
 
     // active view is changed
     const onViewSelected = (view) => {
         setLastActiveView(activeBucket.id, view.id);
         const columnsDef = columns.filter(col => col.id === view.columnsId)[0];
-        const filterDef = filters.filter(f => f.id === view.filterId)[0];
+        const filteredFilters = filters.filter(f => f.id === view.filterId);
+        const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
         const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums);
         setState({
             ...state,
             activeView: view,
             columnsDef: columnsDef,
-            filterDef: filterDef,
+            activeLogic: activeLogic,
             tableColumns: tableColumns
         });
         reloadData();
@@ -142,6 +171,14 @@ export default function BucketDataTable() {
 
     const onCloseTaskExecutionEditorDialog = () => {
         setTaskState({...taskState, open: false});
+    }
+
+    const onOpenRichFilterDialog = () => {
+        setRichFilterState({...richFilterState, open: true});
+    }
+
+    const onCloseRichFilterDialog = () => {
+        setRichFilterState({...richFilterState, open: false});
     }
 
     const getRowDataId = (rowData) => {
@@ -203,21 +240,34 @@ export default function BucketDataTable() {
             });
     }
 
-    const onCloseDataHistoryDialog = () => {
-        setHistoryState({...historyState, open: false});
+    const onDuplicateData = (rowData) => {
+        let resultOk = true;
+        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)), getGetOptions())
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                resultOk = false;
+            })
+            .then(dataRow => {
+                if (resultOk) {
+                    const duplicatedData = {
+                        tagId: dataRow.tagId,
+                        reserved: dataRow.reserved,
+                        properties: dataRow.properties
+                    };
+                    fetch(getDataUrl(activeBucket), getPostOptions(duplicatedData))
+                        .then(handleErrors)
+                        .catch(error => {
+                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                            resultOk = false;
+                        });
+                    resultOk && reloadData();
+                }
+            });
     }
 
-    const getActiveViewFilterLogic = () => {
-        if (state.activeView.filterId != null) {
-            const filterDef = filters.filter(f => f.id === state.activeView.filterId);
-            if (filterDef.length > 0)
-                return filterDef[0].configuration.logic;
-            else {
-                console.error(`The linked filter (id=${state.activeView.filterId}) doesn't exist in the filter list!`)
-                return null;
-            }
-        } else
-            return null;
+    const onCloseDataHistoryDialog = () => {
+        setHistoryState({...historyState, open: false});
     }
 
     const onDataReserve = ({random, number, username}) => {
@@ -225,7 +275,7 @@ export default function BucketDataTable() {
         let payload = {
             targetOwnerUsername: username !== getUsername() ? username : null,
             conditions: consolidateAllConditions(query.search, query.filters),
-            logic: getActiveViewFilterLogic()
+            logic: state.activeLogic
         };
 
         let resultOk = true;
@@ -302,6 +352,15 @@ export default function BucketDataTable() {
         }
     };
 
+    const richFilterAction = {
+        icon: () => <span className="material-icons">filter_alt</span>,
+        tooltip: 'Rich filter',
+        isFreeAction: true,
+        onClick: () => {
+            onOpenRichFilterDialog();
+        }
+    };
+
     const filterAction = {
         icon: () => filtering ? <FilterList color={'primary'}/> : <FilterList/>,
         tooltip: 'Enable/disable filter',
@@ -337,13 +396,23 @@ export default function BucketDataTable() {
         }
     };
 
+    const duplicateAction = {
+        icon: () => <DuplicateIcon/>,
+        tooltip: 'Duplicate data',
+        onClick: (event, rowData) => {
+            onDuplicateData(rowData);
+        }
+    };
+
     const getActions = () => {
         let actions = [];
         actions.push(refreshAction);
         if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) actions.push(tasksAction);
-        actions.push(filterAction);
+        if (isFeatureEnabled(FEATURE_FILTER, state.activeView)) actions.push(filterAction);
+        if (isFeatureEnabled(FEATURE_RICH_FILTER, state.activeView)) actions.push(richFilterAction);
         if (isFeatureEnabled(FEATURE_DETAILS, state.activeView)) actions.push(detailsAction);
         if (isFeatureEnabled(FEATURE_HISTORY, state.activeView)) actions.push(historyAction);
+        if (isFeatureEnabled(FEATURE_DUPLICATE, state.activeView)) actions.push(duplicateAction);
         return actions;
     }
 
@@ -423,7 +492,7 @@ export default function BucketDataTable() {
             <div style={{paddingTop: 0, paddingLeft: 0, paddingRight: 0}}>
                 <MaterialTable
                     tableRef={tableRef}
-                    title={`[${activeBucket.name}] ${state.activeView.description}`}
+                    // title={`[${activeBucket.name}] ${state.activeView.description}`}
                     columns={state.tableColumns}
                     data={query =>
                         new Promise((resolve) => {
@@ -448,7 +517,7 @@ export default function BucketDataTable() {
                                 let payload = {
                                     columns: getFetchColumns(state.tableColumns),
                                     conditions: consolidateAllConditions(query.search, query.filters),
-                                    logic: getActiveViewFilterLogic()
+                                    logic: state.activeLogic
                                 }
 
                                 let resultOk = true;
@@ -476,7 +545,6 @@ export default function BucketDataTable() {
                     options={{
                         paging: true,
                         pageSize: pageSize,
-                        paginationType: 'stepped',
                         pageSizeOptions: getPageSizeOptionsOnDialog(),
                         actionsColumnIndex: -1,
                         debounceInterval: 700,
@@ -504,8 +572,6 @@ export default function BucketDataTable() {
                     components={{
                         Container: props => <div {...props} />,
                         Toolbar: props => {
-                            const propsCopy = {...props};
-                            propsCopy.showTitle = false;
                             return (
                                 <Grid container direction="row">
                                     <Grid container direction={"row"} item xs={3} alignItems="center">
@@ -521,7 +587,14 @@ export default function BucketDataTable() {
                                         </Grid>
                                     </Grid>
                                     <Grid item xs={9}>
-                                        <MTableToolbar {...propsCopy} />
+                                        <MTableToolbar
+                                            {...props}
+                                            showTitle = {false}
+                                            onSearchChanged = {searchText => {
+                                                handleSearchChange(searchText);
+                                                props.onSearchChanged(searchText);
+                                            }}
+                                        />
                                     </Grid>
                                 </Grid>
                             );
@@ -557,6 +630,15 @@ export default function BucketDataTable() {
                     open={taskState.open}
                     onClose={onCloseTaskExecutionEditorDialog}
                     reload={reloadData}
+                />
+
+                <RichFilterDialog
+                    bucket={activeBucket}
+                    open={richFilterState.open}
+                    onClose={onCloseRichFilterDialog}
+                    reload={reloadData}
+                    activeLogic={state.activeLogic}
+                    setActiveLogic={setActiveLogic}
                 />
             </div>
         );

@@ -171,6 +171,10 @@ export const getBucketTasks = (activeBucket, tasks) => {
     return tasks.filter(task => (task.bucketsIds != null && task.bucketsIds.includes(activeBucket.id)) || (task.classesIds != null && task.classesIds.includes(activeBucket.classId)));
 }
 
+export const getBucketFilters = (activeBucket, filters) => {
+    return filters.filter(filterItem => (filterItem.classId != null && filterItem.classId === activeBucket.classId) || filterItem.classId == null);
+}
+
 export const getBucketViews = (activeBucket, views) => {
     if (views != null && activeBucket != null) {
         return views.filter(view => (

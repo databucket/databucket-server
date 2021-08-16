@@ -30,6 +30,7 @@ import ClassesContext from "../../context/classes/ClassesContext";
 import TaskEditConfigDialog, {getActionsType} from "../dialogs/TaskEditConfigDialog";
 import FiltersContext from "../../context/filters/FiltersContext";
 import TagsContext from "../../context/tags/TagsContext";
+import CloneIcon from "@material-ui/icons/ViewStream";
 
 export default function TasksTab() {
 
@@ -83,6 +84,19 @@ export default function TasksTab() {
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
         setLastPageSize(pageSize);
+    }
+
+    const cloneItem = (rowData) => {
+        fetch(getBaseUrl('tasks'), getPostOptions(rowData))
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+            })
+            .then((tasks) => {
+                if (tasks != null) {
+                    addTask(convertNullValuesInObject(tasks, getTasksMapper()));
+                }
+            });
     }
 
     return (
@@ -150,6 +164,11 @@ export default function TasksTab() {
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)
+                    },
+                    {
+                        icon: () => <CloneIcon/>,
+                        tooltip: 'Duplicate',
+                        onClick: (event, rowData) => cloneItem(rowData)
                     }
                 ]}
                 editable={{

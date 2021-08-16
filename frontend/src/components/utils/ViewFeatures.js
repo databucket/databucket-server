@@ -1,9 +1,12 @@
 export const FEATURE_SEARCH = 'Search';
+export const FEATURE_FILTER = 'Filter';
+export const FEATURE_RICH_FILTER = 'Rich filter';
 export const FEATURE_DETAILS = 'Details';
 export const FEATURE_CREATION = 'Creation';
 export const FEATURE_MODIFYING = 'Modifying';
 export const FEATURE_REMOVAL = 'Removal';
 export const FEATURE_HISTORY = 'History';
+export const FEATURE_DUPLICATE = 'Duplicate';
 export const FEATURE_TASKS = 'Tasks';
 export const FEATURE_RESERVATION = 'Reservation';
 export const FEATURE_IMPORT = 'Import';
@@ -19,7 +22,10 @@ export const features = [
     {id: 7, name: FEATURE_TASKS},
     {id: 8, name: FEATURE_RESERVATION},
     {id: 9, name: FEATURE_IMPORT},
-    {id: 10, name: FEATURE_EXPORT}
+    {id: 10, name: FEATURE_EXPORT},
+    {id: 11, name: FEATURE_DUPLICATE},
+    {id: 12, name: FEATURE_FILTER},
+    {id: 13, name: FEATURE_RICH_FILTER}
 ];
 
 export const isFeatureEnabled = (name, activeView) => {

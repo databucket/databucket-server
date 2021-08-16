@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -255,7 +256,7 @@ public class DataService {
                 });
 
                 done = true;
-            } catch (DeadlockLoserDataAccessException | CannotSerializeTransactionException d) {
+            } catch (DeadlockLoserDataAccessException | CannotSerializeTransactionException | JpaSystemException d) {
                 tryCount -= 1;
                 try {
                     Thread.sleep(400);

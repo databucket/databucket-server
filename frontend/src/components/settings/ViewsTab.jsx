@@ -36,6 +36,7 @@ import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SelectMultiViewFeaturesLookup from "../lookup/SelectMultiViewFeaturesLookup";
+import CloneIcon from "@material-ui/icons/ViewStream";
 
 export default function ViewsTab() {
 
@@ -113,6 +114,19 @@ export default function ViewsTab() {
         setLastPageSize(pageSize);
     }
 
+    const cloneItem = (rowData) => {
+        fetch(getBaseUrl('views'), getPostOptions(rowData))
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+            })
+            .then((views) => {
+                if (views != null) {
+                    addView(convertNullValuesInObject(views, getViewsMapper()));
+                }
+            });
+    }
+
     return (
         <div>
             <MaterialTable
@@ -168,6 +182,11 @@ export default function ViewsTab() {
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)
+                    },
+                    {
+                        icon: () => <CloneIcon/>,
+                        tooltip: 'Duplicate',
+                        onClick: (event, rowData) => cloneItem(rowData)
                     }
                 ]}
                 editable={{

@@ -21,7 +21,10 @@ public final class DataRowMapper implements RowMapper<DataDTO> {
     public DataDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
         DataDTO dataDto = new DataDTO();
         dataDto.setId(rs.getLong(COL.DATA_ID));
-        dataDto.setTagId(rs.getLong(COL.TAG_ID));
+        if (rs.getObject(COL.TAG_ID) != null)
+            dataDto.setTagId(rs.getLong(COL.TAG_ID));
+        else
+            dataDto.setTagId(null);
         dataDto.setReserved(rs.getBoolean(COL.RESERVED));
         dataDto.setOwner(rs.getString(COL.RESERVED_BY));
         dataDto.setProperties(convertPGObjectToMap((PGobject) rs.getObject(COL.PROPERTIES)));

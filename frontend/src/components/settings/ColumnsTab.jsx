@@ -142,7 +142,7 @@ export default function ColumnsTab() {
                     },
                     {
                         icon: () => <CloneIcon/>,
-                        tooltip: 'Clone',
+                        tooltip: 'Duplicate',
                         onClick: (event, rowData) => cloneItem(rowData)
                     }
                 ]}

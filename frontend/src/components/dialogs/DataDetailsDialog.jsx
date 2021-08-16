@@ -15,6 +15,7 @@ import Typography from '@material-ui/core/Typography';
 import {Divider} from '@material-ui/core';
 import {createTagLookup} from "../../utils/JsonHelper";
 import {getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../utils/MaterialTableHelper";
+import {getDataDetailsDialogSize, setDataDetailsDialogSize} from "../../utils/ConfigurationStorage";
 
 const titleStyles = theme => ({
     root: {
@@ -29,14 +30,30 @@ const titleStyles = theme => ({
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
+    },
+    smallerButton: {
+        position: 'absolute',
+        right: theme.spacing(15),
+        top: theme.spacing(1)
+    },
+    largerButton: {
+        position: 'absolute',
+        right: theme.spacing(10),
+        top: theme.spacing(1)
     }
 });
 
 const DialogTitle = withStyles(titleStyles)(props => {
-    const {children, classes, onClose} = props;
+    const {children, classes, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
+            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"}>
+                <span className="material-icons">fullscreen_exit</span>
+            </IconButton>
+            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"}>
+                <span className="material-icons">fullscreen</span>
+            </IconButton>
             {onClose ? (
                 <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
                     <CloseIcon/>
@@ -79,6 +96,11 @@ export default function DataDetailsDialog(props) {
     const tableRef = createRef();
     const [state, setState] = useState({dataRow: null, open: false, changed: false, valid: true, changedProperties: null});
     const tagsLookup = createTagLookup(props.tags);
+    const [dialogSize, setDialogSize] = useState(false);
+
+    useEffect(() => {
+        setDialogSize(getDataDetailsDialogSize());
+    }, []);
 
     useEffect(() => {
         setState({...state, dataRow: props.dataRow, open: props.open});
@@ -98,6 +120,32 @@ export default function DataDetailsDialog(props) {
         setState({...state, open: false, changed: false});
     };
 
+    const onMakeDialogSmaller = () => {
+        if (dialogSize === 'lg') {
+            setDialogSize('md');
+            setDataDetailsDialogSize('md');
+        } else if (dialogSize === 'xl') {
+            setDialogSize('lg');
+            setDataDetailsDialogSize('lg');
+        } else if (dialogSize === true) {
+            setDialogSize('xl');
+            setDataDetailsDialogSize('xl');
+        }
+    }
+
+    const onMakeDialogLarger = () => {
+        if (dialogSize === 'md') {
+            setDialogSize('lg');
+            setDataDetailsDialogSize('lg');
+        } else if (dialogSize === 'lg') {
+            setDialogSize('xl');
+            setDataDetailsDialogSize('xl');
+        } else if (dialogSize === 'xl') {
+            setDialogSize(true);
+            setDataDetailsDialogSize(true);
+        }
+    }
+
     return (
         <Dialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
@@ -105,9 +153,14 @@ export default function DataDetailsDialog(props) {
             classes={{paper: classes.dialogPaper}}
             open={state.open}
             fullWidth={true}
-            maxWidth={false}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth={dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
         >
-            <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+            <DialogTitle
+                id="customized-dialog-title"
+                onClose={handleClose}
+                onMakeDialogSmaller={onMakeDialogSmaller}
+                onMakeDialogLarger={onMakeDialogLarger}
+            >
                 Data details
             </DialogTitle>
             <Divider/>

@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import React, {useContext, useEffect, useState} from 'react';
-import './awesome-query-builder-styles.css';
 import {Query, Builder, Utils as QbUtils} from 'react-awesome-query-builder';
 import EnumsContext from "../../context/enums/EnumsContext";
 import Typography from "@material-ui/core/Typography";

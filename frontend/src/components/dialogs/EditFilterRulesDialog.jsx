@@ -114,7 +114,7 @@ export default function EditFilterRulesDialog(props) {
             <Dialog
                 onClose={handleSave}
                 aria-labelledby="customized-dialog-title"
-                classes={{ paper: classes.dialogPaper }}
+                classes={{paper: classes.dialogPaper}}
                 open={open}
                 fullWidth={true}
                 maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
@@ -135,7 +135,7 @@ export default function EditFilterRulesDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers style={{height:'75vh'}}>
+                <DialogContent dividers style={{height: '75vh'}}>
                     {open &&
                     <FilterRulesEditor
                         activeTab={activeTab}
