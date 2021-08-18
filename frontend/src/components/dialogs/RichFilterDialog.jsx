@@ -137,6 +137,7 @@ export default function RichFilterDialog(props) {
     }, [props.open]);
 
     const makeRulesDisabled = (inputLogic) => {
+        // _meta << not implemented by component founder yet!!!
         // const inputLogicStr = JSON.stringify(inputLogic);
         // const disabledILogicStr = inputLogicStr.replace("\"var\":", "\"_meta\": {\"readonly\": true}, \"var\":");
         // return JSON.parsnpute(disabledInputLogicStr);

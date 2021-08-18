@@ -1,7 +1,7 @@
 {
   "homepage": ".",
   "name": "databucket",
-  "version": "3.0.14",
+  "version": "3.0.15",
   "private": true,
   "dependencies": {
     "@material-ui/core": "4.12.3",

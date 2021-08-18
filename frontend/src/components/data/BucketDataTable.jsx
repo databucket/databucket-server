@@ -11,9 +11,18 @@ import {
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {useTheme} from "@material-ui/core/styles";
-import {getLastActiveView, getLastBucketSearchedText, getLastPageSize, getUsername, setLastActiveView, setLastBucketSearchedText, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {
+    getLastActiveView, getLastBucketOrder,
+    getLastBucketSearchedText,
+    getLastPageSize,
+    getUsername,
+    setLastActiveView,
+    setLastBucketOrder,
+    setLastBucketSearchedText,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {useWindowDimension} from "../utils/UseWindowDimension";
-import {Grid} from "@material-ui/core";
+import {Grid, Icon} from "@material-ui/core";
 import ViewMenuSelector from "./ViewMenuSelector";
 import AccessContext from "../../context/access/AccessContext";
 import MissingBucketTable from "./MissingBucketTable";
@@ -34,7 +43,6 @@ import prepareTableColumns, {
     getActiveView,
     getBucketTags, getBucketTasks,
     getBucketViews,
-    getColumnSource,
     getFetchColumns
 } from "./BucketDataTableHelper";
 import MissingActiveView from "./MissingActiveView";
@@ -89,17 +97,31 @@ export default function BucketDataTable() {
         activeLogic: null,    // the logic from active view or from rich filter
         tableColumns: []   // columns prepared for material table,
     });
+    let searchText = activeBucket != null ? getLastBucketSearchedText(activeBucket.id) : "";
+    const [changedBucket, setChangedBucket] = useState(false);
 
     // active bucket is changed
     useEffect(() => {
+        setChangedBucket(true);
+        setFiltering(false);
         const bucketViews = getBucketViews(activeBucket, views);
         if (bucketViews.length > 0 && tags != null && enums != null && views != null && columns != null) {
+            const orderBy = getLastBucketOrder(activeBucket.id);
+
+            if (tableRef !== null && tableRef.current !== null) {
+                tableRef.current.dataManager.changeSearchText(searchText);
+                tableRef.current.dataManager.orderBy = -1;
+                tableRef.current.dataManager.orderDirection = "";
+                tableRef.current.setState({searchText: searchText});
+                tableRef.current.setState(tableRef.current.dataManager.getRenderState());
+            }
+
             const bucketTags = getBucketTags(activeBucket, tags);
             const bucketTasks = getBucketTasks(activeBucket, tasks);
-            const lastActiveViewId = activeBucket != null ? getLastActiveView(activeBucket.id) : null;
+            const lastActiveViewId = getLastActiveView(activeBucket.id);
             const activeView = getActiveView(bucketViews, lastActiveViewId);
             const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
-            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums);
+            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, orderBy);
             const filteredFilters = filters.filter(f => f.id === activeView.filterId);
             const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
 
@@ -126,21 +148,11 @@ export default function BucketDataTable() {
                 tableColumns: []
             });
 
-        setLastSearchedText();
     }, [activeBucket, enums, tags, views, columns, filters]);
 
-    const setLastSearchedText = () => {
-        // put last searched text into 'Search properties' text box
-        if (tableRef !== null && tableRef.current !== null) {
-            const searchText = getLastBucketSearchedText(activeBucket.id);
-            tableRef.current.dataManager.changeSearchText(searchText);
-            tableRef.current.setState({searchText: searchText});
-            tableRef.current.setState(tableRef.current.dataManager.getRenderState());
-        }
-    }
-
-    const handleSearchChange = (searchedText) => {
-        setLastBucketSearchedText(activeBucket.id, searchedText);
+    const handleSearchChange = (text) => {
+        searchText = text;
+        setLastBucketSearchedText(activeBucket.id, text);
     }
 
     const setActiveLogic = (logic) => {
@@ -150,11 +162,12 @@ export default function BucketDataTable() {
 
     // active view is changed
     const onViewSelected = (view) => {
+        setFiltering(false);
         setLastActiveView(activeBucket.id, view.id);
         const columnsDef = columns.filter(col => col.id === view.columnsId)[0];
         const filteredFilters = filters.filter(f => f.id === view.filterId);
         const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
-        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums);
+        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, getLastBucketOrder(activeBucket.id));
         setState({
             ...state,
             activeView: view,
@@ -353,7 +366,7 @@ export default function BucketDataTable() {
     };
 
     const richFilterAction = {
-        icon: () => <span className="material-icons">filter_alt</span>,
+        icon: () => state.activeLogic != null ? <Icon color={'secondary'}><span className="material-icons" >filter_alt</span></Icon> : <span className="material-icons">filter_alt</span>,
         tooltip: 'Rich filter',
         isFreeAction: true,
         onClick: () => {
@@ -362,7 +375,7 @@ export default function BucketDataTable() {
     };
 
     const filterAction = {
-        icon: () => filtering ? <FilterList color={'primary'}/> : <FilterList/>,
+        icon: () => filtering && tableRef.current.state.query.filters.length > 0 ? <FilterList color={'secondary'}/> : <FilterList/>,
         tooltip: 'Enable/disable filter',
         isFreeAction: true,
         onClick: () => {
@@ -492,7 +505,6 @@ export default function BucketDataTable() {
             <div style={{paddingTop: 0, paddingLeft: 0, paddingRight: 0}}>
                 <MaterialTable
                     tableRef={tableRef}
-                    // title={`[${activeBucket.name}] ${state.activeView.description}`}
                     columns={state.tableColumns}
                     data={query =>
                         new Promise((resolve) => {
@@ -506,17 +518,31 @@ export default function BucketDataTable() {
                                 url += 'limit=' + query.pageSize;
                                 url += '&page=' + (query.page + 1);
 
-                                if (query.orderBy != null) {
-                                    const source = getColumnSource(state.tableColumns, query.orderBy.field);
-                                    if (query.orderDirection === 'desc')
-                                        url += '&sort=desc(' + source + ')';
-                                    else
-                                        url += '&sort=' + source;
+                                // take sorting from parameter
+                                if (changedBucket === true) {
+                                    setChangedBucket(false);
+                                    const orderBy = getLastBucketOrder(activeBucket.id);
+                                    if (orderBy != null && state.tableColumns.length > 0) {
+                                        let source = state.tableColumns[0].source;
+                                        if (state.tableColumns.length > orderBy.colId)
+                                            source = state.tableColumns[orderBy.colId].source;
+                                        if (orderBy.ord === 'desc')
+                                            url += '&sort=desc(' + source + ')';
+                                        else
+                                            url += '&sort=' + source;
+                                    }
+                                } else {
+                                    if (query.orderBy != null) {
+                                        if (query.orderDirection === 'desc')
+                                            url += '&sort=desc(' + query.orderBy.source + ')';
+                                        else
+                                            url += '&sort=' + query.orderBy.source;
+                                    }
                                 }
 
                                 let payload = {
                                     columns: getFetchColumns(state.tableColumns),
-                                    conditions: consolidateAllConditions(query.search, query.filters),
+                                    conditions: consolidateAllConditions(searchText, query.filters),
                                     logic: state.activeLogic
                                 }
 
@@ -589,16 +615,20 @@ export default function BucketDataTable() {
                                     <Grid item xs={9}>
                                         <MTableToolbar
                                             {...props}
-                                            showTitle = {false}
-                                            onSearchChanged = {searchText => {
-                                                handleSearchChange(searchText);
-                                                props.onSearchChanged(searchText);
+                                            showTitle={false}
+                                            onSearchChanged={text => {
+                                                handleSearchChange(text);
+                                                props.onSearchChanged(text);
                                             }}
                                         />
                                     </Grid>
                                 </Grid>
                             );
                         }
+                    }}
+                    onOrderChange={(colId, ord) => {
+                        let order = (colId >= 0) ? {colId, ord} : null;
+                        setLastBucketOrder(activeBucket.id, order);
                     }}
                     actions={getActions()}
                     editable={getEditable()}
@@ -630,6 +660,7 @@ export default function BucketDataTable() {
                     open={taskState.open}
                     onClose={onCloseTaskExecutionEditorDialog}
                     reload={reloadData}
+                    activeLogic={state.activeLogic}
                 />
 
                 <RichFilterDialog

@@ -89,7 +89,8 @@ TaskExecutionDialog.propTypes = {
     open: PropTypes.bool.isRequired,
     bucket: PropTypes.object.isRequired,
     onClose: PropTypes.func.isRequired,
-    reload: PropTypes.func.isRequired
+    reload: PropTypes.func.isRequired,
+    activeLogic: PropTypes.object
 };
 
 const initialActions = {properties: []};
@@ -109,8 +110,8 @@ export default function TaskExecutionDialog(props) {
             setActiveTab(0);
             const properties = getClassProperties();
             const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
-            const tree = QbUtils.checkTree(getInitialTree(null, null, config), config);
-            setState({...state, properties: getClassProperties(), actions: initialActions, logic: null, tree: tree, config: config});
+            const tree = QbUtils.checkTree(getInitialTree(props.activeLogic, null, config), config);
+            setState({...state, properties: getClassProperties(), actions: initialActions, logic: props.activeLogic, tree: tree, config: config});
         }
     }, [props.open]);
 

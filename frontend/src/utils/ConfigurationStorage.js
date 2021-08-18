@@ -14,6 +14,7 @@ const LAST_ACTIVE_BUCKET = 'last-active-bucket';
 const LAST_OPENED_BUCKETS = 'last-opened-buckets';
 const LAST_ACTIVE_VIEW = 'last-active-view';
 const LAST_SEARCHED_TEXT = 'last-searched-text';
+const LAST_ORDER = 'last-order';
 const DATA_DETAILS_DIALOG_SIZE = 'data-details-dialog-size';
 const DATA_FILTER_DIALOG_SIZE = 'data-filter-dialog-size';
 
@@ -243,10 +244,12 @@ export const setLastActiveView = (bucketId, viewId) => {
 export const getLastBucketSearchedText = (bucketId) => {
     const lastSearchedText = getActiveProjectContextProperty(LAST_SEARCHED_TEXT);
 
-    if (lastSearchedText != null)
-        return lastSearchedText[`${bucketId}`];
-    else
-        return "";
+    if (lastSearchedText != null) {
+        const text = lastSearchedText[`${bucketId}`];
+        if (text != null)
+            return text;
+    }
+    return "";
 }
 
 export const setLastBucketSearchedText = (bucketId, searchedText) => {
@@ -260,6 +263,31 @@ export const setLastBucketSearchedText = (bucketId, searchedText) => {
 
 export const clearAllSearchedText = () => {
     setActiveProjectContextProperty(LAST_SEARCHED_TEXT, null);
+}
+
+export const getLastBucketOrder = (bucketId) => {
+    const lastOrder = getActiveProjectContextProperty(LAST_ORDER);
+    let result = null;
+
+    if (lastOrder != null) {
+        const order = lastOrder[`${bucketId}`];
+        if (order != null)
+            result = order;
+    }
+    return result;
+}
+
+export const setLastBucketOrder = (bucketId, order) => {
+    let orderList = getActiveProjectContextProperty(LAST_ORDER);
+    if (orderList == null)
+        orderList = {};
+
+    orderList[`${bucketId}`] = order;
+    setActiveProjectContextProperty(LAST_ORDER, orderList);
+}
+
+export const clearAllOrders = () => {
+    setActiveProjectContextProperty(LAST_ORDER, null);
 }
 
 export const getDataDetailsDialogSize = () => {

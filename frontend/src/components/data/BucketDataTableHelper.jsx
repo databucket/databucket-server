@@ -3,16 +3,34 @@ import {createEnumLookup, createTagLookup} from "../../utils/JsonHelper";
 import LookupIconDialog from "./EditLookupIconDialog";
 import TableDynamicIcon from "../utils/TableDynamicIcon";
 
-export default function prepareTableColumns(columns, tags, enums) {
-    if (columns != null)
+export default function prepareTableColumns(columns, tags, enums, sort) {
+    let colId = -1;
+    if (columns != null) {
         return columns.configuration.columns.filter(col => col.enabled).map(col => {
-            return prepareColumn(col, columns.configuration.properties, tags, enums);
+            colId += 1;
+            if (sort != null && colId === sort.colId)
+                return prepareColumn(col, columns.configuration.properties, tags, enums, sort.ord);
+            else
+                return prepareColumn(col, columns.configuration.properties, tags, enums, null);
         });
-    else
+    } else
         return [];
 }
 
-const prepareColumn = (column, properties, tags, enums) => {
+const prepareColumn = (column, properties, tags, enums, ord) => {
+    let colDef = {
+        editable: column.editable,
+        filtering: column.filtering,
+        hidden: column.hidden != null ? column.hidden : false,
+        width: column.width != null ? column.width : ""
+    };
+
+    if (ord != null)
+        colDef = {
+            ...colDef,
+            defaultSort: ord
+        };
+
     switch (column.uuid) {
         case "uuid_data_id":
             return {
@@ -20,10 +38,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Id',
                 source: 'id',
                 type: 'numeric',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
-                width: column.width
+                ...colDef
             };
         case "uuid_tag_id":
             const tagLookup = createTagLookup(tags);
@@ -32,11 +47,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Tag',
                 source: 'tagId',
                 type: 'numeric',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
                 lookup: tagLookup,
-                width: column.width
+                ...colDef
             };
         case "uuid_reserved":
             return {
@@ -44,10 +56,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Reserved',
                 source: 'reserved',
                 type: 'boolean',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
-                width: column.width
+                ...colDef
             };
         case "uuid_owner":
             return {
@@ -55,10 +64,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Owner',
                 source: 'owner',
                 type: 'string',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
-                width: column.width
+                ...colDef
             };
         case "uuid_created_at":
             return {
@@ -66,10 +72,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Created at',
                 source: 'createdAt',
                 type: 'datetime',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
-                width: column.width
+                ...colDef
             };
         case "uuid_created_by":
             return {
@@ -77,10 +80,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Created by',
                 source: 'createdBy',
                 type: 'string',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
-                width: column.width
+                ...colDef
             };
         case "uuid_modified_at":
             return {
@@ -88,10 +88,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Modified at',
                 source: 'modifiedAt',
                 type: 'datetime',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
-                width: column.width
+                ...colDef
             };
         case "uuid_modified_by":
             return {
@@ -99,10 +96,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                 field: 'Modified by',
                 source: 'modifiedBy',
                 type: 'string',
-                editable: column.editable,
-                filtering: column.filtering,
-                hidden: column.hidden,
-                width: column.width
+                ...colDef
             };
         default:
             const property = properties.filter(prop => prop.uuid === column.uuid)[0];
@@ -115,10 +109,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                         field: property.title,
                         source: property.path,
                         type: 'string',
-                        editable: column.editable,
-                        filtering: column.filtering,
-                        hidden: column.hidden,
-                        width: column.width,
+                        ...colDef,
                         render: rowData => <TableDynamicIcon iconName={getIconName(enumObj.items, rowData[property.title])}/>,
                         editComponent: props =>
                             <LookupIconDialog
@@ -134,11 +125,8 @@ const prepareColumn = (column, properties, tags, enums) => {
                         field: property.title,
                         source: property.path,
                         type: 'string',
-                        editable: column.editable,
-                        filtering: column.filtering,
-                        hidden: column.hidden,
-                        width: column.width,
-                        lookup: propLookup
+                        lookup: propLookup,
+                        ...colDef
                     };
                 }
             } else
@@ -147,10 +135,7 @@ const prepareColumn = (column, properties, tags, enums) => {
                     field: property.title,
                     source: property.path,
                     type: property.type,
-                    editable: column.editable,
-                    filtering: column.filtering,
-                    hidden: column.hidden,
-                    width: column.width
+                    ...colDef
                 };
     }
 }
