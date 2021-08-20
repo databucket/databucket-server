@@ -24,6 +24,7 @@ import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
 import {Query, Utils as QbUtils} from "react-awesome-query-builder";
 import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
+import {getTaskExecutionDialogSize, setTaskExecutionDialogSize} from "../../utils/ConfigurationStorage";
 
 const styles = theme => ({
     root: {
@@ -38,14 +39,30 @@ const styles = theme => ({
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
+    },
+    smallerButton: {
+        position: 'absolute',
+        right: theme.spacing(15),
+        top: theme.spacing(1)
+    },
+    largerButton: {
+        position: 'absolute',
+        right: theme.spacing(10),
+        top: theme.spacing(1)
     }
 });
 
 const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose} = props;
+    const {children, classes, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
+            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
+                <span className="material-icons">fullscreen_exit</span>
+            </IconButton>
+            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
+                <span className="material-icons">fullscreen</span>
+            </IconButton>
             {onClose ? (
                 <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
                     <CloseIcon/>
@@ -104,6 +121,12 @@ export default function TaskExecutionDialog(props) {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [appliesCount, setAppliesCount] = useState(0);
     const [state, setState] = useState({actions: initialActions, properties: [], logic: null, tree: null, config: null});
+    const [dialogSize, setDialogSize] = useState('md');
+    const dialogContentRef = React.useRef(null);
+
+    useEffect(() => {
+        setDialogSize(getTaskExecutionDialogSize());
+    }, []);
 
     useEffect(() => {
         if (props.open) {
@@ -287,12 +310,28 @@ export default function TaskExecutionDialog(props) {
     }
 
     const setProperties = (properties) => {
-        setState({...state, properties: properties});
+        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
+        let tree = QbUtils.checkTree(getInitialTree(props.activeLogic, null, config), config);
+        setState({...state, properties: properties, logic: props.activeLogic, tree: tree, config: config});
     }
 
     const onRulesChange = (tree, config) => {
         const logic = QbUtils.jsonLogicFormat(tree, config).logic;
         setState({...state, logic: logic, tree: tree, config: config});
+    }
+
+    const onMakeDialogSmaller = () => {
+        if (dialogSize === 'lg') {
+            setDialogSize('md');
+            setTaskExecutionDialogSize('md');
+        }
+    }
+
+    const onMakeDialogLarger = () => {
+        if (dialogSize === 'md') {
+            setDialogSize('lg');
+            setTaskExecutionDialogSize('lg');
+        }
     }
 
     return (
@@ -301,9 +340,14 @@ export default function TaskExecutionDialog(props) {
             aria-labelledby="task-execution-dialog-title"
             open={props.open}
             fullWidth={true}
-            maxWidth='lg'  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth={dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
         >
-            <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+            <DialogTitle 
+                id="customized-dialog-title" 
+                onClose={handleClose}
+                onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller : null}
+                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger: null}
+            >
                 <div className={classes.oneLine}>
                     <Typography variant="h6">{'Task execution'}</Typography>
                     <TaskMenuSelector tasks={getBucketTasks(props.bucket, accessContext.tasks)} onTaskSelected={onTaskSelected}/>
@@ -321,7 +365,7 @@ export default function TaskExecutionDialog(props) {
                 </div>
             </DialogTitle>
             <EnumsProvider>
-                <DialogContent dividers style={{height: '62vh'}}>
+                <DialogContent dividers style={{height: '62vh'}} ref = {dialogContentRef}>
                     {props.open && activeTab === 0 &&
                     <TaskActions
                         actions={state.actions}
@@ -352,7 +396,7 @@ export default function TaskExecutionDialog(props) {
                         onChange={setProperties}
                         title={'Class origin and defined properties:'}
                         pageSize={null}
-                        customTableWidth={16}
+                        parentContentRef={dialogContentRef}
                     />}
 
                 </DialogContent>
@@ -391,10 +435,10 @@ const useStyles = makeStyles(() => ({
         flexGrow: 1
     },
     devGrabSpace: {
-        width: '270px'
+        width: '170px'
     },
     divActionGrabSpace: {
-        width: '900px'
+        width: '30px'
     }
 }));
 

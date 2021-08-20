@@ -42,7 +42,7 @@ export default function BucketTabSelector() {
     // This timeout allows to load Material Icons before first rendering
     const [ delay, setDelay ] = useState(true);
     useEffect(() => {
-        setTimeout(() => setDelay(false), 500)
+        setTimeout(() => setDelay(false), 700)
     }, []);
 
     const getBucketName = (name) => {

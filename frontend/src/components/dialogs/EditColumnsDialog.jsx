@@ -20,6 +20,7 @@ import {Tabs} from "@material-ui/core";
 import Tab from "@material-ui/core/Tab";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
 import ColumnsTable from "../utils/ColumnsTable";
+import MuiDialogActions from "@material-ui/core/DialogActions";
 
 const styles = (theme) => ({
     root: {
@@ -55,6 +56,13 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
+const DialogActions = withStyles(theme => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(1),
+    },
+}))(MuiDialogActions);
+
 const useStyles = makeStyles(() => ({
     oneLine: {
         display: 'flex',
@@ -86,6 +94,7 @@ export default function EditColumnsDialog(props) {
     const [activeTab, setActiveTab] = useState(0);
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
+    const dialogContentRef = React.useRef(null);
 
     useEffect(() => {
         setProperties(mergeProperties(props.configuration.properties, props.dataClass));
@@ -146,10 +155,25 @@ export default function EditColumnsDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers style={{height:'75vh'}}>
-                    {activeTab === 0 && <ColumnsTable columns={columns} properties={properties} onChange={setColumns}/>}
-                    {activeTab === 1 && <PropertiesTable used={getUsedUuids()} data={properties} enums={enums} onChange={setProperties} title={'Class origin and defined properties:'}/>}
+                <DialogContent dividers style={{height: '75vh'}} ref = {dialogContentRef}>
+                    {activeTab === 0 &&
+                    <ColumnsTable
+                        columns={columns}
+                        properties={properties}
+                        onChange={setColumns}
+                        parentContentRef={dialogContentRef}
+                    />}
+                    {activeTab === 1 &&
+                    <PropertiesTable
+                        used={getUsedUuids()}
+                        data={properties}
+                        enums={enums}
+                        onChange={setProperties}
+                        title={'Class origin and defined properties:'}
+                        parentContentRef={dialogContentRef}
+                    />}
                 </DialogContent>
+                <DialogActions/>
             </Dialog>
         </div>
     );

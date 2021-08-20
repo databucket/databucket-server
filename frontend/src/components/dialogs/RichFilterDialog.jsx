@@ -56,10 +56,10 @@ const DialogTitle = withStyles(styles)(props => {
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"}>
+            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
                 <span className="material-icons">fullscreen_exit</span>
             </IconButton>
-            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"}>
+            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
                 <span className="material-icons">fullscreen</span>
             </IconButton>
             {onClose ? (
@@ -120,6 +120,7 @@ export default function RichFilterDialog(props) {
     const [appliesCount, setAppliesCount] = useState(0);
     const [state, setState] = useState({properties: [], logic: null, tree: null, config: null});
     const [dialogSize, setDialogSize] = useState('md');
+    const dialogContentRef = React.useRef(null);
 
     useEffect(() => {
         setDialogSize(getDataFilterDialogSize());
@@ -219,7 +220,10 @@ export default function RichFilterDialog(props) {
     }
 
     const setProperties = (properties) => {
-        setState({...state, properties: properties});
+        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
+        const disabledRulesLogic = makeRulesDisabled(props.activeLogic);
+        let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
+        setState({...state, properties: properties, logic: disabledRulesLogic, tree: tree, config: config});
     }
 
     const onRulesChange = (tree, config) => {
@@ -252,8 +256,8 @@ export default function RichFilterDialog(props) {
             <DialogTitle
                 id="customized-dialog-title"
                 onClose={handleClose}
-                onMakeDialogSmaller={onMakeDialogSmaller}
-                onMakeDialogLarger={onMakeDialogLarger}
+                onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller : null}
+                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger: null}
             >
                 <div className={classes.oneLine}>
                     <Typography variant="h6">{'Data filter'}</Typography>
@@ -271,7 +275,7 @@ export default function RichFilterDialog(props) {
                 </div>
             </DialogTitle>
             <EnumsProvider>
-                <DialogContent dividers style={{height: '62vh'}}>
+                <DialogContent dividers style={{height: '62vh'}} ref = {dialogContentRef}>
                     {props.open && activeTab === 0 &&
                     <div>
                         <Query
@@ -292,7 +296,7 @@ export default function RichFilterDialog(props) {
                         onChange={setProperties}
                         title={'Class origin and defined properties:'}
                         pageSize={null}
-                        customTableWidth={16}
+                        parentContentRef={dialogContentRef}
                     />}
 
                 </DialogContent>
@@ -333,7 +337,7 @@ const useStyles = makeStyles(() => ({
         width: '250px'
     },
     divActionGrabSpace: {
-        width: '600px'
+        width: '30px'
     }
 }));
 

@@ -242,6 +242,18 @@ export const createTagLookup = (tags) => {
         return {};
 }
 
+export const createUserLookup = (users) => {
+    if (users != null && users.length > 0)
+        return users.reduce((obj, item) => {
+            return {
+                ...obj,
+                [item.username]: item.username,
+            };
+        }, {});
+    else
+        return {};
+}
+
 export const getRolesNames = (roles, rolesIds) => {
     if (roles != null && rolesIds != null && rolesIds.length > 0 && roles.length > 0) {
         if (rolesIds.length === 1)

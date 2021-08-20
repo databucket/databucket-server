@@ -18,6 +18,7 @@ import {getObjectLengthStr} from "../../utils/JsonHelper";
 import {Tabs} from "@material-ui/core";
 import {getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "../../utils/MaterialTableHelper";
 import Tab from "@material-ui/core/Tab";
+import MuiDialogActions from "@material-ui/core/DialogActions";
 
 
 const styles = (theme) => ({
@@ -53,6 +54,13 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
+const DialogActions = withStyles(theme => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(1),
+    },
+}))(MuiDialogActions);
+
 EditFilterRulesDialog.propTypes = {
     configuration: PropTypes.object.isRequired,
     name: PropTypes.string.isRequired,
@@ -71,6 +79,7 @@ export default function EditFilterRulesDialog(props) {
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
     const [configuration, setConfiguration] = useState(null);
+    const dialogContentRef = React.useRef(null);
 
 
     useEffect(() => {
@@ -135,7 +144,7 @@ export default function EditFilterRulesDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers style={{height: '75vh'}}>
+                <DialogContent dividers style={{height: '75vh'}} ref = {dialogContentRef}>
                     {open &&
                     <FilterRulesEditor
                         activeTab={activeTab}
@@ -144,8 +153,10 @@ export default function EditFilterRulesDialog(props) {
                         tags={props.tags}
                         users={props.users}
                         onChange={onFilterChanged}
+                        parentContentRef={dialogContentRef}
                     />}
                 </DialogContent>
+                <DialogActions />
             </Dialog>
             <MessageBox
                 config={messageBox}

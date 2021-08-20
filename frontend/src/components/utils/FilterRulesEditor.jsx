@@ -12,7 +12,8 @@ FilterRulesEditor.propTypes = {
     dataClass: PropTypes.object,
     tags: PropTypes.array.isRequired,
     users: PropTypes.array.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
+    parentContentRef: PropTypes.object.isRequired
 }
 
 export default function FilterRulesEditor(props) {
@@ -84,7 +85,13 @@ export default function FilterRulesEditor(props) {
                 {renderResult({tree: state.tree, config: state.config})}
             </div>}
             {props.activeTab === 0 && <div/>}
-            {props.activeTab === 1 && <PropertiesTable data={properties} enums={enums} onChange={handleChangeFields}/>}
+            {props.activeTab === 1 &&
+            <PropertiesTable
+                data={properties}
+                enums={enums}
+                onChange={handleChangeFields}
+                parentContentRef={props.parentContentRef}
+            />}
         </div>
     );
 };

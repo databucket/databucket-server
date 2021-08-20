@@ -48,10 +48,10 @@ const DialogTitle = withStyles(titleStyles)(props => {
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"}>
+            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
                 <span className="material-icons">fullscreen_exit</span>
             </IconButton>
-            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"}>
+            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
                 <span className="material-icons">fullscreen</span>
             </IconButton>
             {onClose ? (
@@ -96,7 +96,7 @@ export default function DataDetailsDialog(props) {
     const tableRef = createRef();
     const [state, setState] = useState({dataRow: null, open: false, changed: false, valid: true, changedProperties: null});
     const tagsLookup = createTagLookup(props.tags);
-    const [dialogSize, setDialogSize] = useState(false);
+    const [dialogSize, setDialogSize] = useState('lg');
 
     useEffect(() => {
         setDialogSize(getDataDetailsDialogSize());
@@ -127,9 +127,6 @@ export default function DataDetailsDialog(props) {
         } else if (dialogSize === 'xl') {
             setDialogSize('lg');
             setDataDetailsDialogSize('lg');
-        } else if (dialogSize === true) {
-            setDialogSize('xl');
-            setDataDetailsDialogSize('xl');
         }
     }
 
@@ -140,9 +137,6 @@ export default function DataDetailsDialog(props) {
         } else if (dialogSize === 'lg') {
             setDialogSize('xl');
             setDataDetailsDialogSize('xl');
-        } else if (dialogSize === 'xl') {
-            setDialogSize(true);
-            setDataDetailsDialogSize(true);
         }
     }
 
@@ -158,8 +152,8 @@ export default function DataDetailsDialog(props) {
             <DialogTitle
                 id="customized-dialog-title"
                 onClose={handleClose}
-                onMakeDialogSmaller={onMakeDialogSmaller}
-                onMakeDialogLarger={onMakeDialogLarger}
+                onMakeDialogSmaller={dialogSize !== 'md' ? onMakeDialogSmaller : null}
+                onMakeDialogLarger={dialogSize !== 'xl' ? onMakeDialogLarger : null}
             >
                 Data details
             </DialogTitle>

@@ -212,7 +212,9 @@ export const getPropertiesTableHeight = (height, custom) => {
     return `${tableHeight}vh`;
 }
 
-export const getTaskPropertiesTableHeight = (height, custom) => {
-    const tableHeight = ((height - 64 - 64 - 143) / height * 100).toFixed(2) - custom;
-    return `${tableHeight}vh`;
+export const getTableBodyHeight = (parentRef, tableHeadHeight) => {
+    let newHeight = 300;
+    if (parentRef.current)
+        newHeight = parentRef.current.offsetHeight - tableHeadHeight;
+    return newHeight;
 }

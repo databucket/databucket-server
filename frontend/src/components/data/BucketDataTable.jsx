@@ -72,7 +72,7 @@ export default function BucketDataTable() {
     const [height] = useWindowDimension();
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
-    const {buckets, activeBucket, views, columns, filters, tags, tasks, enums} = accessContext;
+    const {buckets, activeBucket, views, columns, filters, tags, tasks, enums, users} = accessContext;
     const [detailsState, setDetailsState] = useState({
         open: false,
         dataRow: null,
@@ -121,7 +121,7 @@ export default function BucketDataTable() {
             const lastActiveViewId = getLastActiveView(activeBucket.id);
             const activeView = getActiveView(bucketViews, lastActiveViewId);
             const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
-            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, orderBy);
+            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, users, orderBy);
             const filteredFilters = filters.filter(f => f.id === activeView.filterId);
             const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
 
@@ -167,7 +167,7 @@ export default function BucketDataTable() {
         const columnsDef = columns.filter(col => col.id === view.columnsId)[0];
         const filteredFilters = filters.filter(f => f.id === view.filterId);
         const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
-        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, getLastBucketOrder(activeBucket.id));
+        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, users, getLastBucketOrder(activeBucket.id));
         setState({
             ...state,
             activeView: view,
@@ -326,7 +326,9 @@ export default function BucketDataTable() {
                     else if (filter.column.type === 'boolean')
                         allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: '=', right_source: 'const', right_value: (filter.value === 'checked')});
                     else if (Array.isArray(filter.value))
-                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                        // Omit when number of arrays items is 0. Do not put the following condition into parent condition!
+                        if (filter.value.length > 0)
+                            allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
                     else
                         allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: '%' + filter.value + '%'});
 

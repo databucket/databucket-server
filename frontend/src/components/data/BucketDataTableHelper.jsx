@@ -1,23 +1,25 @@
 import React from "react";
-import {createEnumLookup, createTagLookup} from "../../utils/JsonHelper";
+import {createEnumLookup, createTagLookup, createUserLookup} from "../../utils/JsonHelper";
 import LookupIconDialog from "./EditLookupIconDialog";
 import TableDynamicIcon from "../utils/TableDynamicIcon";
 
-export default function prepareTableColumns(columns, tags, enums, sort) {
+export default function prepareTableColumns(columns, tags, enums, users, sort) {
     let colId = -1;
     if (columns != null) {
         return columns.configuration.columns.filter(col => col.enabled).map(col => {
             colId += 1;
             if (sort != null && colId === sort.colId)
-                return prepareColumn(col, columns.configuration.properties, tags, enums, sort.ord);
+                return prepareColumn(col, columns.configuration.properties, tags, enums, users, sort.ord);
             else
-                return prepareColumn(col, columns.configuration.properties, tags, enums, null);
+                return prepareColumn(col, columns.configuration.properties, tags, enums, users,null);
         });
     } else
         return [];
 }
 
-const prepareColumn = (column, properties, tags, enums, ord) => {
+const prepareColumn = (column, properties, tags, enums, users, ord) => {
+    const userLookup = createUserLookup(users);
+
     let colDef = {
         editable: column.editable,
         filtering: column.filtering,
@@ -64,6 +66,7 @@ const prepareColumn = (column, properties, tags, enums, ord) => {
                 field: 'Owner',
                 source: 'owner',
                 type: 'string',
+                lookup: userLookup,
                 ...colDef
             };
         case "uuid_created_at":
@@ -80,6 +83,7 @@ const prepareColumn = (column, properties, tags, enums, ord) => {
                 field: 'Created by',
                 source: 'createdBy',
                 type: 'string',
+                lookup: userLookup,
                 ...colDef
             };
         case "uuid_modified_at":
@@ -96,6 +100,7 @@ const prepareColumn = (column, properties, tags, enums, ord) => {
                 field: 'Modified by',
                 source: 'modifiedBy',
                 type: 'string',
+                lookup: userLookup,
                 ...colDef
             };
         default:

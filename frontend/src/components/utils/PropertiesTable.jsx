@@ -1,10 +1,10 @@
-import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import {getPageSizeOptionsOnDialog, getTableBodyHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
 import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import MaterialTable from "material-table";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
@@ -16,8 +16,8 @@ PropertiesTable.propTypes = {
     enums: PropTypes.array.isRequired,
     title: PropTypes.string,
     pageSize: PropTypes.number,
-    customTableWidth: PropTypes.number,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
+    parentContentRef: PropTypes.object.isRequired
 };
 
 export default function PropertiesTable(props) {
@@ -35,6 +35,16 @@ export default function PropertiesTable(props) {
         path: {title: 'Path', check: ['notEmpty', 'validJsonPath']},
         type: {title: 'Type', check: ['validClassPropertyType']}
     };
+
+    // This timeout allows to set dialog size before first rendering
+    const [delay, setDelay] = useState(true);
+    useEffect(() => {
+        setTimeout(() => setDelay(false), 1)
+    }, []);
+
+    const getBodyHeight = (windowHeight) => {
+        return getTableBodyHeight(props.parentContentRef, 66);
+    }
 
     const setData = (newData) => {
         props.onChange(newData);
@@ -58,7 +68,7 @@ export default function PropertiesTable(props) {
         return '';
     }
 
-    return (
+    return !delay && (
         <div>
             <MaterialTable
                 title={props.title}
@@ -107,9 +117,9 @@ export default function PropertiesTable(props) {
                     selection: false,
                     filtering: false,
                     padding: 'dense',
-                    headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getPropertiesTableHeight(height, props.customTableWidth != null ? props.customTableWidth : 5),
-                    minBodyHeight: getPropertiesTableHeight(height, props.customTableWidth != null ? props.customTableWidth : 5),
+                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    minBodyHeight: getBodyHeight(height),
+                    maxBodyHeight: getBodyHeight(height),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -12,6 +12,8 @@ import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
 import EnumsContext from "../../context/enums/EnumsContext";
 import PropertiesTable from "../utils/PropertiesTable";
+import MuiDialogActions from "@material-ui/core/DialogActions";
+import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
 
 const styles = (theme) => ({
     root: {
@@ -46,6 +48,12 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
+const DialogActions = withStyles(theme => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(1),
+    },
+}))(MuiDialogActions);
 
 EditClassFieldsDialog.propTypes = {
     configuration: PropTypes.array.isRequired,
@@ -59,6 +67,7 @@ export default function EditClassFieldsDialog(props) {
     const [data, setData] = useState(props.configuration);
     const [open, setOpen] = useState(false);
     const enumsContext = useContext(EnumsContext);
+    const dialogContentRef = React.useRef(null);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -83,15 +92,24 @@ export default function EditClassFieldsDialog(props) {
                 onClose={handleSave}
                 aria-labelledby="customized-dialog-title"
                 open={open}
-                fullWidth
+                fullWidth={true}
                 maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             >
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     {'Define class properties'}
                 </DialogTitle>
-                <DialogContent dividers>
-                    <PropertiesTable data={data} enums={enumsContext.enums} onChange={setData} title={''}/>
+                <DialogContent dividers style={{height: '75vh'}} ref={dialogContentRef}>
+                    {open &&
+                    <PropertiesTable
+                        data={data}
+                        enums={enumsContext.enums}
+                        onChange={setData}
+                        title={''}
+                        parentContentRef={dialogContentRef}
+                    />
+                    }
                 </DialogContent>
+                <DialogActions/>
             </Dialog>
         </div>
     );

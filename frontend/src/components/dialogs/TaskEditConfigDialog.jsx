@@ -18,6 +18,7 @@ import TaskActions from "../utils/TaskActions";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
 import TagsContext from "../../context/tags/TagsContext";
 import EnumsContext from "../../context/enums/EnumsContext";
+import MuiDialogActions from "@material-ui/core/DialogActions";
 
 
 const styles = (theme) => ({
@@ -53,6 +54,13 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
+const DialogActions = withStyles(theme => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(1),
+    },
+}))(MuiDialogActions);
+
 TaskEditConfigDialog.propTypes = {
     rowData: PropTypes.object.isRequired,
     configuration: PropTypes.object.isRequired, // actions, properties
@@ -74,6 +82,7 @@ export default function TaskEditConfigDialog(props) {
     const [filteredTags, setFilteredTags] = useState(null);
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
+    const dialogContentRef = React.useRef(null);
 
     useEffect(() => {
         if (tags == null)
@@ -153,7 +162,7 @@ export default function TaskEditConfigDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers style={{height:'75vh'}}>
+                <DialogContent dividers style={{height:'75vh'}} ref = {dialogContentRef}>
                     {open && activeTab === 0 &&
                     <TaskActions
                         actions={actions}
@@ -171,9 +180,10 @@ export default function TaskEditConfigDialog(props) {
                         onChange={setProperties}
                         title={'Class origin and defined properties:'}
                         pageSize={null}
-                        customTableWidth={5}
+                        parentContentRef={dialogContentRef}
                     />}
                 </DialogContent>
+                <DialogActions />
             </Dialog>
             <MessageBox
                 config={messageBox}

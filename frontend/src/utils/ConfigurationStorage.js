@@ -17,6 +17,7 @@ const LAST_SEARCHED_TEXT = 'last-searched-text';
 const LAST_ORDER = 'last-order';
 const DATA_DETAILS_DIALOG_SIZE = 'data-details-dialog-size';
 const DATA_FILTER_DIALOG_SIZE = 'data-filter-dialog-size';
+const TASK_EXECUTION_DIALOG_SIZE = 'task-execution-dialog-size';
 
 export const logOut = () => {
     clearUsername();
@@ -292,13 +293,9 @@ export const clearAllOrders = () => {
 
 export const getDataDetailsDialogSize = () => {
     if (localStorage.getItem(DATA_DETAILS_DIALOG_SIZE) != null) {
-        let size = localStorage.getItem(DATA_DETAILS_DIALOG_SIZE);
-        if (size === 'true')
-            return true;
-        else
-            return size;
+        return localStorage.getItem(DATA_DETAILS_DIALOG_SIZE);
     } else
-        return true;
+        return 'lg';
 }
 
 export const setDataDetailsDialogSize = (size) => {
@@ -314,5 +311,16 @@ export const getDataFilterDialogSize = () => {
 
 export const setDataFilterDialogSize = (size) => {
     localStorage.setItem(DATA_FILTER_DIALOG_SIZE, size);
+}
+
+export const getTaskExecutionDialogSize = () => {
+    if (localStorage.getItem(TASK_EXECUTION_DIALOG_SIZE) != null) {
+        return localStorage.getItem(TASK_EXECUTION_DIALOG_SIZE);
+    } else
+        return 'md';
+}
+
+export const setTaskExecutionDialogSize = (size) => {
+    localStorage.setItem(TASK_EXECUTION_DIALOG_SIZE, size);
 }
 
