@@ -1,4 +1,4 @@
-import {getPropertiesTableHeight, getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp, getTableBodyHeight} from "../../utils/MaterialTableHelper";
+import {getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp, getTableBodyHeight} from "../../utils/MaterialTableHelper";
 import {getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";

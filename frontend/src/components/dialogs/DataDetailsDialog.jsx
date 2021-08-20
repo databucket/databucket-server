@@ -127,6 +127,9 @@ export default function DataDetailsDialog(props) {
         } else if (dialogSize === 'xl') {
             setDialogSize('lg');
             setDataDetailsDialogSize('lg');
+        } else if (dialogSize === 'true') {
+            setDialogSize('xl');
+            setDataDetailsDialogSize('xl');
         }
     }
 
@@ -137,6 +140,9 @@ export default function DataDetailsDialog(props) {
         } else if (dialogSize === 'lg') {
             setDialogSize('xl');
             setDataDetailsDialogSize('xl');
+        } else if (dialogSize === 'xl') {
+            setDialogSize('true');
+            setDataDetailsDialogSize('true');
         }
     }
 
@@ -147,13 +153,13 @@ export default function DataDetailsDialog(props) {
             classes={{paper: classes.dialogPaper}}
             open={state.open}
             fullWidth={true}
-            maxWidth={dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth={dialogSize === 'true' ? true : dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
         >
             <DialogTitle
                 id="customized-dialog-title"
                 onClose={handleClose}
                 onMakeDialogSmaller={dialogSize !== 'md' ? onMakeDialogSmaller : null}
-                onMakeDialogLarger={dialogSize !== 'xl' ? onMakeDialogLarger : null}
+                onMakeDialogLarger={dialogSize !== 'true' ? onMakeDialogLarger : null}
             >
                 Data details
             </DialogTitle>

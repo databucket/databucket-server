@@ -9,17 +9,31 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import PropTypes from "prop-types";
 import ActionPropertiesTable from "./ActionPropertiesTable";
+import {makeStyles} from "@material-ui/core/styles";
+
+const useStyles = makeStyles(() => ({
+    settingsContainer: {
+        height: '27%',
+        marginLeft: '20px',
+        marginTop: '10px'
+    },
+    propertiesContainer: {
+        height: '72%'
+    }
+}));
 
 TaskActions.propTypes = {
     actions: PropTypes.object,
     properties: PropTypes.array,
     tags: PropTypes.array,
     onChange: PropTypes.func.isRequired,
-    customHeight: PropTypes.number,
     pageSize: PropTypes.number
 }
 
 export default function TaskActions(props) {
+
+    const classes = useStyles();
+    const actionsPropertiesContentRef = React.useRef(null);
 
     const handleActionTypeChange = (event) => {
         props.onChange({...props.actions, type: event.target.value});
@@ -49,8 +63,8 @@ export default function TaskActions(props) {
     }
 
     return (
-        <div>
-            <div style={{marginLeft: '20px', marginTop: '10px'}}>
+        <div style={{height: '97%'}}>
+            <div className={classes.settingsContainer}>
                 <FormControl component="fieldset">
                     <RadioGroup row value={props.actions.type || ''} onChange={handleActionTypeChange}>
                         <FormControlLabel
@@ -118,13 +132,15 @@ export default function TaskActions(props) {
                 </FormControl>
             </div>
             {props.actions.type === 'modify' &&
-            <ActionPropertiesTable
-                data={props.actions.properties}
-                properties={props.properties}
-                onChange={onActionPropertiesChange}
-                pageSize={props.pageSize}
-                customHeight={props.customHeight}
-            />
+            <div ref={actionsPropertiesContentRef} className={classes.propertiesContainer}>
+                <ActionPropertiesTable
+                    data={props.actions.properties}
+                    properties={props.properties}
+                    onChange={onActionPropertiesChange}
+                    pageSize={props.pageSize}
+                    parentContentRef={actionsPropertiesContentRef}
+                />
+            </div>
             }
         </div>
     );

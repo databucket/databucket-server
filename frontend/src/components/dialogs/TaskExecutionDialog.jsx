@@ -373,7 +373,6 @@ export default function TaskExecutionDialog(props) {
                         tags={getBucketTags(props.bucket, accessContext.tags)}
                         onChange={setActions}
                         pageSize={null}
-                        customHeight={31}
                     />}
 
                     {props.open && activeTab === 1 &&

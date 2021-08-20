@@ -1,4 +1,4 @@
-import {getPropertiesTableHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import {getTableBodyHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
 import {convertPropertiesDates, getPropertyByUuid, getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
@@ -15,8 +15,8 @@ ActionPropertiesTable.propTypes = {
     data: PropTypes.array,
     properties: PropTypes.array,
     onChange: PropTypes.func.isRequired,
-    customHeight: PropTypes.number,
-    pageSize: PropTypes.number
+    pageSize: PropTypes.number,
+    parentContentRef: PropTypes.object.isRequired
 }
 
 export default function ActionPropertiesTable(props) {
@@ -41,6 +41,10 @@ export default function ActionPropertiesTable(props) {
 
     const setData = (newData) => {
         props.onChange(newData);
+    }
+
+    const getBodyHeight = (windowHeight) => {
+        return getTableBodyHeight(props.parentContentRef, 66);
     }
 
     const getInitialProperty = () => {
@@ -250,19 +254,16 @@ export default function ActionPropertiesTable(props) {
                 ]}
                 data={data}
                 options={{
-                    paging: props.pageSize != null,
-                    pageSize: props.pageSize != null ? props.pageSize : 5,
-                    paginationType: 'stepped',
-                    pageSizeOptions: [props.pageSize != null ? props.pageSize : 15],
+                    paging: false,
                     actionsColumnIndex: -1,
                     sorting: true,
                     selection: false,
                     search: true,
                     filtering: false,
                     padding: 'dense',
-                    maxBodyHeight: getPropertiesTableHeight(height, props.customHeight != null ? props.customHeight : 25),
-                    minBodyHeight: getPropertiesTableHeight(height, props.customHeight != null ? props.customHeight : 25),
-                    headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    minBodyHeight: getBodyHeight(height),
+                    maxBodyHeight: getBodyHeight(height),
+                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
