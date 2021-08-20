@@ -63,7 +63,7 @@ export default function TaskActions(props) {
     }
 
     return (
-        <div style={{height: '97%'}}>
+        <div style={{height: '95%'}}>
             <div className={classes.settingsContainer}>
                 <FormControl component="fieldset">
                     <RadioGroup row value={props.actions.type || ''} onChange={handleActionTypeChange}>
