@@ -11,8 +11,8 @@
     </appender>
 
 
-    <logger name="pl.databucket.service" level="DEBUG" />
-    <logger name="pl.databucket.controller" level="DEBUG" />
+    <logger name="pl.databucket.server.service" level="DEBUG" />
+    <logger name="pl.databucket.server.controller" level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="FILE" />

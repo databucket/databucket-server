@@ -95,12 +95,13 @@ export default function BucketDataTable() {
         activeView: null,
         columnsDef: [],     // pure columns definition
         activeLogic: null,    // the logic from active view or from rich filter
-        tableColumns: []   // columns prepared for material table,
+        tableColumns: [],   // columns prepared for material table,
+        resetPage: false
     });
     let searchText = activeBucket != null ? getLastBucketSearchedText(activeBucket.id) : "";
     const [changedBucket, setChangedBucket] = useState(false);
 
-    // active bucket is changed
+    // active bucket has been changed
     useEffect(() => {
         setChangedBucket(true);
         setFiltering(false);
@@ -133,7 +134,8 @@ export default function BucketDataTable() {
                 activeView: activeView,
                 columnsDef: columnsDef,
                 activeLogic: activeLogic,
-                tableColumns: tableColumns
+                tableColumns: tableColumns,
+                resetPage: true
             });
             reloadData();
         } else
@@ -145,7 +147,8 @@ export default function BucketDataTable() {
                 activeView: null,
                 columnsDef: [],
                 activeLogic: null,
-                tableColumns: []
+                tableColumns: [],
+                resetPage: true
             });
 
     }, [activeBucket, enums, tags, views, columns, filters]);
@@ -160,7 +163,7 @@ export default function BucketDataTable() {
         reloadData();
     }
 
-    // active view is changed
+    // active view has been changed
     const onViewSelected = (view) => {
         setFiltering(false);
         setLastActiveView(activeBucket.id, view.id);
@@ -168,12 +171,14 @@ export default function BucketDataTable() {
         const filteredFilters = filters.filter(f => f.id === view.filterId);
         const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
         const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, users, getLastBucketOrder(activeBucket.id));
+
         setState({
             ...state,
             activeView: view,
             columnsDef: columnsDef,
             activeLogic: activeLogic,
-            tableColumns: tableColumns
+            tableColumns: tableColumns,
+            resetPage: true
         });
         reloadData();
     }
@@ -502,7 +507,7 @@ export default function BucketDataTable() {
         return <div/>
     else if (state.activeView == null)
         return <MissingActiveView/>
-    else
+    else {
         return (
             <div style={{paddingTop: 0, paddingLeft: 0, paddingRight: 0}}>
                 <MaterialTable
@@ -518,7 +523,11 @@ export default function BucketDataTable() {
 
                                 let url = getDataUrl(activeBucket) + '/get?';
                                 url += 'limit=' + query.pageSize;
-                                url += '&page=' + (query.page + 1);
+                                if (state.resetPage) {
+                                    url += '&page=1';
+                                    setState({...state, resetPage: false});
+                                } else
+                                    url += '&page=' + (query.page + 1);
 
                                 // take sorting from parameter
                                 if (changedBucket === true) {
@@ -675,4 +684,5 @@ export default function BucketDataTable() {
                 />
             </div>
         );
+    }
 }

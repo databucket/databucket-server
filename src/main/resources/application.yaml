@@ -5,7 +5,7 @@ spring:
     open-in-view: true
     properties:
       hibernate:
-        session_factory.interceptor: pl.databucket.tenant.EntityInterceptor
+        session_factory.interceptor: pl.databucket.server.tenant.EntityInterceptor
         dialect: org.hibernate.dialect.PostgreSQLDialect
   datasource:
     driver-class-name: org.postgresql.Driver

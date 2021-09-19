@@ -58,13 +58,13 @@ export default function InfoDialog() {
             >
                 <img style={{marginLeft: '100px', marginTop: '20px'}} src={DatabucketLogo} alt='' width='399' height='65' />
                 <div style={{margin: '20px'}}>
-                    <Typography color='secondary'>Version: <b>3.0.16</b></Typography>
+                    <Typography color='secondary'>Version: <b>3.0.17</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="primary">www.databucket.pl</Link><br/>
-                    <Link target='_blank' href='https://github.com/databucket/databucket-app' color="textSecondary">Source code</Link><br/>
-                    <Link target='_blank' href='https://github.com/databucket/databucket-app/wiki' color="textSecondary">Documentation</Link><br/>
-                    <Link target='_blank' href='https://github.com/databucket/databucket-app/issues' color="textSecondary">Report a bug, propose a new feature, ask a question...</Link><br/>
+                    <Link target='_blank' href='https://github.com/databucket/databucket-server' color="textSecondary">Source code</Link><br/>
+                    <Link target='_blank' href='https://github.com/databucket/databucket-server/wiki' color="textSecondary">Documentation</Link><br/>
+                    <Link target='_blank' href='https://github.com/databucket/databucket-server/issues' color="textSecondary">Report a bug, propose a new feature, ask a question...</Link><br/>
                     <Link target='_blank' href='https://databucketworkspace.slack.com/archives/C024LBQ4PQU' color="textSecondary">Let's talk on Slack</Link><br/>
-                    <Link target='_blank' href='https://github.com/databucket/databucket-app/blob/master/LICENSE' color="textSecondary">Licence: MIT License</Link><br/>
+                    <Link target='_blank' href='https://github.com/databucket/databucket-server/blob/master/LICENSE' color="textSecondary">Licence: MIT License</Link><br/>
                 </div>
 
                 <div style={{marginLeft: '25px', marginBottom: '10px'}}>
