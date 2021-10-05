@@ -29,7 +29,7 @@ import {
     getColumnCreatedAt,
     getColumnEnabled,
     getColumnExpirationDate,
-    getColumnModifiedBy, getColumnModifiedAt,
+    getColumnModifiedBy, getColumnModifiedAt, getColumnDescription,
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
@@ -50,9 +50,10 @@ export default function UsersTab() {
     const {roles, fetchRoles} = rolesContext;
     const projectsContext = useContext(ProjectsContext);
     const {projects, fetchProjects, notifyProjects} = projectsContext;
-    const changeableFields = ['id', 'username', 'enabled', 'expirationDate', 'rolesIds', 'projectsIds'];
+    const changeableFields = ['id', 'username', 'description', 'enabled', 'expirationDate', 'rolesIds', 'projectsIds'];
     const userSpecification = {
-        username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']}
+        username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']},
+        description: {title: 'Description', check: ['max200']}
     };
 
     useEffect(() => {
@@ -84,6 +85,7 @@ export default function UsersTab() {
                     {filtering: false, cellStyle: { width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
                     getColumnEnabled(),
                     {title: 'Name', field: 'username', editable: 'onAdd', filtering: true},
+                    getColumnDescription(),
                     {
                         title: 'Roles', field: 'rolesIds', filtering: false, sorting: false,
                         render: rowData => getRolesNames(roles, rowData['rolesIds']),

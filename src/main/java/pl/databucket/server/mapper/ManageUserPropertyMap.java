@@ -10,6 +10,7 @@ public class ManageUserPropertyMap extends PropertyMap<User, ManageUserDtoRespon
     protected void configure() {
         map().setId(source.getId());
         map().setUsername(source.getUsername());
+        map().setDescription(source.getDescription());
         map().setEnabled(source.getEnabled());
         map().setExpirationDate(source.getExpirationDate());
         map().setRolesIds(source.getRolesIds());

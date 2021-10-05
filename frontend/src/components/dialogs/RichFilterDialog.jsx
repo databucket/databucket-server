@@ -138,10 +138,12 @@ export default function RichFilterDialog(props) {
     }, [props.open]);
 
     const makeRulesDisabled = (inputLogic) => {
-        // _meta << not implemented by component founder yet!!!
+        // TODO _meta << not implemented by component founder yet!!! (https://github.com/ukrbublik/react-awesome-query-builder/issues/377)
         // const inputLogicStr = JSON.stringify(inputLogic);
-        // const disabledILogicStr = inputLogicStr.replace("\"var\":", "\"_meta\": {\"readonly\": true}, \"var\":");
-        // return JSON.parsnpute(disabledInputLogicStr);
+        // const disabledInputLogicStr = inputLogicStr.replace("\"var\":", "\"_meta\": {\"readonly\": true}, \"var\":");
+        // console.log(JSON.stringify(inputLogic));
+        // console.log(JSON.parse(disabledInputLogicStr));
+        // return JSON.parse(disabledInputLogicStr);
         return inputLogic;
     }
 
