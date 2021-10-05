@@ -16,6 +16,7 @@ public class ManageUserDtoRequest {
     @NotEmpty
     @Size(min = Constants.NAME_MIN, max = Constants.NAME_MAX)
     private String username;
+    private String description;
     private String password;
     private boolean enabled = false;
     private Date expirationDate;

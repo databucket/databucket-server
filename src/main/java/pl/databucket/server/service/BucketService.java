@@ -19,6 +19,7 @@ import pl.databucket.server.repository.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -183,13 +184,30 @@ public class BucketService {
         } else
             bucket.setDataClass(null);
 
-        if (bucketDto.getGroupsIds() != null) {
-            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, bucketDto.getGroupsIds());
-            if (groups.size() > 0)
+        // Modify groups
+        Set<Long> currentGroupsIds = bucket.getGroups().stream().map(Group::getId).collect(Collectors.toSet());
+        Set<Long> newGroupsIds = bucketDto.getGroupsIds();
+        if (!(currentGroupsIds.containsAll(newGroupsIds) && newGroupsIds.size() == currentGroupsIds.size())) {
+            Set<Long> toAdd = newGroupsIds.stream().filter(element -> !currentGroupsIds.contains(element)).collect(Collectors.toSet());
+            if (toAdd.size() > 0) {
+                List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, toAdd);
                 for (Group group : groups) {
                     group.getBuckets().add(bucket);
                     groupRepository.save(group);
                 }
+            }
+
+            Set<Long> toRemove = currentGroupsIds.stream().filter(element -> !newGroupsIds.contains(element)).collect(Collectors.toSet());
+            if (toRemove.size() > 0) {
+                List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, toRemove);
+                for (Group group : groups) {
+                    group.getBuckets().remove(bucket);
+                    groupRepository.save(group);
+                }
+            }
+
+            // Just to send proper response
+            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, bucketDto.getGroupsIds());
             bucket.setGroups(new HashSet<>(groups));
         }
 

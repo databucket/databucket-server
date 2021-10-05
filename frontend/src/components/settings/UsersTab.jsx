@@ -71,7 +71,6 @@ export default function UsersTab() {
     return (
         <div>
             <MaterialTable
-
                 title='Users'
                 tableRef={tableRef}
                 columns={[

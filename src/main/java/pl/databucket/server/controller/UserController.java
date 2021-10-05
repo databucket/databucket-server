@@ -1,5 +1,6 @@
 package pl.databucket.server.controller;
 
+import jdk.nashorn.internal.objects.NativeArray;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,9 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private TeamService teamService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
@@ -37,12 +41,20 @@ public class UserController {
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(UserController.class);
 
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
     @GetMapping
     public ResponseEntity<?> getUsers() {
         try {
             List<User> users = userService.getUsers(((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId());
+            Set<Short> projectTeams = teamService.getTeams().stream().map(Team::getId).collect(Collectors.toSet());
             List<UserDtoResponse> usersDto = users.stream().map(item -> modelMapper.map(item, UserDtoResponse.class)).collect(Collectors.toList());
+
+            // filter teams from current project
+            for (UserDtoResponse userDto : usersDto) {
+                if (userDto.getTeamsIds() != null)
+                    userDto.getTeamsIds().retainAll(projectTeams);
+            }
+
             return new ResponseEntity<>(usersDto, HttpStatus.OK);
         } catch (IllegalArgumentException | ItemNotFoundException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);

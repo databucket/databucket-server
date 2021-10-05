@@ -27,6 +27,9 @@ public class User extends Auditable<String> implements Serializable {
     @Column(name = "user_name", length = Constants.NAME_MAX, unique = true)
     private String username;
 
+    @Column(length = Constants.DESCRIPTION_MAX)
+    private String description;
+
     @Column
     private String password;
 

@@ -4,8 +4,6 @@ import AccessReducer from "./AccessReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getBaseUrl, getSessionUrl, getSessionUrlWithIds} from "../../utils/UrlBuilder";
-import {hasAdminRole} from "../../utils/ConfigurationStorage";
-
 
 const AccessProvider = props => {
 
@@ -88,13 +86,10 @@ const AccessProvider = props => {
     }
 
     const fetchSessionUsers = () => {
-        if (hasAdminRole()) {
-            fetch(getBaseUrl('users'), getGetOptions())
-                .then(handleErrors)
-                .then(users => dispatch({type: "FETCH_SESSION_USERS", payload: users}))
-                .catch(err => console.log(err));
-        } else
-            dispatch({type: "FETCH_SESSION_USERS", payload: []});
+        fetch(getBaseUrl('users'), getGetOptions())
+            .then(handleErrors)
+            .then(users => dispatch({type: "FETCH_SESSION_USERS", payload: users}))
+            .catch(err => console.log(err));
     }
 
     const setActiveGroup = (group) => {

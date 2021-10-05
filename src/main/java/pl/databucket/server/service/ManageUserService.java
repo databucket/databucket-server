@@ -43,6 +43,7 @@ public class ManageUserService {
 
         User newUser = new User();
         newUser.setUsername(manageUserDtoRequest.getUsername());
+        newUser.setDescription(manageUserDtoRequest.getDescription());
         newUser.setEnabled(manageUserDtoRequest.isEnabled());
         newUser.setExpirationDate(manageUserDtoRequest.getExpirationDate());
 
@@ -60,6 +61,7 @@ public class ManageUserService {
 
     public User modifyUser(ManageUserDtoRequest manageUserDtoRequest) {
         User user = userRepository.findByUsername(manageUserDtoRequest.getUsername());
+        user.setDescription(manageUserDtoRequest.getDescription());
         user.setEnabled(manageUserDtoRequest.isEnabled());
         user.setExpirationDate(manageUserDtoRequest.getExpirationDate());
 
