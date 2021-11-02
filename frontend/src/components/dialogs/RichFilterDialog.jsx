@@ -105,7 +105,6 @@ RichFilterDialog.propTypes = {
     open: PropTypes.bool.isRequired,
     bucket: PropTypes.object.isRequired,
     onClose: PropTypes.func.isRequired,
-    reload: PropTypes.func.isRequired,
     activeLogic: PropTypes.object,
     setActiveLogic: PropTypes.func.isRequired
 };
