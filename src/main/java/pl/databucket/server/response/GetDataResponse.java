@@ -36,6 +36,6 @@ public class GetDataResponse {
     @ApiModelProperty(hidden = true)
     private String message;
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(position = 7, example = "[{\"id\":53,\"name\":\"Sabra\"},{\"id\":58,\"name\":\"Shenika\"},{\"id\":117,\"name\":\"Shawna\"}]")
     private Object customData;
 }

@@ -8,7 +8,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from "prop-types";
-import {Tabs} from "@material-ui/core";
+import {CircularProgress, Tabs} from "@material-ui/core";
 import {getDeleteOptions, getPostOptions, getPutOptions, getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "../../utils/MaterialTableHelper";
 import Tab from "@material-ui/core/Tab";
 import {MessageBox} from "../utils/MessageBox";
@@ -25,6 +25,7 @@ import {Query, Utils as QbUtils} from "react-awesome-query-builder";
 import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
 import {getTaskExecutionDialogSize, setTaskExecutionDialogSize} from "../../utils/ConfigurationStorage";
+import Grid from "@material-ui/core/Grid";
 
 const styles = theme => ({
     root: {
@@ -120,7 +121,7 @@ export default function TaskExecutionDialog(props) {
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [appliesCount, setAppliesCount] = useState(0);
-    const [state, setState] = useState({actions: initialActions, properties: [], logic: null, tree: null, config: null});
+    const [state, setState] = useState({actions: initialActions, properties: [], logic: null, tree: null, config: null, processing: false});
     const [dialogSize, setDialogSize] = useState('md');
     const dialogContentRef = React.useRef(null);
 
@@ -194,6 +195,7 @@ export default function TaskExecutionDialog(props) {
     const onTaskExecute = () => {
         let resultOk = true;
         if (state.actions.type === 'remove') {
+            setState({...state, processing: true});
             fetch(getDataUrl(props.bucket), getDeleteOptions({logic: state.logic}))
                 .then(handleErrors)
                 .catch(error => {
@@ -201,6 +203,7 @@ export default function TaskExecutionDialog(props) {
                     resultOk = false;
                 })
                 .then(result => {
+                    setState({...state, processing: false});
                     if (resultOk) {
                         setMessageBox({open: true, severity: 'success', title: result.message, message: null});
                         refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
@@ -243,6 +246,7 @@ export default function TaskExecutionDialog(props) {
             }
 
             if (change) {
+                setState({...state, processing: true});
                 fetch(getDataUrl(props.bucket), getPutOptions(payload))
                     .then(handleErrors)
                     .catch(error => {
@@ -250,6 +254,7 @@ export default function TaskExecutionDialog(props) {
                         resultOk = false;
                     })
                     .then(result => {
+                        setState({...state, processing: false});
                         if (resultOk) {
                             setMessageBox({open: true, severity: 'success', title: result.message, message: null});
                             refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
@@ -342,11 +347,11 @@ export default function TaskExecutionDialog(props) {
             fullWidth={true}
             maxWidth={dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
         >
-            <DialogTitle 
-                id="customized-dialog-title" 
+            <DialogTitle
+                id="customized-dialog-title"
                 onClose={handleClose}
                 onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller : null}
-                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger: null}
+                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger : null}
             >
                 <div className={classes.oneLine}>
                     <Typography variant="h6">{'Task execution'}</Typography>
@@ -365,8 +370,22 @@ export default function TaskExecutionDialog(props) {
                 </div>
             </DialogTitle>
             <EnumsProvider>
-                <DialogContent dividers style={{height: '62vh'}} ref = {dialogContentRef}>
-                    {props.open && activeTab === 0 &&
+                <DialogContent dividers style={{height: '62vh'}} ref={dialogContentRef}>
+                    {props.open && state.processing &&
+                    <Grid
+                        container
+                        spacing={0}
+                        direction="column"
+                        alignItems="center"
+                        justify="center"
+                        style={{minHeight: '50vh'}}
+                    >
+                        <Grid item xs={3}>
+                            <CircularProgress disableShrink/>
+                        </Grid>
+                    </Grid>
+                    }
+                    {props.open && !state.processing && activeTab === 0 &&
                     <TaskActions
                         actions={state.actions}
                         properties={state.properties}
@@ -375,7 +394,7 @@ export default function TaskExecutionDialog(props) {
                         pageSize={null}
                     />}
 
-                    {props.open && activeTab === 1 &&
+                    {props.open && !state.processing && activeTab === 1 &&
                     <div>
                         <Query
                             {...state.config}
@@ -387,7 +406,7 @@ export default function TaskExecutionDialog(props) {
                     </div>
                     }
 
-                    {props.open && activeTab === 2 &&
+                    {props.open && !state.processing && activeTab === 2 &&
                     <PropertiesTable
                         used={getUsedUuids()}
                         data={state.properties}

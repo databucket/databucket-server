@@ -15,6 +15,9 @@ public class DataCreateDTO {
     @ApiModelProperty(position = 2, example = "false")
     private Boolean reserved;
 
+    @ApiModelProperty(position = 3, example = "username")
+    private String owner;
+
     @ApiModelProperty(position = 3, example = "{\"name\": \"John\", \"age\": 34}")
     private Map<String, Object> properties;
 

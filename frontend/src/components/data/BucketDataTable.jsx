@@ -158,8 +158,13 @@ export default function BucketDataTable() {
         setLastBucketSearchedText(activeBucket.id, text);
     }
 
+    const resetPageAndReload = () => {
+        setState({...state, resetPage: true});
+        reloadData();
+    }
+
     const setActiveLogic = (logic) => {
-        setState({...state, activeLogic: logic});
+        setState({...state, activeLogic: logic, resetPage: true});
         reloadData();
     }
 
@@ -670,7 +675,7 @@ export default function BucketDataTable() {
                     bucket={activeBucket}
                     open={taskState.open}
                     onClose={onCloseTaskExecutionEditorDialog}
-                    reload={reloadData}
+                    reload={resetPageAndReload}
                     activeLogic={state.activeLogic}
                 />
 
@@ -678,7 +683,6 @@ export default function BucketDataTable() {
                     bucket={activeBucket}
                     open={richFilterState.open}
                     onClose={onCloseRichFilterDialog}
-                    reload={reloadData}
                     activeLogic={state.activeLogic}
                     setActiveLogic={setActiveLogic}
                 />
