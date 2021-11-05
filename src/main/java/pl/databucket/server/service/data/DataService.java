@@ -1,10 +1,12 @@
 package pl.databucket.server.service.data;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -25,6 +27,7 @@ import pl.databucket.server.mapper.DataRowMapper;
 import pl.databucket.server.service.ServiceUtils;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -62,8 +65,33 @@ public class DataService {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         Query query = new Query(bucket.getTableName()).insertIntoValues(paramMap);
         jdbcTemplate.update(query.toString(logger, paramMap.getValues()), paramMap, keyHolder, new String[]{COL.DATA_ID});
-        long id = keyHolder.getKey().intValue();
+        long id = Objects.requireNonNull(keyHolder.getKey()).intValue();
         return getData(user, bucket, id);
+    }
+
+    public void createData(User user, Bucket bucket, List<DataCreateDTO> dataList) {
+
+        String sql = "INSERT INTO \"" + bucket.getTableName() + "\" (\"tag_id\", \"created_by\", \"modified_by\", \"reserved\", \"reserved_by\", \"properties\") VALUES (?, ?, ?, ?, ?, ?)";
+        logger.debug("create " + dataList.size() + " data rows");
+        logger.debug(sql);
+        int[] result = jdbcTemplate.getJdbcTemplate().batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @SneakyThrows
+            @Override
+            public void setValues(PreparedStatement ps, int i) {
+                DataCreateDTO dataCreateDTO = dataList.get(i);
+                ps.setLong(1, dataCreateDTO.getTagId());
+                ps.setString(2, user.getUsername());
+                ps.setString(3, user.getUsername());
+                ps.setBoolean(4, dataCreateDTO.getReserved());
+                ps.setString(5, dataCreateDTO.getReserved() ? dataCreateDTO.getOwner() != null ? dataCreateDTO.getOwner() : user.getUsername() : null);
+                ps.setObject(6, serviceUtils.javaObjectToPGObject(dataCreateDTO.getProperties()));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return dataList.size();
+            }
+        });
     }
 
     public DataDTO getData(User user, Bucket bucket, long id) throws UnknownColumnException, ConditionNotAllowedException {

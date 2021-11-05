@@ -53,12 +53,16 @@ public class PublicController {
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
 
 
-    @ApiOperation(value = "Authenticate", notes = "Gets the token nedded to work on data", response = AuthRespDTO.class)
+    @ApiOperation(value = "Authenticate", notes = "Returns the token required to authorize the user, user's roles, project details if given projectId, or list of user's projects if the projectId is not given.", response = AuthRespDTO.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = AuthRespDTO.class)
+            @ApiResponse(code = 200, message = "OK", response = AuthRespDTO.class),
+            @ApiResponse(code = 401, message = "Unauthorized - the given credentials are not correct"),
+            @ApiResponse(code = 403, message = "Forbidden - user access has expired | the project is disabled | the project is expired | the user is not assign to given project | the user is not assign to any project"),
+            @ApiResponse(code = 500, message = "Internal server error"),
     })
     @PostMapping(value = "/signin", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> signIn(@ApiParam(value="Payload") @RequestBody AuthReqDTO authReqDTO) {
+    public ResponseEntity<?> signIn(
+            @ApiParam(value="payload - username (required), password (required), projectId (optional)", required = true) @RequestBody AuthReqDTO authReqDTO) {
         User user = userRepository.findByUsername(authReqDTO.getUsername());
         if (user == null)
             return exceptionFormatter.customException(new UsernameNotFoundException("Bad credentials"), HttpStatus.UNAUTHORIZED);
