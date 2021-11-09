@@ -7,9 +7,13 @@
     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═════╝  ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═════╝
 </pre>
 
-#Overview
+# About project
 
-This file describes rules for working with databucket code and provides useful information for new contributors.
+**Databucket** is an Open Source Test Data Management Tool. It delivers features to effectively create and maintain test data and metadata for extensive tests on multiple projects, environments, and various integrated tools at the same time. Databucket stores data in elastic structures which gives a ready approach to maintain constantly changing test data in software development process.
+
+# Getting started with Databucket
+* First you can read about key features on [databucket.pl](https://databucket.pl)
+* Next, you can dive deeper in the [Wiki page](https://github.com/databucket/databucket-server/wiki).
 
 # Contribution rules
 
