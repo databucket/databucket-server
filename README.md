@@ -9,7 +9,7 @@
 
 # About project
 
-**Databucket** is an Open Source Test Data Management Tool. It delivers features to effectively create and maintain test data and metadata for extensive tests on multiple projects, environments, and various integrated tools at the same time. Databucket stores data in elastic structures which gives a ready approach to maintain constantly changing test data in software development process.
+**Databucket** is an Open Source Test Data Management Tool. It delivers features to effectively create and maintain test data and metadata for extensive tests on multiple projects, environments, and various integrated tools at the same time. Databucket stores data in elastic structures, which gives a ready approach to maintain constantly changing test data in the software development process.
 
 # Getting started with Databucket
 * First you can read about key features on [databucket.pl](https://databucket.pl)
