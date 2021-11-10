@@ -29,6 +29,7 @@ import {MessageBox} from "../utils/MessageBox";
 import {sortByKey} from "../../utils/JsonHelper";
 import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRouter";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import ReactGA from 'react-ga';
 
 const initialState = {
     username: "",
@@ -91,6 +92,8 @@ export default function LoginPage() {
                     setToken(data.token);
                     if (hasMemberRole() || hasAdminRole()) {
                         setActiveProjectId(data.project.id);
+                        ReactGA.initialize('UA-86983600-1');
+                        ReactGA.pageview("login-to-project");
                         setState(prevState => ({...prevState, projects: null, changePassword: false}));
                     } else if (hasSuperRole()) {
                         setState(prevState => ({...prevState, projects: null, changePassword: false}));
@@ -244,7 +247,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">3.1.1</Typography>
+            <Typography variant="caption">3.1.2</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
