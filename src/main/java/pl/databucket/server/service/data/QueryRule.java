@@ -196,6 +196,11 @@ public class QueryRule {
         Object rightValue = retrieveCurrentUser(rightObject);
         SourceType rightSource = SourceType.s_const;
 
+        if (rightObject instanceof String && ((String) rightObject).startsWith("#func:")) {
+            rightValue = ((String) rightValue).substring(6);
+            rightSource = SourceType.s_function;
+        }
+
         return new Condition(leftSource, getDatabaseColumnName(leftValue), operator, rightSource, rightValue);
     }
 

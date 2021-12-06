@@ -165,6 +165,12 @@ export const getBucketFilters = (activeBucket, filters) => {
     return filters.filter(filterItem => (filterItem.classId != null && filterItem.classId === activeBucket.classId) || filterItem.classId == null);
 }
 
+export const sleep = (ms) => {
+    return function(x) {
+        return new Promise(resolve => setTimeout(() => resolve(x), ms));
+    };
+}
+
 export const getBucketViews = (activeBucket, views) => {
     if (views != null && activeBucket != null) {
         return views.filter(view => (
@@ -238,7 +244,7 @@ export const convertDataBeforeModify = (columns, newData, oldData) => {
                             if (fieldType === 'numeric')
                                 value = parseInt(newItem, 10);
                             else if (fieldType === 'datetime' || fieldType === 'date' || fieldType === 'time')
-                                value = toIsoString(newItem);
+                                value = newItem.toISOString();
 
                             if (source.startsWith('$')) {
                                 payload.propertiesToSet[source] = value;
