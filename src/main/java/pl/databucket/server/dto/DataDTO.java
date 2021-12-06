@@ -1,5 +1,6 @@
 package pl.databucket.server.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,12 +30,14 @@ public class DataDTO {
     @ApiModelProperty(position = 6, example = "user")
     private String createdBy;
 
-    @ApiModelProperty(position = 7, example = "2021-05-22T14:30:24.011+0000")
+    @ApiModelProperty(position = 7, example = "2021-05-22T14:30:24.011Z")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private Date createdAt;
 
     @ApiModelProperty(position = 8, example = "user")
     private String modifiedBy;
 
-    @ApiModelProperty(position = 9, example = "2021-05-22T14:30:24.011+0000")
+    @ApiModelProperty(position = 9, example = "2021-05-22T14:30:24.011Z")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private Date modifiedAt;
 }

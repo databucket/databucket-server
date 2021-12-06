@@ -283,8 +283,12 @@ export default function BucketDataTable() {
                         .catch(error => {
                             setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                             resultOk = false;
-                        });
-                    resultOk && reloadData();
+                        })
+                        .then(() => {
+                            if (resultOk) {
+                                reloadData();
+                            }
+                    });
                 }
             });
     }

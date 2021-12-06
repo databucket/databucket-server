@@ -264,9 +264,6 @@ public class Query {
         String v2;
 
         if (condition.getOperator().equals(Operator.in) || condition.getOperator().equals(Operator.notIn)) {
-            if (condition.getOperator().equals(Operator.notIn))
-                sFormat = "NOT(%s %s %s)";
-
             // eg.: $.textValue in $.textArray
             if (condition.getLeftSource().equals(SourceType.s_property) && condition.getRightSource().equals(SourceType.s_property)) {
                 throw new ConditionNotAllowedException(condition);
@@ -298,9 +295,12 @@ public class Query {
 
                 // property not used in this condition
             } else {
-                sFormat = "%s %s (%s)";
+                if (condition.getOperator().equals(Operator.notIn))
+                    sFormat = "NOT(%s %s (%s))";
+                else
+                    sFormat = "%s %s (%s)";
                 v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
-                op = condition.getOperator().toString();
+                op = Operator.in.toString();
                 v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
             }
         }
@@ -333,6 +333,7 @@ public class Query {
             v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), rightValue, paramMap);
 
         } else {
+            boolean convertToDateTime = false;
             if (condition.getLeftSource().equals(SourceType.s_property)) {
                 if (condition.getRightValue() instanceof Integer)
                     v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::int";
@@ -341,10 +342,17 @@ public class Query {
                 else if (condition.getRightValue() instanceof Boolean)
                     v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::bool";
                 else if (isValidDate((String) condition.getRightValue()) != null) {
-                    Timestamp date = isValidDate((String) condition.getRightValue());
-                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text::timestamp";
-                } else
-                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::text";
+                    convertToDateTime = true;
+                    String leftValue = ((String)condition.getLeftValue()).replace("::timestamp", ""); // in case using optional cast
+                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text::timestamp";
+                } else {
+                    String leftValue = (String) condition.getLeftValue();
+                    if (leftValue.endsWith("::timestamp")) {
+                        leftValue = leftValue.substring(0, leftValue.indexOf("::timestamp"));
+                        v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text::timestamp";
+                    } else
+                        v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text";
+                }
             } else if (condition.getLeftSource().equals(SourceType.s_function)) {
                 v1 = "(" + getField((String) condition.getLeftValue()) + ")";
             } else
@@ -355,7 +363,10 @@ public class Query {
             if (condition.getLeftSource().equals(SourceType.s_property)) {
                 if (condition.getRightValue() == null)
                     v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "null", paramMap);
-                else if (condition.getRightValue() instanceof String)
+                else if (convertToDateTime) {
+                    Timestamp timestamp = isValidDate((String) condition.getRightValue());
+                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), timestamp, paramMap);
+                } else if (condition.getRightValue() instanceof String && condition.getRightSource() != SourceType.s_function)
                     v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "\"" + condition.getRightValue() + "\"", paramMap);
                 else
                     v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), condition.getRightValue(), paramMap);
