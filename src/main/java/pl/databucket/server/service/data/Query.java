@@ -343,7 +343,7 @@ public class Query {
                     v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::bool";
                 else if (isValidDate((String) condition.getRightValue()) != null) {
                     convertToDateTime = true;
-                    String leftValue = ((String)condition.getLeftValue()).replace("::timestamp", ""); // in case using optional cast
+                    String leftValue = ((String) condition.getLeftValue()).replace("::timestamp", ""); // in case using optional cast
                     v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text::timestamp";
                 } else {
                     String leftValue = (String) condition.getLeftValue();
@@ -549,6 +549,11 @@ public class Query {
     public Query limitPage(Map<String, Object> paramMap, Integer limit, Integer page) {
         limit(paramMap, limit);
         offset(paramMap, page * limit - limit);
+        return this;
+    }
+
+    public Query forUpdateSkipLocked() {
+        query += " for update skip locked";
         return this;
     }
 
