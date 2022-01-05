@@ -238,9 +238,6 @@ public class DataService {
 
     public List<Long> reserveData(User user, Bucket bucket, QueryRule queryRule, Integer limit, String sort, String targetOwnerUsername) throws UnknownColumnException, ConditionNotAllowedException, UnexpectedException {
 
-        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
-        transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
-
         Map<String, Object> paramMap = new HashMap<>();
         queryRule.getConditions().add(new Condition(COL.RESERVED, Operator.equal, false));
 
@@ -249,51 +246,39 @@ public class DataService {
                 .from()
                 .where(queryRule, paramMap)
                 .orderBy(sort)
-                .limitPage(paramMap, limit, 1);
+                .limitPage(paramMap, limit, 1)
+                .forUpdateSkipLocked();
 
-        boolean done = false;
-        int tryCount = 7;
-        List<Long> dataIds = null;
+        List<Long> dataIds;
 
-        while (!done && tryCount > 0) {
-            try {
-                dataIds = transactionTemplate.execute(paramTransactionStatus -> {
-                    List<Long> listOfIds = jdbcTemplate.queryForList(selectQuery.toString(logger, paramMap), paramMap, Long.class);
-                    if (listOfIds.size() > 0) {
-                        Condition condition = new Condition(COL.DATA_ID, Operator.in, listOfIds);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        try {
+            dataIds = transactionTemplate.execute(paramTransactionStatus -> {
+                List<Long> listOfIds = jdbcTemplate.queryForList(selectQuery.toString(logger, paramMap), paramMap, Long.class);
+                if (listOfIds.size() > 0) {
+                    Condition condition = new Condition(COL.DATA_ID, Operator.in, listOfIds);
 
-                        Map<String, Object> updateNamedParams = new HashMap<>();
-                        updateNamedParams.put(COL.RESERVED_BY, targetOwnerUsername);
-                        updateNamedParams.put(COL.MODIFIED_BY, user.getUsername());
-                        updateNamedParams.put(COL.RESERVED, true);
+                    Map<String, Object> updateNamedParams = new HashMap<>();
+                    updateNamedParams.put(COL.RESERVED_BY, targetOwnerUsername);
+                    updateNamedParams.put(COL.MODIFIED_BY, user.getUsername());
+                    updateNamedParams.put(COL.RESERVED, true);
 
-                        Query updateQuery = null;
-                        try {
-                            updateQuery = new Query(bucket.getTableName())
-                                    .update()
-                                    .set(updateNamedParams)
-                                    .where(condition, updateNamedParams);
-                        } catch (UnknownColumnException | ConditionNotAllowedException e) {
-                            e.printStackTrace();
-                        }
+                    Query updateQuery = new Query(bucket.getTableName());
+                    try {
+                        updateQuery.update()
+                                .set(updateNamedParams)
+                                .where(condition, updateNamedParams);
+                    } catch (UnknownColumnException | ConditionNotAllowedException e) {
+                        e.printStackTrace();
+                    }
 
-                        jdbcTemplate.update(updateQuery.toString(logger, updateNamedParams), updateNamedParams);
-                        return listOfIds;
-                    } else
-                        return null;
-                });
-
-                done = true;
-            } catch (DeadlockLoserDataAccessException | CannotSerializeTransactionException | JpaSystemException d) {
-                tryCount -= 1;
-                try {
-                    Thread.sleep(400);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } catch (Exception e) {
-                throw new UnexpectedException(e);
-            }
+                    jdbcTemplate.update(updateQuery.toString(logger, updateNamedParams), updateNamedParams);
+                    return listOfIds;
+                } else
+                    return null;
+            });
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
         }
 
         return dataIds;
