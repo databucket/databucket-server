@@ -22,6 +22,6 @@ public class DataReserveDTO implements SearchRules {
     @ApiModelProperty(hidden = true)
     private Map<String, Object> logic; // New rules defined in frontend (property is saved as prop.$*group*itemName)
 
-    @ApiModelProperty(position = 1, example = "[[\"$.firstName\", \"like\", \"S%a\"],\"id > 10\",\"tagId > 0\",{\"or\":[\"owner != null\",\"createdBy = '@currentUser'\"]}]")
+    @ApiModelProperty(position = 1, example = "[[\"$.firstName\",\"like\",\"S%a\"],[\"id\", \">\",  10],[\"tagId\",\">\", 0],{\"or\": [[\"owner\", \"!=\", null],[\"createdBy\", \"=\", \"@currentUser\"]]}]")
     private List<Object> rules;
 }

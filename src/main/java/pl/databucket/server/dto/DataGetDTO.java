@@ -19,7 +19,7 @@ public class DataGetDTO implements SearchRules {
             "{\"left_source\": \"property\",\t\"left_value\": \"$.name\",\t\"operator\": \"like\",\t\"right_source\": \"const\", \"right_value\": \"Jo%\"}]")
     private List<Map<String, Object>> conditions; // Old filtering method
 
-    @ApiModelProperty(position = 2, example = "[[\"$.firstName\", \"like\", \"S%a\"],\"id > 10\",\"tagId > 0\",{\"or\":[\"owner != null\",\"createdBy = '@currentUser'\"]}]")
+    @ApiModelProperty(position = 2, example = "[[\"$.firstName\",\"like\",\"S%a\"],[\"id\", \">\",  10],[\"tagId\",\">\", 0],{\"or\": [[\"owner\", \"!=\", null],[\"createdBy\", \"=\", \"@currentUser\"]]}]")
     private List<Object> rules;
 
     @ApiModelProperty(hidden = true)
