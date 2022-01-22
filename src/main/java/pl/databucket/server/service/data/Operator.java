@@ -8,8 +8,8 @@ public enum Operator {
 
 	equal("="),
 	notEqual("<>"),
-	grater(">"),
-	graterEqual(">="),
+	greater(">"),
+	greaterEqual(">="),
 	less("<"),
 	lessEqual("<="),
 
@@ -60,10 +60,10 @@ public enum Operator {
 
     public static Operator getInverted(Operator operator) {
 		switch (operator) {
-			case grater: return less;
-			case less: return grater;
-			case graterEqual: return lessEqual;
-			case lessEqual: return graterEqual;
+			case greater: return less;
+			case less: return greater;
+			case greaterEqual: return lessEqual;
+			case lessEqual: return greaterEqual;
 			default: return null;
 		}
 	}

@@ -264,6 +264,12 @@ public class Query {
         String v2;
 
         if (condition.getOperator().equals(Operator.in) || condition.getOperator().equals(Operator.notIn)) {
+
+            if (condition.getOperator().equals(Operator.notIn))
+                sFormat = "NOT(%s %s (%s))";
+            else
+                sFormat = "%s %s (%s)";
+
             // eg.: $.textValue in $.textArray
             if (condition.getLeftSource().equals(SourceType.s_property) && condition.getRightSource().equals(SourceType.s_property)) {
                 throw new ConditionNotAllowedException(condition);
@@ -295,10 +301,6 @@ public class Query {
 
                 // property not used in this condition
             } else {
-                if (condition.getOperator().equals(Operator.notIn))
-                    sFormat = "NOT(%s %s (%s))";
-                else
-                    sFormat = "%s %s (%s)";
                 v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
                 op = Operator.in.toString();
                 v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);

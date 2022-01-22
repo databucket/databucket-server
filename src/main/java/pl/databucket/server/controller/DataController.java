@@ -19,7 +19,7 @@ import pl.databucket.server.exception.*;
 import pl.databucket.server.response.GetDataResponse;
 import pl.databucket.server.service.BucketService;
 import pl.databucket.server.service.UserService;
-
+import javax.validation.constraints.Size;
 import java.util.*;
 
 @Api(tags="SECURED")
@@ -282,9 +282,11 @@ public class DataController {
 
         try {
             GetDataResponse response = new GetDataResponse();
-            response.setPage(page);
             response.setLimit(limit);
-            response.setSort(sort);
+            if (limit > 0) {
+                response.setPage(page);
+                response.setSort(sort);
+            }
 
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
@@ -292,7 +294,8 @@ public class DataController {
 
                 long total = (long) result.get(ResultField.TOTAL);
                 response.setTotal(total);
-                response.setTotalPages((int) Math.ceil(total / (float) limit));
+                if (limit > 0)
+                    response.setTotalPages((int) Math.ceil(total / (float) limit));
                 if (result.containsKey(ResultField.DATA))
                     response.setData((List<DataDTO>) result.get(ResultField.DATA));
                 else
@@ -332,6 +335,9 @@ public class DataController {
         Bucket bucket = bucketService.getBucket(bucketName);
         if (bucket == null)
             return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+
+        if (limit < 1)
+            return exceptionFormatter.customException("The limit must be greater than 0!", HttpStatus.NOT_ACCEPTABLE);
 
         try {
             ReserveDataResponse response = new ReserveDataResponse();
