@@ -145,7 +145,7 @@ public class QueryRule {
                     throw new InvalidObjectException("Expected Map or ArrayList in as the 'rule' item!");
             }
 
-        // inside ! operator
+            // inside ! operator
         else if (inputRules instanceof Map) {
             Map<String, Object> inputRuleItemMap = (Map<String, Object>) inputRules;
             if (inputRuleItemMap.size() == 1) {
@@ -190,18 +190,71 @@ public class QueryRule {
         }
     }
 
-    private Condition getConditionFromRule(Object leftObject, Operator operator, Object rightObject) {
-        String leftValue = (String) leftObject;
-        SourceType leftSource = leftValue.startsWith("$") ? leftValue.endsWith("()") ? SourceType.s_function : SourceType.s_property : SourceType.s_field;
-        Object rightValue = retrieveCurrentUser(rightObject);
-        SourceType rightSource = SourceType.s_const;
+    private boolean isField(String value) {
+        String[] fields = {"id", "tagId", "owner", "reserved", "properties", "createdBy", "createdAt", "modifiedBy", "modifiedAt"};
+        return Arrays.asList(fields).contains(value);
+    }
 
-        if (rightObject instanceof String && ((String) rightObject).startsWith("#func:")) {
-            rightValue = ((String) rightValue).substring(6);
-            rightSource = SourceType.s_function;
+    private SourceType getSourceType(Object objectValue) {
+        if (objectValue instanceof String) {
+            String stringValue = (String) objectValue;
+            if (stringValue.startsWith("$"))
+                if (stringValue.endsWith("()"))
+                    return SourceType.s_function;
+                else
+                    return SourceType.s_property;
+            else if (isField(stringValue))
+                return SourceType.s_field;
+            else
+                return SourceType.s_const;
+        } else
+            return SourceType.s_const;
+    }
+
+    private Condition getConditionFromRule(Object leftObject, Operator operator, Object rightObject) {
+        SourceType leftSourceType = getSourceType(leftObject);
+        SourceType rightSourceType = getSourceType(rightObject);
+
+        leftObject = retrieveCurrentUser(leftObject);
+        if (leftObject instanceof String) {
+            String leftValue = (String) leftObject;
+            if (leftValue.startsWith("#func:")) {
+                leftObject = ((String) leftObject).substring(6);
+                leftSourceType = SourceType.s_function;
+            } else if (leftSourceType.equals(SourceType.s_field))
+                leftObject = getDatabaseColumnName(leftValue);
         }
 
-        return new Condition(leftSource, getDatabaseColumnName(leftValue), operator, rightSource, rightValue);
+        rightObject = retrieveCurrentUser(rightObject);
+        if (rightObject instanceof String) {
+            String rightValue = (String) rightObject;
+            if (rightValue.startsWith("#func:")) {
+                rightObject = ((String) rightObject).substring(6);
+                rightSourceType = SourceType.s_function;
+            } else if (rightSourceType.equals(SourceType.s_field))
+                rightObject = getDatabaseColumnName(rightValue);
+        }
+
+        // replace left and right in some situations
+        if (leftSourceType.equals(SourceType.s_const)
+                && !rightSourceType.equals(SourceType.s_const)
+                && (operator.equals(Operator.less)
+                || operator.equals(Operator.lessEqual)
+                || operator.equals(Operator.greater)
+                || operator.equals(Operator.greaterEqual))) {
+            Operator newOperator;
+            if (operator.equals(Operator.less))
+                newOperator = Operator.greater;
+            else if (operator.equals(Operator.greater))
+                newOperator = Operator.less;
+            else if (operator.equals(Operator.lessEqual))
+                newOperator = Operator.greaterEqual;
+            else
+                newOperator = Operator.lessEqual;
+
+            return new Condition(rightSourceType, rightObject, newOperator, leftSourceType, leftObject);
+        } else
+            return new Condition(leftSourceType, leftObject, operator, rightSourceType, rightObject);
     }
 
     private Condition getConditionFromJsonLogic(Operator operator, Object firstItem, Object secondItem) {
@@ -209,8 +262,8 @@ public class QueryRule {
             case equal:
             case notEqual:
                 return new Condition(convertJsonLogicVariable(firstItem), operator, retrieveCurrentUser(secondItem));
-            case grater:
-            case graterEqual:
+            case greater:
+            case greaterEqual:
             case less:
             case lessEqual:
                 return new Condition(convertJsonLogicVariable(firstItem), operator, secondItem);
