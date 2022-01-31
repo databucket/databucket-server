@@ -32,11 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = null;
         String authToken = null;
         if (header != null && header.startsWith(TOKEN_PREFIX)) {
-            authToken = header.replace(TOKEN_PREFIX, "");
+            authToken = header.trim().replaceFirst("\ufeff", "").replace(TOKEN_PREFIX, "");    // Fixing: Unexpected character ('�' (code 65533 / 0xfffd))
             try {
                 username = jwtTokenUtil.getUsernameFromToken(authToken);
             } catch (io.jsonwebtoken.MalformedJwtException e) {
-                logger.error("Broken token: " + authToken, e);
+                logger.error("The token is broken", e);
             } catch (IllegalArgumentException e) {
                 logger.error("An error occurred during getting user name from token", e);
             } catch (ExpiredJwtException e) {
