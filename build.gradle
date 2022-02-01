@@ -1,12 +1,12 @@
 plugins {
     id 'java'
     id 'groovy'
-    id 'org.springframework.boot' version '2.5.2'
+    id 'org.springframework.boot' version '2.5.7'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 group = 'pl.databucket'
-version = '3.1.8'
+version = '3.1.9'
 sourceCompatibility = 8
 
 configurations {
@@ -24,13 +24,14 @@ jar {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter:2.5.4'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.4'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.4'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.5.4'
+    implementation 'org.springframework.boot:spring-boot-starter:2.5.7'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.7'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.7'
+    implementation 'org.springframework.boot:spring-boot-starter-security:2.5.7'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.7'
     implementation 'org.springframework:spring-tx:5.3.9'
     implementation 'org.postgresql:postgresql:42.2.23.jre7'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.12.5'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
     implementation 'org.projectlombok:lombok:1.18.20'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
