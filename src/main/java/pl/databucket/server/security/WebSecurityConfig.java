@@ -55,10 +55,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/",
                         "/api/public/**", // public endpoint for authorization
                         "/**/static/**",
-                        "/**/favicon.ico"
-                ).permitAll()
-                // need to be redirect in case browser refreshing
-                .antMatchers(
+                        "/actuator/**",
+                        "/**/favicon.ico",
                         "/login",
                         "/change-password",
                         "/project",
@@ -88,7 +86,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.css",
                         "/**/*.js"
                 ).permitAll()
-                .antMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
