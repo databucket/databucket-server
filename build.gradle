@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'pl.databucket'
-version = '3.1.9'
+version = '3.2.0'
 sourceCompatibility = 8
 
 configurations {
@@ -41,6 +41,7 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
+
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok'
 
@@ -71,6 +72,13 @@ test {
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
+
+task deleteStatic(type: Delete) {
+    exec {
+        workingDir 'src/main/resources'
+        delete "static"
+    }
+}
 
 task buildFrontend() {
     String npm = 'npm'

@@ -11,6 +11,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Group findByIdAndDeleted(long id, boolean deleted);
     List<Group> findAllByDeletedAndIdIn(boolean deleted, Iterable<Long> ids);
+    List<Group> findAllByDeletedAndNameIn(boolean deleted, Iterable<String> names);
     List<Group> findAllByDeletedOrderById(boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
 }

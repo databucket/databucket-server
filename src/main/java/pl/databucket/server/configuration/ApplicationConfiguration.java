@@ -31,6 +31,7 @@ public class ApplicationConfiguration {
         modelMapper.addMappings(new AccessTreeBucketPropertyMap());
         modelMapper.addMappings(new AccessTreeViewPropertyMap());
         modelMapper.addMappings(new UserColumnsPropertyMap());
+        modelMapper.addMappings(new TemplatePropertyMap());
         return modelMapper;
     }
 }

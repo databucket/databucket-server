@@ -42,9 +42,19 @@ public class Project extends Auditable<String> {
     @ManyToMany(mappedBy = "projects")
     private Set<User> users;
 
+    @ManyToMany(mappedBy = "projects")
+    private Set<Template> templates;
+
     public Set<Long> getUsersIds() {
         if (users != null && users.size() > 0)
             return users.stream().map(User::getId).collect(Collectors.toSet());
+        else
+            return null;
+    }
+
+    public Set<Integer> getTemplatesIds() {
+        if (templates != null && templates.size() > 0)
+            return templates.stream().map(Template::getId).collect(Collectors.toSet());
         else
             return null;
     }

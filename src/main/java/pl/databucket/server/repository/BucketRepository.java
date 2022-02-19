@@ -16,6 +16,7 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
     Bucket findByIdAndDeleted(long id, boolean deleted);
     Bucket findByNameAndDeleted(String name, boolean deleted);
     List<Bucket> findAllByDeletedAndIdIn(boolean deleted, Iterable<Long> longs);
+    List<Bucket> findAllByDeletedAndNameIn(boolean deleted, Iterable<String> names);
     List<Bucket> findAllByDeletedOrderById(boolean deleted);
     List<Bucket> findAllByDeletedAndDataClass(boolean deleted, DataClass dataClassId);
     boolean existsByNameAndDeleted(String name, boolean deleted);

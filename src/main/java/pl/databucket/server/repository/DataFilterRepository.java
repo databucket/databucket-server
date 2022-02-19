@@ -11,6 +11,7 @@ import java.util.List;
 public interface DataFilterRepository extends JpaRepository<DataFilter, Long> {
 
     DataFilter findByIdAndDeleted(long id, boolean deleted);
+    DataFilter findByNameAndDeleted(String name, boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
     List<DataFilter> findAllByDeletedOrderById(boolean deleted);
     List<DataFilter> findAllByDeletedAndDataClass(boolean deleted, DataClass dataClass);

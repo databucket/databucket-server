@@ -48,7 +48,7 @@ public class ViewService {
         view.setFeaturesIds(viewDto.getFeaturesIds());
 
         if (viewDto.getRoleId() != null) {
-            Role role = roleRepository.getOne(viewDto.getRoleId());
+            Role role = roleRepository.getById(viewDto.getRoleId());
             view.setRole(role);
         }
 
