@@ -1,14 +1,11 @@
 package pl.databucket.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.databucket.server.configuration.Constants;
-import pl.databucket.server.dto.TemplateConfDto;
 import pl.databucket.server.entity.*;
 import pl.databucket.server.repository.*;
 
@@ -25,15 +22,11 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
     private RoleRepository roleRepository;
 
     @Autowired
-    private TemplateRepository templateRepository;
-
-    @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
 
     public void run(ApplicationArguments args) throws IOException {
         createRoles();
         createSuperUser();
-        createBaseTemplate();
     }
 
     private void createRoles() {
@@ -73,21 +66,6 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
             newUser.setPassword(bcryptEncoder.encode("super"));
             newUser.setRoles(roles);
             userRepository.save(newUser);
-        }
-    }
-
-    private void createBaseTemplate() throws IOException {
-        final String NAME = "Film";
-        if (!templateRepository.existsTemplateByName(NAME)) {
-            File file = new ClassPathResource("exampleFilmTemplate.json").getFile();
-            TemplateConfDto configuration = new ObjectMapper().readValue(file, TemplateConfDto.class);
-
-            Template template = new Template();
-            template.setName(NAME);
-            template.setDescription("Example template for film data");
-            template.setConfiguration(configuration);
-
-            templateRepository.save(template);
         }
     }
 

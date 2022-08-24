@@ -46,7 +46,7 @@ const ManageUsersProvider = props => {
                 itemsTargetFieldName = "projectsIds";
                 break;
             default:
-                console.log("Undefined notification source!");
+                console.log("ManageUsersProvider - Undefined notification source! " + sourceName);
                 return;
         }
         dispatch({

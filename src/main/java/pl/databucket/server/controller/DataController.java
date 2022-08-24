@@ -183,7 +183,7 @@ public class DataController {
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("is not present in table \"tags\""))
+            if (Objects.requireNonNull(e.getMessage()).contains("is not present in table \"tags\""))
                 return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
             else if (e.getMessage().contains("cannot cast jsonb null"))
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);

@@ -11,7 +11,9 @@ public class TemplatePropertyMap extends PropertyMap<Template, TemplateDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-//        map().setTemplateConfDto(source.getTemplateConfiguraiton());
+        map().setTemplatesIds(source.getTemplatesIds());
+        map().setProjectsIds(source.getProjectsIds());
+        map().setConfiguration(source.getConfiguration());
 
         map().setCreatedBy(source.getCreatedBy());
         map().setCreatedAt(source.getCreatedAt());

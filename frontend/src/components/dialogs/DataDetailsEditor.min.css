@@ -1,0 +1,39 @@
+.ace_editor {
+    min-height: 200px;
+    font-size: 13pt !important;
+}
+
+.jsoneditor-mode-code {
+    border-width: 0px;
+}
+
+.jsoneditor-menu {
+    background-color: inherit;
+    border-width: 0px;
+}
+
+.jsoneditor-statusbar {
+    border-width: 0px;
+    background-color: inherit;
+}
+
+.jsoneditor-format {
+    margin-left: 15px !important;
+}
+
+.jsoneditor-repair {
+    display: none;
+}
+
+.jsoneditor-poweredBy {
+    display: none;
+}
+
+.jsoneditor-sort {
+    display: none;
+}
+
+.jsoneditor-transform {
+    display: none;
+}
+

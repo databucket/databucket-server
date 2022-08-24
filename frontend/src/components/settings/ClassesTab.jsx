@@ -68,8 +68,8 @@ export default function ClassesTab() {
                 title='Classes'
                 tableRef={tableRef}
                 columns={[
-                    getColumnName(),
-                    getColumnDescription(),
+                    getColumnName("20%"),
+                    getColumnDescription("20%"),
                     {
                         title: 'Properties',
                         field: 'configuration',

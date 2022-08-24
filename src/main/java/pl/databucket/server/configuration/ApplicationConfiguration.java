@@ -32,6 +32,8 @@ public class ApplicationConfiguration {
         modelMapper.addMappings(new AccessTreeViewPropertyMap());
         modelMapper.addMappings(new UserColumnsPropertyMap());
         modelMapper.addMappings(new TemplatePropertyMap());
+        modelMapper.addMappings(new TemplateDataPropertyMap());
+        modelMapper.addMappings(new TemplateDataItemPropertyMap());
         return modelMapper;
     }
 }

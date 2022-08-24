@@ -47,7 +47,7 @@ export default function GroupsTab() {
     const bucketsContext = useContext(BucketsContext);
     const {buckets, fetchBuckets, notifyBuckets} = bucketsContext;
     const usersContext = useContext(UsersContext);
-    const {users, fetchUsers, notifyUsers} = usersContext;
+    const {users, fetchUsers} = usersContext;
     const teamsContext = useContext(TeamsContext);
     const {teams, fetchTeams} = teamsContext;
     const changeableFields = ['name', 'shortName', 'description', 'bucketsIds', 'usersIds', 'roleId', 'teamsIds'];
@@ -164,7 +164,6 @@ export default function GroupsTab() {
                                 .then((group) => {
                                     if (group != null) {
                                         addGroup(convertNullValuesInObject(group, getGroupMapper()));
-                                        notifyUsers('GROUP', group.id, group['usersIds']);
                                         notifyBuckets('GROUP', group.id, group['bucketsIds']);
                                         resolve();
                                     }
@@ -206,8 +205,6 @@ export default function GroupsTab() {
                                 .then((group) => {
                                     if (group != null) {
                                         editGroup(convertNullValuesInObject(group, getGroupMapper()));
-                                        if (!arraysEquals(newData, oldData, 'usersIds'))
-                                            notifyUsers('GROUP', group.id, group['usersIds']);
                                         if (!arraysEquals(newData, oldData, 'bucketsIds'))
                                             notifyBuckets('GROUP', group.id, group['bucketsIds']);
                                         resolve();
@@ -232,7 +229,6 @@ export default function GroupsTab() {
                                     .then(() => {
                                         if (!e) {
                                             removeGroup(oldData.id);
-                                            notifyUsers('GROUP', oldData.id, []);
                                             notifyBuckets('GROUP', oldData.id, []);
                                             resolve();
                                         }

@@ -66,7 +66,7 @@ const BucketsProvider = props => {
                 itemsTargetFieldName = "teamsIds";
                 break;
             default:
-                console.log("Undefined notification source!");
+                console.log("BucketsProvider - Undefined notification source! " + sourceName);
                 return;
         }
         dispatch({

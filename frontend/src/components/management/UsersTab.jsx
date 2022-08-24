@@ -29,7 +29,7 @@ import {
     getColumnCreatedAt,
     getColumnEnabled,
     getColumnExpirationDate,
-    getColumnModifiedBy, getColumnModifiedAt, getColumnDescription,
+    getColumnModifiedBy, getColumnModifiedAt, getColumnDescription, getColumnId,
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
@@ -82,10 +82,11 @@ export default function UsersTab() {
                 title='Users'
                 tableRef={tableRef}
                 columns={[
-                    {filtering: false, cellStyle: { width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
+                    getColumnId(),
+                    {title: 'State', filtering: false, cellStyle: { width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
                     getColumnEnabled(),
                     {title: 'Name', field: 'username', editable: 'onAdd', filtering: true},
-                    getColumnDescription(),
+                    getColumnDescription('20%'),
                     {
                         title: 'Roles', field: 'rolesIds', filtering: false, sorting: false,
                         render: rowData => getRolesNames(roles, rowData['rolesIds']),

@@ -53,7 +53,7 @@ const TagsProvider = props => {
                 itemsTargetFieldName = "bucketsIds";
                 break;
             default:
-                console.log("Undefined notification source!");
+                console.log("TagsProvider - Undefined notification source! " + sourceName);
                 return;
         }
         dispatch({

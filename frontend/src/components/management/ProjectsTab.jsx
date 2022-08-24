@@ -34,6 +34,8 @@ import {getManageProjectMapper} from "../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import TemplatesContext from "../../context/templates/TemplatesContext";
+import SelectTemplatesDialog from "../dialogs/SelectTemplatesDialog";
 
 export default function ProjectsTab() {
 
@@ -48,9 +50,11 @@ export default function ProjectsTab() {
     const {projects, fetchProjects, addProject, editProject, removeProject} = projectsContext;
     const usersContext = useContext(ManageUsersContext);
     const {users, fetchUsers, notifyUsers} = usersContext;
+    const templatesContext = useContext(TemplatesContext);
+    const {templates, fetchTemplates, notifyTemplates} = templatesContext;
     const rolesContext = useContext(RolesContext);
     const {roles, fetchRoles} = rolesContext;
-    const changeableFields = ['id', 'enabled', 'name', 'description', 'usersIds', 'expirationDate'];
+    const changeableFields = ['id', 'enabled', 'name', 'description', 'usersIds', 'templatesIds', 'expirationDate'];
     const projectSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -60,6 +64,11 @@ export default function ProjectsTab() {
         if (users == null)
             fetchUsers();
     }, [users, fetchUsers]);
+
+    useEffect(() => {
+        if (templates == null)
+            fetchTemplates();
+    }, [templates, fetchTemplates]);
 
     useEffect(() => {
         if (projects == null)
@@ -109,7 +118,7 @@ export default function ProjectsTab() {
                     getColumnId(),
                     getColumnEnabled(),
                     getColumnName(),
-                    getColumnDescription(),
+                    getColumnDescription('20%'),
                     getColumnExpirationDate(),
                     {
                         title: 'Users', field: 'usersIds', filtering: false, searchable: false, sorting: false,
@@ -118,6 +127,17 @@ export default function ProjectsTab() {
                             <SelectUsersDialog
                                 users={users != null ? users : []}
                                 roles={roles != null ? roles : []}
+                                rowData={props.rowData}
+                                onChange={props.onChange}
+                            />
+                        )
+                    },
+                    {
+                        title: 'Templates', field: 'templatesIds', filtering: false, searchable: false, sorting: false,
+                        render: rowData => getArrayLengthStr(rowData['templatesIds']),
+                        editComponent: props => (
+                            <SelectTemplatesDialog
+                                templates={templates != null ? templates : []}
                                 rowData={props.rowData}
                                 onChange={props.onChange}
                             />
@@ -188,6 +208,7 @@ export default function ProjectsTab() {
                                     if (project != null) {
                                         addProject(convertNullValuesInObject(project, getManageProjectMapper()));
                                         notifyUsers('PROJECT', project.id, project['usersIds']);
+                                        notifyTemplates('PROJECT', project.id, project['templatesIds']);
                                         resolve();
                                     }
                                 });
@@ -232,6 +253,7 @@ export default function ProjectsTab() {
                                         editProject(convertNullValuesInObject(project, getManageProjectMapper()));
                                         if (!arraysEquals(newData, oldData, 'usersIds'))
                                             notifyUsers('PROJECT', project.id, project['usersIds']);
+                                            notifyTemplates('PROJECT', project.id, project['templatesIds']);
                                         resolve();
                                     }
                                 });

@@ -7,6 +7,7 @@ import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.TemplateConfDto;
 import javax.persistence.*;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -32,8 +33,28 @@ public class Template extends Auditable<String> {
     @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "templates_base",
+            joinColumns = {@JoinColumn(name = "template_id")},
+            inverseJoinColumns = {@JoinColumn(name = "base_template_id")})
+    private Set<Template> templates;
+
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private TemplateConfDto configuration;
+
+    public Set<Integer> getProjectsIds() {
+        if (projects != null && projects.size() > 0)
+            return projects.stream().map(Project::getId).collect(Collectors.toSet());
+        else
+            return null;
+    }
+
+    public Set<Integer> getTemplatesIds() {
+        if (templates != null && templates.size() > 0)
+            return templates.stream().map(Template::getId).collect(Collectors.toSet());
+        else
+            return null;
+    }
 
 }

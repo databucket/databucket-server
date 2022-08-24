@@ -12,6 +12,7 @@ public class TemplateDto {
     private Integer id;
     private String name;
     private String description;
+    private Set<Integer> templatesIds;
     private Set<Integer> projectsIds;
     private TemplateConfDto configuration;
 

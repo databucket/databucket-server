@@ -139,8 +139,8 @@ export default function BucketsTab() {
                         render: rowData => <DynamicIcon iconName={rowData.iconName} />,
                         editComponent: props => <EditIconDialog value={props.value} onChange={props.onChange}/>
                     },
-                    getColumnName(),
-                    getColumnDescription(),
+                    getColumnName("20%"),
+                    getColumnDescription("20%"),
                     getColumnClass(classesLookup, 'Class support'),
                     getColumnGroups(groups, 'Show in groups'),
                     {title: 'Protect orphaned data', field: 'protectedData', type: 'boolean'},

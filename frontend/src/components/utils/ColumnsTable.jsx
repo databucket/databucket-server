@@ -3,8 +3,7 @@ import {getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHel
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import MaterialTable from "material-table";
-import React, {useContext, useEffect, useState} from "react";
-import EnumsContext from "../../context/enums/EnumsContext";
+import React, {useEffect, useState} from "react";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import {useTheme} from "@material-ui/core/styles";
 import {MessageBox} from "./MessageBox";
@@ -16,8 +15,6 @@ export default function ColumnsTable(props) {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [height] = useWindowDimension();
-    const enumsContext = useContext(EnumsContext);
-    const {enums, fetchEnums} = enumsContext;
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const columns = props.columns;
@@ -32,11 +29,6 @@ export default function ColumnsTable(props) {
     useEffect(() => {
         setTimeout(() => setDelay(false), 1)
     }, []);
-
-    useEffect(() => {
-        if (enums == null)
-            fetchEnums();
-    }, [enums, fetchEnums]);
 
     const getBodyHeight = (windowHeight) => {
         return getTableBodyHeight(props.parentContentRef, 66);

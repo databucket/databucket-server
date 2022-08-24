@@ -159,6 +159,11 @@ public class TemplateService {
         template.setDescription(templateDto.getDescription());
         template.setConfiguration(templateDto.getConfiguration());
 
+        if (templateDto.getTemplatesIds() != null) {
+            List<Template> templates = templateRepository.findAllByIdInOrderById(templateDto.getTemplatesIds());
+            template.setTemplates(new HashSet<>(templates));
+        }
+
         if (templateDto.getProjectsIds() != null) {
             List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false, templateDto.getProjectsIds());
             template.setProjects(new HashSet<>(projects));
@@ -168,7 +173,16 @@ public class TemplateService {
     }
 
     public List<Template> getTemplates() {
-        return templateRepository.findAll();
+        return templateRepository.findAllByOrderByIdAsc();
+    }
+
+    public List<Template> getTemplates(int projectId) throws ItemNotFoundException {
+        Project project = projectRepository.findByIdAndDeleted(projectId, false);
+
+        if (project == null)
+            throw new ItemNotFoundException(Project.class, projectId);
+
+        return templateRepository.findAllByProjectsContainsOrderByIdAsc(project);
     }
 
     public Template modifyTemplate(TemplateDto templateDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
@@ -185,6 +199,11 @@ public class TemplateService {
         template.setDescription(templateDto.getDescription());
         template.setConfiguration(templateDto.getConfiguration());
 
+        if (templateDto.getTemplatesIds() != null) {
+            List<Template> templates = templateRepository.findAllByIdInOrderById(templateDto.getTemplatesIds());
+            template.setTemplates(new HashSet<>(templates));
+        }
+
         if (templateDto.getProjectsIds() != null) {
             List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false, templateDto.getProjectsIds());
             template.setProjects(new HashSet<>(projects));
@@ -198,7 +217,11 @@ public class TemplateService {
         if (!templateOpt.isPresent())
             throw new ItemNotFoundException(Template.class, templateId);
 
-        templateRepository.delete(templateOpt.get());
+        Template template = templateOpt.get();
+        template.setProjects(null); // TODO: check if this is required
+        template.setTemplates(null);
+
+        templateRepository.delete(template);
     }
 
     private TeamDto createTeamDto(Map<String, Object> teamMap) {

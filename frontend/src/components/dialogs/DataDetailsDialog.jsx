@@ -1,4 +1,4 @@
-import React, {createRef, useEffect, useState} from 'react';
+import React, {createRef, useEffect, useRef, useState} from 'react';
 import {makeStyles, useTheme, withStyles} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import MaterialTable from 'material-table';
@@ -8,14 +8,23 @@ import IconButton from '@material-ui/core/IconButton';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import JSONInput from 'react-json-editor-ajrm/index';
-import locale from 'react-json-editor-ajrm/locale/en';
+import {JsonEditor as Editor} from 'jsoneditor-react';
+import Ajv from 'ajv';
+import ace from 'brace';
+import "./DataDetailsEditor.min.css"
+import 'brace/mode/json';
+import "brace/theme/monokai";
+import "brace/theme/eclipse";
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
-import {Divider} from '@material-ui/core';
+import {Divider, TextField, Tooltip} from '@material-ui/core';
 import {createTagLookup} from "../../utils/JsonHelper";
 import {getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../utils/MaterialTableHelper";
 import {getDataDetailsDialogSize, setDataDetailsDialogSize} from "../../utils/ConfigurationStorage";
+import {MessageBox} from "../utils/MessageBox";
+import jp from "jsonpath";
+import {getDirectDataPath} from "../../route/AppRouter";
+import {debounce2} from "../utils/UseWindowDimension";
 
 const titleStyles = theme => ({
     root: {
@@ -31,33 +40,59 @@ const titleStyles = theme => ({
         right: theme.spacing(1),
         top: theme.spacing(1)
     },
+    linkButton: {
+        position: 'absolute',
+        right: theme.spacing(32),
+        top: theme.spacing(1)
+    },
+    openButton: {
+        position: 'absolute',
+        right: theme.spacing(26),
+        top: theme.spacing(1)
+    },
     smallerButton: {
         position: 'absolute',
-        right: theme.spacing(15),
+        right: theme.spacing(17),
         top: theme.spacing(1)
     },
     largerButton: {
         position: 'absolute',
-        right: theme.spacing(10),
+        right: theme.spacing(11),
         top: theme.spacing(1)
     }
 });
 
 const DialogTitle = withStyles(titleStyles)(props => {
-    const {children, classes, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
+    const {children, classes, onClose, onMakeDialogSmaller, onMakeDialogLarger, onCopyDataLink, onOpenDataLink} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
-                <span className="material-icons">fullscreen_exit</span>
-            </IconButton>
-            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
-                <span className="material-icons">fullscreen</span>
-            </IconButton>
-            {onClose ? (
-                <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
-                    <CloseIcon/>
+            <Tooltip id="link-tooltip" title="Copy direct link to data">
+                <IconButton className={classes.linkButton} onClick={onCopyDataLink} color={"inherit"}>
+                    <span className="material-icons">link</span>
                 </IconButton>
+            </Tooltip>
+            <Tooltip id="open-in-new-tooltip" title="Open details in new tab">
+                <IconButton className={classes.openButton} onClick={onOpenDataLink} color={"inherit"}>
+                    <span className="material-icons">open_in_new</span>
+                </IconButton>
+            </Tooltip>
+            <Tooltip id="smaller-window-tooltip" title="Smaller">
+                <IconButton className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
+                    <span className="material-icons">fullscreen_exit</span>
+                </IconButton>
+            </Tooltip>
+            <Tooltip id="larger-window-tooltip" title="Larger">
+                <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
+                    <span className="material-icons">fullscreen</span>
+                </IconButton>
+            </Tooltip>
+            {onClose ? (
+                <Tooltip id="close-window-tooltip" title="Close">
+                    <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
+                        <CloseIcon/>
+                    </IconButton>
+                </Tooltip>
             ) : null}
         </MuiDialogTitle>
     );
@@ -82,8 +117,13 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
+const ajv = new Ajv({allErrors: true, verbose: true});
+const jsonThemeLight = "ace/theme/eclipse";
+const jsonThemeDark = "ace/theme/monokai";
+
 DataDetailsDialog.propTypes = {
     open: PropTypes.bool.isRequired,
+    bucket: PropTypes.object.isRequired,
     dataRow: PropTypes.object,
     tags: PropTypes.array,
     onChange: PropTypes.func.isRequired
@@ -94,31 +134,66 @@ export default function DataDetailsDialog(props) {
     const theme = useTheme();
     const classes = useStyles();
     const tableRef = createRef();
-    const [state, setState] = useState({dataRow: null, open: false, changed: false, valid: true, changedProperties: null});
+    const jsonEditorRef = useRef(null);
+    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [state, setState] = useState({open: false, changed: false, changedProperties: null});
     const tagsLookup = createTagLookup(props.tags);
     const [dialogSize, setDialogSize] = useState('lg');
+    const [jsonPath, setJsonPath] = useState(null);
 
     useEffect(() => {
         setDialogSize(getDataDetailsDialogSize());
     }, []);
 
     useEffect(() => {
-        setState({...state, dataRow: props.dataRow, open: props.open});
+        setState({...state, open: props.open});
     }, [props.dataRow, props.open]);
 
-    const handleChanged = (contentValues) => {
-        setState({...state, valid: contentValues.error === false, changed: true, changedProperties: contentValues.jsObject});
+    const handleChange = json => {
+        const initial = JSON.stringify(props.dataRow.properties);
+        const current = JSON.stringify(json);
+        setState({...state, changed: initial.localeCompare(current) !== 0, changedProperties: json});
     };
 
     const handleSave = () => {
         setState({...state, open: false, changed: false});
-        props.onChange({...state.dataRow, properties: state.changedProperties}, true);
+        props.onChange({...props.dataRow, properties: state.changedProperties}, true);
     };
 
     const handleClose = () => {
         props.onChange(null, false);
         setState({...state, open: false, changed: false});
     };
+
+    const copyContent = async () => {
+        try {
+            if (jsonEditorRef.current !== null) {
+                const jsonEditor = jsonEditorRef.current.jsonEditor;
+                await navigator.clipboard.writeText(jsonEditor.getText());
+            }
+        } catch (err) {
+            setMessageBox({open: true, severity: 'error', title: 'Error', message: 'Copying has failed!'});
+        }
+    }
+
+    const copyDataLink = async () => {
+        try {
+            let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
+            if (jsonPath != null)
+                dataLink += "/" + jsonPath;
+            await navigator.clipboard.writeText(dataLink);
+        } catch (err) {
+            setMessageBox({open: true, severity: 'error', title: 'Error', message: 'Copying has failed!'});
+        }
+    }
+
+    const openDataLink = async () => {
+        // let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
+        let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
+        if (jsonPath != null)
+            dataLink += "/" + jsonPath;
+        window.open(dataLink, "_blank");
+    }
 
     const onMakeDialogSmaller = () => {
         if (dialogSize === 'lg') {
@@ -146,6 +221,30 @@ export default function DataDetailsDialog(props) {
         }
     }
 
+    const debouncedSave = useRef(debounce2(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
+
+    const handleChangedJsonPath = (event) => {
+        debouncedSave(event.target.value);
+    };
+
+    useEffect(() => {
+        if (props.dataRow != null && jsonEditorRef.current !== null) {
+            const jsonEditor = jsonEditorRef.current.jsonEditor;
+            if (jsonPath != null && jsonPath.length > 0) {
+                const fullJson = state.changedProperties != null ? state.changedProperties : props.dataRow.properties;
+                let filtered = [];
+                try {
+                    filtered = jp.query(fullJson, jsonPath);
+                } catch (err) {}
+                jsonEditor.aceEditor.setReadOnly(true);
+                jsonEditor.set(filtered);
+            } else {
+                jsonEditor.aceEditor.setReadOnly(false);
+                jsonEditor.set(state.changed ? state.changedProperties : props.dataRow.properties);
+            }
+        }
+    }, [jsonPath]);
+
     return (
         <Dialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
@@ -160,6 +259,8 @@ export default function DataDetailsDialog(props) {
                 onClose={handleClose}
                 onMakeDialogSmaller={dialogSize !== 'md' ? onMakeDialogSmaller : null}
                 onMakeDialogLarger={dialogSize !== 'true' ? onMakeDialogLarger : null}
+                onCopyDataLink={copyDataLink}
+                onOpenDataLink={openDataLink}
             >
                 Data details
             </DialogTitle>
@@ -168,7 +269,8 @@ export default function DataDetailsDialog(props) {
                 tableRef={tableRef}
                 columns={[
                     {title: 'Id', field: 'id', type: 'numeric'},
-                    {title: 'Tag', field: 'tagId', type: 'numeric', lookup: tagsLookup},
+                    {title: 'Tag name', field: 'tagId', type: 'numeric', lookup: tagsLookup},
+                    {title: 'Tag id', field: 'tagId', type: 'numeric'},
                     {title: 'Reserved', field: 'reserved', type: 'boolean'},
                     {title: 'Owner', field: 'owner', type: 'string'},
                     {title: 'Created at', field: 'createdAt', type: 'datetime'},
@@ -176,7 +278,7 @@ export default function DataDetailsDialog(props) {
                     {title: 'Modified at', field: 'modifiedAt', type: 'datetime'},
                     {title: 'Modified by', field: 'modifiedBy', type: 'string'}
                 ]}
-                data={[state.dataRow]}
+                data={[props.dataRow]}
                 options={{
                     paging: false,
                     toolbar: false,
@@ -192,26 +294,44 @@ export default function DataDetailsDialog(props) {
                     Container: props => <div {...props} />
                 }}
             />
-            <DialogContent>
-                <JSONInput
-                    id='json_editor'
-                    placeholder={state.dataRow !== null ? state.dataRow.properties : null}
-                    theme={theme.palette.type === 'light' ? "light_mitsuketa_tribute" : "dark_mitsuketa_tribute"}
-                    locale={locale}
-                    style={{body: {fontSize: 'large', fontWeight: 'bold'}, errorMessage: {fontSize: 'large'}}}
-                    width="100%"
-                    height="100%"
-                    onKeyPressUpdate={true}
-                    waitAfterKeyPress={1000}
-                    onChange={(jsObject) => handleChanged(jsObject)}
+            <DialogContent style={{height: '75vh'}}>
+                <Editor
+                    ref={jsonEditorRef}
+                    value={props.dataRow != null ? props.dataRow.properties : {}}
+                    ajv={ajv}
+                    mode="code"
+                    ace={ace}
+                    onChange={handleChange}
+                    theme={theme.palette.type === 'light' ? jsonThemeLight : jsonThemeDark}
+                    statusBar={false}
+                    htmlElementProps={{style: {height: "100%"}}}
                 />
             </DialogContent>
             <Divider/>
             <DialogActions>
-                <Button id="saveButton" onClick={handleSave} disabled={!state.changed || !state.valid} color="primary">
+                <Tooltip id="copy-content-tooltip" title="Copy content">
+                    <IconButton color={"inherit"} onClick={copyContent}>
+                        <span className="material-icons">content_copy</span>
+                    </IconButton>
+                </Tooltip>
+                <TextField
+                    hiddenLabel
+                    id="jsonPathId"
+                    size="small"
+                    fullWidth
+                    placeholder={"$.store.books[*].title"}
+                    InputProps={{disableUnderline: true}}
+                    onChange={handleChangedJsonPath}
+                />
+                <div style={{width: '100px'}}/>
+                <Button id="saveButton" onClick={handleSave} disabled={!state.changed} color="primary">
                     Save
                 </Button>
             </DialogActions>
+            <MessageBox
+                config={messageBox}
+                onClose={() => setMessageBox({...messageBox, open: false})}
+            />
         </Dialog>
     );
 }

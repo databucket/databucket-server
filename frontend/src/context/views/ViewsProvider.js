@@ -57,7 +57,7 @@ const ViewsProvider = props => {
                 itemsTargetFieldName = "teamsIds";
                 break;
             default:
-                console.log("Undefined notification source!");
+                console.log("ViewsProvider - Undefined notification source! " + sourceName);
                 return;
         }
         dispatch({

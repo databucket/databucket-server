@@ -48,7 +48,7 @@ public class ManageProjectService {
         }
 
         if (manageProjectDto.getTemplatesIds() != null) {
-            List<Template> templates = templateRepository.findAllByIdIn(manageProjectDto.getTemplatesIds());
+            List<Template> templates = templateRepository.findAllByIdInOrderById(manageProjectDto.getTemplatesIds());
             if (manageProjectDto.getTemplatesIds().size() > 0)
                 for (Template template : templates) {
                     template.getProjects().add(project);
@@ -102,7 +102,7 @@ public class ManageProjectService {
                     template.getProjects().remove(project);
                     templateRepository.save(template);
                 }
-                List<Template> templates = templateRepository.findAllByIdIn(manageProjectDto.getTemplatesIds());
+                List<Template> templates = templateRepository.findAllByIdInOrderById(manageProjectDto.getTemplatesIds());
                 if (manageProjectDto.getTemplatesIds().size() > 0) {
                     for (Template template : templates) {
                         template.getProjects().add(project);
