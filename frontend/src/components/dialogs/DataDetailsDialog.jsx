@@ -188,7 +188,6 @@ export default function DataDetailsDialog(props) {
     }
 
     const openDataLink = async () => {
-        // let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
         let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
         if (jsonPath != null)
             dataLink += "/" + jsonPath;
