@@ -59,5 +59,5 @@ export const getManagementLogsPath = () => {
 }
 
 export const getDirectDataPath = (bucket, dataId) => {
-    return `${window.location.origin}/project/bucket/${bucket}/data/${dataId}`;
+    return `${window.location.origin}${getContextPath()}/project/bucket/${bucket}/data/${dataId}`;
 }
