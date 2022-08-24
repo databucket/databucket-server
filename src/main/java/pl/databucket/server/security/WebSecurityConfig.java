@@ -60,19 +60,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/login",
                         "/change-password",
                         "/project",
-                        "/project/settings/teams",
-                        "/project/settings/users",
-                        "/project/settings/classes",
-                        "/project/settings/enums",
-                        "/project/settings/groups",
-                        "/project/settings/buckets",
-                        "/project/settings/tags",
-                        "/project/settings/columns",
-                        "/project/settings/filters",
-                        "/project/settings/views",
-                        "/project/settings/tasks",
-                        "/management/projects",
-                        "/management/users"
+                        "/project/**",
+                        "/management",
+                        "/management/**"
                         ).permitAll()
                 // swagger
                 .antMatchers(HttpMethod.GET,
