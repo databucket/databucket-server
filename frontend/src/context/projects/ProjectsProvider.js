@@ -51,8 +51,11 @@ const ProjectsProvider = props => {
             case "USER":
                 itemsTargetFieldName = "usersIds";
                 break;
+            case "TEMPLATE":
+                itemsTargetFieldName = "templatesIds";
+                break;
             default:
-                console.log("Undefined notification source!");
+                console.log("ProjectsProvider - Undefined notification source! " + sourceName);
                 return;
         }
         dispatch({

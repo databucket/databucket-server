@@ -15,18 +15,30 @@ export const getColumnId = () => {
         type: 'numeric',
         editable: 'never',
         filtering: true,
+        width: '1%',
         cellStyle: {width: '1%'}
     };
 };
 
-export const getColumnName = () => {
-    return {
-        title: 'Name',
-        field: 'name',
-        type: 'string',
-        editable: 'always',
-        filtering: true
-    };
+export const getColumnName = (width) => {
+    if (width != null)
+        return {
+            title: 'Name',
+            field: 'name',
+            type: 'string',
+            editable: 'always',
+            filtering: true,
+            width: {width},
+            cellStyle: {width: {width}}
+        };
+    else
+        return {
+            title: 'Name',
+            field: 'name',
+            type: 'string',
+            editable: 'always',
+            filtering: true
+        };
 };
 
 export const getColumnShortName = () => {
@@ -39,21 +51,34 @@ export const getColumnShortName = () => {
     };
 };
 
-export const getColumnDescription = () => {
-    return {
-        title: 'Description',
-        field: 'description',
-        type: 'string',
-        editable: 'always',
-        filtering: true
-    };
+export const getColumnDescription = (width) => {
+    if (width != null) {
+        return {
+            title: 'Description',
+            field: 'description',
+            type: 'string',
+            editable: 'always',
+            filtering: true,
+            width: {width},
+            cellStyle: {width: {width}}
+        };
+    } else
+        return {
+            title: 'Description',
+            field: 'description',
+            type: 'string',
+            editable: 'always',
+            filtering: true
+        };
 };
 
 export const getColumnEnabled = () => {
     return {
         title: 'Enabled',
         field: 'enabled',
-        type: 'boolean'
+        type: 'boolean',
+        width: '1%',
+        cellStyle: {width: '1%'}
     };
 };
 

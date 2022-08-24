@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
 import {makeStyles, useTheme} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -42,15 +42,17 @@ import {getBaseUrl, getSwaggerDocPath} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
 import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 export default function ProjectData() {
     const styleClasses = useStyles();
+    const drawerRef = useRef(null);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const theme = useTheme();
     const [open, setOpen] = useState(isLeftPanelOpen());
     const [logged, setLogged] = useState(hasToken() && hasProject());
     const accessContext = useContext(AccessContext);
+    const [currentDrawerWidth, setCurrentDrawerWidth] = useState(0);
     const {
         fetchAccessTree,
         projects,
@@ -63,6 +65,13 @@ export default function ProjectData() {
         enums, fetchSessionEnums,
         fetchSessionUsers
     } = accessContext;
+
+    useEffect(() => {
+        if (open)
+            setCurrentDrawerWidth(drawerWidth);
+        else
+            setCurrentDrawerWidth(73);
+    }, [open]);
 
     useEffect(() => {
         fetchSessionUsers();
@@ -165,6 +174,7 @@ export default function ProjectData() {
                     </Toolbar>
                 </AppBar>
                 <Drawer
+                    ref={drawerRef}
                     variant="permanent"
                     className={clsx(styleClasses.drawer, {
                         [styleClasses.drawerOpen]: open,
@@ -184,7 +194,7 @@ export default function ProjectData() {
                     </div>
                     <Divider/>
                     <GroupMenuSelector open={open}/>
-                    <BucketListSelector/>
+                    <BucketListSelector leftPanelWidth={currentDrawerWidth}/>
                     <div className={styleClasses.grow}/>
                     <Divider/>
                     <List>
@@ -217,7 +227,7 @@ export default function ProjectData() {
                 </Drawer>
                 <main className={styleClasses.content}>
                     <div className={styleClasses.toolbar}/>
-                    <BucketDataTable/>
+                    <BucketDataTable leftPanelWidth={currentDrawerWidth}/>
                 </main>
             </div>
             <MessageBox

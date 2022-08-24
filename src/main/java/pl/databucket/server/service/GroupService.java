@@ -40,7 +40,7 @@ public class GroupService {
         groupRepository.saveAndFlush(group);
 
         if (groupDto.getRoleId() != null) {
-            Role role = roleRepository.getOne(groupDto.getRoleId());
+            Role role = roleRepository.getById(groupDto.getRoleId());
             group.setRole(role);
         }
 

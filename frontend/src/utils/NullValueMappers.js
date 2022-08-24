@@ -2,6 +2,18 @@ export const getManageProjectMapper = () => {
     return {description: ''};
 }
 
+export const getManageDataMapper = () => {
+    return {description: ''};
+}
+
+export const getDataMapper = () => {
+    return {description: ''};
+}
+
+export const getTemplateMapper = () => {
+    return {description: '', projectsIds: []};
+}
+
 export const getManageUserMapper = () => {
     return {rolesIds: [], projectsIds: []};
 }

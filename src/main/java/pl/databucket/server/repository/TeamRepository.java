@@ -12,6 +12,7 @@ public interface TeamRepository extends JpaRepository<Team, Short> {
     Team findByIdAndDeleted(short id, boolean deleted);
     List<Team> findAllByIdIn(Iterable<Short> ids);
     List<Team> findAllByDeletedAndIdIn(boolean deleted, Iterable<Short> ids);
+    List<Team> findAllByDeletedAndNameIn(boolean deleted, Iterable<String> names);
     List<Team> findAllByDeletedOrderById(boolean deleted);
     boolean existsByNameAndDeleted(String name, boolean deleted);
 }

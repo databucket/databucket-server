@@ -6,8 +6,12 @@ plugins {
 }
 
 group = 'pl.databucket'
-version = '3.1.9'
+version = '3.2.0'
+targetCompatibility = 8
 sourceCompatibility = 8
+
+//compileJava.options.fork = true
+//compileJava.options.forkOptions.executable = 'C:\\Program Files\\Java\\jdk1.8.0_191\\bin\\javac'
 
 configurations {
     compileOnly {
@@ -22,6 +26,7 @@ repositories {
 jar {
     enabled = false
 }
+
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter:2.5.7'
@@ -41,6 +46,7 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
+
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok'
 
@@ -71,6 +77,10 @@ test {
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
+
+task deleteStatic(type: Delete) {
+    delete "src/main/resources/static"
+}
 
 task buildFrontend() {
     String npm = 'npm'

@@ -118,7 +118,7 @@ public class PublicController {
                 }
 
                 // We haven't got the projectId but the user is assigned to one project.
-            } else if (authReqDTO.getProjectId() == null && user.getProjects().size() == 1) {
+            } else if (user.getProjects().size() == 1) {
                 Project project = user.getProjects().iterator().next();
 
                 // The project is disabled

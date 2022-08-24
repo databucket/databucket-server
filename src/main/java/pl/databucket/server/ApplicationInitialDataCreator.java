@@ -9,6 +9,7 @@ import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.entity.*;
 import pl.databucket.server.repository.*;
 
+import java.io.*;
 import java.util.*;
 
 @Component
@@ -23,7 +24,7 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
 
-    public void run(ApplicationArguments args) {
+    public void run(ApplicationArguments args) throws IOException {
         createRoles();
         createSuperUser();
     }

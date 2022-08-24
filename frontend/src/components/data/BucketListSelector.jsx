@@ -5,8 +5,14 @@ import ListItemText from "@material-ui/core/ListItemText";
 import List from "@material-ui/core/List";
 import DynamicIcon from "../utils/DynamicIcon";
 import AccessContext from "../../context/access/AccessContext";
+import {Tooltip} from "@material-ui/core";
+import PropTypes from "prop-types";
 
-export default function BucketListSelector() {
+BucketListSelector.propTypes = {
+    leftPanelWidth: PropTypes.number.isRequired
+}
+
+export default function BucketListSelector(props) {
 
     const accessContext = useContext(AccessContext);
     const {groups, buckets, activeGroup, activeBucket, addTab} = accessContext;
@@ -32,8 +38,15 @@ export default function BucketListSelector() {
         addTab(bucket);
     }
 
-    const getBucketName = (name) => {
-        return name.length > 17 ? name.substring(0, 15) + "..." : name;
+    const getBucketVisibleName = (name) => {
+        return name.length > 23 ? name.substring(0, 22) + "..." : name;
+    }
+
+    const getTooltipName = (name, visibleName) => {
+        if (visibleName.endsWith("...") || props.leftPanelWidth < 100)
+            return <h2>{name}</h2>;
+        else
+            return "";
     }
 
     return (
@@ -43,16 +56,18 @@ export default function BucketListSelector() {
                     return a.name > b.name ? 1 : -1
                 })
                 .map((bucket) => (
-                <ListItem
-                    button
-                    selected={activeBucket != null ? bucket.id === activeBucket.id : false}
-                    key={bucket.name}
-                    onClick={() => onClick(bucket)}
-                >
-                    <ListItemIcon><DynamicIcon iconName={bucket.iconName}/></ListItemIcon>
-                    <ListItemText primary={getBucketName(bucket.name)}/>
-                </ListItem>
-            ))}
+                    <Tooltip placement="right" title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
+                        <ListItem
+                            button
+                            selected={activeBucket != null ? bucket.id === activeBucket.id : false}
+                            key={bucket.name}
+                            onClick={() => onClick(bucket)}
+                        >
+                            <ListItemIcon><DynamicIcon iconName={bucket.iconName}/></ListItemIcon>
+                            <ListItemText primary={getBucketVisibleName(bucket.name)}/>
+                        </ListItem>
+                    </Tooltip>
+                ))}
         </List>
     );
 }

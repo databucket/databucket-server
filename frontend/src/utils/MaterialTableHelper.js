@@ -36,11 +36,17 @@ export const getGetOptions = () => {
 }
 
 export const getPostOptions = (payload) => {
-    return ({
-        method: 'POST',
-        body: reverseMapping(payload),
-        headers: fetchHelper(getToken())
-    });
+    if (payload != null)
+        return ({
+            method: 'POST',
+            body: reverseMapping(payload),
+            headers: fetchHelper(getToken())
+        });
+    else
+        return ({
+            method: 'POST',
+            headers: fetchHelper(getToken())
+        });
 }
 
 export const getPutOptions = (payload) => {
@@ -69,6 +75,10 @@ export const getPageSizeOptions = () => {
     return [10, 15, 20, 25, 30, 35, 40, 50];
 }
 
+export const getTemplatePageSizeOptions = () => {
+    return [10, 15, 20];
+}
+
 export const getPageSizeOptionsOnDialog = () => {
     return [10, 15, 20, 25, 30, 40, 50];
 }
@@ -95,6 +105,13 @@ export const getTableRowBackgroundColor = (rowData, theme) => {
         return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.02) : theme.palette.background.default;
     else
         return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.02) : theme.palette.background.default;
+}
+
+export const getTableRowForegroundColor = (rowData, theme, editable) => {
+    if (theme.palette.type === 'light')
+        return editable ? theme.palette.foreground.default : theme.palette.color.red;
+    else
+        return editable ? theme.palette.foreground.default : theme.palette.color.red;
 }
 
 export const getSettingsTabsColor = (theme) => {
@@ -202,6 +219,11 @@ export const getSettingsTableHeight = (height) => {
     return `${tableHeight}vh`;
 }
 
+export const getTemplateTableHeight = (height) => {
+    const tableHeight = ((height - 250) / height * 100).toFixed(2);
+    return `${tableHeight}vh`;
+}
+
 export const getDialogTableHeight = (height, custom) => {
     const tableHeight = ((height - 64 - 64 - 52 - 2) / height * 100).toFixed(2) - custom;
     return `${tableHeight}vh`;
@@ -217,4 +239,9 @@ export const getTableBodyHeight = (parentRef, tableHeadHeight) => {
     if (parentRef.current)
         newHeight = parentRef.current.offsetHeight - tableHeadHeight;
     return newHeight;
+}
+
+export const getBodyHeight = (height) => {
+    const bodyHeight = ((height - 64 - 64) / height * 100).toFixed(2);
+    return `${bodyHeight}vh`;
 }

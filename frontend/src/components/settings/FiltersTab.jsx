@@ -30,6 +30,7 @@ import ClassesContext from "../../context/classes/ClassesContext";
 import TagsContext from "../../context/tags/TagsContext";
 import UsersContext from "../../context/users/UsersContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import EnumsContext from "../../context/enums/EnumsContext";
 
 export default function FiltersTab() {
 
@@ -45,6 +46,8 @@ export default function FiltersTab() {
     const {tags, fetchTags} = tagsContext;
     const usersContext = useContext(UsersContext);
     const {users, fetchUsers} = usersContext;
+    const enumsContext = useContext(EnumsContext);
+    const {enums, fetchEnums} = enumsContext;
     const filtersContext = useContext(FiltersContext);
     const {filters, fetchFilters, addFilter, editFilter, removeFilter} = filtersContext;
     const changeableFields = ['name', 'description', 'classId', 'configuration'];
@@ -67,6 +70,11 @@ export default function FiltersTab() {
         if (tags == null)
             fetchTags();
     }, [tags, fetchTags]);
+
+    useEffect(() => {
+        if (enums == null)
+            fetchEnums();
+    }, [enums, fetchEnums]);
 
     useEffect(() => {
         if (users == null)

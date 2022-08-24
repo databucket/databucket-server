@@ -105,8 +105,8 @@ export default function TasksTab() {
                 title='Tasks'
                 tableRef={tableRef}
                 columns={[
-                    getColumnName(),
-                    getColumnDescription(),
+                    getColumnName("20%"),
+                    getColumnDescription("20%"),
                     getColumnClass(classesLookup, 'Class support'),
                     getColumnFilter(filters),
                     getColumnBuckets(buckets, 'Show in buckets'),

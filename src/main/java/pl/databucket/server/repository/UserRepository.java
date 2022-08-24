@@ -14,4 +14,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByIdIn(Iterable<Long> ids);
     List<User> findAllByOrderById();
     List<User> findUsersByProjectsContainsOrderById(Project project);
+    List<User> findAllByUsernameIn(Iterable<String> userNames);
 }

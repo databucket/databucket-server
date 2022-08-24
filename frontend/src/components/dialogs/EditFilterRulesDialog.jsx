@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {makeStyles, withStyles} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -10,7 +10,6 @@ import MoreHoriz from "@material-ui/icons/MoreHoriz";
 import Tooltip from "@material-ui/core/Tooltip";
 import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
-import EnumsContext from "../../context/enums/EnumsContext";
 import {MessageBox} from "../utils/MessageBox";
 import FilterRulesEditor from "../utils/FilterRulesEditor";
 import {Utils as QbUtils} from "react-awesome-query-builder";
@@ -76,16 +75,8 @@ export default function EditFilterRulesDialog(props) {
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})
     const [open, setOpen] = useState(false);
-    const enumsContext = useContext(EnumsContext);
-    const {enums, fetchEnums} = enumsContext;
     const [configuration, setConfiguration] = useState(null);
     const dialogContentRef = React.useRef(null);
-
-
-    useEffect(() => {
-        if (enums == null)
-            fetchEnums();
-    }, [enums, fetchEnums]);
 
     const handleClickOpen = () => {
         setOpen(true);

@@ -202,7 +202,7 @@ export const setSelectionItemsByIds = (inputItems, itemsIds) => {
 
 export const getRoleName = (roles, roleId) => {
     if (roles != null && roleId != null && roleId > 0) {
-        return roles.find(r => r.id === roleId).name;
+        return roles.find(r => r.id === parseInt(roleId)).name;
     } else
         return '- none -';
 }
@@ -323,6 +323,11 @@ export const uuidV4 = () => {
         const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
+}
+
+export const getClassByUid = (classes, id) => {
+    const dataClass = (classes != null && id != null && id !== 'none') ? classes.filter(c => c.id === id) : [];
+    return dataClass.length > 0 ? dataClass[0] : null;
 }
 
 export const getClassById = (classes, id) => {

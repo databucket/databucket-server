@@ -39,6 +39,8 @@ import {
     getSettingsTabSelectedBackgroundColor,
     getSettingsTabSelectedColor
 } from "../../utils/MaterialTableHelper";
+import TemplatesTab from "../settings/TemplatesTab";
+import TemplatesProvider from "../../context/templates/TemplatesProvider";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -77,7 +79,7 @@ const StyledTab = withStyles(styles)(Tab)
 export default function _ProjectSettingsTabs() {
 
     const classes = useStyles();
-    const tabs = ['teams', 'users', 'classes', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks'];
+    const tabs = ['teams', 'users', 'classes', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks', 'templates'];
 
     const getTabsValue = (pathname) => {
         let value = pathname.split("/").pop();
@@ -118,11 +120,12 @@ export default function _ProjectSettingsTabs() {
                             <StyledTab label="Filters" value={tabs[8]} component={Link} to={`${getProjectSettingsPath()}/filters`}/>
                             <StyledTab label="Views" value={tabs[9]} component={Link} to={`${getProjectSettingsPath()}/views`}/>
                             <StyledTab label="Tasks" value={tabs[10]} component={Link} to={`${getProjectSettingsPath()}/tasks`}/>
+                            <StyledTab label="Templates" value={tabs[11]} component={Link} to={`${getProjectSettingsPath()}/templates`}/>
                         </Tabs>
                     </div>
                     <div className={classes.panel}>
                         <RolesProvider> <GroupsProvider> <BucketsProvider> <UsersProvider><ClassesProvider><TagsProvider><ColumnsProvider>
-                            <EnumsProvider> <FiltersProvider> <TasksProvider> <EventsProvider> <ViewsProvider> <TeamsProvider>
+                            <EnumsProvider> <FiltersProvider> <TasksProvider> <EventsProvider> <ViewsProvider> <TeamsProvider> <TemplatesProvider>
                                 <Switch>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/teams`} component={TeamsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/users`} component={UsersTab}/>
@@ -135,9 +138,10 @@ export default function _ProjectSettingsTabs() {
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/filters`} component={FiltersTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/views`} component={ViewsTab}/>
                                     <ProjectRoute exact path={`${getProjectSettingsPath()}/tasks`} component={TasksTab}/>
+                                    <ProjectRoute exact path={`${getProjectSettingsPath()}/templates`} component={TemplatesTab}/>
                                     <ProjectRoute path={`${getProjectSettingsPath()}/*`} component={NotFoundPage}/>
                                 </Switch>
-                            </TeamsProvider> </ViewsProvider> </EventsProvider> </TasksProvider> </FiltersProvider> </EnumsProvider>
+                            </TemplatesProvider> </TeamsProvider> </ViewsProvider> </EventsProvider> </TasksProvider> </FiltersProvider> </EnumsProvider>
                         </ColumnsProvider> </TagsProvider> </ClassesProvider> </UsersProvider> </BucketsProvider> </GroupsProvider> </RolesProvider>
                     </div>
                 </div>

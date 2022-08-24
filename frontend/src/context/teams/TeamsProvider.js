@@ -53,7 +53,7 @@ const TeamsProvider = props => {
                 itemsTargetFieldName = "usersIds";
                 break;
             default:
-                console.log("Undefined notification source!");
+                console.log("TeamsProvider - Undefined notification source! " + sourceName);
                 return;
         }
         dispatch({

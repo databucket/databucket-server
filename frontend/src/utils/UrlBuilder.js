@@ -1,4 +1,4 @@
-const getOrigin = () => {
+export const getOrigin = () => {
     const origin = window.location.origin;
     // const origin = 'http://localhost:8080';
 
@@ -24,6 +24,10 @@ export const getDataReserveUrl = (bucket, number, random) => {
 
 export const getDataByIdUrl = (bucket, id) => {
     return `${getOrigin()}/api/bucket/${bucket.name}/${id}`;
+}
+
+export const getDataByIdUrl2 = (bucketName, id) => {
+    return `${getOrigin()}/api/bucket/${bucketName}/${id}`;
 }
 
 export const getDataHistoryUrl = (bucket, id) => {

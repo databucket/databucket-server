@@ -85,8 +85,8 @@ export default function TeamsTab() {
                 title='Teams'
                 tableRef={tableRef}
                 columns={[
-                    getColumnName(),
-                    getColumnDescription(),
+                    getColumnName("20%"),
+                    getColumnDescription("20%"),
                     getColumnUsers(users, roles),
                     getColumnCreatedBy(),
                     getColumnCreatedAt(),

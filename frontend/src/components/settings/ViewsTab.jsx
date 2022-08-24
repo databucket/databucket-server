@@ -133,8 +133,8 @@ export default function ViewsTab() {
                 title='Views'
                 tableRef={tableRef}
                 columns={[
-                    getColumnName(),
-                    getColumnDescription(),
+                    getColumnName("20%"),
+                    getColumnDescription("20%"),
                     getColumnColumns(columns),
                     getColumnFilter(filters),
                     getColumnBuckets(buckets, 'Show in buckets'),

@@ -59,23 +59,29 @@ import DataHistoryDialog from "../dialogs/DataHistoryDialog";
 import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
-
+import "./BucketDataTableStyle.css";
+import PropTypes from "prop-types";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
 
-export default function BucketDataTable() {
+BucketDataTable.propTypes = {
+    leftPanelWidth: PropTypes.number.isRequired
+}
+
+export default function BucketDataTable(props) {
 
     const theme = useTheme();
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [height] = useWindowDimension();
+    const [height, width] = useWindowDimension();
+    const [tableWidth, setTableWidth] = useState(500);
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
     const {buckets, activeBucket, views, columns, filters, tags, tasks, enums, users} = accessContext;
     const [detailsState, setDetailsState] = useState({
         open: false,
-        dataRow: null,
+        dataRow: null
     });
     const [historyState, setHistoryState] = useState({
         open: false,
@@ -100,6 +106,10 @@ export default function BucketDataTable() {
     });
     let searchText = activeBucket != null ? getLastBucketSearchedText(activeBucket.id) : "";
     const [changedBucket, setChangedBucket] = useState(false);
+
+    useEffect(() => {
+        setTableWidth(width - props.leftPanelWidth - 1);
+    }, [width, height, props.leftPanelWidth]);
 
     // active bucket has been changed
     useEffect(() => {
@@ -219,7 +229,6 @@ export default function BucketDataTable() {
             .then(dataRow => {
                 if (resultOk) {
                     setDetailsState({
-                        ...detailsState,
                         dataRow: dataRow,
                         open: true
                     });
@@ -518,7 +527,7 @@ export default function BucketDataTable() {
         return <MissingActiveView/>
     else {
         return (
-            <div style={{paddingTop: 0, paddingLeft: 0, paddingRight: 0}}>
+            <div style={{width: tableWidth}}>
                 <MaterialTable
                     tableRef={tableRef}
                     columns={state.tableColumns}
@@ -592,7 +601,7 @@ export default function BucketDataTable() {
                         paging: true,
                         pageSize: pageSize,
                         pageSizeOptions: getPageSizeOptionsOnDialog(),
-                        actionsColumnIndex: -1,
+                        // actionsColumnIndex: -1,
                         debounceInterval: 700,
                         sorting: true,
                         selection: false,
@@ -660,6 +669,7 @@ export default function BucketDataTable() {
                 />
 
                 <DataDetailsDialog
+                    bucket={activeBucket}
                     open={detailsState.open}
                     dataRow={detailsState.dataRow}
                     tags={tags}

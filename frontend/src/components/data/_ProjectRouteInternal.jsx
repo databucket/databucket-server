@@ -4,6 +4,9 @@ import ProjectRoute from "../../route/ProjectRoute";
 import _ProjectSettingsTabs from "../settings/_ProjectSettingsTabs";
 import {getProjectSettingsPath} from "../../route/AppRouter";
 import ProjectDataWrapper from "./_ProjectDataWrapper";
+import DataDetailsPageWrapper from "./details_page/DataDetailsPageWrapper";
+import NotFoundPage from "../NotFoundPage";
+import PublicRoute from "../../route/PublicRoute";
 
 export default function _ProjectRouteInternal() {
 
@@ -11,7 +14,10 @@ export default function _ProjectRouteInternal() {
         <Switch>
             <Redirect exact from='/project/settings' to={getProjectSettingsPath()}/>
             <ProjectRoute path="/project/settings/:page" component={_ProjectSettingsTabs}/>
+            <ProjectRoute path="/project/bucket/:bucketName/data/:dataId/:jsonPath" component={DataDetailsPageWrapper}/>
+            <ProjectRoute path="/project/bucket/:bucketName/data/:dataId" component={DataDetailsPageWrapper}/>
             <ProjectRoute path="/project" component={ProjectDataWrapper}/>
+            <PublicRoute path="*" component={NotFoundPage}/>
         </Switch>
     )
 }

@@ -8,7 +8,7 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import {Link, Redirect, Route, Switch} from "react-router-dom";
 import {getAppBarBackgroundColor} from "../../utils/Themes";
-import {getManagementProjectsPath, getManagementUsersPath, getProjectDataPath} from "../../route/AppRouter";
+import {getManagementProjectsPath, getManagementTemplatesPath, getManagementUsersPath, getProjectDataPath} from "../../route/AppRouter";
 import {getLastManagementPageName, hasProject, hasToken, logOut, setLastManagementPageName} from "../../utils/ConfigurationStorage";
 import ProjectsTab from "./ProjectsTab";
 import UsersTab from "./UsersTab";
@@ -18,7 +18,11 @@ import ProjectsProvider from "../../context/projects/ProjectsProvider";
 import ManageUsersProvider from "../../context/users/ManageUsersProvider";
 import RolesProvider from "../../context/roles/RolesProvider";
 import UserProfile from "../data/UserProfile";
-// import LogsTab from "./LogsTab";
+import TemplatesTab from "./TemplatesTab";
+import TemplatesProvider from "../../context/templates/TemplatesProvider";
+import DataItemsProvider from "../../context/templatesDataItems/DataItemsProvider";
+import DataProvider from "../../context/templatesData/DataProvider";
+import PublicRoute from "../../route/PublicRoute";
 
 const useStyles = makeStyles(theme => ({
     appBar: {
@@ -38,7 +42,7 @@ export default function _ManagementTabs() {
     document.title = 'Databucket';
 
     const classes = useStyles();
-    const tabs = ['projects', 'users', 'logs'];
+    const tabs = ['projects', 'users', 'templates'];
     const [logged, setLogged] = useState(hasToken());
 
     const getTabsValue = (pathname) => {
@@ -79,20 +83,20 @@ export default function _ManagementTabs() {
                                       className={classes.tabs}>
                                     <Tab label="Projects" value={tabs[0]} component={Link} to={getManagementProjectsPath()}/>
                                     <Tab label="Users" value={tabs[1]} component={Link} to={getManagementUsersPath()}/>
-                                    {/*<Tab label="Logs" value={tabs[2]} component={Link} to={getManagementLogsPath()}/>*/}
+                                    <Tab label="Templates" value={tabs[2]} component={Link} to={getManagementTemplatesPath()}/>
                                 </Tabs>
                                 <div/>
                                 <UserProfile onLogout={handleLogout}/>
                             </Toolbar>
                         </AppBar>
-                        <ProjectsProvider> <ManageUsersProvider> <RolesProvider>
+                        <ProjectsProvider> <ManageUsersProvider> <RolesProvider> <TemplatesProvider> <DataProvider> <DataItemsProvider>
                             <Switch>
                                 <ManagementRoute exact path={getManagementProjectsPath()} component={ProjectsTab}/>
                                 <ManagementRoute exact path={getManagementUsersPath()} component={UsersTab}/>
-                                {/*<ManagementRoute exact path={getManagementLogsPath()} component={LogsTab}/>*/}
-                                <ManagementRoute path="/management/*" component={NotFoundPage}/>
+                                <ManagementRoute exact path={getManagementTemplatesPath()} component={TemplatesTab}/>
+                                <PublicRoute path="*" component={NotFoundPage}/>
                             </Switch>
-                        </RolesProvider> </ManageUsersProvider> </ProjectsProvider>
+                        </DataItemsProvider> </DataProvider> </TemplatesProvider> </RolesProvider> </ManageUsersProvider> </ProjectsProvider>
                     </div>
                 )}
             />

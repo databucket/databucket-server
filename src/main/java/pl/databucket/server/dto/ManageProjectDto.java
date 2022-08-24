@@ -20,6 +20,7 @@ public class ManageProjectDto {
     private boolean enabled;
     private Date expirationDate;
     private Set<Long> usersIds;
+    private Set<Integer> templatesIds;
 
     private String createdBy;
     private Date createdAt;

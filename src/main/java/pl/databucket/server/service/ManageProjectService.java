@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.databucket.server.dto.ManageProjectDto;
 import pl.databucket.server.entity.Project;
+import pl.databucket.server.entity.Template;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.repository.ProjectRepository;
+import pl.databucket.server.repository.TemplateRepository;
 import pl.databucket.server.repository.UserRepository;
 
 import java.util.HashSet;
@@ -22,6 +24,9 @@ public class ManageProjectService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TemplateRepository templateRepository;
 
     public Project createProject(ManageProjectDto manageProjectDto) {
         Project project = new Project();
@@ -40,6 +45,17 @@ public class ManageProjectService {
                 }
 
             project.setUsers(new HashSet<>(users));
+        }
+
+        if (manageProjectDto.getTemplatesIds() != null) {
+            List<Template> templates = templateRepository.findAllByIdInOrderById(manageProjectDto.getTemplatesIds());
+            if (manageProjectDto.getTemplatesIds().size() > 0)
+                for (Template template : templates) {
+                    template.getProjects().add(project);
+                    templateRepository.save(template);
+                }
+
+            project.setTemplates(new HashSet<>(templates));
         }
 
         return projectRepository.save(project);
@@ -79,6 +95,24 @@ public class ManageProjectService {
                 project.setUsers(new HashSet<>(users));
             }
         }
+
+        if (manageProjectDto.getTemplatesIds() != null) {
+            if (!manageProjectDto.getTemplatesIds().equals(project.getTemplatesIds())) {
+                for (Template template : project.getTemplates()) {
+                    template.getProjects().remove(project);
+                    templateRepository.save(template);
+                }
+                List<Template> templates = templateRepository.findAllByIdInOrderById(manageProjectDto.getTemplatesIds());
+                if (manageProjectDto.getTemplatesIds().size() > 0) {
+                    for (Template template : templates) {
+                        template.getProjects().add(project);
+                        templateRepository.save(template);
+                    }
+                }
+                project.setTemplates(new HashSet<>(templates));
+            }
+        }
+
         return projectRepository.save(project);
     }
 

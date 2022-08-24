@@ -7,6 +7,7 @@ import Tabs from "@material-ui/core/Tabs";
 import {lighten, makeStyles, withStyles} from "@material-ui/core/styles";
 import {getAppBarBackgroundColor} from "../../utils/Themes";
 import AccessContext from "../../context/access/AccessContext";
+import {Tooltip} from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     tabs: {
@@ -45,8 +46,15 @@ export default function BucketTabSelector() {
         setTimeout(() => setDelay(false), 700)
     }, []);
 
-    const getBucketName = (name) => {
+    const getBucketVisibleName = (name) => {
         return name.length > 17 ? name.substring(0, 15) + "..." : name;
+    }
+
+    const getTooltipName = (name, visibleName) => {
+        if (visibleName.endsWith("..."))
+            return <h2>{name}</h2>;
+        else
+            return "";
     }
 
     const handleChangedTab = (bucket) => {
@@ -73,17 +81,19 @@ export default function BucketTabSelector() {
         >
             {bucketsTabs.map((bucket) => (
                 <StyledTab key={bucket.id} component="div" onClick={() => handleChangedTab(bucket)} label={
+                    <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
                     <span>
                         <IconButton disabled className={classes.button}>
                             <DynamicIcon iconName={bucket.iconName}/>
                         </IconButton>
 
-                        {getBucketName(bucket.name)}
+                        {getBucketVisibleName(bucket.name)}
 
                         <IconButton color={'inherit'} onClick={() => handleRemovedTab(bucket)}>
                             <CloseIcon style={{fontSize: 18}}/>
                         </IconButton>
                     </span>
+                    </Tooltip>
                 }
                 />
             ))}

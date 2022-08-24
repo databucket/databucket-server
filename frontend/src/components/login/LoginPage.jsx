@@ -247,7 +247,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">3.1.9</Typography>
+            <Typography variant="caption">3.2.0</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
