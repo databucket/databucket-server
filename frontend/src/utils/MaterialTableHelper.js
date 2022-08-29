@@ -95,16 +95,23 @@ export const handleErrors = (res) => {
 
 export const getTableHeaderBackgroundColor = (theme) => {
     if (theme.palette.type === 'light') {
-        return darken(theme.palette.background.default, 0.1);
+        return darken(theme.palette.background.default, 0.15);
     } else
-        return lighten(theme.palette.background.default, 0.1);
+        return lighten(theme.palette.background.default, 0.15);
+}
+
+export const getTableToolbarBackgroundColor = (theme) => {
+    if (theme.palette.type === 'light') {
+        return darken(theme.palette.background.default, 0.07);
+    } else
+        return lighten(theme.palette.background.default, 0.07);
 }
 
 export const getTableRowBackgroundColor = (rowData, theme) => {
     if (theme.palette.type === 'light')
-        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.02) : theme.palette.background.default;
+        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.02) : darken(theme.palette.background.default, 0.04);
     else
-        return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.02) : theme.palette.background.default;
+        return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.04) : lighten(theme.palette.background.default, 0.02);
 }
 
 export const getTableRowForegroundColor = (rowData, theme, editable) => {

@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -352,7 +353,7 @@ public class DataService {
         return result;
     }
 
-    public List<Map<String, Object>> getDataHistoryProperties(Bucket bucket, Long dataId, List<Long> ids) throws ItemNotFoundException, UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
+    public List<Map<String, Object>> getDataHistoryProperties(Bucket bucket, Long dataId, List<Long> ids) throws UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         Map<String, Object> namedParameters = new HashMap<>();
 
@@ -371,4 +372,49 @@ public class DataService {
         serviceUtils.convertStringToMap(result, COL.PROPERTIES);
         return result;
     }
-}
+
+    public int clearDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException {
+        DataDTO data = getData(user, bucket, dataId);
+        if (data != null) {
+            Map<String, Object> paramMap = new HashMap<>();
+            List<Condition> conditions = new ArrayList<>();
+            conditions.add(new Condition(COL.DATA_ID, Operator.equal, dataId));
+
+            if (bucket.isProtectedData() && !user.isAdminUser())
+                conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+
+            Query query = new Query(bucket.getTableHistoryName())
+                    .delete()
+                    .from()
+                    .where(conditions, paramMap);
+
+            return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        } else
+            throw new AccessDeniedException("Data reserved by another user!");
+    }
+
+    public int clearDataHistory(User user, Bucket bucket, QueryRule queryRule) throws UnknownColumnException, ConditionNotAllowedException {
+        Map<String, Object> paramMap = new HashMap<>();
+
+        if (bucket.isProtectedData() && !user.isAdminUser())
+            queryRule.getConditions().add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+
+        Query selectQuery = new Query(bucket.getTableName())
+                .select(COL.DATA_ID)
+                .from()
+                .where(queryRule, paramMap);
+
+        List<Long> listOfIds = jdbcTemplate.queryForList(selectQuery.toString(logger, paramMap), paramMap, Long.class);
+        if (listOfIds.size() > 0) {
+            Condition condition = new Condition(COL.DATA_ID, Operator.in, listOfIds);
+            Query query = new Query(bucket.getTableHistoryName())
+                    .delete()
+                    .from()
+                    .where(condition, paramMap);
+
+            jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+            return listOfIds.size();
+        }
+        return 0;
+    }
+ }

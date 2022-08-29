@@ -8,7 +8,7 @@ import {
     getPutOptions,
     getTableHeaderBackgroundColor,
     getTableHeight,
-    getTableRowBackgroundColor
+    getTableRowBackgroundColor, getTableToolbarBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {useTheme} from "@material-ui/core/styles";
 import {
@@ -59,7 +59,6 @@ import DataHistoryDialog from "../dialogs/DataHistoryDialog";
 import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
-import "./BucketDataTableStyle.css";
 import PropTypes from "prop-types";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
@@ -297,7 +296,7 @@ export default function BucketDataTable(props) {
                             if (resultOk) {
                                 reloadData();
                             }
-                    });
+                        });
                 }
             });
     }
@@ -352,8 +351,8 @@ export default function BucketDataTable(props) {
                         // Omit when number of arrays items is 0. Do not put the following condition into parent condition!
                         if (filter.value.length > 0)
                             allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
-                    else
-                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: '%' + filter.value + '%'});
+                        else
+                            allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: '%' + filter.value + '%'});
 
                 } else {
                     if (filter.column.type === 'numeric')
@@ -391,7 +390,7 @@ export default function BucketDataTable(props) {
     };
 
     const richFilterAction = {
-        icon: () => state.activeLogic != null ? <Icon color={'secondary'}><span className="material-icons" >filter_alt</span></Icon> : <span className="material-icons">filter_alt</span>,
+        icon: () => state.activeLogic != null ? <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon> : <span className="material-icons">filter_alt</span>,
         tooltip: 'Rich filter',
         isFreeAction: true,
         onClick: () => {
@@ -610,9 +609,10 @@ export default function BucketDataTable(props) {
                         padding: 'dense',
                         search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
                         searchFieldStyle: {width: 500},
-                        headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
                         maxBodyHeight: getTableHeight(height),
                         minBodyHeight: getTableHeight(height),
+                        headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
+                        cellStyle: {whiteSpace: 'nowrap'},
                         rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                     }}
                     localization={{
@@ -628,30 +628,32 @@ export default function BucketDataTable(props) {
                         Container: props => <div {...props} />,
                         Toolbar: props => {
                             return (
-                                <Grid container direction="row">
-                                    <Grid container direction={"row"} item xs={3} alignItems="center">
-                                        <Grid item>
-                                            {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) && <ReserveDataDialog onReserve={onDataReserve}/>}
+                                <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
+                                    <Grid container direction="row">
+                                        <Grid container direction={"row"} item xs={3} alignItems="center">
+                                            <Grid item>
+                                                {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) && <ReserveDataDialog onReserve={onDataReserve}/>}
+                                            </Grid>
+                                            <Grid item>
+                                                <ViewMenuSelector
+                                                    views={state.bucketViews}
+                                                    activeView={state.activeView}
+                                                    onChange={view => onViewSelected(view)}
+                                                />
+                                            </Grid>
                                         </Grid>
-                                        <Grid item>
-                                            <ViewMenuSelector
-                                                views={state.bucketViews}
-                                                activeView={state.activeView}
-                                                onChange={view => onViewSelected(view)}
+                                        <Grid item xs={9}>
+                                            <MTableToolbar
+                                                {...props}
+                                                showTitle={false}
+                                                onSearchChanged={text => {
+                                                    handleSearchChange(text);
+                                                    props.onSearchChanged(text);
+                                                }}
                                             />
                                         </Grid>
                                     </Grid>
-                                    <Grid item xs={9}>
-                                        <MTableToolbar
-                                            {...props}
-                                            showTitle={false}
-                                            onSearchChanged={text => {
-                                                handleSearchChange(text);
-                                                props.onSearchChanged(text);
-                                            }}
-                                        />
-                                    </Grid>
-                                </Grid>
+                                </div>
                             );
                         }
                     }}

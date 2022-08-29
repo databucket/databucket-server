@@ -8,13 +8,6 @@ import IconButton from '@material-ui/core/IconButton';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import {JsonEditor as Editor} from 'jsoneditor-react';
-import Ajv from 'ajv';
-import ace from 'brace';
-import "./DataDetailsEditor.min.css"
-import 'brace/mode/json';
-import "brace/theme/monokai";
-import "brace/theme/eclipse";
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import {Divider, TextField, Tooltip} from '@material-ui/core';
@@ -25,6 +18,17 @@ import {MessageBox} from "../utils/MessageBox";
 import jp from "jsonpath";
 import {getDirectDataPath} from "../../route/AppRouter";
 import {debounce2} from "../utils/UseWindowDimension";
+import {JsonEditor as Editor} from 'jsoneditor-react';
+import Ajv from 'ajv';
+import ace from 'brace';
+import "./DataDetailsEditor.min.css"
+import 'brace/mode/json';
+import "brace/theme/monokai";
+// import "brace/theme/eclipse";
+
+const ajv = new Ajv({allErrors: true, verbose: true});
+const jsonThemeLight = null; //"ace/theme/eclipse";
+const jsonThemeDark = "ace/theme/monokai";
 
 const titleStyles = theme => ({
     root: {
@@ -116,10 +120,6 @@ const useStyles = makeStyles(() => ({
         minHeight: '98vh',
     }
 }));
-
-const ajv = new Ajv({allErrors: true, verbose: true});
-const jsonThemeLight = "ace/theme/eclipse";
-const jsonThemeDark = "ace/theme/monokai";
 
 DataDetailsDialog.propTypes = {
     open: PropTypes.bool.isRequired,
