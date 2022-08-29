@@ -13,7 +13,11 @@ import UnlockedIcon from '@material-ui/icons/LockOpen';
 import DataHistoryPropertiesDiffDialog from './DataHistoryPropertiesDiffDialog';
 import PropTypes from "prop-types";
 import {createTagLookup} from "../../utils/JsonHelper";
-import {getTableHeaderBackgroundColor} from "../../utils/MaterialTableHelper";
+import {getDeleteOptions, getTableHeaderBackgroundColor} from "../../utils/MaterialTableHelper";
+import {Tooltip} from "@material-ui/core";
+import {getClearDataHistoryByIdUrl} from "../../utils/UrlBuilder";
+import {handleErrors} from "../../utils/FetchHelper";
+import {MessageBox} from "../utils/MessageBox";
 
 const styles = theme => ({
     root: {
@@ -24,6 +28,11 @@ const styles = theme => ({
         display: 'flex',
         flexWrap: 'wrap',
     },
+    clearHistoryButton: {
+        position: 'absolute',
+        right: theme.spacing(6),
+        top: theme.spacing(1)
+    },
     closeButton: {
         position: 'absolute',
         right: theme.spacing(1),
@@ -32,14 +41,21 @@ const styles = theme => ({
 });
 
 const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose} = props;
+    const {children, classes, onClose, onClearDataHistory} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
-            {onClose ? (
-                <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
-                    <CloseIcon/>
+            <Tooltip id="clear-history" title="Clear data history">
+                <IconButton className={classes.clearHistoryButton} onClick={onClearDataHistory} color={"inherit"}>
+                    <span className="material-icons">delete</span>
                 </IconButton>
+            </Tooltip>
+            {onClose ? (
+                <Tooltip id="close" title="Close">
+                    <IconButton className={classes.closeButton} onClick={onClose}>
+                        <CloseIcon/>
+                    </IconButton>
+                </Tooltip>
             ) : null}
         </MuiDialogTitle>
     );
@@ -70,6 +86,7 @@ DataHistoryDialog.propTypes = {
 export default function DataHistoryDialog(props) {
 
     const tableRef = createRef();
+    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const theme = useTheme();
     const [state, setState] = useState({bucket: null, dataRowId: null, history: [], open: false, columns: []});
 
@@ -119,6 +136,22 @@ export default function DataHistoryDialog(props) {
         setState({...state, open: false});
     };
 
+    const handleClearDataHistory = () => {
+        let resultOk = true;
+        fetch(getClearDataHistoryByIdUrl(props.bucket, props.dataRowId), getDeleteOptions())
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                resultOk = false;
+            })
+            .then(result => {
+                if (resultOk) {
+                    setState({...state, history: []});
+                }
+            });
+    }
+
+
     return (
         <Dialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
@@ -127,7 +160,7 @@ export default function DataHistoryDialog(props) {
             fullWidth={true}
             maxWidth='lg'  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
         >
-            <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+            <DialogTitle id="customized-dialog-title" onClose={handleClose} onClearDataHistory={handleClearDataHistory}>
                 Data history [Id: {state.dataRowId}]
             </DialogTitle>
             <DialogContent dividers>
@@ -147,6 +180,10 @@ export default function DataHistoryDialog(props) {
                     components={{
                         Container: props => <div {...props} />
                     }}
+                />
+                <MessageBox
+                    config={messageBox}
+                    onClose={() => setMessageBox({...messageBox, open: false})}
                 />
             </DialogContent>
             <DialogActions/>

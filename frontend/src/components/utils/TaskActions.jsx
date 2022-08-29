@@ -77,6 +77,11 @@ export default function TaskActions(props) {
                             control={<Radio/>}
                             label="Modify data"
                         />
+                        <FormControlLabel
+                            value="clear history"
+                            control={<Radio/>}
+                            label="Clear history"
+                        />
                     </RadioGroup>
                     {props.actions.type === 'modify' &&
                     <div>

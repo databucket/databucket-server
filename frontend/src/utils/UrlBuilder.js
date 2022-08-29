@@ -34,6 +34,14 @@ export const getDataHistoryUrl = (bucket, id) => {
     return `${getOrigin()}/api/bucket/${bucket.name}/${id}/history`;
 }
 
+export const getClearDataHistoryByIdUrl = (bucket, id) => {
+    return `${getOrigin()}/api/bucket/${bucket.name}/${id}/history/clear`;
+}
+
+export const getClearDataHistoryByRulesUrl = (bucket, id) => {
+    return `${getOrigin()}/api/bucket/${bucket.name}/history/clear`;
+}
+
 export const getDataHistoryPropertiesUrl = (bucket, id, idA, idB) => {
     return `${getOrigin()}/api/bucket/${bucket.name}/${id}/history/${idA},${idB}`;
 }

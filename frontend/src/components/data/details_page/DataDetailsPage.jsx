@@ -1,11 +1,4 @@
 import React, {createRef, useContext, useEffect, useRef, useState} from 'react';
-import {JsonEditor as Editor} from 'jsoneditor-react';
-import Ajv from 'ajv';
-import ace from 'brace';
-import "../../dialogs/DataDetailsEditor.min.css"
-import 'brace/mode/json';
-import "brace/theme/monokai";
-import "brace/theme/eclipse";
 import {createTagLookup} from "../../../utils/JsonHelper";
 import {getBodyHeight, getGetOptions, getPutOptions, getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
@@ -22,10 +15,16 @@ import {handleErrors} from "../../../utils/FetchHelper";
 import jp from "jsonpath";
 import {MessageBox} from "../../utils/MessageBox";
 import {getDirectDataPath} from "../../../route/AppRouter";
+import {JsonEditor as Editor} from 'jsoneditor-react';
+import Ajv from 'ajv';
+import ace from 'brace';
+import "../../dialogs/DataDetailsEditor.min.css"
+import 'brace/mode/json';
+import "brace/theme/monokai";
+// import "brace/theme/eclipse";
 
 const ajv = new Ajv({allErrors: true, verbose: true});
-
-const jsonThemeLight = "ace/theme/eclipse";
+const jsonThemeLight = null; //"ace/theme/eclipse";
 const jsonThemeDark = "ace/theme/monokai";
 
 export default function DataDetailsPage() {

@@ -19,7 +19,7 @@ import EnumsProvider from "../../context/enums/EnumsProvider";
 import Button from "@material-ui/core/Button";
 import TaskMenuSelector from "../data/TaskMenuSelector";
 import {handleErrors} from "../../utils/FetchHelper";
-import {getDataUrl} from "../../utils/UrlBuilder";
+import {getClearDataHistoryByRulesUrl, getDataUrl} from "../../utils/UrlBuilder";
 import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
 import {Query, Utils as QbUtils} from "react-awesome-query-builder";
 import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
@@ -191,6 +191,21 @@ export default function TaskExecutionDialog(props) {
                     if (resultOk) {
                         setMessageBox({open: true, severity: 'success', title: result.message, message: null});
                         refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
+                        props.reload();
+                    }
+                });
+        } else if (state.actions.type === 'clear history') {
+            setState({...state, processing: true});
+            fetch(getClearDataHistoryByRulesUrl(props.bucket), getDeleteOptions({logic: state.logic}))
+                .then(handleErrors)
+                .catch(error => {
+                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                    resultOk = false;
+                })
+                .then(result => {
+                    setState({...state, processing: false});
+                    if (resultOk) {
+                        setMessageBox({open: true, severity: 'success', title: result.message, message: null});
                         props.reload();
                     }
                 });
