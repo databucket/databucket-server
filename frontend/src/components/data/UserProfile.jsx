@@ -48,7 +48,8 @@ export default function UserProfile(props) {
             newThemeName = 'light';
 
         setCustomThemeName(newThemeName);
-        saveThemeName(newThemeName)
+        saveThemeName(newThemeName);
+        window.location.reload();
     };
 
     const handleMenu = (event) => {

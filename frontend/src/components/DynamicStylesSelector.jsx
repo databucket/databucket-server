@@ -1,16 +1,16 @@
-import React from 'react';
-import {useTheme} from "@material-ui/core/styles";
+import React, {useEffect} from 'react';
 
-const DynamicStylesSelector = ({children}) => {
-    const theme = useTheme();
+const DynamicStylesSelector = ({themeName, children}) => {
 
-    if (theme.palette.type === 'dark') {
-        import("./styles/awesome-query-builder-styles-dark.css").then(()=>{});
-        import("./styles/json-editor-styles-dark.css").then(()=>{});
-    } else {
-        import("./styles/awesome-query-builder-styles-light.css").then(()=>{});
-        import("./styles/json-editor-styles-light.css").then(()=>{});
-    }
+    useEffect(() => {
+        if (themeName === 'dark') {
+            import("./styles/awesome-query-builder-styles-dark.css").then(()=>{});
+            import("./styles/json-editor-styles-dark.css").then(()=>{});
+        } else {
+            import("./styles/awesome-query-builder-styles-light.css").then(()=>{});
+            import("./styles/json-editor-styles-light.css").then(()=>{});
+        }
+    }, [themeName]);
 
     return (
         <div>
