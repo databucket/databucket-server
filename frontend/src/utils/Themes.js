@@ -18,15 +18,14 @@ export const LightTheme = createTheme({
         },
         primary: {
             main: '#0d47a1',
-            // contrastText: '#ebf2fd',
             contrastText: '#eeeee4'
         },
         secondary: {
             main: '#ff9800'
         },
         text: {
-            primary: '#585858',
-            secondary: '#585858'
+            primary: '#4e4e4e'
+            // secondary: '#585858'
         }
     },
 });

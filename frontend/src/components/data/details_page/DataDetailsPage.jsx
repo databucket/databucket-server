@@ -18,7 +18,6 @@ import {getDirectDataPath} from "../../../route/AppRouter";
 import {JsonEditor as Editor} from 'jsoneditor-react';
 import Ajv from 'ajv';
 import ace from 'brace';
-import "../../dialogs/DataDetailsEditor.min.css"
 import 'brace/mode/json';
 import "brace/theme/monokai";
 // import "brace/theme/eclipse";
