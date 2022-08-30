@@ -15,7 +15,7 @@ export default function App() {
     return (
         <ThemeProvider theme={getTheme(themeName)}>
             <CssBaseline>
-                <DynamicStylesSelector>
+                <DynamicStylesSelector themeName={themeName}>
                     <AppRouter/>
                 </DynamicStylesSelector>
             </CssBaseline>
