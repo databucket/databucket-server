@@ -11,6 +11,7 @@ export const FEATURE_TASKS = 'Tasks';
 export const FEATURE_RESERVATION = 'Reservation';
 export const FEATURE_IMPORT = 'Import';
 export const FEATURE_EXPORT = 'Export';
+export const FEATURE_AVAILABLE_TAGS = 'Available tags';
 
 export const features = [
     {id: 1, name: FEATURE_SEARCH},
@@ -25,7 +26,8 @@ export const features = [
     {id: 10, name: FEATURE_EXPORT},
     {id: 11, name: FEATURE_DUPLICATE},
     {id: 12, name: FEATURE_FILTER},
-    {id: 13, name: FEATURE_RICH_FILTER}
+    {id: 13, name: FEATURE_RICH_FILTER},
+    {id: 14, name: FEATURE_AVAILABLE_TAGS}
 ];
 
 export const isFeatureEnabled = (name, activeView) => {
