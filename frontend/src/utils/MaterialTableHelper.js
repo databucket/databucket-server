@@ -109,7 +109,7 @@ export const getTableToolbarBackgroundColor = (theme) => {
 
 export const getTableRowBackgroundColor = (rowData, theme) => {
     if (theme.palette.type === 'light')
-        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.02) : darken(theme.palette.background.default, 0.04);
+        return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.04) : darken(theme.palette.background.default, 0.02);
     else
         return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.04) : lighten(theme.palette.background.default, 0.02);
 }
