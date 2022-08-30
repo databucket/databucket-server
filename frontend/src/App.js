@@ -5,7 +5,7 @@ import AppRouter from './route/AppRouter'
 import CssBaseline from "@material-ui/core/CssBaseline";
 import CustomThemeContext from "./context/theme/CustomThemeContext";
 import {clearAllSearchedText, clearAllOrders} from "./utils/ConfigurationStorage";
-import DynamicStylesSelector from "./components/DynamicStylesSelector";
+import StaticStylesSelector from "./components/StaticStylesSelector";
 
 export default function App() {
 
@@ -15,9 +15,9 @@ export default function App() {
     return (
         <ThemeProvider theme={getTheme(themeName)}>
             <CssBaseline>
-                <DynamicStylesSelector themeName={themeName}>
+                <StaticStylesSelector themeName={themeName}>
                     <AppRouter/>
-                </DynamicStylesSelector>
+                </StaticStylesSelector>
             </CssBaseline>
         </ThemeProvider>
     );

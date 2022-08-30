@@ -35,7 +35,7 @@ import {
     FEATURE_CREATION,
     FEATURE_REMOVAL,
     FEATURE_RESERVATION,
-    FEATURE_EXPORT, FEATURE_TASKS, FEATURE_DUPLICATE, FEATURE_RICH_FILTER, FEATURE_FILTER
+    FEATURE_EXPORT, FEATURE_TASKS, FEATURE_DUPLICATE, FEATURE_RICH_FILTER, FEATURE_FILTER, FEATURE_AVAILABLE_TAGS
 } from "../utils/ViewFeatures";
 import prepareTableColumns, {
     convertDataBeforeAdd,
@@ -60,6 +60,7 @@ import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
 import PropTypes from "prop-types";
+import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
@@ -633,6 +634,9 @@ export default function BucketDataTable(props) {
                                         <Grid container direction={"row"} item xs={3} alignItems="center">
                                             <Grid item>
                                                 {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) && <ReserveDataDialog onReserve={onDataReserve}/>}
+                                            </Grid>
+                                            <Grid item>
+                                                {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView) && <AvailableTagsDialog bucketTags={state.bucketTags}/>}
                                             </Grid>
                                             <Grid item>
                                                 <ViewMenuSelector

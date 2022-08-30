@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 
-const DynamicStylesSelector = ({themeName, children}) => {
+const StaticStylesSelector = ({themeName, children}) => {
 
     useEffect(() => {
         if (themeName === 'dark') {
@@ -19,4 +19,4 @@ const DynamicStylesSelector = ({themeName, children}) => {
     );
 }
 
-export default DynamicStylesSelector;
+export default StaticStylesSelector;

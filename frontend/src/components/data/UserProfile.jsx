@@ -34,7 +34,7 @@ export default function UserProfile(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const [customThemeName, setCustomThemeName] = useContext(CustomThemeContext);
+    const [customThemeName] = useContext(CustomThemeContext);
 
     const handleLogout = () => {
         props.onLogout();
@@ -47,7 +47,6 @@ export default function UserProfile(props) {
         else
             newThemeName = 'light';
 
-        setCustomThemeName(newThemeName);
         saveThemeName(newThemeName);
         window.location.reload();
     };
