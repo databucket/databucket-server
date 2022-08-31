@@ -348,12 +348,10 @@ export default function BucketDataTable(props) {
                             allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: '=', right_source: 'const', right_value: parseFloat(filter.value)});
                     else if (filter.column.type === 'boolean')
                         allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: '=', right_source: 'const', right_value: (filter.value === 'checked')});
-                    else if (Array.isArray(filter.value))
-                        // Omit when number of arrays items is 0. Do not put the following condition into parent condition!
-                        if (filter.value.length > 0)
-                            allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
-                        else
-                            allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: '%' + filter.value + '%'});
+                    else if (Array.isArray(filter.value) && filter.value.length > 0)
+                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                    else if (filter.value.length > 0)
+                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: '%' + filter.value + '%'});
 
                 } else {
                     if (filter.column.type === 'numeric')
@@ -366,7 +364,9 @@ export default function BucketDataTable(props) {
                             allConditions.push({left_source: 'field', left_value: filter.column.source, operator: '=', right_source: 'const', right_value: parseFloat(filter.value)});
                     else if (filter.column.type === 'boolean')
                         allConditions.push({left_source: 'field', left_value: filter.column.source, operator: '=', right_source: 'const', right_value: (filter.value === 'checked')});
-                    else {
+                    else if (Array.isArray(filter.value) && filter.value.length > 0)
+                        allConditions.push({left_source: 'field', left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                    else if (filter.value.length > 0) {
                         const filterValue = (filter.value === '@currentUser') ? getUsername() : '%' + filter.value + '%';
                         allConditions.push({left_source: 'field', left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: filterValue});
                     }
