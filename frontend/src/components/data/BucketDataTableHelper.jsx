@@ -107,6 +107,7 @@ const prepareColumn = (column, properties, tags, enums, users, ord) => {
             const property = properties.filter(prop => prop.uuid === column.uuid)[0];
             if (property.enumId != null && property.enumId > 0) {
                 const enumObj = enums.filter(en => en.id === property.enumId)[0];
+                const propLookup = createEnumLookup(enumObj);
 
                 if (enumObj.iconsEnabled) {
                     return {
@@ -114,17 +115,17 @@ const prepareColumn = (column, properties, tags, enums, users, ord) => {
                         field: property.title,
                         source: property.path,
                         type: 'string',
+                        lookup: propLookup,
                         ...colDef,
-                        render: rowData => <TableDynamicIcon iconName={getIconName(enumObj.items, rowData[property.title])}/>,
+                        render: rowData => <TableDynamicIcon icon={getIcon(enumObj.items, rowData[property.title])}/>,
                         editComponent: props =>
                             <LookupIconDialog
-                                selectedIconName={getIconName(enumObj.items, props.rowData[property.title])}
+                                icon={getIcon(enumObj.items, props.rowData[property.title])}
                                 items={enumObj.items}
                                 onChange={props.onChange}
                             />
                     };
                 } else {
-                    const propLookup = createEnumLookup(enumObj);
                     return {
                         title: property.title,
                         field: property.title,
@@ -145,7 +146,7 @@ const prepareColumn = (column, properties, tags, enums, users, ord) => {
     }
 }
 
-const getIconName = (items, value) => {
+const getIcon = (items, value) => {
     const filteredItems = items.filter(item => (item.value === value));
     if (filteredItems.length > 0)
         return filteredItems[0].icon;

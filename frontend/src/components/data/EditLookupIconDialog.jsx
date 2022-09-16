@@ -10,16 +10,16 @@ import TableDynamicIcon from "../utils/TableDynamicIcon";
 export default function LookupIconDialog(props) {
     const {onChange, items} = props;
     const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedValue, setSelectedValue] = useState(props.selectedIconName);
+    const [selectedIcon, setSelectedIcon] = useState(props.icon);
 
     const handleClick = event => {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = (value, iconName) => {
+    const handleClose = (value, icon) => {
         setAnchorEl(null);
         if (value != null) {
-            setSelectedValue(iconName);
+            setSelectedIcon(icon);
             onChange(value);
         }
     };
@@ -31,7 +31,7 @@ export default function LookupIconDialog(props) {
                 color="default"
                 size="small"
             >
-                <TableDynamicIcon iconName={selectedValue != null ? selectedValue : 'more_horiz'}/>
+                <TableDynamicIcon icon={selectedIcon != null ? selectedIcon : {name: 'more_horiz', color: null, svg: null}} />
             </IconButton>
             <Menu
                 id="customized-menu"
@@ -43,11 +43,11 @@ export default function LookupIconDialog(props) {
                 {items.map((item) => (
                     <MenuItem
                         onClick={() => handleClose(item.value, item.icon)}
-                        selected={item.icon === selectedValue}
+                        selected={item.icon === selectedIcon}
                         key={item.value}
                     >
                         <ListItemIcon>
-                            <TableDynamicIcon iconName={item.icon}/>
+                            <TableDynamicIcon icon={item.icon}/>
                         </ListItemIcon>
                         <ListItemText primary={item.text}/>
                     </MenuItem>

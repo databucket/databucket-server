@@ -15,7 +15,7 @@ public class BucketDto {
     private Long id;
     @Size(min=Constants.NAME_MIN, max=Constants.NAME_MAX)
     private String name;
-    private String iconName;
+    private IconDto icon;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
     private Long classId;

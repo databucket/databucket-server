@@ -5,8 +5,7 @@ import {
     getColumnDescription,
     getColumnName, getColumnModifiedAt, getColumnModifiedBy
 } from "../utils/StandardColumns";
-import DynamicIcon from "../utils/DynamicIcon";
-import EditIconDialog from "./EditIconDialog";
+import StyledIcon from "../utils/StyledIcon";
 
 SelectBucketsDialog.propTypes = {
     buckets: PropTypes.array.isRequired,
@@ -19,8 +18,7 @@ export default function SelectBucketsDialog(props) {
     const columns = [
         {
             title: 'Icon', sorting: false, field: 'iconName', searchable: false, filtering: false, initialEditValue: 'PanoramaFishEye',
-            render: rowData => <DynamicIcon iconName={rowData.iconName} color='action' />,
-            editComponent: props => <EditIconDialog value={props.value} onChange={props.onChange} />
+            render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg}/>
         },
         getColumnName(),
         getColumnDescription(),

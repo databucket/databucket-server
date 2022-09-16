@@ -10,5 +10,5 @@ import lombok.Setter;
 public class DataEnumItemDto {
     private String value;
     private String text;
-    private String icon;
+    private IconDto icon;
 }

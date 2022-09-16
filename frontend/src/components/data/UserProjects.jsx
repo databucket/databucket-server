@@ -32,7 +32,7 @@ export default function UserProjects(props) {
     if (projects != null && projects.length > 1)
         return (
             <div>
-                <Tooltip title={'Select project'}>
+                <Tooltip title={'Open project'}>
                     <IconButton onClick={handleMenu} color={'inherit'}>
                         <span className="material-icons">exit_to_app</span>
                     </IconButton>

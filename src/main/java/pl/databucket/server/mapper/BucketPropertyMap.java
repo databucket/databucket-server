@@ -2,6 +2,7 @@ package pl.databucket.server.mapper;
 
 import org.modelmapper.PropertyMap;
 import pl.databucket.server.dto.BucketDto;
+import pl.databucket.server.dto.IconDto;
 import pl.databucket.server.entity.Bucket;
 
 public class BucketPropertyMap extends PropertyMap<Bucket, BucketDto> {
@@ -11,7 +12,7 @@ public class BucketPropertyMap extends PropertyMap<Bucket, BucketDto> {
         map().setId(source.getId());
         map().setName(source.getName());
         map().setDescription(source.getDescription());
-        map().setIconName(source.getIconName());
+        map().setIcon(source.getIconDto());
         map().setClassId(source.getDataClass().getId());
         map().setGroupsIds(source.getGroupsIds());
         map().setUsersIds(source.getUsersIds());

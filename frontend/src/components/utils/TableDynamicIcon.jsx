@@ -1,13 +1,9 @@
 import React from 'react';
-import {Icon} from "@material-ui/core";
+import StyledIcon from "./StyledIcon";
 
-export default function TableDynamicIcon({iconName}) {
-    if (iconName != null)
-        return (
-            <Icon style={{textAlign: "center", verticalAlign: "middle"}}>
-                <span className="material-icons">{iconName}</span>
-            </Icon>
-        );
+export default function TableDynamicIcon({icon}) {
+    if (icon != null)
+        return (<StyledIcon iconName={icon.name} iconColor={icon.color} iconSvg={icon.svg}/>);
     else
         return <div/>
 }

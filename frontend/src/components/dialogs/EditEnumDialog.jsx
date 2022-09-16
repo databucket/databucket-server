@@ -18,12 +18,12 @@ import MaterialTable from "material-table";
 import {useTheme} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
-import DynamicIcon from "../utils/DynamicIcon";
-import EditIconDialog from "./EditIconDialog";
+import EditIconDialog from "./SelectIconDialog";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import {MessageBox} from "../utils/MessageBox";
 import {useWindowDimension} from "../utils/UseWindowDimension";
+import StyledIcon from "../utils/StyledIcon";
 
 const styles = (theme) => ({
     root: {
@@ -82,9 +82,12 @@ export default function EditEnumDialog(props) {
         columnsArray.push({title: 'Text', field: 'text'});
         if (props.iconsEnabled)
             columnsArray.push({
-                title: 'Icon', field: 'icon',
-                render: rowData => <DynamicIcon iconName={rowData.icon}/>,
-                editComponent: props => <EditIconDialog value={props.value} onChange={props.onChange}/>
+                title: 'Icon',
+                field: 'icon',
+                initialEditValue: {name: "help", color: null, svg: null},
+                // render: rowData => <DynamicIcon iconName={rowData.icon}/>,
+                render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg}/>,
+                editComponent: props => <EditIconDialog icon={props.value} onChange={props.onChange} />
             });
         return columnsArray;
     }

@@ -20,6 +20,7 @@ const AccessProvider = props => {
         classes: null,
         tasks: null,
         tags: null,
+        svgs: null,
         enums: null,
         users: null
     }
@@ -75,6 +76,13 @@ const AccessProvider = props => {
         fetch(getBaseUrl('tags'), getGetOptions())
             .then(handleErrors)
             .then(tags => dispatch({type: "FETCH_SESSION_TAGS", payload: tags}))
+            .catch(err => console.log(err));
+    }
+
+    const fetchSessionSvgs = () => {
+        fetch(getBaseUrl('svg'), getGetOptions())
+            .then(handleErrors)
+            .then(svgs => dispatch({type: "FETCH_SESSION_SVGS", payload: svgs}))
             .catch(err => console.log(err));
     }
 
@@ -135,6 +143,7 @@ const AccessProvider = props => {
                 classes: state.classes,
                 tasks: state.tasks,
                 tags: state.tags,
+                svgs: state.svgs,
                 enums: state.enums,
                 users: state.users,
                 fetchAccessTree,
@@ -147,6 +156,7 @@ const AccessProvider = props => {
                 fetchSessionClasses,
                 fetchSessionTasks,
                 fetchSessionTags,
+                fetchSessionSvgs,
                 fetchSessionEnums,
                 fetchSessionUsers
             }

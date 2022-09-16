@@ -279,8 +279,11 @@ public class TemplateService {
     private BucketDto createBucketDto(Map<String, Object> bucketMap) {
         BucketDto bucketDto = new BucketDto();
 
-        if (bucketMap.containsKey(Const.ICON_NAME))
-            bucketDto.setIconName((String) bucketMap.get(Const.ICON_NAME));
+//        if (bucketMap.containsKey(Const.ICON_NAME))
+//            bucketDto.setIconName((String) bucketMap.get(Const.ICON_NAME));
+//
+//        if (bucketMap.containsKey(Const.ICON_COLOR))
+//            bucketDto.setIconColor((String) bucketMap.get(Const.ICON_COLOR));
 
         if (bucketMap.containsKey(Const.NAME))
             bucketDto.setName((String) bucketMap.get(Const.NAME));
