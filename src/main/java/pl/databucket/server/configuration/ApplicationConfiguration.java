@@ -34,6 +34,7 @@ public class ApplicationConfiguration {
         modelMapper.addMappings(new TemplatePropertyMap());
         modelMapper.addMappings(new TemplateDataPropertyMap());
         modelMapper.addMappings(new TemplateDataItemPropertyMap());
+        modelMapper.addMappings(new SvgPropertyMap());
         return modelMapper;
     }
 }

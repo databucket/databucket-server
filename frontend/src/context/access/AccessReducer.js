@@ -68,6 +68,11 @@ const AccessReducer = (state, action) => {
                 ...state,
                 tags: action.payload
             };
+        case "FETCH_SESSION_SVGS":
+            return {
+                ...state,
+                svgs: action.payload
+            };
         case "FETCH_SESSION_ENUMS":
             return {
                 ...state,

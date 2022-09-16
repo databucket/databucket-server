@@ -93,6 +93,10 @@ export const handleErrors = (res) => {
     }
 }
 
+export const getButtonColor = (theme) => {
+    return theme.palette.text.primary;
+}
+
 export const getTableHeaderBackgroundColor = (theme) => {
     if (theme.palette.type === 'light') {
         return darken(theme.palette.background.default, 0.15);

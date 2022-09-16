@@ -3,10 +3,10 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import List from "@material-ui/core/List";
-import DynamicIcon from "../utils/DynamicIcon";
 import AccessContext from "../../context/access/AccessContext";
 import {Tooltip} from "@material-ui/core";
 import PropTypes from "prop-types";
+import StyledIcon from "../utils/StyledIcon";
 
 BucketListSelector.propTypes = {
     leftPanelWidth: PropTypes.number.isRequired
@@ -63,7 +63,9 @@ export default function BucketListSelector(props) {
                             key={bucket.name}
                             onClick={() => onClick(bucket)}
                         >
-                            <ListItemIcon><DynamicIcon iconName={bucket.iconName}/></ListItemIcon>
+                            <ListItemIcon>
+                                <StyledIcon iconName={bucket.iconName} iconColor={bucket.iconColor} iconSvg={bucket.iconSvg} />
+                            </ListItemIcon>
                             <ListItemText primary={getBucketVisibleName(bucket.name)}/>
                         </ListItem>
                     </Tooltip>

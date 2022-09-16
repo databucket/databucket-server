@@ -4,6 +4,7 @@ public class Const {
 
     public static final String NAME = "name";
     public static final String ICON_NAME = "iconName";
+    public static final String ICON_COLOR = "iconColor";
     public static final String SHORT_NAME = "shortName";
     public static final String DESCRIPTION = "description";
     public static final String BUCKET_NAMES = "bucketNames";

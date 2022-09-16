@@ -25,8 +25,7 @@ import {
 } from "../utils/StandardColumns";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import GroupsContext from "../../context/groups/GroupsContext";
-import DynamicIcon from "../utils/DynamicIcon";
-import EditIconDialog from "../dialogs/EditIconDialog";
+import SelectIconDialog from "../dialogs/SelectIconDialog";
 import RolesContext from "../../context/roles/RolesContext";
 import UsersContext from "../../context/users/UsersContext";
 import {getBucketMapper} from "../../utils/NullValueMappers";
@@ -35,6 +34,8 @@ import ClassesContext from "../../context/classes/ClassesContext";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import SvgContext from "../../context/svgs/SvgContext";
+import StyledIcon from "../utils/StyledIcon";
 
 export default function BucketsTab() {
 
@@ -57,7 +58,9 @@ export default function BucketsTab() {
     const {classes, fetchClasses, classesLookup} = classesContext;
     const teamsContext = useContext(TeamsContext);
     const {teams, fetchTeams} = teamsContext;
-    const changeableFields = ['name', 'iconName', 'history', 'protectedData', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
+    const svgContext = useContext(SvgContext);
+    const {svgs, fetchSvgs} = svgContext;
+    const changeableFields = ['name', 'icon', 'history', 'protectedData', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -92,6 +95,11 @@ export default function BucketsTab() {
         if (teams == null)
             fetchTeams();
     }, [teams, fetchTeams]);
+
+    useEffect(() => {
+        if (svgs == null)
+            fetchSvgs();
+    }, [svgs, fetchSvgs]);
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
@@ -132,12 +140,12 @@ export default function BucketsTab() {
                     {
                         title: 'Icon',
                         sorting: false,
-                        field: 'iconName',
+                        field: 'icon',
                         searchable: false,
                         filtering: false,
                         initialEditValue: 'panorama_fish_eye',
-                        render: rowData => <DynamicIcon iconName={rowData.iconName} />,
-                        editComponent: props => <EditIconDialog value={props.value} onChange={props.onChange}/>
+                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg}/>,
+                        editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
                     getColumnName("20%"),
                     getColumnDescription("20%"),

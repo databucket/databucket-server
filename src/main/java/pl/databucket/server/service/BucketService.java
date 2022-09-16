@@ -63,7 +63,9 @@ public class BucketService {
         bucket.setDescription(bucketDto.getDescription());
         bucket.setHistory(bucketDto.isHistory());
         bucket.setProtectedData(bucketDto.isProtectedData());
-        bucket.setIconName(bucketDto.getIconName());
+        bucket.setIconName(bucketDto.getIcon().getName());
+        bucket.setIconColor(bucketDto.getIcon().getColor());
+        bucket.setIconSvg(bucketDto.getIcon().getSvg());
         bucket = bucketRepository.saveAndFlush(bucket);
 
         if (bucketDto.getRoleId() != null) {
@@ -176,7 +178,9 @@ public class BucketService {
 
         bucket.setName(bucketDto.getName());
         bucket.setDescription(bucketDto.getDescription());
-        bucket.setIconName(bucketDto.getIconName());
+        bucket.setIconName(bucketDto.getIcon().getName());
+        bucket.setIconColor(bucketDto.getIcon().getColor());
+        bucket.setIconSvg(bucketDto.getIcon().getSvg());
 
         if (bucketDto.getClassId() != null) {
             DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getClassId(), false);

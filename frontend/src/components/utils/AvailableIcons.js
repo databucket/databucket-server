@@ -1,13 +1,8 @@
 
 export const iconsNames = [
     'person',
-    'person_add',
-    'person_remove',
-    'person_search',
     'people',
     'groups',
-    'group_add',
-    'group_remove',
     'people_alt',
     'person_outline',
     'people_outline',
@@ -16,12 +11,8 @@ export const iconsNames = [
 
     'home',
     'maps_home_work',
-    'location_city',
-    'apartment',
-    'business',
 
     'face',
-    'child_care',
     'mood',
     'sentiment_very_dissatisfied',
     'sentiment_neutral',
@@ -173,16 +164,6 @@ export const iconsNames = [
     'euro',
     'monetization_on',
     'price_change',
-
-    'filter_1',
-    'filter_2',
-    'filter_3',
-    'filter_4',
-    'filter_5',
-    'filter_6',
-    'filter_7',
-    'filter_8',
-    'filter_9',
 
     'attach_file',
     'extension',

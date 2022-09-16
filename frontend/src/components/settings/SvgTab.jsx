@@ -1,92 +1,129 @@
 import MaterialTable from "material-table";
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import Refresh from "@material-ui/icons/Refresh";
 import FilterList from "@material-ui/icons/FilterList";
 import {useTheme} from "@material-ui/core/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
+    getButtonColor,
     getDeleteOptions,
     getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
     getTableHeaderBackgroundColor, getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
-    convertNullValuesInObject, getArrayLengthStr,
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getColumnDescription,
     getColumnModifiedBy, getColumnModifiedAt,
     getColumnName, getColumnCreatedBy, getColumnCreatedAt
 } from "../utils/StandardColumns";
-import {getEnumMapper} from "../../utils/NullValueMappers";
-import EditEnumDialog from "../dialogs/EditEnumDialog";
-import EnumsContext from "../../context/enums/EnumsContext";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import SvgContext from "../../context/svgs/SvgContext";
+import IconButton from "@material-ui/core/IconButton";
+import parse from "html-react-parser";
+import {parseCustomSvg} from "../utils/SvgHelper";
 
-export default function EnumsTab() {
+export default function SvgTab() {
 
     const theme = useTheme();
+    const inputRef = useRef(null);
     const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
-    const enumsContext = useContext(EnumsContext);
-    const {enums, fetchEnums, addEnum, editEnum, removeEnum} = enumsContext;
-    const changeableFields = ['name', 'description', 'iconsEnabled', 'items'];
+    const svgContext = useContext(SvgContext);
+    const {svgs, fetchSvgs, editSvg, removeSvg} = svgContext;
+    const changeableFields = ['name', 'structure'];
     const fieldsSpecification = {
-        name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
-        description: {title: 'Description', check: ['max250']},
-        items: {title: 'Items', check: ['notEmpty', 'custom-check-enum-items']}
+        name: {title: 'Name', check: ['notEmpty', 'min3', 'max200']},
+        structure: {title: 'Svg content', check: ['notEmpty']}
     };
 
     useEffect(() => {
-        if (enums == null)
-            fetchEnums();
-    }, [enums, fetchEnums]);
+        if (svgs == null)
+            fetchSvgs();
+    }, [svgs, fetchSvgs]);
 
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
         setLastPageSize(pageSize);
     }
 
+    const onLoadSvgFromFile = () => {
+        inputRef.current.click();
+    }
+
+    const onFileInputChange = () => {
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            const file = document.querySelector('input[type=file]').files[0];
+            const reader = new FileReader();
+            const svgFile = /svg.*/;
+
+            if (file.type.match(svgFile)) {
+                reader.onload = function (event) {
+                    insertSvg(file.name, event.target.result);
+                }
+            } else
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: "It doesn't seem to be an svg file!"});
+
+            reader.readAsText(file);
+        }
+    }
+
+    const insertSvg = (name, svgContent) => {
+        const size = ['24', '24px'];
+        const svgObj = parse(svgContent);
+        if (svgObj.type !== "svg") {
+            setMessageBox({open: true, severity: 'error', title: 'Error', message: "It seems, the file content isn't an svg object!"});
+            return;
+        }
+        if ((svgObj.props.height != null && !size.includes(svgObj.props.height))
+            || (svgObj.props.width != null && !size.includes(svgObj.props.width))
+            || (svgObj.props.viewBox != null && svgObj.props.viewBox !== "0 0 24 24")) {
+            setMessageBox({open: true, severity: 'error', title: 'Error', message: "The SVG object is expected to be configured with viewBox=\"0 0 24 24\" height=\"24px\" width=\"24px\"!"});
+            return;
+        }
+
+        const childrenContent = svgContent.substring(svgContent.indexOf(">") + 1).replace("</svg>", "");
+        const payload = {name: name, structure: childrenContent};
+        fetch(getBaseUrl('svg'), getPostOptions(payload))
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+            })
+            .then(() => {
+                fetchSvgs();
+            });
+    }
+
     return (
         <div>
             <MaterialTable
 
-                title='Enums'
+                title='Svg icons'
                 tableRef={tableRef}
                 columns={[
+                    {
+                        title: 'Image',
+                        sorting: false,
+                        field: 'structure',
+                        searchable: false,
+                        filtering: false,
+                        editable: false,
+                        render: rowData => <IconButton>{parseCustomSvg(rowData.structure, getButtonColor(theme))}</IconButton>,
+                    },
                     getColumnName(),
-                    getColumnDescription(),
-                    {
-                        title: 'Icons enabled',
-                        field: 'iconsEnabled',
-                        type: 'boolean',
-                        initialEditValue: false
-                    },
-                    {
-                        title: 'Items', field: 'items',
-                        render: rowData => getArrayLengthStr(rowData['items']),
-                        editComponent: props => (
-                            <EditEnumDialog
-                                name={props.rowData['name'] != null ? props.rowData['name'] : ''}
-                                iconsEnabled={props.rowData['iconsEnabled'] === true || props.rowData['iconsEnabled'] === 'true'}
-                                items={props.rowData['items'] != null ? props.rowData['items'] : []}
-                                onChange={props.onChange}
-                            />
-                        )
-                    },
                     getColumnCreatedBy(),
                     getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
                 ]}
-                data={enums != null ? enums : []}
+                data={svgs != null ? svgs : []}
                 onChangeRowsPerPage={onChangeRowsPerPage}
                 options={{
                     pageSize: pageSize,
@@ -111,43 +148,48 @@ export default function EnumsTab() {
                         icon: () => <Refresh/>,
                         tooltip: 'Refresh',
                         isFreeAction: true,
-                        onClick: () => fetchEnums()
+                        onClick: () => fetchSvgs()
                     },
                     {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)
+                    },
+                    {
+                        icon: () => <span className="material-icons">file_open</span>,
+                        tooltip: 'Load from file',
+                        isFreeAction: true,
+                        onClick: () => onLoadSvgFromFile()
                     }
                 ]}
                 editable={{
-                    onRowAdd: newData =>
-                        new Promise((resolve, reject) => {
-                            let message = validateItem(newData, fieldsSpecification);
-                            if (message != null) {
-                                setMessageBox({
-                                    open: true,
-                                    severity: 'warning',
-                                    title: 'Item is not valid',
-                                    message: message
-                                });
-                                reject();
-                                return;
-                            }
-
-                            fetch(getBaseUrl('enums'), getPostOptions(newData))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    reject();
-                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                })
-                                .then((enumItem) => {
-                                    if (enumItem != null) {
-                                        addEnum(convertNullValuesInObject(enumItem, getEnumMapper()));
-                                        resolve();
-                                    }
-                                });
-                        }),
+                    // onRowAdd: newData =>
+                    //     new Promise((resolve, reject) => {
+                    //         let message = validateItem(newData, fieldsSpecification);
+                    //         if (message != null) {
+                    //             setMessageBox({
+                    //                 open: true,
+                    //                 severity: 'warning',
+                    //                 title: 'Item is not valid',
+                    //                 message: message
+                    //             });
+                    //             reject();
+                    //             return;
+                    //         }
+                    //
+                    //         fetch(getBaseUrl('svg'), getPostOptions(newData))
+                    //             .then(handleErrors)
+                    //             .catch(error => {
+                    //                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                    //             })
+                    //             .then((svgItem) => {
+                    //                 if (svgItem != null) {
+                    //                     addSvg(svgItem);
+                    //                     resolve();
+                    //                 }
+                    //             });
+                    //     }),
 
                     onRowUpdate: (newData, oldData) =>
                         new Promise((resolve, reject) => {
@@ -175,15 +217,15 @@ export default function EnumsTab() {
                                 return;
                             }
 
-                            fetch(getBaseUrl('enums'), getPutOptions(newData))
+                            fetch(getBaseUrl('svg'), getPutOptions(newData))
                                 .then(handleErrors)
                                 .catch(error => {
                                     setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                     reject();
                                 })
-                                .then((enumItem) => {
-                                    if (enumItem != null) {
-                                        editEnum(convertNullValuesInObject(enumItem, getEnumMapper()));
+                                .then((svgItem) => {
+                                    if (svgItem != null) {
+                                        editSvg(svgItem);
                                         resolve();
                                     }
                                 });
@@ -193,7 +235,7 @@ export default function EnumsTab() {
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
                                 let e = false;
-                                fetch(getBaseUrl(`enums/${oldData.id}`), getDeleteOptions())
+                                fetch(getBaseUrl(`svg/${oldData.id}`), getDeleteOptions())
                                     .then(handleErrors)
                                     .catch(error => {
                                         e = true;
@@ -205,7 +247,7 @@ export default function EnumsTab() {
                                     })
                                     .then(() => {
                                         if (!e) {
-                                            removeEnum(oldData.id);
+                                            removeSvg(oldData.id);
                                             resolve();
                                         }
                                     });
@@ -217,6 +259,14 @@ export default function EnumsTab() {
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
+            />
+            <input
+                ref={inputRef}
+                accept="image/svg+xml"
+                type="file"
+                onChange={onFileInputChange}
+                id="icon-button-file"
+                style={{display: 'none',}}
             />
         </div>
     );

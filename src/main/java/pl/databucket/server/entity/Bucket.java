@@ -11,6 +11,7 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 import pl.databucket.server.configuration.Constants;
+import pl.databucket.server.dto.IconDto;
 import pl.databucket.server.tenant.TenantSupport;
 
 
@@ -36,6 +37,12 @@ public class Bucket extends Auditable<String> implements TenantSupport {
 
     @Column(name = "icon_name", length = Constants.NAME_MAX)
     private String iconName;
+
+    @Column(name = "icon_color")
+    private String iconColor;
+
+    @Column(name = "icon_svg", columnDefinition="text")
+    private String iconSvg;
 
     @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
@@ -105,6 +112,14 @@ public class Bucket extends Auditable<String> implements TenantSupport {
 
     public String getTableHistoryName() {
         return getTableName() + "-h";
+    }
+
+    public IconDto getIconDto() {
+        IconDto iconDto = new IconDto();
+        iconDto.setName(iconName);
+        iconDto.setColor(iconColor);
+        iconDto.setSvg(iconSvg);
+        return iconDto;
     }
 
 }
