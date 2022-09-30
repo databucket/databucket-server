@@ -1,6 +1,6 @@
 import React from 'react';
 import IconButton from "@material-ui/core/IconButton";
-import {makeStyles} from "@material-ui/core/styles";
+import {makeStyles, useTheme} from "@material-ui/core/styles";
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
 
@@ -22,11 +22,12 @@ StyledIconButtonTab.propTypes = {
 
 export default function StyledIconButtonTab(props) {
     const classes = useStyles(props);
+    const theme = useTheme();
 
     if (props.iconSvg != null)
         return (
             <IconButton disabled onClick={props.onClick} className={classes.button}>
-                {parseCustomSvg(props.iconSvg, props.iconColor)}
+                {parseCustomSvg(props.iconSvg, props.iconColor != null ? props.iconColor : theme.palette.primary.contrastText)}
             </IconButton>
         );
     else

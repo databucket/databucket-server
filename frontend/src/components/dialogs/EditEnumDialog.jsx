@@ -85,8 +85,7 @@ export default function EditEnumDialog(props) {
                 title: 'Icon',
                 field: 'icon',
                 initialEditValue: {name: "help", color: null, svg: null},
-                // render: rowData => <DynamicIcon iconName={rowData.icon}/>,
-                render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg}/>,
+                render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
                 editComponent: props => <EditIconDialog icon={props.value} onChange={props.onChange} />
             });
         return columnsArray;

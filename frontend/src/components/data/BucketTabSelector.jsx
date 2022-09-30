@@ -8,6 +8,7 @@ import {getAppBarBackgroundColor} from "../../utils/Themes";
 import AccessContext from "../../context/access/AccessContext";
 import {Tooltip} from "@material-ui/core";
 import StyledIconButtonTab from "../utils/StyledIconButtonTab";
+import {getIconColor} from "../../utils/MaterialTableHelper";
 
 const useStyles = makeStyles((theme) => ({
     tabs: {
@@ -78,7 +79,7 @@ export default function BucketTabSelector() {
                 <StyledTab key={bucket.id} component="div" onClick={() => handleChangedTab(bucket)} label={
                     <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
                     <span>
-                        <StyledIconButtonTab iconName={bucket.iconName} iconColor={bucket.iconColor} iconSvg={bucket.iconSvg} />
+                        <StyledIconButtonTab iconName={bucket.iconName} iconColor={getIconColor('banner', bucket.iconColor)} iconSvg={bucket.iconSvg} />
                         {getBucketVisibleName(bucket.name)}
                         <IconButton color={'inherit'} onClick={() => handleRemovedTab(bucket)}>
                             <CloseIcon style={{fontSize: 18}}/>

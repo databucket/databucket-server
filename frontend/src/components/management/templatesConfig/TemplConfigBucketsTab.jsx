@@ -91,8 +91,7 @@ export default function TemplConfigBucketsTab(props) {
                         searchable: false,
                         filtering: false,
                         initialEditValue: 'panorama_fish_eye',
-                        // render: rowData => <DynamicIcon iconName={rowData.iconName} />,
-                        render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg}/>,
+                        render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
                         editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
                     getColumnName(),

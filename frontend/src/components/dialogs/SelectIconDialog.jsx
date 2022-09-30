@@ -17,6 +17,8 @@ import {MessageBox} from "../utils/MessageBox";
 import {parseCustomSvg} from "../utils/SvgHelper";
 import ColorPicker from "material-ui-color-picker";
 import Typography from "@material-ui/core/Typography";
+import {DarkTheme, getAppBarBackgroundColor, LightTheme} from "../../utils/Themes";
+import StyledIcon from "../utils/StyledIcon";
 
 SimpleDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
@@ -136,19 +138,63 @@ function SimpleDialog(props) {
             <div style={{height: "20px"}}/>
             <div>
                 <Grid container spacing={0} alignItems="center">
-                    <Grid item xs={2}/>
+                    <Grid item xs={1}/>
                     <Grid item xs>
-                        <div style={{marginLeft: "20px", maxWidth: "50px"}}>
-                            <Tooltip id="select icon" title="Selected icon">
-                                <StyledIconButton
-                                    iconName={currentIcon.name}
-                                    iconColor={currentIcon.color != null ? currentIcon.color : getButtonColor(theme)}
-                                    iconSvg={currentIcon.svg}
-                                />
-                            </Tooltip>
+                        <div style={
+                            {
+                                background: getAppBarBackgroundColor(),
+                                height: "48px",
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }
+                        }>
+                            <StyledIcon
+                                iconName={currentIcon.name}
+                                iconColor={currentIcon.color}
+                                iconSvg={currentIcon.svg}
+                                themeType={'banner-display'}
+                            />
                         </div>
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs>
+                        <div style={
+                            {
+                                background: LightTheme.palette.background.paper,
+                                height: "48px",
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }
+                        }>
+                            <StyledIcon
+                                iconName={currentIcon.name}
+                                iconColor={currentIcon.color}
+                                iconSvg={currentIcon.svg}
+                                themeType={'light-display'}
+                            />
+                        </div>
+                    </Grid>
+                    <Grid item xs>
+                        <div style={
+                            {
+                                background: DarkTheme.palette.background.paper,
+                                height: "48px",
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }
+                        }>
+                            <StyledIcon
+                                iconName={currentIcon.name}
+                                iconColor={currentIcon.color}
+                                iconSvg={currentIcon.svg}
+                                themeType={'dark-display'}
+                            />
+                        </div>
+                    </Grid>
+                    <Grid item xs={1}/>
+                    <Grid item xs={3}>
                         <TextField
                             hiddenLabel
                             id="iconNameTextBox"
@@ -158,7 +204,7 @@ function SimpleDialog(props) {
                             onChange={handleChangedIconName}
                         />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
                         <Link style={{marginLeft: "10px"}} target='_blank' href='https://fonts.google.com/icons?selected=Material+Icons' color="primary">More icons...</Link><br/>
                     </Grid>
                     <Grid item xs={1}/>

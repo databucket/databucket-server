@@ -1,11 +1,12 @@
 import React from "react";
 import {fetchHelper} from "./FetchHelper";
 import {getToken} from "./ConfigurationStorage";
-import {darken, lighten} from '@material-ui/core/styles';
+import {darken, lighten, rgbToHex} from '@material-ui/core/styles';
 import UserIcon from "@material-ui/icons/AccountCircle";
 import DisabledUserIcon from "@material-ui/icons/NotInterested";
 import ExpiredUserIcon from "@material-ui/icons/EventBusy";
 import Tooltip from "@material-ui/core/Tooltip";
+import {DarkTheme, LightTheme} from "./Themes";
 
 const reverseMapping = (payload) => {
     let newPayload = JSON.parse(JSON.stringify(payload));
@@ -255,4 +256,26 @@ export const getTableBodyHeight = (parentRef, tableHeadHeight) => {
 export const getBodyHeight = (height) => {
     const bodyHeight = ((height - 64 - 64) / height * 100).toFixed(2);
     return `${bodyHeight}vh`;
+}
+
+export const getIconColor = (type, color) => {
+    if (color != null) {
+        if (type === 'light') {
+            return rgbToHex(darken(color, 0.1));
+        } else if (type === 'dark') {
+            return rgbToHex(lighten(color, 0.25));
+        } else if (type === 'banner') {
+            return rgbToHex(lighten(color, 0.15));
+        } else
+            return color;
+    } else {
+        if (type === 'light-display') {
+            return LightTheme.palette.text.primary;
+        } else if (type === 'dark-display') {
+            return DarkTheme.palette.text.primary;
+        } else if (type === 'banner-display') {
+            return DarkTheme.palette.text.primary;
+        } else
+            return color;
+    }
 }
