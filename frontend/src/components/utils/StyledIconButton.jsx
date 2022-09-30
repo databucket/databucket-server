@@ -1,8 +1,9 @@
 import React from 'react';
 import IconButton from "@material-ui/core/IconButton";
-import {makeStyles} from "@material-ui/core/styles";
+import {makeStyles, useTheme} from "@material-ui/core/styles";
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
+import {getIconColor} from "../../utils/MaterialTableHelper";
 
 const useStyles = makeStyles(theme => ({
     customStyles: {
@@ -19,17 +20,23 @@ StyledIconButton.propTypes = {
 
 export default function StyledIconButton(props) {
     const classes = useStyles(props);
+    const theme = useTheme();
 
     if (props.iconSvg != null)
         return (
             <IconButton onClick={props.onClick} className={classes.customStyles}>
-                {parseCustomSvg(props.iconSvg, props.iconColor)}
+                {parseCustomSvg(props.iconSvg, getIconColor(theme.palette.type, props.iconColor))}
             </IconButton>
         );
     else
         return (
             <IconButton onClick={props.onClick} className={classes.customStyles}>
-                <span className="material-icons">{props.iconName}</span>
+                <span
+                    style={{color: getIconColor(theme.palette.type, props.iconColor)}}
+                    className="material-icons"
+                >
+                {props.iconName}
+                </span>
             </IconButton>
         );
 }

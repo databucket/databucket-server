@@ -7,6 +7,7 @@ import AccessContext from "../../context/access/AccessContext";
 import {Tooltip} from "@material-ui/core";
 import PropTypes from "prop-types";
 import StyledIcon from "../utils/StyledIcon";
+import {useTheme} from "@material-ui/core/styles";
 
 BucketListSelector.propTypes = {
     leftPanelWidth: PropTypes.number.isRequired
@@ -14,6 +15,7 @@ BucketListSelector.propTypes = {
 
 export default function BucketListSelector(props) {
 
+    const theme = useTheme();
     const accessContext = useContext(AccessContext);
     const {groups, buckets, activeGroup, activeBucket, addTab} = accessContext;
     const [filteredBuckets, setFilteredBuckets] = useState([]);
@@ -64,7 +66,12 @@ export default function BucketListSelector(props) {
                             onClick={() => onClick(bucket)}
                         >
                             <ListItemIcon>
-                                <StyledIcon iconName={bucket.iconName} iconColor={bucket.iconColor} iconSvg={bucket.iconSvg} />
+                                <StyledIcon
+                                    iconName={bucket.iconName}
+                                    iconColor={bucket.iconColor}
+                                    iconSvg={bucket.iconSvg}
+                                    themeType={theme.palette.type}
+                                />
                             </ListItemIcon>
                             <ListItemText primary={getBucketVisibleName(bucket.name)}/>
                         </ListItem>

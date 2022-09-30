@@ -133,7 +133,6 @@ export default function BucketsTab() {
     return (
         <div>
             <MaterialTable
-
                 title='Buckets'
                 tableRef={tableRef}
                 columns={[
@@ -144,7 +143,7 @@ export default function BucketsTab() {
                         searchable: false,
                         filtering: false,
                         initialEditValue: 'panorama_fish_eye',
-                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg}/>,
+                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
                         editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
                     getColumnName("20%"),
