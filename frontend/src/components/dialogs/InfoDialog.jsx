@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
 import ListItemIcon from "@material-ui/core/ListItemIcon";
-import InfoIcon from "@material-ui/icons/InfoOutlined";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItem from "@material-ui/core/ListItem";
 import DatabucketLogo from "../../images/databucket-logo.png";
@@ -22,6 +21,7 @@ import SwaggerLogo from "../../images/swagger-logo.png";
 import Link from "@material-ui/core/Link";
 import {useTheme} from "@material-ui/core/styles";
 import {Tooltip, withStyles} from "@material-ui/core";
+import {getButtonColor} from "../../utils/MaterialTableHelper";
 
 
 const styles = {
@@ -47,7 +47,11 @@ export default function InfoDialog() {
     return (
         <div>
             <ListItem button onClick={handleClickOpen}>
-                <ListItemIcon><InfoIcon/></ListItemIcon>
+                <ListItemIcon>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill={getButtonColor(theme)}>
+                        <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                </ListItemIcon>
                 <ListItemText primary={'Info'}/>
             </ListItem>
             <Dialog
@@ -56,9 +60,9 @@ export default function InfoDialog() {
                 open={open}
                 fullWidth={true}
             >
-                <img style={{marginLeft: '100px', marginTop: '20px'}} src={DatabucketLogo} alt='' width='399' height='65' />
+                <img style={{marginLeft: '100px', marginTop: '20px'}} src={DatabucketLogo} alt='' width='399' height='65'/>
                 <div style={{margin: '20px'}}>
-                    <Typography color='secondary'>Version: <b>3.3.1</b></Typography>
+                    <Typography color='secondary'>Version: <b>3.3.2</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="primary">www.databucket.pl</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server' color="textSecondary">Source code</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server/wiki' color="textSecondary">Documentation</Link><br/>

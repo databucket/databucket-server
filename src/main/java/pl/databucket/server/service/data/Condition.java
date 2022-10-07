@@ -16,7 +16,14 @@ public class Condition {
 	public Condition(SourceType leftSource, Object leftValue, Operator operator, SourceType rightSource, Object rightValue) {
 		this.leftSource = leftSource;
 		this.leftValue = leftValue;
-		this.operator = operator;
+		if (rightValue != null)
+			this.operator = operator;
+		else if (operator.equals(Operator.equal))
+			this.operator = Operator.is;
+		else if (operator.equals(Operator.notEqual))
+			this.operator = Operator.isNot;
+		else
+			throw new IllegalArgumentException("Unsupported condition!");
 		this.rightSource = rightSource;
 		this.rightValue = rightValue;
 	}
@@ -24,7 +31,15 @@ public class Condition {
 	public Condition(String field, Operator operator, Object value) {
 		this.leftSource = field.startsWith("$") ? field.endsWith("()") ? SourceType.s_function : SourceType.s_property : SourceType.s_field;
 		this.leftValue = field;
-		this.operator = operator;
+		if (value != null)
+			this.operator = operator;
+		else if (operator.equals(Operator.equal))
+			this.operator = Operator.is;
+		else if (operator.equals(Operator.notEqual))
+			this.operator = Operator.isNot;
+		else
+			throw new IllegalArgumentException("Unsupported condition!");
+
 		this.rightSource = SourceType.s_const;
 		this.rightValue = value;
 	}

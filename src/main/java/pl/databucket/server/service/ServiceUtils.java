@@ -38,7 +38,7 @@ public class ServiceUtils {
                                     Double doubleValue = Double.parseDouble(value);
                                     entry.setValue(doubleValue);
                                 } catch (NumberFormatException e2) {
-                                    // do nothing
+                                    entry.setValue(value); // e.g. Json object
                                 }
                             }
                         }
