@@ -198,7 +198,9 @@ public class Query {
         } else if (sourceType.equals(SourceType.s_field)) {
             return (String) value;
         } else if (sourceType.equals(SourceType.s_const)) {
-            if (paramMap != null) {
+            if (value == null) {
+                return "null";
+            } else if (paramMap != null) {
                 if (value instanceof String) {
                     Timestamp date = isValidDate((String) value);
                     if (date != null)
@@ -337,7 +339,9 @@ public class Query {
         } else {
             boolean convertToDateTime = false;
             if (condition.getLeftSource().equals(SourceType.s_property)) {
-                if (condition.getRightValue() instanceof Integer)
+                if (condition.getRightValue() == null)
+                    v1 = getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap);
+                else if (condition.getRightValue() instanceof Integer)
                     v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::int";
                 else if (condition.getRightValue() instanceof Float)
                     v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::float";
@@ -364,7 +368,7 @@ public class Query {
 
             if (condition.getLeftSource().equals(SourceType.s_property)) {
                 if (condition.getRightValue() == null)
-                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "null", paramMap);
+                    v2 = null;
                 else if (convertToDateTime) {
                     Timestamp timestamp = isValidDate((String) condition.getRightValue());
                     v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), timestamp, paramMap);

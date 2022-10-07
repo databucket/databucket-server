@@ -18,6 +18,9 @@ public enum Operator {
 	in("in"),
 	notIn("!in"),
 
+	is("is"),
+	isNot("is not"),
+
 	like("like"),
 	notLike("!like"),
 

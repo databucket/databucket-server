@@ -279,11 +279,12 @@ public class QueryRule {
     }
 
     Object retrieveCurrentUser(Object obj) {
-        if (obj.equals("@currentUser"))
-            return currentUser;
-        else if (obj instanceof List)
-            Collections.replaceAll((ArrayList) obj, "@currentUser", currentUser);
-
+        if (obj != null) {
+            if (obj.equals("@currentUser"))
+                return currentUser;
+            else if (obj instanceof List)
+                Collections.replaceAll((ArrayList) obj, "@currentUser", currentUser);
+        }
         return obj;
     }
 
