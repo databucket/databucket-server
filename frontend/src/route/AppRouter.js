@@ -7,13 +7,14 @@ import ProjectRoute from './ProjectRoute'
 import ManagementRoute from './ManagementRoute';
 import _ManagementTabs from "../components/management/_ManagementTabs";
 import ChangePasswordPage from "../components/login/ChangePasswordPage";
-import {hasProject} from "../utils/ConfigurationStorage";
+import {getActiveProjectId, hasProject, setPathname} from "../utils/ConfigurationStorage";
 import _ProjectRouteInternal from "../components/data/_ProjectRouteInternal";
 import ChangePasswordRoute from "./ChangePasswordRoute";
 import {getContextPath} from "../utils/UrlBuilder";
 
 export default function AppRouter() {
 
+    setPathname(window.location.pathname);
     return (
         <BrowserRouter
             basename={getContextPath()}
@@ -31,11 +32,15 @@ export default function AppRouter() {
 }
 
 export const getProjectDataPath = () => {
-    return hasProject() ? `/project` : '/login'
+    return hasProject() ? `/project/${getActiveProjectId()}` : '/login'
+}
+
+export const getGivenProjectDataPath = (projectId) => {
+    return `/project/${projectId}`;
 }
 
 export const getProjectSettingsPath = () => {
-    return hasProject() ? `/project/settings` : '/login'
+    return hasProject() ? `/project/${getActiveProjectId()}/settings` : '/login'
 }
 
 export const getManagementProjectsPath = () => {
@@ -59,5 +64,5 @@ export const getManagementLogsPath = () => {
 }
 
 export const getDirectDataPath = (bucket, dataId) => {
-    return `${window.location.origin}${getContextPath()}/project/bucket/${bucket}/data/${dataId}`;
+    return `${window.location.origin}${getContextPath()}/project/${getActiveProjectId()}/bucket/${bucket}/data/${dataId}`;
 }

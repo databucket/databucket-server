@@ -18,7 +18,7 @@ import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
     setToken,
     setActiveProjectId,
-    setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut
+    setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut, getPathname, setPathname
 } from '../../utils/ConfigurationStorage';
 import {Link, Redirect} from 'react-router-dom';
 import FormControl from "@material-ui/core/FormControl";
@@ -235,7 +235,12 @@ export default function LoginPage() {
             case 3:
                 return getProjectsPaper();
             case 2:
-                return redirectTo(getProjectDataPath());
+                const pathname = getPathname();
+                if (pathname != null && pathname !== "null") {
+                    setPathname(null);
+                    return redirectTo(pathname)
+                } else
+                    return redirectTo(getProjectDataPath());
             case 1:
                 return redirectTo(getManagementProjectsPath());
             default:
@@ -247,7 +252,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">3.3.2</Typography>
+            <Typography variant="caption">3.3.3</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

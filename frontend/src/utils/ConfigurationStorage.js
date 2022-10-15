@@ -1,5 +1,6 @@
 const THEME_NAME = "theme-name";
 const USER_NAME = "user-name";
+const PATHNAME = "href";
 const TOKEN = 'token';
 const PROJECT_ID = 'project-id';
 const PROJECT_CONTEXT = 'project-context';
@@ -24,6 +25,14 @@ export const logOut = () => {
     clearToken();
     clearRoles();
     clearActiveProjectId();
+}
+
+export const setPathname = (pathname) => {
+    localStorage.setItem(PATHNAME, pathname);
+}
+
+export const getPathname = () => {
+    return localStorage.getItem(PATHNAME);
 }
 
 export const clearUsername = () => {

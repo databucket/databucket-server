@@ -9,17 +9,19 @@ import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import {debounce2, useWindowDimension} from "../../utils/UseWindowDimension";
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 import {getDataByIdUrl2} from "../../../utils/UrlBuilder";
 import {handleErrors} from "../../../utils/FetchHelper";
 import jp from "jsonpath";
 import {MessageBox} from "../../utils/MessageBox";
-import {getDirectDataPath} from "../../../route/AppRouter";
+import {getDirectDataPath, getProjectDataPath} from "../../../route/AppRouter";
 import {JsonEditor as Editor} from 'jsoneditor-react';
 import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
 import "brace/theme/monokai";
+import CloseIcon from "@material-ui/icons/Cancel";
+import {setPathname} from "../../../utils/ConfigurationStorage";
 // import "brace/theme/eclipse";
 
 const ajv = new Ajv({allErrors: true, verbose: true});
@@ -56,7 +58,7 @@ export default function DataDetailsPage() {
             tracker.setValue(previousValue);
         }
 
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('change', {bubbles: true}));
     }
 
     useEffect(() => {
@@ -148,9 +150,12 @@ export default function DataDetailsPage() {
     }, [jsonPath]);
 
     document.title = `Databucket [${inputParams.bucketName}: ${inputParams.dataId}]`;
-
+    setPathname(null); // clear path
     return (
         <div style={{height: getBodyHeight(height)}}>
+            <IconButton component={Link} to={getProjectDataPath()} aria-label="Close">
+                <CloseIcon/>
+            </IconButton>
             <MaterialTable
                 tableRef={tableRef}
                 columns={[

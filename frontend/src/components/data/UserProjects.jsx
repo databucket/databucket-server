@@ -5,6 +5,8 @@ import MenuItem from "@material-ui/core/MenuItem";
 import AccessContext from "../../context/access/AccessContext";
 import {getActiveProjectId} from "../../utils/ConfigurationStorage";
 import {Tooltip} from "@material-ui/core";
+import {Link} from "react-router-dom";
+import {getGivenProjectDataPath} from "../../route/AppRouter";
 
 export default function UserProjects(props) {
 
@@ -59,8 +61,10 @@ export default function UserProjects(props) {
                         })
                         .map((project) => (
                             <MenuItem
+                                component={Link}
                                 key={project.id}
                                 value={project.id}
+                                to={getGivenProjectDataPath(project.id)}
                                 onClick={() => handleSelected(project)}
                             >
                                 {project.name}
