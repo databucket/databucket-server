@@ -5,7 +5,7 @@ import {getProjectDataPath, getProjectSettingsPath} from "../../route/AppRouter"
 import {makeStyles, withStyles} from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Cancel";
-import {getLastSettingsPageName, setLastSettingsPageName} from "../../utils/ConfigurationStorage";
+import {getLastSettingsPageName, setLastSettingsPageName, setPathname} from "../../utils/ConfigurationStorage";
 import ProjectRoute from "../../route/ProjectRoute";
 import NotFoundPage from "../NotFoundPage";
 import GroupsTab from "./GroupsTab";
@@ -95,6 +95,8 @@ export default function _ProjectSettingsTabs() {
         }
         return tabName;
     }
+
+    setPathname(null); // clear path
 
     return (
         <Route

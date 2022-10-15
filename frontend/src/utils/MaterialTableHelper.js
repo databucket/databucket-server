@@ -254,7 +254,7 @@ export const getTableBodyHeight = (parentRef, tableHeadHeight) => {
 }
 
 export const getBodyHeight = (height) => {
-    const bodyHeight = ((height - 64 - 64) / height * 100).toFixed(2);
+    const bodyHeight = ((height - 64 - 64 - 60) / height * 100).toFixed(2);
     return `${bodyHeight}vh`;
 }
 

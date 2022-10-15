@@ -12,10 +12,10 @@ export default function _ProjectRouteInternal() {
 
     return (
         <Switch>
-            <Redirect exact from='/project/settings' to={getProjectSettingsPath()}/>
-            <ProjectRoute path="/project/settings/:page" component={_ProjectSettingsTabs}/>
-            <ProjectRoute path="/project/bucket/:bucketName/data/:dataId/:jsonPath" component={DataDetailsPageWrapper}/>
-            <ProjectRoute path="/project/bucket/:bucketName/data/:dataId" component={DataDetailsPageWrapper}/>
+            <Redirect exact from='/project/:projectId/settings' to={getProjectSettingsPath()}/>
+            <ProjectRoute path="/project/:projectId/settings/:page" component={_ProjectSettingsTabs}/>
+            <ProjectRoute path="/project/:projectId/bucket/:bucketName/data/:dataId/:jsonPath" component={DataDetailsPageWrapper}/>
+            <ProjectRoute path="/project/:projectId/bucket/:bucketName/data/:dataId" component={DataDetailsPageWrapper}/>
             <ProjectRoute path="/project" component={ProjectDataWrapper}/>
             <PublicRoute path="*" component={NotFoundPage}/>
         </Switch>

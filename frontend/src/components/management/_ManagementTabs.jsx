@@ -9,7 +9,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import {Link, Redirect, Route, Switch} from "react-router-dom";
 import {getAppBarBackgroundColor} from "../../utils/Themes";
 import {getManagementProjectsPath, getManagementTemplatesPath, getManagementUsersPath, getProjectDataPath} from "../../route/AppRouter";
-import {getLastManagementPageName, hasProject, hasToken, logOut, setLastManagementPageName} from "../../utils/ConfigurationStorage";
+import {getLastManagementPageName, hasProject, hasToken, logOut, setLastManagementPageName, setPathname} from "../../utils/ConfigurationStorage";
 import ProjectsTab from "./ProjectsTab";
 import UsersTab from "./UsersTab";
 import NotFoundPage from "../NotFoundPage";
@@ -64,6 +64,7 @@ export default function _ManagementTabs() {
     }
 
     if (logged) {
+        setPathname(null); // clear path
         return (
             <Route
                 path="/"
