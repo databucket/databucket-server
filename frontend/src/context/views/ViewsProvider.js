@@ -47,7 +47,7 @@ const ViewsProvider = props => {
     }
 
     const notifyViews = (sourceName, sourceObjectId, sourceObjectItemsIds) => {
-        console.log(`notifyViews: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
+        // console.log(`notifyViews: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
         let itemsTargetFieldName;
         switch (sourceName) {
             case "USER":

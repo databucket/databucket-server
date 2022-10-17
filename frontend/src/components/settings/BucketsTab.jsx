@@ -142,7 +142,7 @@ export default function BucketsTab() {
                         field: 'icon',
                         searchable: false,
                         filtering: false,
-                        initialEditValue: 'panorama_fish_eye',
+                        initialEditValue: {"name":"trip_origin","color":null,"svg":null},
                         render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
                         editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
