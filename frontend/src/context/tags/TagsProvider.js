@@ -46,7 +46,7 @@ const TagsProvider = props => {
     }
 
     const notifyTags = (sourceName, sourceObjectId, sourceObjectItemsIds) => {
-        console.log(`notifyTags: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
+        // console.log(`notifyTags: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
         let itemsTargetFieldName;
         switch (sourceName) {
             case "BUCKET":

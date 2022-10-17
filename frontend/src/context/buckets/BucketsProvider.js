@@ -47,7 +47,7 @@ const BucketsProvider = props => {
     }
 
     const notifyBuckets = (sourceName, sourceObjectId, sourceObjectItemsIds) => {
-        console.log(`notifyBuckets: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
+        // console.log(`notifyBuckets: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
         let itemsTargetFieldName;
         switch (sourceName) {
             case "USER":

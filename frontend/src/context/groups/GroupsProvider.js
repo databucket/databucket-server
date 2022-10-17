@@ -46,7 +46,7 @@ const GroupsProvider = props => {
     }
 
     const notifyGroups = (sourceName, sourceObjectId, sourceObjectItemsIds) => {
-        console.log(`notifyGroups: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
+        // console.log(`notifyGroups: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
         let itemsTargetFieldName;
         switch (sourceName) {
             case "USER":

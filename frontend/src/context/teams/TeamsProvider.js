@@ -46,7 +46,7 @@ const TeamsProvider = props => {
     }
 
     const notifyTeams = (sourceName, sourceObjectId, sourceObjectItemsIds) => {
-        console.log(`notifyTeams: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
+        // console.log(`notifyTeams: ${sourceName}(${sourceObjectId}) -> ${sourceObjectItemsIds}`);
         let itemsTargetFieldName;
         switch (sourceName) {
             case "USER":
