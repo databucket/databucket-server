@@ -14,7 +14,16 @@ import {getContextPath} from "../utils/UrlBuilder";
 
 export default function AppRouter() {
 
-    setPathname(window.location.pathname);
+    const fullPathname = window.location.pathname;
+    const pathname = fullPathname.replace(getContextPath(), "");
+
+    console.log("----save pathname -------------------------------------------");
+    console.log("contextPath: " + getContextPath());
+    console.log("fullPathname: " + fullPathname);
+    console.log("pathname: " + pathname);
+    console.log("-------------------------------------------------------------");
+
+    setPathname(pathname);
     return (
         <BrowserRouter
             basename={getContextPath()}

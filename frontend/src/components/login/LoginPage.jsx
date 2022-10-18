@@ -28,7 +28,7 @@ import Grid from "@material-ui/core/Grid";
 import {MessageBox} from "../utils/MessageBox";
 import {sortByKey} from "../../utils/JsonHelper";
 import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRouter";
-import {getBaseUrl} from "../../utils/UrlBuilder";
+import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import ReactGA from 'react-ga';
 
 const initialState = {
@@ -246,7 +246,6 @@ export default function LoginPage() {
                     console.log("> 2: redirectTo: " + pathname);
                     return redirectTo(pathname);
                 }
-
             case 1:
                 return redirectTo(getManagementProjectsPath());
             default:
