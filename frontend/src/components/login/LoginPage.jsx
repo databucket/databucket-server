@@ -236,14 +236,11 @@ export default function LoginPage() {
                 return getProjectsPaper();
             case 2:
                 const pathname = getPathname();
-                console.log("pathname: " + pathname);
                 if (pathname != null && pathname !== "null") {
                     setPathname(null);
-                    console.log("> 1: redirectTo: " + pathname);
                     return redirectTo(pathname)
                 } else {
                     const pathname = getProjectDataPath();
-                    console.log("> 2: redirectTo: " + pathname);
                     return redirectTo(pathname);
                 }
             case 1:
