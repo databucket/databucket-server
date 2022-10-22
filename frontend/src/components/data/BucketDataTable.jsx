@@ -113,13 +113,16 @@ export default function BucketDataTable(props) {
 
     // active bucket has been changed
     useEffect(() => {
+        // console.log(">> active bucket has been changed");
         setChangedBucket(true);
         setFiltering(false);
         const bucketViews = getBucketViews(activeBucket, views);
         if (bucketViews.length > 0 && tags != null && enums != null && views != null && columns != null) {
+            // console.log(">> 1");
             const orderBy = getLastBucketOrder(activeBucket.id);
-
+            // console.log("lastBucketOrder: " + orderBy);
             if (tableRef !== null && tableRef.current !== null) {
+                // console.log("lastBucketSearchText: " + searchText);
                 tableRef.current.dataManager.changeSearchText(searchText);
                 tableRef.current.dataManager.orderBy = -1;
                 tableRef.current.dataManager.orderDirection = "";
@@ -662,6 +665,9 @@ export default function BucketDataTable(props) {
                         }
                     }}
                     onOrderChange={(colId, ord) => {
+                        // console.log("onOrderChange: (colId, ord)");
+                        // console.log(colId);
+                        // console.log(ord);
                         let order = (colId >= 0) ? {colId, ord} : null;
                         setLastBucketOrder(activeBucket.id, order);
                     }}
