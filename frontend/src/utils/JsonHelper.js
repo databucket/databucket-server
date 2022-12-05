@@ -22,6 +22,14 @@ export const getSelectedValues = (data, keys) => {
     return result;
 }
 
+const validateEmail = (email) => {
+    return String(email)
+        .toLowerCase()
+        .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+};
+
 export const validateItem = (data, specification) => {
     // exampleSpecification = {
     //     name: {title: 'Name', check: ['notEmpty', 'min3', 'max5']},
@@ -87,6 +95,11 @@ export const validateItem = (data, specification) => {
                     if (validation === 'validClassPropertyType') {
                         if (data[key] === 'select' && data['enumId'] == null)
                             message += `>>> Enum must not be empty for 'Enum' type! `;
+                    }
+
+                    if (validation === 'email') {
+                        if (!validateEmail(data[key]))
+                            message += `>>> Invalid email address! `;
                     }
                 }
             }

@@ -34,6 +34,7 @@ public class ManageProjectService {
         project.setDescription(manageProjectDto.getDescription());
         project.setExpirationDate(manageProjectDto.getExpirationDate());
         project.setEnabled(manageProjectDto.isEnabled());
+        project.setPublicVisible(manageProjectDto.isPublicVisible());
         projectRepository.saveAndFlush(project);
 
         if (manageProjectDto.getUsersIds() != null) {
@@ -77,6 +78,7 @@ public class ManageProjectService {
         project.setName(manageProjectDto.getName());
         project.setDescription(manageProjectDto.getDescription());
         project.setEnabled(manageProjectDto.isEnabled());
+        project.setPublicVisible(manageProjectDto.isPublicVisible());
         project.setExpirationDate(manageProjectDto.getExpirationDate());
 
         if (manageProjectDto.getUsersIds() != null) {

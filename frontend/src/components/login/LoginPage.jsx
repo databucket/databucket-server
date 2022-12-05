@@ -20,7 +20,7 @@ import {
     setActiveProjectId,
     setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut, getPathname, setPathname
 } from '../../utils/ConfigurationStorage';
-import {Link, Redirect} from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 import FormControl from "@material-ui/core/FormControl";
 import IconButton from "@material-ui/core/IconButton";
 import {Visibility, VisibilityOff} from "@material-ui/icons";
@@ -28,20 +28,24 @@ import Grid from "@material-ui/core/Grid";
 import {MessageBox} from "../utils/MessageBox";
 import {sortByKey} from "../../utils/JsonHelper";
 import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRouter";
-import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 import ReactGA from 'react-ga';
+import MaterialLink from "@material-ui/core/Link";
+import {Link} from "react-router-dom";
 
 const initialState = {
     username: "",
     password: "",
     projects: null,
+    resetPassword: false,
     changePassword: false,
+    register: false,
     showPassword: false
 };
 
 export default function LoginPage() {
 
-    const [{username, password, projects, changePassword, showPassword}, setState] = useState(initialState);
+    const [{username, password, projects, resetPassword, changePassword, register, showPassword}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
 
     const onChange = e => {
@@ -67,7 +71,7 @@ export default function LoginPage() {
     };
 
     const signIn = (username, password, projectId) => {
-        fetch(getBaseUrl('public/signin'), {
+        fetch(getBaseUrl('public/sign-in'), {
             method: 'POST',
             body: JSON.stringify(projectId == null ? {username, password} : {username, password, projectId}),
             headers: {'Content-Type': 'application/json'}
@@ -133,6 +137,7 @@ export default function LoginPage() {
                     <Input
                         id="standard-adornment-password"
                         name="password"
+                        // inputProps={{ style: { backgroundColor: "red" } }} //TODO nie działa tylko dla Chrome
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={onChange}
@@ -150,8 +155,21 @@ export default function LoginPage() {
                         }
                     />
                 </FormControl>
-                <div className="Button">
+                <div className="ForgotPasswordLink">
+                    <MaterialLink
+                        component="button"
+                        variant="caption"
+                        color="inherit"
+                        onClick={() => {
+                            setState(prevState => ({...prevState, resetPassword: true}));
+                        }}
+                    >
+                        Forgot your password?
+                    </MaterialLink>
+                </div>
+                <div className="ButtonLogin">
                     <Button
+                        fullWidth={true}
                         variant="contained"
                         color="primary"
                         size={'large'}
@@ -160,8 +178,19 @@ export default function LoginPage() {
                             handleSignIn();
                         }}
                     >
-                        Submit
+                        Login
                     </Button>
+                </div>
+                <div className="RegistrationLink">
+                    <MaterialLink
+                        component="button"
+                        color="inherit"
+                        onClick={() => {
+                            setState(prevState => ({...prevState, register: true}));
+                        }}
+                    >
+                        Don't have an account?
+                    </MaterialLink>
                 </div>
             </Paper>
         );
@@ -215,7 +244,11 @@ export default function LoginPage() {
     }
 
     const getSwitchParam = () => {
-        if (changePassword === true) {
+        if (register === true) {
+            return 6;
+        } else if (resetPassword === true) {
+            return 5;
+        } else if (changePassword === true) {
             return 4;
         } else if (projects != null && projects.length > 0) {
             return 3;
@@ -230,6 +263,10 @@ export default function LoginPage() {
 
     const paper = () => {
         switch (getSwitchParam()) {
+            case 6:
+                return redirectTo("/sign-up");
+            case 5:
+                return redirectTo("/forgot-password");
             case 4:
                 return redirectTo("/change-password");
             case 3:
@@ -254,7 +291,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">3.3.3</Typography>
+            <Typography variant="caption">3.4.0</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

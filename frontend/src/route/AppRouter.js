@@ -11,6 +11,9 @@ import {getActiveProjectId, hasProject, setPathname} from "../utils/Configuratio
 import _ProjectRouteInternal from "../components/data/_ProjectRouteInternal";
 import ChangePasswordRoute from "./ChangePasswordRoute";
 import {getContextPath} from "../utils/UrlBuilder";
+import ForgotPasswordPage from "../components/login/ForgotPasswordPage";
+import SignUpPage from "../components/login/SignUpPage";
+import ConfirmationPage from "../components/login/ConfirmationPage";
 
 export default function AppRouter() {
 
@@ -24,6 +27,9 @@ export default function AppRouter() {
             <Switch>
                 <Redirect exact from='/' to={getProjectDataPath()}/>
                 <PublicRoute exact restricted={true} path="/login" component={LoginPage}/>
+                <PublicRoute exact restricted={true} path="/forgot-password" component={ForgotPasswordPage}/>
+                <PublicRoute exact restricted={true} path="/sign-up" component={SignUpPage}/>
+                <PublicRoute exact restricted={true} path="/confirmation/*" component={ConfirmationPage}/>
                 <ChangePasswordRoute exact path="/change-password" component={ChangePasswordPage}/>
                 <ManagementRoute path="/management" component={_ManagementTabs}/>
                 <ProjectRoute path="/project" component={_ProjectRouteInternal}/>

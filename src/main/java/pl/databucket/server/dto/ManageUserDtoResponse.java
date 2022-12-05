@@ -13,6 +13,7 @@ public class ManageUserDtoResponse {
     private long id;
     private String username;
     private String description;
+    private String email;
     private Boolean enabled;
     private Date expirationDate;
     private Set<Short> rolesIds;
