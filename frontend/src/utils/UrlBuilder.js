@@ -1,7 +1,6 @@
 export const getOrigin = () => {
-    const origin = window.location.origin;
-    // const origin = 'http://localhost:8080';
-
+    // const origin = window.location.origin;
+    const origin = 'http://localhost:8080';
     return origin + getContextPath();
 }
 
@@ -12,6 +11,10 @@ export const getContextPath = () => {
             return contextPath;
     }
     return "";
+}
+
+export const getConfirmationUrl = (secureLink) => {
+    return `${getOrigin()}/api/public/confirmation/${secureLink}`;
 }
 
 export const getDataUrl = (bucket) => {

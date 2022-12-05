@@ -21,6 +21,7 @@ public class TokenProvider implements Serializable {
 
     public static final String AUTHORITIES_KEY = "a-key";
     public static final String PROJECT_ID = "p-id";
+    public static final String CONTENT = "content";
 
     @Value("${jwt.secret}")
     private String singingKey;
@@ -48,7 +49,7 @@ public class TokenProvider implements Serializable {
                 .getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
@@ -70,6 +71,22 @@ public class TokenProvider implements Serializable {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String packToJwts(String content) {
+        return Jwts.builder()
+                .claim(CONTENT, content)
+                .signWith(SignatureAlgorithm.HS256, singingKey)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000))
+                .compact();
+    }
+
+    public String unpackFromJwts(String jwts) {
+        return Jwts.parser()
+                .setSigningKey(singingKey)
+                .parseClaimsJws(jwts)
+                .getBody().get(CONTENT).toString();
     }
 
     UsernamePasswordAuthenticationToken getAuthentication(final String token, final CustomUserDetails customUserDetails) {

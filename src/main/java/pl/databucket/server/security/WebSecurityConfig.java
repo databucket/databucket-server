@@ -53,7 +53,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(
                         "/",
-                        "/api/public/**", // public endpoint for authorization
+                        "/api/public/**", // public endpoint
                         "/**/static/**",
                         "/actuator/**",
                         "/**/favicon.ico",

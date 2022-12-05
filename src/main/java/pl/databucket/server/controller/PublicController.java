@@ -6,30 +6,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-import pl.databucket.server.dto.AuthReqDTO;
-import pl.databucket.server.dto.AuthRespDTO;
-import pl.databucket.server.dto.AuthProjectDTO;
-import pl.databucket.server.dto.DataGetDTO;
+import pl.databucket.server.dto.*;
 import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ExceptionFormatter;
+import pl.databucket.server.exception.ForbiddenRepetitionException;
 import pl.databucket.server.repository.UserRepository;
-import pl.databucket.server.response.MessageResponse;
 import pl.databucket.server.security.TokenProvider;
-import pl.databucket.server.service.data.DataService;
-import pl.databucket.server.service.data.QueryRule;
+import pl.databucket.server.service.ManageUserService;
 
+import javax.mail.AuthenticationFailedException;
+import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Api(tags="PUBLIC")
+@Api(tags = "PUBLIC")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/public")
@@ -42,7 +41,7 @@ public class PublicController {
     private UserRepository userRepository;
 
     @Autowired
-    private DataService dataService;
+    private ManageUserService manageUserService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -60,9 +59,9 @@ public class PublicController {
             @ApiResponse(code = 403, message = "Forbidden - user access has expired | the project is disabled | the project is expired | the user is not assign to given project | the user is not assign to any project"),
             @ApiResponse(code = 500, message = "Internal server error"),
     })
-    @PostMapping(value = "/signin", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = {"/sign-in", "/signin"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signIn(
-            @ApiParam(value="payload - username (required), password (required), projectId (optional)", required = true) @RequestBody AuthReqDTO authReqDTO) {
+            @ApiParam(value = "payload - username (required), password (required), projectId (optional)", required = true) @RequestBody AuthReqDTO authReqDTO) {
         User user = userRepository.findByUsername(authReqDTO.getUsername());
         if (user == null)
             return exceptionFormatter.customException(new UsernameNotFoundException("Bad credentials"), HttpStatus.UNAUTHORIZED);
@@ -177,23 +176,66 @@ public class PublicController {
         }
     }
 
-    @ApiOperation(value = "getQuery", hidden = true)
-    @PostMapping(value = "/query")
-    public ResponseEntity<?> getQuery(@RequestBody(required = false) DataGetDTO dataGetDto) {
+    @PostMapping(value = "/forgot-password", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordReqDTO forgotPasswordReqDTO) {
         try {
-            return new ResponseEntity<>(new MessageResponse(dataService.getQuery(new QueryRule("fakeUserName", dataGetDto))), HttpStatus.OK);
+            manageUserService.forgotPasswordMessage(forgotPasswordReqDTO);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (MessagingException | MailSendException e) {
+            return exceptionFormatter.customPublicException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (UsernameNotFoundException e) {
+            return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (ForbiddenRepetitionException e) {
+            return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
     }
 
-    @ApiOperation(value = "getQueryRules", hidden = true)
-    @PostMapping(value = "/query-rules")
-    public ResponseEntity<?> getQueryRules(@RequestBody(required = false) DataGetDTO dataGetDto) {
+    @GetMapping(value = {"/confirmation/forgot-password/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> forgotPasswordConfirmation(@PathVariable String jwts) {
         try {
-            return new ResponseEntity<>(new QueryRule("fakeUserName", dataGetDto), HttpStatus.OK);
+            manageUserService.resetAndSendPassword(jwts);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (MessagingException | MailSendException e) {
+            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (ForbiddenRepetitionException e) {
+            return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
     }
+
+    @PostMapping(value = {"/sign-up"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> signUp(@RequestBody SignUpDtoRequest signUpDtoRequest) {
+        try {
+            if (userRepository.existsByUsername(signUpDtoRequest.getUsername()))
+                return exceptionFormatter.customPublicException("Given username already exists", HttpStatus.CONFLICT);
+
+            if (userRepository.existsByEmail(signUpDtoRequest.getEmail()))
+                return exceptionFormatter.customPublicException("Given email already exists", HttpStatus.CONFLICT);
+
+            manageUserService.signUpUser(signUpDtoRequest);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (MessagingException | MailSendException e) {
+            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    @GetMapping(value = {"/confirmation/sign-up/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> signUpConfirmation(@PathVariable String jwts) {
+        try {
+            manageUserService.signUpUserConfirmation(jwts);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (MessagingException | MailSendException e) {
+            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (ForbiddenRepetitionException e) {
+            return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
 }

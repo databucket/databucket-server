@@ -34,6 +34,9 @@ public class Project extends Auditable<String> {
     private Date expirationDate;
 
     @Column
+    private Boolean publicVisible = false;
+
+    @Column
     private Boolean enabled = true;
 
     @Column

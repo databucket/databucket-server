@@ -50,9 +50,10 @@ export default function UsersTab() {
     const {roles, fetchRoles} = rolesContext;
     const projectsContext = useContext(ProjectsContext);
     const {projects, fetchProjects, notifyProjects} = projectsContext;
-    const changeableFields = ['id', 'username', 'description', 'enabled', 'expirationDate', 'rolesIds', 'projectsIds'];
+    const changeableFields = ['id', 'username', 'email', 'description', 'enabled', 'expirationDate', 'rolesIds', 'projectsIds'];
     const userSpecification = {
         username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']},
+        email: {title: 'Email', check: ['email']},
         description: {title: 'Description', check: ['max200']}
     };
 
@@ -86,6 +87,7 @@ export default function UsersTab() {
                     {title: 'State', filtering: false, cellStyle: { width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
                     getColumnEnabled(),
                     {title: 'Name', field: 'username', editable: 'onAdd', filtering: true},
+                    {title: 'Email', field: 'email', filtering: true},
                     getColumnDescription('20%'),
                     {
                         title: 'Roles', field: 'rolesIds', filtering: false, sorting: false,

@@ -62,7 +62,7 @@ export default function InfoDialog() {
             >
                 <img style={{marginLeft: '100px', marginTop: '20px'}} src={DatabucketLogo} alt='' width='399' height='65'/>
                 <div style={{margin: '20px'}}>
-                    <Typography color='secondary'>Version: <b>3.3.3</b></Typography>
+                    <Typography color='secondary'>Version: <b>3.4.0</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="primary">www.databucket.pl</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server' color="textSecondary">Source code</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server/wiki' color="textSecondary">Documentation</Link><br/>

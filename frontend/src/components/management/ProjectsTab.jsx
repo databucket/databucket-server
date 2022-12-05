@@ -54,7 +54,7 @@ export default function ProjectsTab() {
     const {templates, fetchTemplates, notifyTemplates} = templatesContext;
     const rolesContext = useContext(RolesContext);
     const {roles, fetchRoles} = rolesContext;
-    const changeableFields = ['id', 'enabled', 'name', 'description', 'usersIds', 'templatesIds', 'expirationDate'];
+    const changeableFields = ['id', 'publicVisible', 'enabled', 'name', 'description', 'usersIds', 'templatesIds', 'expirationDate'];
     const projectSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -116,6 +116,13 @@ export default function ProjectsTab() {
                 tableRef={tableRef}
                 columns={[
                     getColumnId(),
+                    {
+                        title: 'Public',
+                        field: 'publicVisible',
+                        type: 'boolean',
+                        width: '1%',
+                        cellStyle: {width: '1%'}
+                    },
                     getColumnEnabled(),
                     getColumnName(),
                     getColumnDescription('20%'),

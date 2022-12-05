@@ -75,7 +75,7 @@ public class ManageUserController {
     @PostMapping(value = "/password/reset")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody AuthReqDTO authDtoRequest) {
         try {
-            manageUserService.resetPassword(authDtoRequest);
+            manageUserService.resetAndSendPassword(authDtoRequest);
             return new ResponseEntity<>(null, HttpStatus.OK);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);

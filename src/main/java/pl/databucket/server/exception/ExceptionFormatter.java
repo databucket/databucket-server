@@ -47,4 +47,10 @@ public class ExceptionFormatter {
         return new ResponseEntity<>(response, status);
     }
 
+    public ResponseEntity<Map<String, Object>> customPublicException(String message, HttpStatus status) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        return new ResponseEntity<>(response, status);
+    }
+
 }

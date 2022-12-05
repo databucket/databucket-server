@@ -18,6 +18,7 @@ public class ManageProjectDto {
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
     private boolean enabled;
+    private boolean publicVisible;
     private Date expirationDate;
     private Set<Long> usersIds;
     private Set<Integer> templatesIds;

@@ -23,40 +23,47 @@
     padding: 30px;
 }
 
+.Description {
+    padding: 30px;
+}
+
 .TitleGrid {
     padding: 30px;
     width: 100%;
     /*overflow: auto;*/
 }
 
-.ButtonLogin {
+.Button {
     width: 100%;
-    margin-top: 50px;
+    margin-top: 10px;
     padding: 20px;
 }
 
-.ForgotPasswordLink {
-    width: 100%;
-    display: flex;
-    margin-top: -15px;
-    margin-right: 45px;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-end;
-    z-index: 1;
-}
-
-.RegistrationLink {
-    padding-top: 70px;
-}
-
-.ProjectsList {
-    width: 100%;
-    overflow: auto;
-}
-
-.LoginInputText {
+.EmailInputText {
     height: 70px;
     width: 85%;
     overflow: auto;
+}
+
+.UsernameInputText {
+    height: 70px;
+    width: 85%;
+    overflow: auto;
+}
+
+.PasswordText {
+    height: 70px;
+    width: 85%;
+    overflow: auto;
+}
+
+.BackLink {
+    width: 100%;
+    margin-top: 50px;
+    margin-left: 40px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
 }

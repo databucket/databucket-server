@@ -5,6 +5,7 @@ import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
@@ -30,6 +31,10 @@ public class User extends Auditable<String> implements Serializable {
     @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
 
+    @Email
+    @Column
+    private String email;
+
     @Column
     private String password;
 
@@ -43,6 +48,13 @@ public class User extends Auditable<String> implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date expirationDate;
 
+    @Column(name = "last_send_email_forgot_password_link_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastSendEmailForgotPasswordLinkDate;
+
+    @Column(name = "last_send_email_temp_password_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastSendEmailTempPasswordDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",

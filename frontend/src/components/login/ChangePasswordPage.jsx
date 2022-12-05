@@ -13,6 +13,7 @@ import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
 import {Redirect} from "react-router-dom";
 import {getProjectDataPath} from "../../route/AppRouter";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import Link from "@material-ui/core/Link";
 
 const initialState = {
     password: "",
@@ -21,6 +22,7 @@ const initialState = {
 };
 
 export default function ChangePasswordPage() {
+    const [back, setBack] = useState(false);
     const [{password, newPassword, newPasswordConfirmation}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [redirect, setRedirect] = useState(false);
@@ -82,6 +84,9 @@ export default function ChangePasswordPage() {
             getPasswordStrength(value);
     };
 
+    if (back)
+        return (<Redirect to="/login"/>);
+    else
     return (
         redirect === true ? (
             <Redirect to={getProjectDataPath()}/>
@@ -91,6 +96,16 @@ export default function ChangePasswordPage() {
                     <Typography className="Title" variant="h5">
                         Change password
                     </Typography>
+                    {/*// additional control to block setting default password by Chrome*/}
+                    <FormControl disabled={true} style={{height: '0px', width: '0px'}}>
+                        <Input
+                            name="pass"
+                            type='password'
+                            value={null}
+                            disabled={true}
+                            // visible={false}
+                        />
+                    </FormControl>
                     <FormControl className="LoginInputText">
                         <InputLabel htmlFor="standard-adornment-password">Current password</InputLabel>
                         <Input
@@ -120,6 +135,7 @@ export default function ChangePasswordPage() {
                     </FormControl>
                     <div className="Button">
                         <Button
+                            fullWidth={true}
                             variant="contained"
                             color="primary"
                             disabled={
@@ -131,6 +147,17 @@ export default function ChangePasswordPage() {
                         >
                             Submit
                         </Button>
+                    </div>
+                    <div className="BackLink">
+                        <Link
+                            component="button"
+                            color="inherit"
+                            onClick={() => {
+                                setBack(true);
+                            }}
+                        >
+                            Back
+                        </Link>
                     </div>
                 </Paper>
                 <MessageBox
