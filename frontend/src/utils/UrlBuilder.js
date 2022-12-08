@@ -1,6 +1,6 @@
 export const getOrigin = () => {
-    // const origin = window.location.origin;
-    const origin = 'http://localhost:8080';
+    const origin = window.location.origin;
+    // const origin = 'http://localhost:8080';
     return origin + getContextPath();
 }
 
