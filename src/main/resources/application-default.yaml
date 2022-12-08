@@ -14,7 +14,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: databucket.info@gmail.com
-    password: *
+    username: username
+    password: password
+    from: admin@email.io
     properties.mail.smtp.auth: true
     properties.mail.smtp.starttls.enable: true
