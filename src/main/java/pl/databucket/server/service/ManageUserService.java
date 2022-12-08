@@ -5,6 +5,7 @@ import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.databucket.server.configuration.AppProperties;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.AuthReqDTO;
 import pl.databucket.server.dto.ForgotPasswordReqDTO;
@@ -22,7 +23,6 @@ import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.mail.MailSenderService;
 
-import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -50,6 +50,8 @@ public class ManageUserService {
     @Autowired
     private MailSenderService mailSenderService;
 
+    @Autowired
+    private AppProperties appProperties;
 
     public List<User> getUsers() {
         return userRepository.findAllByOrderById();
@@ -90,7 +92,7 @@ public class ManageUserService {
         newUser.setRoles(roles);
         newUser = userRepository.save(newUser);
 
-        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()));
+        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()), appProperties.getFrom());
     }
 
     public void signUpUserConfirmation(String jwts) throws ForbiddenRepetitionException, MessagingException {
@@ -104,7 +106,7 @@ public class ManageUserService {
             user.setEnabled(true);
             userRepository.save(user);
 
-            mailSenderService.sendRegistrationConfirmation(user);
+            mailSenderService.sendRegistrationConfirmation(user, appProperties.getFrom());
         } else
             throw new AccountExpiredException("The confirmation link is expired!");
     }
@@ -123,7 +125,7 @@ public class ManageUserService {
                 throw new ForbiddenRepetitionException("The confirmation link has been send within last 48 hours. Search it in your email inbox.");
         }
 
-        mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()));
+        mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()), appProperties.getFrom());
         user.setLastSendEmailForgotPasswordLinkDate(new Date());
         userRepository.save(user);
     }
@@ -183,7 +185,7 @@ public class ManageUserService {
 
             String newPassword = new String(password);
 
-            mailSenderService.sendNewPassword(user, newPassword);
+            mailSenderService.sendNewPassword(user, newPassword, appProperties.getFrom());
 
             user.setPassword(bcryptEncoder.encode(newPassword));
             user.setChangePassword(true);
