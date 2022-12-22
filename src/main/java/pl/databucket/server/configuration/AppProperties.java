@@ -9,6 +9,15 @@ import org.springframework.stereotype.Component;
 public class AppProperties {
 
     @Value("${spring.mail.from}")
-    private String from;
+    private String mailFrom;
+
+    @Value("${recaptcha.enabled}")
+    private Boolean recaptchaEnabled;
+
+    @Value("${recaptcha.siteKey}")
+    private String recaptchaSiteKey;
+
+    @Value("${recaptcha.secretKey}")
+    private String recaptchaSecretKey;
 
 }

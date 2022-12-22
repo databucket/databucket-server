@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import "./SignUpPage.css";
 import Button from "@material-ui/core/Button";
 import Logo from "../../images/databucket-logo.png";
@@ -20,6 +20,93 @@ export default function SignUpPage() {
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [recaptcha, setRecaptcha] = useState({enabled: true, siteKey: null});
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (recaptcha.enabled === true && recaptcha.siteKey == null) {
+            fetch(getBaseUrl('public/recaptcha-site-key'), {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            })
+                .then(handleLoginErrors)
+                .then(response => {
+                    // console.log("Loaded site key: " + response.siteKey);
+                    if (response.enabled === true)
+                        setRecaptcha({enabled: true, siteKey: response.siteKey});
+                    else
+                        setRecaptcha({...recaptcha, enabled: false});
+                })
+                .catch(error => {
+                    setMessageBox({open: true, severity: 'error', title: 'Getting site key failed', message: error});
+                });
+        }
+    }, []);
+
+    useEffect(() => {
+        const loadScriptByURL = (id, url, callback) => {
+            const isScriptExist = document.getElementById(id);
+
+            if (!isScriptExist) {
+                let script = document.createElement("script");
+                script.type = "text/javascript";
+                script.src = url;
+                script.id = id;
+                script.onload = function () {
+                    if (callback) callback();
+                };
+                document.body.appendChild(script);
+            }
+            if (isScriptExist && callback) callback();
+        }
+
+        // load the script by passing the URL
+        if (recaptcha.siteKey != null) {
+            loadScriptByURL("recaptcha-key", `https://www.google.com/recaptcha/api.js?render=${recaptcha.siteKey}`, function () {
+                // console.log("Recaptcha script loaded with given site key!");
+            });
+        }
+    }, [recaptcha.siteKey]);
+
+    const handleSubmit = e => {
+        setLoading(true);
+        e.preventDefault();
+
+        if (recaptcha.enabled) {
+            window.grecaptcha.ready(() => {
+                window.grecaptcha.execute(recaptcha.siteKey, {action: 'submit'}).then(token => {
+                    submitData(token);
+                });
+            });
+        } else
+            submitData(null);
+    }
+
+    const submitData = token => {
+        const payload = {
+            username: username,
+            email: email,
+            password: password,
+            url: window.location.origin + getContextPath() + "/confirmation/sign-up/",
+            recaptchaToken: token
+        }
+
+        fetch(getBaseUrl('public/sign-up'), {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {'Content-Type': 'application/json'}
+        })
+            .then(handleLoginErrors)
+            .then(res => res.json())
+            .then(res => {
+                setLoading(false);
+                setMessageBox({open: true, severity: 'info', title: 'Send confirmation email', message: ""});
+            })
+            .catch(error => {
+                setLoading(false);
+                setMessageBox({open: true, severity: 'error', title: 'Registration failed', message: error});
+            });
+    }
 
     const handleSetUsername = e => {
         setUsername(e.target.value);
@@ -40,21 +127,6 @@ export default function SignUpPage() {
         setPasswordConfirmation(e.target.value);
         checkPasswordConfirmation(e.target.value);
     };
-
-    const handleSubmit = () => {
-        fetch(getBaseUrl('public/sign-up'), {
-            method: 'POST',
-            body: JSON.stringify({username: username, email: email, password: password, url: window.location.origin + getContextPath() + "/confirmation/sign-up/"}),
-            headers: {'Content-Type': 'application/json'}
-        })
-            .then(handleLoginErrors)
-            .then(response => {
-                setMessageBox({open: true, severity: 'info', title: 'Send confirmation email', message: null});
-            }).catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Registration failed', message: error});
-            }
-        );
-    }
 
     const getPasswordStrength = (pwd) => {
         const strongRegex = new RegExp("^(?=.{14,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
@@ -80,7 +152,7 @@ export default function SignUpPage() {
     }
 
     const checkUsername = (username) => {
-        if (!(username.length >=3 && username.length < 30))
+        if (!(username.length >= 3 && username.length < 30))
             setMessageBox({open: true, severity: 'info', title: 'Please enter a username between 3 and 30 characters.', message: ''});
     }
 
@@ -98,27 +170,18 @@ export default function SignUpPage() {
         return (<Redirect to="/login"/>);
     else
         return (
-            <div className="ContainerClass">
+            <div className="ContainerClassSingUp">
                 {<img src={Logo} alt=''/>}
-                <Paper className="PaperClass" elevation={3}>
-                    <Typography className="Title" variant="h5">
+                <Paper className="PaperClassSingUp" elevation={3}>
+                    <Typography className="TitleSingUp" variant="h5">
                         Sign up
                     </Typography>
-                    <Typography className="Description">
+                    <Typography className="DescriptionSingUp">
                         You want to create a new account?
                         Send required fields and wait for the confirmation link.
                         Until you confirm your registration, your account will be inactive.
                     </Typography>
-                    {/*// additional control to block setting default password by Chrome*/}
-                    <FormControl disabled={true} style={{height: '0px', width: '0px'}}>
-                        <Input
-                            name="pass"
-                            type='password'
-                            value={null}
-                            disabled={true}
-                        />
-                    </FormControl>
-                    <FormControl className="UsernameInputText">
+                    <FormControl className="UsernameInputTextSingUp">
                         <InputLabel htmlFor="standard-adornment-username">Username</InputLabel>
                         <Input
                             id="standard-adornment-username"
@@ -127,9 +190,12 @@ export default function SignUpPage() {
                             value={username}
                             onChange={handleSetUsername}
                             onKeyPress={(event) => handleKeypress(event)}
+                            onFocus={(event) => {
+                                event.target.setAttribute('autocomplete', 'off');
+                            }}
                         />
                     </FormControl>
-                    <FormControl className="EmailInputText">
+                    <FormControl className="EmailInputTextSingUp">
                         <InputLabel htmlFor="standard-adornment-email">Email</InputLabel>
                         <Input
                             id="standard-adornment-email"
@@ -140,7 +206,7 @@ export default function SignUpPage() {
                             onKeyPress={(event) => handleKeypress(event)}
                         />
                     </FormControl>
-                    <FormControl className="PasswordText">
+                    <FormControl className="PasswordTextSingUp">
                         <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
                         <Input
                             id="standard-adornment-password"
@@ -148,18 +214,24 @@ export default function SignUpPage() {
                             type={'password'}
                             value={password}
                             onChange={handlePassword}
+                            onFocus={(event) => {
+                                event.target.setAttribute('autocomplete', 'off');
+                            }}
                         />
                     </FormControl>
-                    <FormControl className="PasswordText">
+                    <FormControl className="PasswordTextSingUp">
                         <InputLabel htmlFor="standard-adornment-confirm-password">Confirm password</InputLabel>
                         <Input
                             name="passwordConfirmation"
                             type='password'
                             value={passwordConfirmation}
                             onChange={handlePasswordConfirmation}
+                            onFocus={(event) => {
+                                event.target.setAttribute('autocomplete', 'off');
+                            }}
                         />
                     </FormControl>
-                    <div className="Button">
+                    <div className="ButtonSingUp">
                         <Button
                             fullWidth={true}
                             variant="contained"
@@ -171,15 +243,14 @@ export default function SignUpPage() {
                                     && password.length > 0
                                     && passwordConfirmation.length > 0
                                     && password === passwordConfirmation
+                                    && !loading
                                 )}
-                            onClick={() => {
-                                handleSubmit();
-                            }}
+                            onClick={handleSubmit}
                         >
-                            Submit
+                            {loading ? 'Processing...' : 'Submit'}
                         </Button>
                     </div>
-                    <div className="BackLink">
+                    <div className="BackLinkSingUp">
                         <Link
                             component="button"
                             color="inherit"

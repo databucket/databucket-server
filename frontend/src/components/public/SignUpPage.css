@@ -1,4 +1,4 @@
-.ContainerClass {
+.ContainerClassSingUp {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -6,7 +6,7 @@
     padding: 10vh;
 }
 
-.PaperClass {
+.PaperClassSingUp {
     margin-top: 40px;
     display: flex;
     min-width: 370px;
@@ -19,49 +19,49 @@
     padding: 20px 0px 0px 0px;
 }
 
-.Title {
-    padding: 30px;
+.TitleSingUp {
+    padding: 10px;
 }
 
-.Description {
+.DescriptionSingUp {
     padding: 30px;
+    /*margin-left: 30px;*/
 }
 
-.TitleGrid {
+.TitleGridSingUp {
     padding: 30px;
     width: 100%;
     /*overflow: auto;*/
 }
 
-.Button {
+.ButtonSingUp {
     width: 100%;
-    margin-top: 10px;
     padding: 20px;
 }
 
-.EmailInputText {
+.EmailInputTextSingUp {
     height: 70px;
     width: 85%;
     overflow: auto;
 }
 
-.UsernameInputText {
+.UsernameInputTextSingUp {
     height: 70px;
     width: 85%;
     overflow: auto;
 }
 
-.PasswordText {
+.PasswordTextSingUp {
     height: 70px;
     width: 85%;
     overflow: auto;
 }
 
-.BackLink {
+.BackLinkSingUp {
     width: 100%;
-    margin-top: 50px;
+    margin-top: 20px;
     margin-left: 40px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;

@@ -96,16 +96,6 @@ export default function ChangePasswordPage() {
                     <Typography className="Title" variant="h5">
                         Change password
                     </Typography>
-                    {/*// additional control to block setting default password by Chrome*/}
-                    <FormControl disabled={true} style={{height: '0px', width: '0px'}}>
-                        <Input
-                            name="pass"
-                            type='password'
-                            value={null}
-                            disabled={true}
-                            // visible={false}
-                        />
-                    </FormControl>
                     <FormControl className="LoginInputText">
                         <InputLabel htmlFor="standard-adornment-password">Current password</InputLabel>
                         <Input
@@ -113,6 +103,9 @@ export default function ChangePasswordPage() {
                             type='password'
                             value={password}
                             onChange={onChange}
+                            onFocus={(event) => {
+                                event.target.setAttribute('autocomplete', 'off');
+                            }}
                         />
                     </FormControl>
                     <FormControl className="LoginInputText">
@@ -122,6 +115,9 @@ export default function ChangePasswordPage() {
                             type='password'
                             value={newPassword}
                             onChange={onChange}
+                            onFocus={(event) => {
+                                event.target.setAttribute('autocomplete', 'off');
+                            }}
                         />
                     </FormControl>
                     <FormControl className="LoginInputText">
@@ -131,6 +127,9 @@ export default function ChangePasswordPage() {
                             type='password'
                             value={newPasswordConfirmation}
                             onChange={onChange}
+                            onFocus={(event) => {
+                                event.target.setAttribute('autocomplete', 'off');
+                            }}
                         />
                     </FormControl>
                     <div className="Button">

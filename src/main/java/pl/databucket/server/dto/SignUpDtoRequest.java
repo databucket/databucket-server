@@ -17,5 +17,6 @@ public class SignUpDtoRequest {
     private String email;
     private String password;
     private String url;
+    private String recaptchaToken;
 
 }
