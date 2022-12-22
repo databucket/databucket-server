@@ -38,9 +38,8 @@ public class SwaggerConfiguration {
                                 .build())
                 )
                 .select()
-                .paths(PathSelectors.regex(".*/api/(bucket|public)/.*"))
+                .paths(PathSelectors.regex(".*/api/(bucket/.*|public/signin)"))
                 .paths(PathSelectors.regex("(?!.*/history.*).+")) // do not show data history methods
-//                .paths(PathSelectors.regex("(?!.*/query.*).+")) // do not show query methods
                 .build()
                 .useDefaultResponseMessages(false)
                 .apiInfo(apiInfo());
@@ -49,7 +48,7 @@ public class SwaggerConfiguration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Databucket API")
-                .version("3.4.1")
+                .version("3.4.2")
                 .build();
     }
 }

@@ -2,10 +2,10 @@ package pl.databucket.server.controller;
 
 import io.swagger.annotations.*;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import pl.databucket.server.configuration.AppProperties;
 import pl.databucket.server.dto.*;
 import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
@@ -21,11 +23,10 @@ import pl.databucket.server.exception.ForbiddenRepetitionException;
 import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.ManageUserService;
+import pl.databucket.server.service.data.DataService;
 
-import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(tags = "PUBLIC")
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/public")
 public class PublicController {
+
+    Logger logger = LoggerFactory.getLogger(PublicController.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -45,6 +48,9 @@ public class PublicController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private AppProperties appProperties;
 
     @Autowired
     private TokenProvider jwtTokenUtil;
@@ -209,6 +215,9 @@ public class PublicController {
     @PostMapping(value = {"/sign-up"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signUp(@RequestBody SignUpDtoRequest signUpDtoRequest) {
         try {
+            if (appProperties.getRecaptchaEnabled() && !checkReCaptcha(signUpDtoRequest.getRecaptchaToken()))
+                return exceptionFormatter.customPublicException("Anti-bot verification blocked your request!", HttpStatus.FORBIDDEN);
+
             if (userRepository.existsByUsername(signUpDtoRequest.getUsername()))
                 return exceptionFormatter.customPublicException("Given username already exists", HttpStatus.CONFLICT);
 
@@ -224,6 +233,27 @@ public class PublicController {
         }
     }
 
+    private boolean checkReCaptcha(String token) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        String uri = "https://www.google.com/recaptcha/api/siteverify" +
+                "?secret=" + appProperties.getRecaptchaSecretKey() +
+                "&response=" + token;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        ResponseEntity<?> result = restTemplate.exchange(uri, HttpMethod.GET, entity, ReCaptchaSiteVerifyResponseDTO.class);
+        ReCaptchaSiteVerifyResponseDTO reCaptchaSiteVerifyResponse = (ReCaptchaSiteVerifyResponseDTO) result.getBody();
+        assert reCaptchaSiteVerifyResponse != null;
+
+        if (!reCaptchaSiteVerifyResponse.isSuccess())
+            logger.error("ReCaptcha failed: " + Arrays.toString(reCaptchaSiteVerifyResponse.getErrorCodes()));
+
+        return reCaptchaSiteVerifyResponse.isSuccess() && reCaptchaSiteVerifyResponse.getScore() > 0.5;
+    }
+
     @GetMapping(value = {"/confirmation/sign-up/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signUpConfirmation(@PathVariable String jwts) {
         try {
@@ -233,6 +263,22 @@ public class PublicController {
             return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (ForbiddenRepetitionException e) {
             return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    @GetMapping(value = {"/recaptcha-site-key"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getReCaptchaSiteKey() {
+        try {
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("enabled", appProperties.getRecaptchaEnabled());
+            if (appProperties.getRecaptchaEnabled())
+                responseBody.put("siteKey", appProperties.getRecaptchaSiteKey());
+            else
+                responseBody.put("siteKey", null);
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

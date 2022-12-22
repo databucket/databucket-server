@@ -1,19 +1,19 @@
 import React from "react";
 import {BrowserRouter, Redirect, Switch} from 'react-router-dom';
-import LoginPage from '../components/login/LoginPage';
+import LoginPage from '../components/public/LoginPage';
 import NotFoundPage from '../components/NotFoundPage';
 import PublicRoute from './PublicRoute'
 import ProjectRoute from './ProjectRoute'
 import ManagementRoute from './ManagementRoute';
 import _ManagementTabs from "../components/management/_ManagementTabs";
-import ChangePasswordPage from "../components/login/ChangePasswordPage";
+import ChangePasswordPage from "../components/public/ChangePasswordPage";
 import {getActiveProjectId, hasProject, setPathname} from "../utils/ConfigurationStorage";
 import _ProjectRouteInternal from "../components/data/_ProjectRouteInternal";
 import ChangePasswordRoute from "./ChangePasswordRoute";
 import {getContextPath} from "../utils/UrlBuilder";
-import ForgotPasswordPage from "../components/login/ForgotPasswordPage";
-import SignUpPage from "../components/login/SignUpPage";
-import ConfirmationPage from "../components/login/ConfirmationPage";
+import ForgotPasswordPage from "../components/public/ForgotPasswordPage";
+import SignUpPage from "../components/public/SignUpPage";
+import ConfirmationPage from "../components/public/ConfirmationPage";
 
 export default function AppRouter() {
 

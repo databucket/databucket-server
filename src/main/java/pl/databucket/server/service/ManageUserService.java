@@ -92,7 +92,7 @@ public class ManageUserService {
         newUser.setRoles(roles);
         newUser = userRepository.save(newUser);
 
-        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()), appProperties.getFrom());
+        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()), appProperties.getMailFrom());
     }
 
     public void signUpUserConfirmation(String jwts) throws ForbiddenRepetitionException, MessagingException {
@@ -106,7 +106,7 @@ public class ManageUserService {
             user.setEnabled(true);
             userRepository.save(user);
 
-            mailSenderService.sendRegistrationConfirmation(user, appProperties.getFrom());
+            mailSenderService.sendRegistrationConfirmation(user, appProperties.getMailFrom());
         } else
             throw new AccountExpiredException("The confirmation link is expired!");
     }
@@ -125,7 +125,7 @@ public class ManageUserService {
                 throw new ForbiddenRepetitionException("The confirmation link has been send within last 48 hours. Search it in your email inbox.");
         }
 
-        mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()), appProperties.getFrom());
+        mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()), appProperties.getMailFrom());
         user.setLastSendEmailForgotPasswordLinkDate(new Date());
         userRepository.save(user);
     }
@@ -185,7 +185,7 @@ public class ManageUserService {
 
             String newPassword = new String(password);
 
-            mailSenderService.sendNewPassword(user, newPassword, appProperties.getFrom());
+            mailSenderService.sendNewPassword(user, newPassword, appProperties.getMailFrom());
 
             user.setPassword(bcryptEncoder.encode(newPassword));
             user.setChangePassword(true);
