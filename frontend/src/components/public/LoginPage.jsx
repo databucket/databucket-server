@@ -273,7 +273,12 @@ export default function LoginPage() {
                 return getProjectsPaper();
             case 2:
                 const pathname = getPathname();
-                if (pathname != null && pathname !== "null") {
+                if (pathname != null
+                    && pathname !== "null"
+                    && !pathname.includes("confirmation")
+                    && !pathname.includes("forgot-password")
+                    && !pathname.includes("sign-up")
+                ) {
                     setPathname(null);
                     return redirectTo(pathname)
                 } else {
@@ -291,7 +296,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">3.4.2</Typography>
+            <Typography variant="caption">3.4.3</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

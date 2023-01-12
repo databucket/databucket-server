@@ -1,5 +1,5 @@
 import React from "react";
-import {BrowserRouter, Redirect, Switch} from 'react-router-dom';
+import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import LoginPage from '../components/public/LoginPage';
 import NotFoundPage from '../components/NotFoundPage';
 import PublicRoute from './PublicRoute'
@@ -27,9 +27,9 @@ export default function AppRouter() {
             <Switch>
                 <Redirect exact from='/' to={getProjectDataPath()}/>
                 <PublicRoute exact restricted={true} path="/login" component={LoginPage}/>
-                <PublicRoute exact restricted={true} path="/forgot-password" component={ForgotPasswordPage}/>
-                <PublicRoute exact restricted={true} path="/sign-up" component={SignUpPage}/>
-                <PublicRoute exact restricted={true} path="/confirmation/*" component={ConfirmationPage}/>
+                <Route exact restricted={true} path="/forgot-password" component={ForgotPasswordPage}/>
+                <Route exact restricted={true} path="/sign-up" component={SignUpPage}/>
+                <Route path="/confirmation/*" component={ConfirmationPage}/>
                 <ChangePasswordRoute exact path="/change-password" component={ChangePasswordPage}/>
                 <ManagementRoute path="/management" component={_ManagementTabs}/>
                 <ProjectRoute path="/project" component={_ProjectRouteInternal}/>

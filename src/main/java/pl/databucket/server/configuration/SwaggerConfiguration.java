@@ -48,7 +48,7 @@ public class SwaggerConfiguration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Databucket API")
-                .version("3.4.2")
+                .version("3.4.3")
                 .build();
     }
 }

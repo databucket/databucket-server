@@ -10,7 +10,7 @@ import Link from "@material-ui/core/Link";
 import {Redirect} from "react-router-dom";
 import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
-import {handleLoginErrors} from "../../utils/FetchHelper";
+import {handleErrors, handleLoginErrors} from "../../utils/FetchHelper";
 
 export default function SignUpPage() {
 
@@ -83,6 +83,7 @@ export default function SignUpPage() {
     }
 
     const submitData = token => {
+        let errorResp = false;
         const payload = {
             username: username,
             email: email,
@@ -96,15 +97,20 @@ export default function SignUpPage() {
             body: JSON.stringify(payload),
             headers: {'Content-Type': 'application/json'}
         })
-            .then(handleLoginErrors)
-            .then(res => res.json())
-            .then(res => {
-                setLoading(false);
-                setMessageBox({open: true, severity: 'info', title: 'Send confirmation email', message: ""});
-            })
+            .then(handleErrors)
             .catch(error => {
+                errorResp = true;
                 setLoading(false);
                 setMessageBox({open: true, severity: 'error', title: 'Registration failed', message: error});
+            })
+            .then(() => {
+                if (!errorResp) {
+                    setLoading(false);
+                    setMessageBox({open: true, severity: 'info', title: 'Send confirmation email', message: ""});
+                    setTimeout(() => {
+                        setBack(true);
+                    }, 6000)
+                }
             });
     }
 

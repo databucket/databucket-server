@@ -132,6 +132,13 @@ public class ManageUserService {
 
     public User modifyUser(ManageUserDtoRequest manageUserDtoRequest) {
         User user = userRepository.findByUsername(manageUserDtoRequest.getUsername());
+
+        // clear last send email dates when changed email address
+        if (!user.getEmail().equals(manageUserDtoRequest.getEmail())) {
+            user.setLastSendEmailForgotPasswordLinkDate(null);
+            user.setLastSendEmailTempPasswordDate(null);
+        }
+
         user.setEmail(manageUserDtoRequest.getEmail());
         user.setDescription(manageUserDtoRequest.getDescription());
         user.setEnabled(manageUserDtoRequest.isEnabled());

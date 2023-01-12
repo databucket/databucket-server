@@ -225,7 +225,7 @@ public class PublicController {
                 return exceptionFormatter.customPublicException("Given email already exists", HttpStatus.CONFLICT);
 
             manageUserService.signUpUser(signUpDtoRequest);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return exceptionFormatter.responseMessage("An account has been created for a new user", HttpStatus.CREATED);
         } catch (MessagingException | MailSendException e) {
             return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (Exception e) {

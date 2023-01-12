@@ -261,6 +261,7 @@ public class DataService {
                     Map<String, Object> updateNamedParams = new HashMap<>();
                     updateNamedParams.put(COL.RESERVED_BY, targetOwnerUsername);
                     updateNamedParams.put(COL.MODIFIED_BY, user.getUsername());
+                    updateNamedParams.put(COL.MODIFIED_AT, new java.sql.Timestamp(new java.util.Date().getTime()));
                     updateNamedParams.put(COL.RESERVED, true);
 
                     Query updateQuery = new Query(bucket.getTableName());
