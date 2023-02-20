@@ -134,7 +134,7 @@ public class ManageUserService {
         User user = userRepository.findByUsername(manageUserDtoRequest.getUsername());
 
         // clear last send email dates when changed email address
-        if (!user.getEmail().equals(manageUserDtoRequest.getEmail())) {
+        if (user.getEmail() != null && !user.getEmail().equals(manageUserDtoRequest.getEmail())) {
             user.setLastSendEmailForgotPasswordLinkDate(null);
             user.setLastSendEmailTempPasswordDate(null);
         }
