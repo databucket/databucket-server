@@ -7,8 +7,8 @@ plugins {
 
 group = 'pl.databucket'
 version = '3.4.4'
-targetCompatibility = 8
-sourceCompatibility = 8
+targetCompatibility = 17
+sourceCompatibility = 17
 
 //compileJava.options.fork = true
 //compileJava.options.forkOptions.executable = 'C:\\Program Files\\Java\\jdk1.8.0_191\\bin\\javac'
@@ -29,14 +29,14 @@ jar {
 
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-mail:2.5.7'
+    implementation 'org.springframework.boot:spring-boot-starter:2.6.8'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.8'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.9'
+    implementation 'org.springframework.boot:spring-boot-starter-security:2.6.8'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.6.8'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:2.6.8'
     implementation 'org.springframework:spring-tx:5.3.9'
-    implementation 'org.postgresql:postgresql:42.2.23.jre7'
+    implementation 'org.postgresql:postgresql:42.2.27'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
     implementation 'org.projectlombok:lombok:1.18.20'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
@@ -46,7 +46,7 @@ dependencies {
     implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.12.0'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.33'
 
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok'
@@ -79,11 +79,11 @@ test {
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
-task deleteStatic(type: Delete) {
+tasks.register('deleteStatic', Delete) {
     delete "src/main/resources/static"
 }
 
-task buildFrontend() {
+tasks.register('buildFrontend') {
     String npm = 'npm'
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         npm = 'npm.cmd'
@@ -100,7 +100,7 @@ task buildFrontend() {
     }
 }
 
-task copyFrontend() {
+tasks.register('copyFrontend') {
     copy {
         from "frontend/build"
         into "src/main/resources/static"
