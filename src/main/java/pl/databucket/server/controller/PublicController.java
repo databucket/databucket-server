@@ -23,7 +23,6 @@ import pl.databucket.server.exception.ForbiddenRepetitionException;
 import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.ManageUserService;
-import pl.databucket.server.service.data.DataService;
 
 import javax.mail.MessagingException;
 import java.util.*;
