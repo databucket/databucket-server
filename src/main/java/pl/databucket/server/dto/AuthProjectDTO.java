@@ -1,29 +1,29 @@
 package pl.databucket.server.dto;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import javax.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
-import javax.validation.constraints.Size;
 
 @Getter
 @Setter
 public class AuthProjectDTO {
 
-    @ApiModelProperty(position = 1, example = "1")
+    @Schema(example = "1")
     private int id;
 
-    @ApiModelProperty(position = 2, example = "DEMO")
+    @Schema(example = "DEMO")
     private String name;
 
-    @ApiModelProperty(position = 3, example = "Demo project")
+    @Schema(example = "Demo project")
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
 
-    @ApiModelProperty(position = 4, example = "true")
+    @Schema(example = "true")
     private boolean enabled;
 
-    @ApiModelProperty(position = 5, example = "false")
+    @Schema(example = "false")
     private boolean expired;
 
 }

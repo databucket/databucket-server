@@ -1,58 +1,44 @@
 package pl.databucket.server.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationManagerResolver;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import javax.annotation.Resource;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationConverter;
+import org.springframework.security.web.authentication.AuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Order(2)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
 
-    @Resource(name = "userService")
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
-
-    @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
-    @Autowired
-    public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService)
-            .passwordEncoder(encoder());
+    public AuthenticationManagerResolver<HttpServletRequest> resolver() {
+        return request -> customersAuthenticationManager();
     }
 
     @Bean
-    public JwtAuthenticationFilter authenticationTokenFilterBean() throws Exception {
-        return new JwtAuthenticationFilter();
+    public AuthenticationManager customersAuthenticationManager() {
+        return authentication -> new UsernamePasswordAuthenticationToken(
+            authentication.getPrincipal(),
+            authentication.getCredentials());
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationEntryPoint unauthorizedHandler)
+        throws Exception {
         http.sessionManagement().invalidSessionUrl("/");
-
         http.cors().and().csrf().disable()
-            .authorizeRequests()
+            .authorizeHttpRequests()
 //            .antMatchers(
 //                "/",
 //                "/api/public/**", // public endpoint
@@ -82,11 +68,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                "/**/*.js"
 //            ).permitAll()
             .antMatchers(HttpMethod.GET,
-                "/index*",  "/static/**", "/*.js", "/*.json", "/*.ico", "/api/public/auth-options")
+                "/index*", "/static/**", "/*.js", "/*.json", "/*.ico",
+                "/api/public/auth-options",
+                "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+                "/actuator/**")
             .permitAll()
             .anyRequest().authenticated()
-            .and()
-            .oauth2Client()
             .and()
             .oauth2Login()
             .loginPage("/auth")
@@ -95,11 +82,30 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 //        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(authenticationFilter(), BasicAuthenticationFilter.class);
+        return http.build();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter authenticationTokenFilterBean() {
+        return new JwtAuthenticationFilter();
     }
 
     @Bean
     public BCryptPasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private AuthenticationFilter authenticationFilter() {
+        AuthenticationFilter filter = new AuthenticationFilter(
+            resolver(), authenticationConverter());
+        filter.setSuccessHandler((request, response, auth) -> {
+        });
+        return filter;
+    }
+
+    public AuthenticationConverter authenticationConverter() {
+        return new BasicAuthenticationConverter();
     }
 
 }

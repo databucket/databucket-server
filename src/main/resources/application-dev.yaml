@@ -2,10 +2,6 @@ jwt:
   secret: veryverysecret
   expire.hours: 24
 
-server:
-  port: 8080
-  servlet.context-path: /
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/databucket
@@ -29,17 +25,17 @@ spring:
         registration:
           dopauth:
             client-id: databucket
-#            client-secret: 69b9a190-407b-4bfd-a347-5b9b75959876
+            #            client-secret: 69b9a190-407b-4bfd-a347-5b9b75959876
             authorization-grant-type: authorization_code
             redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
             scope: openid
         provider:
           dopauth:
             issuer-uri: http://auth.test.local/auth/realms/databucket
-#            authorization-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/auth
-#            token-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/token
-#            user-info-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/userinfo
-#            jwk-set-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/certs
+            #            authorization-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/auth
+            #            token-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/token
+            #            user-info-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/userinfo
+            #            jwk-set-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/certs
             user-name-attribute: preferred_username
 logging:
   level:

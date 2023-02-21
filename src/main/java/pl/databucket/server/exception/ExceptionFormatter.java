@@ -18,7 +18,7 @@ public class ExceptionFormatter {
 
     public ResponseEntity<Map<String, Object>> defaultException(Exception e) {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        logger.error("[" + userName + "] " + e.getMessage(), e);
+        logger.error("[{}] {}", userName, e.getMessage(), e);
         Map<String, Object> response = new HashMap<>();
         response.put("message", e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

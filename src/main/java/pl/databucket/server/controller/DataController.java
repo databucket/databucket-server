@@ -1,427 +1,419 @@
 package pl.databucket.server.controller;
 
-import io.swagger.annotations.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import pl.databucket.server.dto.*;
-import pl.databucket.server.entity.Tag;
-import pl.databucket.server.response.MessageResponse;
-import pl.databucket.server.response.ReserveDataResponse;
-import pl.databucket.server.service.data.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import pl.databucket.server.dto.DataCreateDTO;
+import pl.databucket.server.dto.DataDTO;
+import pl.databucket.server.dto.DataGetDTO;
+import pl.databucket.server.dto.DataModifyDTO;
+import pl.databucket.server.dto.DataRemoveDTO;
+import pl.databucket.server.dto.DataReserveDTO;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
-import pl.databucket.server.exception.*;
+import pl.databucket.server.exception.BucketNotFoundException;
+import pl.databucket.server.exception.ConditionNotAllowedException;
+import pl.databucket.server.exception.ExceptionFormatter;
+import pl.databucket.server.exception.NoAccessToBucketException;
+import pl.databucket.server.exception.UnexpectedException;
+import pl.databucket.server.exception.UnknownColumnException;
+import pl.databucket.server.exception.ValidationException;
 import pl.databucket.server.response.GetDataResponse;
+import pl.databucket.server.response.MessageResponse;
+import pl.databucket.server.response.ReserveDataResponse;
 import pl.databucket.server.service.BucketService;
 import pl.databucket.server.service.UserService;
-import javax.validation.constraints.Size;
-import java.util.*;
+import pl.databucket.server.service.data.COL;
+import pl.databucket.server.service.data.Condition;
+import pl.databucket.server.service.data.DataService;
+import pl.databucket.server.service.data.Operator;
+import pl.databucket.server.service.data.QueryRule;
+import pl.databucket.server.service.data.ResultField;
 
-@Api(tags="SECURED")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "SECURED")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/bucket/{bucketName}")
 @RestController
+@RequiredArgsConstructor
 public class DataController {
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(DataController.class);
 
-    @Autowired
-    private DataService dataService;
-
-    @Autowired
-    private BucketService bucketService;
-
-    @Autowired
-    private UserService userService;
-
+    private final DataService dataService;
+    private final BucketService bucketService;
+    private final UserService userService;
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Insert data", notes = "Inserts one data set into the selected bucket.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not existing tagId"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @Operation(summary = "Insert data", description = "Inserts one data set into the selected bucket.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Created", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        }
+    )
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> insertData(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="payload - data", required = true) @RequestBody DataCreateDTO dataCreateDTO) {
+    public ResponseEntity<DataDTO> insertData(
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "payload - data", required = true) @RequestBody DataCreateDTO dataCreateDTO)
+        throws BucketNotFoundException, NoAccessToBucketException, UnknownColumnException, ConditionNotAllowedException, SQLException, JsonProcessingException {
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
 
-        try {
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                DataDTO dataDTO = dataService.createData(user, bucket, dataCreateDTO);
-                return new ResponseEntity<>(dataDTO, HttpStatus.CREATED);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataCreateDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
-            else
-                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            DataDTO dataDTO = dataService.createData(user, bucket, dataCreateDTO);
+            return new ResponseEntity<>(dataDTO, HttpStatus.CREATED);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Insert multi data", notes = "Inserts multiple data sets into the selected bucket.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not existing tagId"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @Operation(summary = "Insert multi data", description = "Inserts multiple data sets into the selected bucket.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Created"),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
     @PostMapping(value = {"/multi"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> insertMultiData(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="payload - a list of data", required = true) @RequestBody List<DataCreateDTO> dataList) {
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "payload - a list of data", required = true) @RequestBody List<DataCreateDTO> dataList)
+        throws BucketNotFoundException, NoAccessToBucketException {
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
-
-        try {
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                dataService.createData(user, bucket, dataList);
-                return new ResponseEntity<>(HttpStatus.CREATED);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
-            return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            dataService.createData(user, bucket, dataList);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Modify data by data ids", notes = "Makes changes on data based on data ids.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}"
-                    )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not exising tagId"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
-    @PutMapping(value = { "/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> modifyData(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="ids", example = "1,2,3", required = true) @PathVariable Optional<List<Long>> ids,
-            @ApiParam(value="payload - data details (rules are ignored in this endpoint)", required = true) @RequestBody DataModifyDTO dataModifyDTO) {
+    @Operation(summary = "Modify data by data ids", description = "Makes changes on data based on data ids.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not exising tagId"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
+    @PutMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MessageResponse> modifyData(
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "ids", example = "1,2,3", required = true) @PathVariable Optional<List<Long>> ids,
+        @Parameter(name = "payload - data details (rules are ignored in this endpoint)", required = true) @RequestBody DataModifyDTO dataModifyDTO)
+        throws BucketNotFoundException, IOException, NoAccessToBucketException, UnknownColumnException, ConditionNotAllowedException, SQLException {
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
-
-        try {
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, ids, dataModifyDTO, new QueryRule(user.getUsername(), dataModifyDTO));
-                return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
-            else if (e.getMessage().contains("cannot cast jsonb null"))
-                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
-            else
-                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            int count = dataService.modifyData(user, bucket, ids, dataModifyDTO,
+                new QueryRule(user.getUsername(), dataModifyDTO));
+            return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Modify data by rules", notes = "Makes changes on data based on data rules.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}"
-                    )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not existing tagId or rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @Operation(summary = "Modify data by rules", description = "Makes changes on data based on data rules.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId or rules contain not exising property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> modifyData(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="payload - data details and rules", required = true) @RequestBody DataModifyDTO dataModifyDTO) {
+    public ResponseEntity<MessageResponse> modifyData(
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "payload - data details and rules", required = true) @RequestBody DataModifyDTO dataModifyDTO)
+        throws BucketNotFoundException, IOException, NoAccessToBucketException, UnknownColumnException, ConditionNotAllowedException, SQLException {
 
         if ((dataModifyDTO.getConditions() == null || dataModifyDTO.getConditions().size() == 0)
             && (dataModifyDTO.getRules() == null || dataModifyDTO.getRules().size() == 0)
-            && dataModifyDTO.getLogic() == null)
-            return new ResponseEntity<>(new MessageResponse("Can not modify data without any rules!"), HttpStatus.NOT_ACCEPTABLE);
-
+            && dataModifyDTO.getLogic() == null) {
+            return new ResponseEntity<>(new MessageResponse("Can not modify data without any rules!"),
+                HttpStatus.NOT_ACCEPTABLE);
+        }
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
 
-        try {
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, Optional.empty(), dataModifyDTO, new QueryRule(user.getUsername(), dataModifyDTO));
-                return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
-            if (Objects.requireNonNull(e.getMessage()).contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
-            else if (e.getMessage().contains("cannot cast jsonb null"))
-                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
-            else
-                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            int count = dataService.modifyData(user, bucket, Optional.empty(), dataModifyDTO,
+                new QueryRule(user.getUsername(), dataModifyDTO));
+            return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
 
-    @ApiOperation(value = "Get data by data ids", notes = "Retrieves data based on data ids.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = DataDTO.class),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @Operation(summary = "Get data by data ids", description = "Retrieves data based on data ids.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @GetMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getData(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="ids", example = "1,2,3", required = true) @PathVariable List<Long> ids) {
+    public ResponseEntity<List<DataDTO>> getData(
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "ids", example = "1,2,3", required = true) @PathVariable List<Long> ids)
+        throws BucketNotFoundException, NoAccessToBucketException, UnknownColumnException, ConditionNotAllowedException {
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
 
-        try {
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                List<DataDTO> dataDtoList = dataService.getData(user, bucket, ids);
-                if (ids.size() == 1 && dataDtoList.size() == 1)
-                    return new ResponseEntity<>(dataDtoList.get(0), HttpStatus.OK);
-                else
-                    return new ResponseEntity<>(dataDtoList, HttpStatus.OK);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            List<DataDTO> dataDtoList = dataService.getData(user, bucket, ids);
+            return new ResponseEntity<>(dataDtoList, HttpStatus.OK);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
 
-    @ApiOperation(value = "Remove data by data ids", notes = "Removes data based on data ids.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}"
-                    )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @Operation(summary = "Remove data by data ids", description = "Removes data based on data ids.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @DeleteMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteData(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="ids", example = "1,2,3", required = true) @PathVariable List<Long> ids) {
+    public ResponseEntity<MessageResponse> deleteData(
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "ids", example = "1,2,3", required = true) @PathVariable List<Long> ids)
+        throws BucketNotFoundException, UnknownColumnException, ConditionNotAllowedException, NoAccessToBucketException {
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
 
-        try {
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.deleteDataByIds(user, bucket, ids);
-                return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            int count = dataService.deleteDataByIds(user, bucket, ids);
+            return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Get data by rules", notes = "Retrieves data based on data rules. Define 'columns' to limit the retrieved data sets. Search for 'data' if columns are not defined and 'customData' if columns are defined.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = GetDataResponse.class),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error"),
-    })
+    @Operation(summary = "Get data by rules", description = "Retrieves data based on data rules. Define 'columns' to limit the retrieved data sets. Search for 'data' if columns are not defined and 'customData' if columns are defined.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not exising property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+        })
     @PostMapping(value = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getData(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="page", example="1") @RequestParam(required = false, defaultValue = "1") Integer page,
-            @ApiParam(value="limit", example = "1") @RequestParam(required = false, defaultValue = "1") Integer limit,
-            @ApiParam(value="sort", example = "id") @RequestParam(required = false, defaultValue = "id") String sort,
-            @ApiParam(value="payload - rules (required), columns (optional)", required = true) @RequestBody DataGetDTO dataGetDTO) {
+    public ResponseEntity<GetDataResponse> getData(
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "page", example = "1") @RequestParam(required = false, defaultValue = "1") Integer page,
+        @Parameter(name = "limit", example = "1") @RequestParam(required = false, defaultValue = "1") Integer limit,
+        @Parameter(name = "sort", example = "id") @RequestParam(required = false, defaultValue = "id") String sort,
+        @Parameter(name = "payload - rules (required), columns (optional)", required = true) @RequestBody DataGetDTO dataGetDTO)
+        throws BucketNotFoundException, InvalidObjectException, UnknownColumnException, ConditionNotAllowedException, NoAccessToBucketException {
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
 
-        try {
-            GetDataResponse response = new GetDataResponse();
-            response.setLimit(limit);
+        GetDataResponse response = new GetDataResponse();
+        response.setLimit(limit);
+        if (limit > 0) {
+            response.setPage(page);
+            response.setSort(sort);
+        }
+
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            Map<ResultField, Object> result = dataService.getData(user, bucket,
+                Optional.ofNullable(dataGetDTO.getColumns()), new QueryRule(user.getUsername(), dataGetDTO), page,
+                limit, sort);
+
+            long total = (long) result.get(ResultField.TOTAL);
+            response.setTotal(total);
             if (limit > 0) {
-                response.setPage(page);
-                response.setSort(sort);
+                response.setTotalPages((int) Math.ceil(total / (float) limit));
+            }
+            if (result.containsKey(ResultField.DATA)) {
+                response.setData((List<DataDTO>) result.get(ResultField.DATA));
+            } else {
+                response.setCustomData(result.get(ResultField.CUSTOM_DATA));
             }
 
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDTO.getColumns()), new QueryRule(user.getUsername(), dataGetDTO), page, limit, sort);
+            if (response.getData() == null && response.getCustomData() == null && limit > 0) {
+                response.setMessage("No data matches the rules!");
+            }
 
-                long total = (long) result.get(ResultField.TOTAL);
-                response.setTotal(total);
-                if (limit > 0)
-                    response.setTotalPages((int) Math.ceil(total / (float) limit));
-                if (result.containsKey(ResultField.DATA))
-                    response.setData((List<DataDTO>) result.get(ResultField.DATA));
-                else
-                    response.setCustomData(result.get(ResultField.CUSTOM_DATA));
-
-                if (response.getData() == null && response.getCustomData() == null && limit > 0)
-                    response.setMessage("No data matches the rules!");
-
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("cannot cast jsonb null"))
-                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
-            else
-                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Reserve data by rules", notes = "Reserves data based on data rules.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ReserveDataResponse.class),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error"),
-    })
+    @Operation(summary = "Reserve data by rules", description = "Reserves data based on data rules.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not exising property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+        })
     @PostMapping(value = {"/reserve"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> reserveData(
-            @ApiParam(value="bucket name", example = "bucket", required = true) @PathVariable String bucketName,
-            @ApiParam(value="limit", example = "1") @RequestParam(required = false, defaultValue = "1") Integer limit,
-            @ApiParam(value="sort", example = "random") @RequestParam(required = false, defaultValue = "id") String sort,
-            @ApiParam(value="payload - rules (required)", required = true)  @RequestBody DataReserveDTO dataReserveDTO) {
+    public ResponseEntity<ReserveDataResponse> reserveData(
+        @Parameter(name = "bucket name", example = "bucket", required = true) @PathVariable String bucketName,
+        @Parameter(name = "limit", example = "1") @RequestParam(required = false, defaultValue = "1") Integer limit,
+        @Parameter(name = "sort", example = "random") @RequestParam(required = false, defaultValue = "id") String sort,
+        @Parameter(name = "payload - rules (required)", required = true) @RequestBody DataReserveDTO dataReserveDTO)
+        throws BucketNotFoundException, NoAccessToBucketException, UnknownColumnException, ConditionNotAllowedException, UnexpectedException, InvalidObjectException {
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
 
-        if (limit < 1)
-            return exceptionFormatter.customException("The limit must be greater than 0!", HttpStatus.NOT_ACCEPTABLE);
+        if (limit < 1) {
+            throw new ValidationException("The limit must be greater than 0!");
+        }
 
-        try {
-            ReserveDataResponse response = new ReserveDataResponse();
-            response.setLimit(limit);
-            response.setSort(sort);
+        ReserveDataResponse response = new ReserveDataResponse();
+        response.setLimit(limit);
+        response.setSort(sort);
 
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                String targetOwnerUsername = user.getUsername();
-                if (user.isAdminUser() && dataReserveDTO.getTargetOwnerUsername() != null)
-                    targetOwnerUsername = dataReserveDTO.getTargetOwnerUsername();
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            String targetOwnerUsername = user.getUsername();
+            if (user.isAdminUser() && dataReserveDTO.getTargetOwnerUsername() != null) {
+                targetOwnerUsername = dataReserveDTO.getTargetOwnerUsername();
+            }
 
-                QueryRule queryRule = new QueryRule(user.getUsername(), dataReserveDTO);
-                List<Long> dataIds = dataService.reserveData(user, bucket, queryRule, limit, sort, targetOwnerUsername);
-                if (dataIds != null && dataIds.size() > 0)
-                    response.setReserved(dataIds.size());
-                else
-                    response.setReserved(0);
+            QueryRule queryRule = new QueryRule(user.getUsername(), dataReserveDTO);
+            List<Long> dataIds = dataService.reserveData(user, bucket, queryRule, limit, sort, targetOwnerUsername);
+            if (dataIds != null && !dataIds.isEmpty()) {
+                response.setReserved(dataIds.size());
+            } else {
+                response.setReserved(0);
+            }
 
-                queryRule.getConditions().add(new Condition(COL.RESERVED, Operator.notEqual, true));
-                Map<ResultField, Object> getDataResult = dataService.getData(user, bucket, Optional.empty(), queryRule, 0, 0, "id");
-                response.setAvailable((Long) getDataResult.get(ResultField.TOTAL));
+            queryRule.getConditions().add(new Condition(COL.RESERVED, Operator.notEqual, true));
+            Map<ResultField, Object> getDataResult = dataService.getData(user, bucket, Optional.empty(), queryRule,
+                0, 0, "id");
+            response.setAvailable((Long) getDataResult.get(ResultField.TOTAL));
 
-                if (dataIds != null && dataIds.size() > 0) {
-                    List<DataDTO> dataDTOList = dataService.getData(user, bucket, dataIds);
-                    response.setData(dataDTOList);
-                } else if (limit > 0)
-                    response.setMessage("No data matches the rules!");
+            if (dataIds != null && !dataIds.isEmpty()) {
+                List<DataDTO> dataDTOList = dataService.getData(user, bucket, dataIds);
+                response.setData(dataDTOList);
+            }
 
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("cannot cast jsonb null"))
-                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
-            else
-                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Remove data by rules", notes = "Removes data based on data rules.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}"
-                    )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error"),
-    })
+    @Operation(summary = "Remove data by rules", description = "Removes data based on data rules.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not exising property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+        })
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteData(
-            @ApiParam(name = "bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="payload - rules (required)", required = true) @RequestBody DataRemoveDTO dataRemoveDTO) {
+    public ResponseEntity<MessageResponse> deleteData(
+        @Parameter(name = "bucket name", required = true) @PathVariable String bucketName,
+        @Parameter(name = "payload - rules (required)", required = true) @RequestBody DataRemoveDTO dataRemoveDTO)
+        throws BucketNotFoundException, InvalidObjectException, NoAccessToBucketException, UnknownColumnException, ConditionNotAllowedException {
 
         if ((dataRemoveDTO.getConditions() == null || dataRemoveDTO.getConditions().size() == 0)
-                && (dataRemoveDTO.getRules() == null || dataRemoveDTO.getRules().size() == 0)
-                && dataRemoveDTO.getLogic() == null)
-            return new ResponseEntity<>(new MessageResponse("Can not remove data without any rules!"), HttpStatus.NOT_ACCEPTABLE);
+            && (dataRemoveDTO.getRules() == null || dataRemoveDTO.getRules().size() == 0)
+            && dataRemoveDTO.getLogic() == null) {
+            return new ResponseEntity<>(new MessageResponse("Can not remove data without any rules!"),
+                HttpStatus.NOT_ACCEPTABLE);
+        }
 
         Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+        if (bucket == null) {
+            throw new BucketNotFoundException(bucketName);
+        }
 
-        try {
-            User user = userService.getCurrentUser();
-            if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.deleteDataByRules(user, bucket, new QueryRule(user.getUsername(), dataRemoveDTO));
-                return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
-            } else
-                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("cannot cast jsonb null"))
-                return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
-            else
-                return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception ee) {
-            return exceptionFormatter.defaultException(ee);
+        User user = userService.getCurrentUser();
+        if (bucketService.hasUserAccessToBucket(bucket, user)) {
+            int count = dataService.deleteDataByRules(user, bucket, new QueryRule(user.getUsername(), dataRemoveDTO));
+            return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
+        } else {
+            throw new NoAccessToBucketException(bucketName);
         }
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleError(Exception ex) {
+        return exceptionFormatter.defaultException(ex);
+    }
+
+    @ExceptionHandler({NoAccessToBucketException.class, BucketNotFoundException.class})
+    public ResponseEntity<Map<String, Object>> handleNotFoundError(Exception ex) {
+        return exceptionFormatter.customException(ex, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleError(DataIntegrityViolationException e) {
+        return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleError(ValidationException e) {
+        return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+    }
+
 }

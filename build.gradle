@@ -1,8 +1,7 @@
 plugins {
     id 'java'
-    id 'groovy'
-    id 'org.springframework.boot' version '2.5.7'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.7.8'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 group = 'pl.databucket'
@@ -12,16 +11,13 @@ sourceCompatibility = 17
 
 ext['log4j2.version'] = '2.20.0'
 ext['tomcat.version'] = '9.0.71'
-ext['jackson.version'] = '2.14.2'
-
-//compileJava.options.fork = true
-//compileJava.options.forkOptions.executable = 'C:\\Program Files\\Java\\jdk1.8.0_191\\bin\\javac'
+ext['jackson.version'] = '2.13.4'
 
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    all*.exclude module : 'spring-boot-starter-logging'
+    all*.exclude module: 'spring-boot-starter-logging'
 }
 
 repositories {
@@ -34,27 +30,23 @@ jar {
 
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter:2.7.8'
-    implementation 'org.springframework.boot:spring-boot-starter-log4j2:2.7.8'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.8'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.8'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.8'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client:2.7.8'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.7.8'
-    implementation 'org.springframework.boot:spring-boot-starter-mail:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework:spring-tx:5.3.25'
     implementation 'org.postgresql:postgresql:42.3.8'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
-    implementation 'org.projectlombok:lombok:1.18.20'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
-    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.10.0'
-    implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
-    implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.12.0'
-    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-    implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.33'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.14'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+    implementation 'com.vladmihalcea:hibernate-types-52:2.12.0'
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'org.modelmapper:modelmapper:2.4.4'
     implementation 'com.lmax:disruptor:3.4.3'
+    implementation 'org.projectlombok:lombok:1.18.20'
 
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok'
@@ -91,7 +83,7 @@ tasks.register('deleteStatic', Delete) {
     delete "src/main/resources/static"
 }
 
-tasks.register('buildFrontend') {
+tasks.register('buildFrontend', GradleBuild) {
     String npm = 'npm'
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         npm = 'npm.cmd'
@@ -109,12 +101,16 @@ tasks.register('buildFrontend') {
 }
 
 tasks.register('copyFrontend') {
+    dependsOn tasks.named('buildFrontend')
+
     copy {
         from "frontend/build"
         into "src/main/resources/static"
     }
 }
 
-copyFrontend.dependsOn buildFrontend
-
-bootJar.dependsOn copyFrontend
+clean.dependsOn tasks.named("deleteStatic")
+bootJar.dependsOn tasks.named("copyFrontend")
+springBoot {
+    buildInfo()
+}

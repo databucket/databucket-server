@@ -1,6 +1,7 @@
 package pl.databucket.server.dto;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,13 +11,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthReqDTO {
 
-    @ApiModelProperty(position = 1, required = true, example = "username")
+    @Schema(requiredMode = RequiredMode.REQUIRED, example = "username")
     private String username;
 
-    @ApiModelProperty(position = 2, required = true, example = "example password")
+    @Schema(requiredMode = RequiredMode.REQUIRED, example = "example password")
     private String password;
 
-    @ApiModelProperty(position = 3, example = "1")
+    @Schema(example = "1")
     private Integer projectId;
 
 }

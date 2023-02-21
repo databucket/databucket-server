@@ -1,54 +1,44 @@
 package pl.databucket.server.configuration;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ApiKey;
-import springfox.documentation.service.AuthorizationScope;
-import springfox.documentation.service.SecurityReference;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spi.service.contexts.SecurityContext;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import static io.swagger.v3.oas.annotations.enums.SecuritySchemeIn.HEADER;
-import static java.util.Collections.singletonList;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
 @Configuration
-@EnableSwagger2
+@OpenAPIDefinition(
+    info = @Info(
+        title = "Databucket API",
+        version = "3.4.4",
+        contact = @Contact(
+            name = "Krzysztof Słysz", email = "kslysz@gmail.com", url = "https://databucket.pl/"
+        )
+    ),
+    servers = @Server(
+        url = "${api.server.url}",
+        description = "Production"
+    )
+)
 public class SwaggerConfiguration {
 
     @Bean
-    public Docket confDataContext() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .securitySchemes(singletonList(new ApiKey("JWT", AUTHORIZATION, HEADER.name())))
-                .securityContexts(singletonList(
-                        SecurityContext.builder()
-                                .securityReferences(
-                                        singletonList(SecurityReference.builder()
-                                                .reference("JWT")
-                                                .scopes(new AuthorizationScope[0])
-                                                .build()
-                                        )
-                                )
-                                .build())
-                )
-                .select()
-                .paths(PathSelectors.regex(".*/api/(bucket/.*|public/signin)"))
-                .paths(PathSelectors.regex("(?!.*/history.*).+")) // do not show data history methods
-                .build()
-                .useDefaultResponseMessages(false)
-                .apiInfo(apiInfo());
+    public OpenAPI customizeOpenAPI() {
+        final String securitySchemeName = "bearerAuth";
+        return new OpenAPI()
+            .addSecurityItem(new SecurityRequirement()
+                .addList(securitySchemeName))
+            .components(new Components()
+                .addSecuritySchemes(securitySchemeName, new SecurityScheme()
+                    .name(securitySchemeName)
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")));
     }
 
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("Databucket API")
-                .version("3.4.4")
-                .build();
-    }
 }

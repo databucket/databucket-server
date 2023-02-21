@@ -1,24 +1,24 @@
 package pl.databucket.server.dto;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.Map;
 
 @Getter
 @Setter
 public class DataCreateDTO {
 
-    @ApiModelProperty(position = 1, example = "1")
+    @Schema(example = "1")
     private Long tagId;
 
-    @ApiModelProperty(position = 2, example = "false")
+    @Schema(example = "false")
     private Boolean reserved;
 
-    @ApiModelProperty(position = 3, example = "username")
+    @Schema(example = "username")
     private String owner;
 
-    @ApiModelProperty(position = 3, example = "{\"name\": \"John\", \"age\": 34}")
+    @Schema(example = "{\"name\": \"John\", \"age\": 34}")
     private Map<String, Object> properties;
 
 }

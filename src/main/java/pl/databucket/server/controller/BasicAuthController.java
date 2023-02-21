@@ -3,6 +3,7 @@ package pl.databucket.server.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,9 +16,8 @@ import javax.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,11 +33,14 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import pl.databucket.server.configuration.AppProperties;
 import pl.databucket.server.dto.AuthProjectDTO;
@@ -54,15 +57,14 @@ import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.ManageUserService;
 
-//@Tag(name = "PUBLIC")
-//@CrossOrigin(origins = "*")
-//@RestController
-//@RequestMapping("/api/public")
+@Tag(name = "PUBLIC")
+@CrossOrigin(origins = "*")
+@RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class PublicController {
-
-    Logger logger = LoggerFactory.getLogger(PublicController.class);
+@Log4j2
+public class BasicAuthController {
 
     AuthenticationManager authenticationManager;
     UserRepository userRepository;
@@ -71,7 +73,7 @@ public class PublicController {
     AppProperties appProperties;
     TokenProvider jwtTokenUtil;
     ClientRegistrationRepository clientRegistrationRepository;
-    private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
+    private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(BasicAuthController.class);
 
 
     @Operation(
@@ -254,7 +256,7 @@ public class PublicController {
         assert reCaptchaSiteVerifyResponse != null;
 
         if (!reCaptchaSiteVerifyResponse.isSuccess()) {
-            logger.error("ReCaptcha failed: " + Arrays.toString(reCaptchaSiteVerifyResponse.getErrorCodes()));
+            log.error("ReCaptcha failed: " + Arrays.toString(reCaptchaSiteVerifyResponse.getErrorCodes()));
         }
 
         return reCaptchaSiteVerifyResponse.isSuccess() && reCaptchaSiteVerifyResponse.getScore() > 0.5;
@@ -276,7 +278,6 @@ public class PublicController {
         } else {
             responseBody.put("siteKey", null);
         }
-
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 

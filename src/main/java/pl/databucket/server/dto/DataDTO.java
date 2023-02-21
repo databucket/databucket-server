@@ -1,43 +1,36 @@
 package pl.databucket.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
-
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 public class DataDTO {
 
-    @ApiModelProperty(position = 1, example = "15")
+    @Schema(example = "15")
     private long id;
-
-    @ApiModelProperty(position = 2, example = "1")
+    @Schema(example = "1")
     private Long tagId;
-
-    @ApiModelProperty(position = 3, example = "false")
+    @Schema(example = "false")
     private boolean reserved;
-
-    @ApiModelProperty(position = 4, example = "null")
+    @Schema(example = "null")
     private String owner;
-
-    @ApiModelProperty(position = 5, example = "{\"name\": \"John\", \"age\": 34}")
+    @Schema(example = "{\"name\": \"John\", \"age\": 34}")
     private Map<String, Object> properties;
-
-    @ApiModelProperty(position = 6, example = "user")
+    @Schema(example = "user")
     private String createdBy;
-
-    @ApiModelProperty(position = 7, example = "2021-05-22T14:30:24.011Z")
+    @Schema(example = "2021-05-22T14:30:24.011Z")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private Date createdAt;
 
-    @ApiModelProperty(position = 8, example = "user")
+    @Schema(example = "user")
     private String modifiedBy;
 
-    @ApiModelProperty(position = 9, example = "2021-05-22T14:30:24.011Z")
+    @Schema(example = "2021-05-22T14:30:24.011Z")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private Date modifiedAt;
 }
