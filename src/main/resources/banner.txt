@@ -7,5 +7,5 @@
     ██████╔╝██║  ██║   ██║   ██║  ██║██████╔╝╚██████╔╝╚██████╗██║  ██╗███████╗   ██║       ██████╔╝
     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═════╝  ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═════╝
 
-Databucket version: (v3.4.4)
+Databucket version: (v3.5.0)
 Spring Boot version:${spring-boot.formatted-version}
