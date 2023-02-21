@@ -2,6 +2,8 @@ version: '3.3'
 services:
   postgres:
     image: postgres:12.2-alpine
+    expose:
+      - "5432"
     ports:
       - "5432:5432"
     environment:
@@ -12,8 +14,8 @@ services:
   databucket:
     build: .
     container_name: databucket
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/databucket
@@ -24,3 +26,23 @@ services:
       SPRING_MAIL_USERNAME: username
       SPRING_MAIL_PASSWORD: password
       SPRING_MAIL_FROM: admin@email.io
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_DOPAUTH_ISSUER-URI: http://auth:8080/auth/realms/databucket
+
+  auth:
+    image: quay.io/keycloak/keycloak:12.0.4
+    expose:
+      - "8080"
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      DB_VENDOR: h2
+
+  reverse-proxy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    #      - "2015:2015"
+    #      - "2019:2019"
+    volumes:
+      - "${PWD}/docker/Caddyfile:/etc/caddy/Caddyfile"

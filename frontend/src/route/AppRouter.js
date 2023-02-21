@@ -14,6 +14,7 @@ import {getContextPath} from "../utils/UrlBuilder";
 import ForgotPasswordPage from "../components/public/ForgotPasswordPage";
 import SignUpPage from "../components/public/SignUpPage";
 import ConfirmationPage from "../components/public/ConfirmationPage";
+import AuthPage from "../components/public/AuthPage";
 
 export default function AppRouter() {
 
@@ -26,6 +27,7 @@ export default function AppRouter() {
         >
             <Switch>
                 <Redirect exact from='/' to={getProjectDataPath()}/>
+                <PublicRoute exact restricted={true} path="/auth" component={AuthPage}/>
                 <PublicRoute exact restricted={true} path="/login" component={LoginPage}/>
                 <Route exact restricted={true} path="/forgot-password" component={ForgotPasswordPage}/>
                 <Route exact restricted={true} path="/sign-up" component={SignUpPage}/>
@@ -40,7 +42,7 @@ export default function AppRouter() {
 }
 
 export const getProjectDataPath = () => {
-    return hasProject() ? `/project/${getActiveProjectId()}` : '/login'
+    return hasProject() ? `/project/${getActiveProjectId()}` : '/auth'
 }
 
 export const getGivenProjectDataPath = (projectId) => {
@@ -48,7 +50,7 @@ export const getGivenProjectDataPath = (projectId) => {
 }
 
 export const getProjectSettingsPath = () => {
-    return hasProject() ? `/project/${getActiveProjectId()}/settings` : '/login'
+    return hasProject() ? `/project/${getActiveProjectId()}/settings` : '/auth'
 }
 
 export const getManagementProjectsPath = () => {
