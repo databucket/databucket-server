@@ -3,6 +3,7 @@ package pl.databucket.server.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -20,6 +21,7 @@ import javax.annotation.Resource;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@Order(2)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Resource(name = "userService")
@@ -37,7 +39,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService)
-                .passwordEncoder(encoder());
+            .passwordEncoder(encoder());
     }
 
     @Bean
@@ -50,45 +52,53 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().invalidSessionUrl("/");
 
         http.cors().and().csrf().disable()
-                .authorizeRequests()
-                .antMatchers(
-                        "/",
-                        "/api/public/**", // public endpoint
-                        "/**/static/**",
-                        "/actuator/**",
-                        "/**/favicon.ico",
-                        "/login",
-                        "/confirmation/**",
-                        "/forgot-password",
-                        "/sign-up",
-                        "/change-password",
-                        "/project",
-                        "/project/**",
-                        "/management",
-                        "/management/**"
-                        ).permitAll()
-                // swagger
-                .antMatchers(HttpMethod.GET,
-                        "/swagger-ui/**",
-                        "/v2/api-docs",
-                        "/v3/api-docs",
-                        "/webjars/**",            // swagger-ui webjars
-                        "/swagger-resources/**",  // swagger-ui resources
-                        "/configuration/**",      // swagger configuration
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js"
-                ).permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            .authorizeRequests()
+//            .antMatchers(
+//                "/",
+//                "/api/public/**", // public endpoint
+//                "/**/static/**",
+//                "/actuator/**",
+//                "/**/favicon.ico",
+//                "/login",
+//                "/confirmation/**",
+//                "/forgot-password",
+//                "/sign-up",
+//                "/change-password",
+//                "/project",
+//                "/project/**",
+//                "/management",
+//                "/management/**"
+//            ).permitAll()
+//            // swagger
+//            .antMatchers(HttpMethod.GET,
+//                "/swagger-ui/**",
+//                "/v2/api-docs",
+//                "/v3/api-docs",
+//                "/webjars/**",            // swagger-ui webjars
+//                "/swagger-resources/**",  // swagger-ui resources
+//                "/configuration/**",      // swagger configuration
+//                "/**/*.html",
+//                "/**/*.css",
+//                "/**/*.js"
+//            ).permitAll()
+            .antMatchers(HttpMethod.GET,
+                "/index*",  "/static/**", "/*.js", "/*.json", "/*.ico", "/api/public/auth-options")
+            .permitAll()
+            .anyRequest().authenticated()
+            .and()
+            .oauth2Client()
+            .and()
+            .oauth2Login()
+            .loginPage("/auth")
+            .and()
+            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
-    public BCryptPasswordEncoder encoder(){
+    public BCryptPasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
 

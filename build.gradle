@@ -39,6 +39,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web:2.7.8'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.8'
     implementation 'org.springframework.boot:spring-boot-starter-security:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client:2.7.8'
     implementation 'org.springframework.boot:spring-boot-starter-actuator:2.7.8'
     implementation 'org.springframework.boot:spring-boot-starter-mail:2.7.8'
     implementation 'org.springframework:spring-tx:5.3.25'
