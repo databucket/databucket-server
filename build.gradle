@@ -7,8 +7,12 @@ plugins {
 
 group = 'pl.databucket'
 version = '3.4.4'
-targetCompatibility = 8
-sourceCompatibility = 8
+targetCompatibility = 17
+sourceCompatibility = 17
+
+ext['log4j2.version'] = '2.20.0'
+ext['tomcat.version'] = '9.0.71'
+ext['jackson.version'] = '2.14.2'
 
 //compileJava.options.fork = true
 //compileJava.options.forkOptions.executable = 'C:\\Program Files\\Java\\jdk1.8.0_191\\bin\\javac'
@@ -17,6 +21,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    all*.exclude module : 'spring-boot-starter-logging'
 }
 
 repositories {
@@ -29,15 +34,16 @@ jar {
 
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-mail:2.5.7'
-    implementation 'org.springframework:spring-tx:5.3.9'
-    implementation 'org.postgresql:postgresql:42.2.23.jre7'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
+    implementation 'org.springframework.boot:spring-boot-starter:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.7.8'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:2.7.8'
+    implementation 'org.springframework:spring-tx:5.3.25'
+    implementation 'org.postgresql:postgresql:42.3.8'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
     implementation 'org.projectlombok:lombok:1.18.20'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
@@ -46,7 +52,7 @@ dependencies {
     implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.12.0'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.33'
 
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok'
@@ -66,7 +72,7 @@ dependencies {
 
 test {
 //    useJUnitPlatform()
-    afterSuite {desc, result ->
+    afterSuite { desc, result ->
         if (!desc.parent) {
             println("${result.resultType} " +
                     "(${result.testCount} tests, " +
@@ -79,11 +85,11 @@ test {
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
-task deleteStatic(type: Delete) {
+tasks.register('deleteStatic', Delete) {
     delete "src/main/resources/static"
 }
 
-task buildFrontend() {
+tasks.register('buildFrontend') {
     String npm = 'npm'
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         npm = 'npm.cmd'
@@ -100,7 +106,7 @@ task buildFrontend() {
     }
 }
 
-task copyFrontend() {
+tasks.register('copyFrontend') {
     copy {
         from "frontend/build"
         into "src/main/resources/static"

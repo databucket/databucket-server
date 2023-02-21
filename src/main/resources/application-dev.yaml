@@ -11,7 +11,12 @@ spring:
     url: jdbc:postgresql://localhost:5432/databucket
     username: databucket_user
     password: databucket_user
-
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: username
+    password: password
+    from: admin@email.io
 logging:
   level:
     pl.databucket.service.data.DataService: debug
