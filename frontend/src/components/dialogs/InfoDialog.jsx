@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -21,17 +22,22 @@ import SwaggerLogo from "../../images/swagger-logo.png";
 import Link from "@mui/material/Link";
 import {useTheme} from "@mui/material/styles";
 import { Tooltip } from "@mui/material";
-import withStyles from '@mui/styles/withStyles';
 import {getButtonColor} from "../../utils/MaterialTableHelper";
 
 
-const styles = {
-    tooltip: {
-        backgroundColor: "silver"
-    }
+const PREFIX = 'InfoDialog';
+
+const classes = {
+    tooltip: `${PREFIX}-tooltip`
 };
 
-const CustomTooltip = withStyles(styles)(Tooltip);
+const Root = styled('div')({
+    [`& .${classes.tooltip}`]: {
+        backgroundColor: "silver"
+    }
+});
+
+const CustomTooltip = Tooltip;
 
 export default function InfoDialog() {
 
@@ -46,7 +52,7 @@ export default function InfoDialog() {
     };
 
     return (
-        <div>
+        <Root>
             <ListItem button onClick={handleClickOpen}>
                 <ListItemIcon>
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill={getButtonColor(theme)}>
@@ -151,6 +157,6 @@ export default function InfoDialog() {
                     </CustomTooltip>
                 </div>
             </Dialog>
-        </div>
+        </Root>
     );
 }

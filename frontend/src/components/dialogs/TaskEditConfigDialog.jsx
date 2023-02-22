@@ -1,6 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import {styled} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
@@ -13,7 +12,6 @@ import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
 import {MessageBox} from "../utils/MessageBox";
 import {Tabs} from "@mui/material";
-import {getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "../../utils/MaterialTableHelper";
 import Tab from "@mui/material/Tab";
 import TaskActions from "../utils/TaskActions";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
@@ -22,21 +20,52 @@ import EnumsContext from "../../context/enums/EnumsContext";
 import MuiDialogActions from "@mui/material/DialogActions";
 
 
-const styles = (theme) => ({
-    root: {
+const PREFIX = 'TaskEditConfigDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    root3: `${PREFIX}-root3`,
+    selected: `${PREFIX}-selected`,
+    dialogPaper: `${PREFIX}-dialogPaper`,
+    oneLine: `${PREFIX}-oneLine`,
+    tabs: `${PREFIX}-tabs`,
+    devGrabSpace: `${PREFIX}-devGrabSpace`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const Root = styled('div')(({theme}) => ({
+    [`& .${classes.dialogPaper}`]: {
+        minHeight: '80vh',
+    },
+
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+    },
+
+    [`& .${classes.tabs}`]: {
+        flexGrow: 1
+    },
+
+    [`& .${classes.devGrabSpace}`]: {
+        width: '200px'
+    },
+    [`& .${classes.root}`]: {
         margin: 0,
         padding: theme.spacing(1),
     },
-    closeButton: {
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
     }
-});
+}));
 
-const DialogTitle = withStyles(styles)((props) => {
-    const {children, classes, onClose, ...other} = props;
+const DialogTitle = ((props) => {
+    const {children, onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             {children}
@@ -53,18 +82,9 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+const DialogActions = MuiDialogActions;
 
 TaskEditConfigDialog.propTypes = {
     rowData: PropTypes.object.isRequired,
@@ -76,7 +96,7 @@ TaskEditConfigDialog.propTypes = {
 
 export default function TaskEditConfigDialog(props) {
 
-    const classes = useStyles();
+
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})
     const [open, setOpen] = useState(false);
@@ -134,7 +154,7 @@ export default function TaskEditConfigDialog(props) {
     }
 
     return (
-        <div>
+        <Root>
             <Tooltip title={'Define action'}>
                 <Button
                     endIcon={<MoreHoriz/>}
@@ -167,70 +187,47 @@ export default function TaskEditConfigDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers style={{height:'75vh'}} ref = {dialogContentRef}>
+                <DialogContent
+                    dividers
+                    style={{height: '75vh'}}
+                    ref={dialogContentRef}
+                    classes={{
+                        root: classes.root
+                    }}>
                     {open && activeTab === 0 &&
-                    <TaskActions
-                        actions={actions}
-                        properties={properties}
-                        tags={filteredTags}
-                        onChange={setActions}
-                        pageSize={null}
-                        customHeight={20}
-                    />}
+                        <TaskActions
+                            actions={actions}
+                            properties={properties}
+                            tags={filteredTags}
+                            onChange={setActions}
+                            pageSize={null}
+                            customHeight={20}
+                        />}
                     {open && activeTab === 1 &&
-                    <PropertiesTable
-                        used={getUsedUuids()}
-                        data={properties}
-                        enums={enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        pageSize={null}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={getUsedUuids()}
+                            data={properties}
+                            enums={enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            pageSize={null}
+                            parentContentRef={dialogContentRef}
+                        />}
                 </DialogContent>
-                <DialogActions />
+                <DialogActions
+                    classes={{
+                        root: classes.root2
+                    }}/>
             </Dialog>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </div>
+        </Root>
     );
 }
 
-const useStyles = makeStyles(() => ({
-    dialogPaper: {
-        minHeight: '80vh',
-    },
-    oneLine: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-    tabs: {
-        flexGrow: 1
-    },
-    devGrabSpace: {
-        width: '200px'
-    }
-}));
-
-const tabStyles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: getSettingsTabHooverBackgroundColor(theme),
-            opacity: 1
-        },
-        "&$selected": {
-            // backgroundColor: getSettingsTabSelectedBackgroundColor(theme),
-            color: getSettingsTabSelectedColor(theme),
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(tabStyles)(Tab)
+const StyledTab = Tab
 
 export const getActionsType = (actions) => {
     if (actions.type != null)

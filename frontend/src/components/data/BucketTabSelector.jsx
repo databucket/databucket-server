@@ -1,45 +1,52 @@
 import React, {useContext, useEffect, useState} from 'react';
+import {styled} from '@mui/material/styles';
 import Tab from "@mui/material/Tab";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Tabs from "@mui/material/Tabs";
-import { lighten } from "@mui/material/styles";
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import {lighten} from "@mui/material/styles";
 import {getAppBarBackgroundColor} from "../../utils/Themes";
 import AccessContext from "../../context/access/AccessContext";
 import {Tooltip} from "@mui/material";
 import StyledIconButtonTab from "../utils/StyledIconButtonTab";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 
-const useStyles = makeStyles((theme) => ({
-    tabs: {
+const PREFIX = 'BucketTabSelector';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    selected: `${PREFIX}-selected`,
+    tabs: `${PREFIX}-tabs`
+};
+
+const StyledTabs = styled(Tabs)((
+    {
+        theme
+    }
+) => ({
+    [`&.${classes.tabs}`]: {
         flex: 1,
+    },
+    [`&.${classes.root}`]: {
+        textTransform: "initial"
+    },
+    [`&.${classes.root}:hover`]: {
+        backgroundColor: lighten(getAppBarBackgroundColor(), 0.05),
+        opacity: 1
     }
 }));
 
-const styles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: lighten(getAppBarBackgroundColor(), 0.05),
-            opacity: 1
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(styles)(Tab)
+const StyledTab = Tab
 
 export default function BucketTabSelector() {
 
-    const classes = useStyles();
+
     const accessContext = useContext(AccessContext);
     const {bucketsTabs, activeBucket, setActiveBucket, removeTab} = accessContext;
     let removing = false; // indicate whether changing tab is invoked by selection or by removing
 
     // This timeout allows to load Material Icons before first rendering
-    const [ delay, setDelay ] = useState(true);
+    const [delay, setDelay] = useState(true);
     useEffect(() => {
         setTimeout(() => setDelay(false), 700)
     }, []);
@@ -71,7 +78,7 @@ export default function BucketTabSelector() {
     }
 
     const tabs = (
-        <Tabs
+        <StyledTabs
             value={bucketsTabs.indexOf(activeBucket)}
             variant="scrollable"
             scrollButtons
@@ -81,7 +88,9 @@ export default function BucketTabSelector() {
                 <StyledTab key={bucket.id} component="div" onClick={() => handleChangedTab(bucket)} label={
                     <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
                     <span>
-                        <StyledIconButtonTab iconName={bucket.iconName} iconColor={getIconColor('banner', bucket.iconColor)} iconSvg={bucket.iconSvg} />
+                        <StyledIconButtonTab iconName={bucket.iconName}
+                                             iconColor={getIconColor('banner', bucket.iconColor)}
+                                             iconSvg={bucket.iconSvg}/>
                         {getBucketVisibleName(bucket.name)}
                         <IconButton color={'inherit'} onClick={() => handleRemovedTab(bucket)} size="large">
                             <CloseIcon style={{fontSize: 18}}/>
@@ -91,7 +100,7 @@ export default function BucketTabSelector() {
                 }
                 />
             ))}
-        </Tabs>
+        </StyledTabs>
     );
 
     return !delay && tabs;

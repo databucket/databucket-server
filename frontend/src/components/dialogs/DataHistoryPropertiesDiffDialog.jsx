@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
@@ -13,22 +13,35 @@ import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
 // import ReactDiffViewer from "react-diff-viewer";
-import {useTheme} from "@mui/material";
+// import {useTheme} from "@mui/material";
 
-const styles = theme => ({
-    root: {
+const PREFIX = 'DataHistoryPropertiesDiffDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root2}`]: {
         margin: 0,
         padding: theme.spacing(2),
     },
-    closeButton: {
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
-    },
-});
+    }
+}));
 
-const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose} = props;
+const DialogTitle = (props => {
+    const {children,  onClose} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
@@ -45,15 +58,11 @@ const DialogTitle = withStyles(styles)(props => {
     );
 });
 
-const DialogContent = withStyles(theme => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
 export default function DataHistoryPropertiesDiffDialog(props) {
 
-    const theme = useTheme();
+    // const theme = useTheme();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [state, setState] = useState({
         bucket: null,
@@ -123,7 +132,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
     };
 
     return (
-        <div>
+        <Root>
             <Tooltip title='Show changes'>
                 <IconButton
                     onClick={handleClickOpen}
@@ -143,7 +152,11 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleClose}>
                     Properties difference
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent
+                    dividers
+                    classes={{
+                        root: classes.root
+                    }}>
                     {/*<ReactDiffViewer*/}
                     {/*    useDarkTheme={theme.palette.mode === 'dark'}*/}
                     {/*    oldValue={state.oldValue}*/}
@@ -157,6 +170,6 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
             </Dialog>
-        </div>
+        </Root>
     );
 }

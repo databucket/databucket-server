@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
@@ -34,7 +34,7 @@ function SimpleDialog(props) {
     const [currentIcon, setCurrentIcon] = useState({name: initIcon.name, color: initIcon.color, svg: initIcon.svg});
     const svgContext = useContext(SvgContext);
     const {svgs, fetchSvgs} = svgContext;
-    const colorPickerRef = useRef();
+    // const colorPickerRef = useRef();
 
     useEffect(() => {
         if (svgs == null)
@@ -67,10 +67,10 @@ function SimpleDialog(props) {
         setCurrentIcon({...currentIcon, color: null});
     }
 
-    const handleChangedColor = (newColor) => {
-        if (newColor != null)
-            setCurrentIcon({...currentIcon, color: newColor});
-    }
+    // const handleChangedColor = (newColor) => {
+    //     if (newColor != null)
+    //         setCurrentIcon({...currentIcon, color: newColor});
+    // }
 
     return (
         <Dialog
