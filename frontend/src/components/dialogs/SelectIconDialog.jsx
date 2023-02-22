@@ -15,7 +15,7 @@ import {useTheme} from "@mui/material/styles";
 import SvgContext from "../../context/svgs/SvgContext";
 import {MessageBox} from "../utils/MessageBox";
 import {parseCustomSvg} from "../utils/SvgHelper";
-import ColorPicker from "material-ui-color-picker";
+// import ColorPicker from "material-ui-color-picker";
 import Typography from "@mui/material/Typography";
 import {DarkTheme, getAppBarBackgroundColor, LightTheme} from "../../utils/Themes";
 import StyledIcon from "../utils/StyledIcon";
@@ -85,18 +85,18 @@ function SimpleDialog(props) {
                     <Typography style={{marginLeft: "20px"}}>Color:</Typography>
                 </Grid>
                 <Grid item xs={1}>
-                    {currentIcon.color === null && (
-                        <ColorPicker
-                            ref={colorPickerRef}
-                            onChange={handleChangedColor}
-                            defaultValue={getButtonColor(theme)}
-                        />)}
-                    {currentIcon.color !== null && (
-                        <ColorPicker
-                            ref={colorPickerRef}
-                            onChange={handleChangedColor}
-                            defaultValue={currentIcon.color}
-                        />)}
+                    {/*{currentIcon.color === null && (*/}
+                    {/*    <ColorPicker*/}
+                    {/*        ref={colorPickerRef}*/}
+                    {/*        onChange={handleChangedColor}*/}
+                    {/*        defaultValue={getButtonColor(theme)}*/}
+                    {/*    />)}*/}
+                    {/*{currentIcon.color !== null && (*/}
+                    {/*    <ColorPicker*/}
+                    {/*        ref={colorPickerRef}*/}
+                    {/*        onChange={handleChangedColor}*/}
+                    {/*        defaultValue={currentIcon.color}*/}
+                    {/*    />)}*/}
                 </Grid>
                 <Grid item xs>
                     <Tooltip id="reset-color" title="Reset color">
