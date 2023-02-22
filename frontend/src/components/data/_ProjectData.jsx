@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
+import { styled } from '@mui/material/styles';
 import clsx from 'clsx';
 import { useTheme } from '@mui/material/styles';
-import makeStyles from '@mui/styles/makeStyles';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -42,10 +42,105 @@ import {getBaseUrl, getSwaggerDocPath} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
 import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
 
+const PREFIX = '_ProjectData';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    grow: `${PREFIX}-grow`,
+    appBar: `${PREFIX}-appBar`,
+    appBarShift: `${PREFIX}-appBarShift`,
+    menuButton: `${PREFIX}-menuButton`,
+    hide: `${PREFIX}-hide`,
+    drawer: `${PREFIX}-drawer`,
+    drawerOpen: `${PREFIX}-drawerOpen`,
+    drawerClose: `${PREFIX}-drawerClose`,
+    toolbar: `${PREFIX}-toolbar`,
+    content: `${PREFIX}-content`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root}`]: {
+        display: 'flex',
+    },
+
+    [`& .${classes.grow}`]: {
+        flexGrow: 1,
+    },
+
+    [`& .${classes.appBar}`]: {
+        zIndex: theme.zIndex.drawer + 1,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+
+    [`& .${classes.appBarShift}`]: {
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+
+    [`& .${classes.menuButton}`]: {
+        marginRight: theme.spacing(2)
+    },
+
+    [`& .${classes.hide}`]: {
+        display: 'none',
+    },
+
+    [`& .${classes.drawer}`]: {
+        width: drawerWidth,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+    },
+
+    [`& .${classes.drawerOpen}`]: {
+        width: drawerWidth,
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+
+    [`& .${classes.drawerClose}`]: {
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        overflowX: 'hidden',
+        width: theme.spacing(7) + 1,
+        [theme.breakpoints.up('sm')]: {
+            width: theme.spacing(9) + 1,
+        },
+    },
+
+    [`& .${classes.toolbar}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        padding: theme.spacing(0, 1),
+        // necessary for content to be below app bar
+        ...theme.mixins.toolbar,
+    },
+
+    [`& .${classes.content}`]: {
+        flexGrow: 1,
+        padding: theme.spacing(0),
+    }
+}));
+
 const drawerWidth = 260;
 
 export default function ProjectData() {
-    const styleClasses = useStyles();
+
     const drawerRef = useRef(null);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const theme = useTheme();
@@ -135,12 +230,12 @@ export default function ProjectData() {
 
     setPathname(null); // clear path
     return (
-        <div>
-            <div className={styleClasses.root}>
+        <Root>
+            <div className={classes.root}>
                 <AppBar
                     position="fixed"
-                    className={clsx(styleClasses.appBar, {
-                        [styleClasses.appBarShift]: open,
+                    className={clsx(classes.appBar, {
+                        [classes.appBarShift]: open,
                     })}
                     style={{background: getAppBarBackgroundColor()}}
                 >
@@ -150,8 +245,8 @@ export default function ProjectData() {
                             aria-label="open drawer"
                             onClick={handleDrawerOpen}
                             edge="start"
-                            className={clsx(styleClasses.menuButton, {
-                                [styleClasses.hide]: open,
+                            className={clsx(classes.menuButton, {
+                                [classes.hide]: open,
                             })}
                             size="large">
                             <MenuIcon/>
@@ -164,18 +259,18 @@ export default function ProjectData() {
                 <Drawer
                     ref={drawerRef}
                     variant="permanent"
-                    className={clsx(styleClasses.drawer, {
-                        [styleClasses.drawerOpen]: open,
-                        [styleClasses.drawerClose]: !open,
+                    className={clsx(classes.drawer, {
+                        [classes.drawerOpen]: open,
+                        [classes.drawerClose]: !open,
                     })}
                     classes={{
                         paper: clsx({
-                            [styleClasses.drawerOpen]: open,
-                            [styleClasses.drawerClose]: !open,
+                            [classes.drawerOpen]: open,
+                            [classes.drawerClose]: !open,
                         }),
                     }}
                 >
-                    <div className={styleClasses.toolbar}>
+                    <div className={classes.toolbar}>
                         <IconButton onClick={handleDrawerClose} size="large">
                             {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
                         </IconButton>
@@ -183,7 +278,7 @@ export default function ProjectData() {
                     <Divider/>
                     <GroupMenuSelector open={open}/>
                     <BucketListSelector leftPanelWidth={currentDrawerWidth}/>
-                    <div className={styleClasses.grow}/>
+                    <div className={classes.grow}/>
                     <Divider/>
                     <List>
                         {
@@ -226,8 +321,8 @@ export default function ProjectData() {
                         <InfoDialog/>
                     </List>
                 </Drawer>
-                <main className={styleClasses.content}>
-                    <div className={styleClasses.toolbar}/>
+                <main className={classes.content}>
+                    <div className={classes.toolbar}/>
                     <BucketDataTable leftPanelWidth={currentDrawerWidth}/>
                 </main>
             </div>
@@ -235,71 +330,6 @@ export default function ProjectData() {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </div>
+        </Root>
     );
 }
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        display: 'flex',
-    },
-    grow: {
-        flexGrow: 1,
-    },
-    appBar: {
-        zIndex: theme.zIndex.drawer + 1,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-    },
-    appBarShift: {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    menuButton: {
-        marginRight: theme.spacing(2)
-    },
-    hide: {
-        display: 'none',
-    },
-    drawer: {
-        width: drawerWidth,
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-    },
-    drawerOpen: {
-        width: drawerWidth,
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    drawerClose: {
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-        overflowX: 'hidden',
-        width: theme.spacing(7) + 1,
-        [theme.breakpoints.up('sm')]: {
-            width: theme.spacing(9) + 1,
-        },
-    },
-    toolbar: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-    },
-    content: {
-        flexGrow: 1,
-        padding: theme.spacing(0),
-    },
-}));

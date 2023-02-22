@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import {styled} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
@@ -16,26 +15,57 @@ import FilterRulesEditor from "../utils/FilterRulesEditor";
 import {Utils as QbUtils} from "react-awesome-query-builder";
 import {getObjectLengthStr} from "../../utils/JsonHelper";
 import {Tabs} from "@mui/material";
-import {getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "../../utils/MaterialTableHelper";
 import Tab from "@mui/material/Tab";
 import MuiDialogActions from "@mui/material/DialogActions";
 
 
-const styles = (theme) => ({
-    root: {
+const PREFIX = 'EditFilterRulesDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    root3: `${PREFIX}-root3`,
+    selected: `${PREFIX}-selected`,
+    dialogPaper: `${PREFIX}-dialogPaper`,
+    oneLine: `${PREFIX}-oneLine`,
+    tabs: `${PREFIX}-tabs`,
+    devGrabSpace: `${PREFIX}-devGrabSpace`,
+    closeButton: `${PREFIX}-closeButton`,
+};
+
+const Root = styled('div')(({theme}) => ({
+    [`& .${classes.dialogPaper}`]: {
+        minHeight: '80vh',
+    },
+
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+    },
+
+    [`& .${classes.tabs}`]: {
+        flexGrow: 1
+    },
+
+    [`& .${classes.devGrabSpace}`]: {
+        width: '200px'
+    },
+    [`& .${classes.root}`]: {
         margin: 0,
         padding: theme.spacing(1),
     },
-    closeButton: {
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
     }
-});
+}));
 
-const DialogTitle = withStyles(styles)((props) => {
-    const {children, classes, onClose, ...other} = props;
+
+const DialogTitle = ((props) => {
+    const {children, onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             {children}
@@ -52,18 +82,9 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+const DialogActions = MuiDialogActions;
 
 EditFilterRulesDialog.propTypes = {
     configuration: PropTypes.object.isRequired,
@@ -76,7 +97,7 @@ EditFilterRulesDialog.propTypes = {
 
 export default function EditFilterRulesDialog(props) {
 
-    const classes = useStyles();
+
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})
     const [open, setOpen] = useState(false);
@@ -106,7 +127,7 @@ export default function EditFilterRulesDialog(props) {
     }
 
     return (
-        <div>
+        <Root>
             <Tooltip title={'Define rules'}>
                 <Button
                     endIcon={<MoreHoriz/>}
@@ -140,58 +161,35 @@ export default function EditFilterRulesDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers style={{height: '75vh'}} ref = {dialogContentRef}>
+                <DialogContent
+                    dividers
+                    style={{height: '75vh'}}
+                    ref={dialogContentRef}
+                    classes={{
+                        root: classes.root
+                    }}>
                     {open &&
-                    <FilterRulesEditor
-                        activeTab={activeTab}
-                        configuration={props.configuration}
-                        dataClass={props.dataClass}
-                        tags={props.tags}
-                        users={props.users}
-                        onChange={onFilterChanged}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <FilterRulesEditor
+                            activeTab={activeTab}
+                            configuration={props.configuration}
+                            dataClass={props.dataClass}
+                            tags={props.tags}
+                            users={props.users}
+                            onChange={onFilterChanged}
+                            parentContentRef={dialogContentRef}
+                        />}
                 </DialogContent>
-                <DialogActions />
+                <DialogActions
+                    classes={{
+                        root: classes.root2
+                    }}/>
             </Dialog>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </div>
+        </Root>
     );
 }
 
-const useStyles = makeStyles(() => ({
-    dialogPaper: {
-        minHeight: '80vh',
-    },
-    oneLine: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-    tabs: {
-        flexGrow: 1
-    },
-    devGrabSpace: {
-        width: '200px'
-    }
-}));
-
-const tabStyles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: getSettingsTabHooverBackgroundColor(theme),
-            opacity: 1
-        },
-        "&$selected": {
-            // backgroundColor: getSettingsTabSelectedBackgroundColor(theme),
-            color: getSettingsTabSelectedColor(theme),
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(tabStyles)(Tab)
+const StyledTab = Tab

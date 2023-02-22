@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
@@ -11,13 +11,26 @@ import CustomThemeContext from "../../context/theme/CustomThemeContext";
 import Button from "@mui/material/Button";
 import {Tooltip} from "@mui/material";
 
-const useStyles = makeStyles((theme) => ({
-    oneLine: {
+const PREFIX = 'UserProfile';
+
+const classes = {
+    oneLine: `${PREFIX}-oneLine`,
+    content: `${PREFIX}-content`,
+    button: `${PREFIX}-button`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.oneLine}`]: {
         display: 'flex',
         alignItems: 'center',
         flexWrap: 'wrap'
     },
-    content: {
+
+    [`& .${classes.content}`]: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
@@ -25,13 +38,14 @@ const useStyles = makeStyles((theme) => ({
         padding: "15px",
         margin: theme.spacing(1),
     },
-    button: {
+
+    [`& .${classes.button}`]: {
         marginTop: "13px"
     }
 }));
 
 export default function UserProfile(props) {
-    const classes = useStyles();
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const [customThemeName] = useContext(CustomThemeContext);
@@ -60,7 +74,7 @@ export default function UserProfile(props) {
     };
 
     return (
-        <div>
+        <Root>
             <Tooltip title={'User profile'}>
                 <IconButton onClick={handleMenu} color={'inherit'} size="large">
                     <AccountCircle/>
@@ -103,6 +117,6 @@ export default function UserProfile(props) {
                     </Button>
                 </div>
             </Menu>
-        </div>
+        </Root>
     );
 }

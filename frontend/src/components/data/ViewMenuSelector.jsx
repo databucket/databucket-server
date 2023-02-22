@@ -1,9 +1,44 @@
 import React, {useState} from 'react';
+import { styled } from '@mui/material/styles';
 import PropTypes from "prop-types";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import {Grid, IconButton, Menu, Tooltip} from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+const PREFIX = 'ViewMenuSelector';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    view: `${PREFIX}-view`,
+    select: `${PREFIX}-select`,
+    description: `${PREFIX}-description`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`&.${classes.root}`]: {
+        flexGrow: 1
+    },
+
+    [`& .${classes.view}`]: {
+        paddingLeft: theme.spacing(2),
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.select}`]: {
+        marginLeft: '10px',
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.description}`]: {
+        padding: theme.spacing(2),
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+    }
+}));
 
 ViewMenuSelector.propTypes = {
     views: PropTypes.array.isRequired,
@@ -12,7 +47,7 @@ ViewMenuSelector.propTypes = {
 }
 
 export default function ViewMenuSelector(props) {
-    const classes = useStyles();
+
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -44,7 +79,7 @@ export default function ViewMenuSelector(props) {
     }
 
     return (
-        <div className={classes.root}>
+        <Root className={classes.root}>
             <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
                 { props.views.length > 1 &&
                     <Tooltip title={'Select view'}>
@@ -88,26 +123,6 @@ export default function ViewMenuSelector(props) {
                     </MenuItem>
                 ))}
             </Menu>
-        </div>
+        </Root>
     );
-};
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1
-    },
-    view: {
-        paddingLeft: theme.spacing(2),
-        padding: theme.spacing(1)
-    },
-    select: {
-        marginLeft: '10px',
-        padding: theme.spacing(1)
-    },
-    description: {
-        padding: theme.spacing(2),
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis"
-    }
-}));
+}

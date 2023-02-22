@@ -1,7 +1,6 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
+import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
 import PropTypes from 'prop-types';
 import MaterialTable from 'material-table';
 import Button from '@mui/material/Button';
@@ -25,50 +24,35 @@ import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
 import "brace/theme/monokai";
+const PREFIX = 'DataDetailsDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    root3: `${PREFIX}-root3`,
+    container: `${PREFIX}-container`,
+    closeButton: `${PREFIX}-closeButton`,
+    linkButton: `${PREFIX}-linkButton`,
+    openButton: `${PREFIX}-openButton`,
+    smallerButton: `${PREFIX}-smallerButton`,
+    largerButton: `${PREFIX}-largerButton`,
+    dialogPaper: `${PREFIX}-dialogPaper`
+};
+
+const StyledDialog = styled(Dialog)(() => ({
+    [`& .${classes.dialogPaper}`]: {
+        minHeight: '98vh',
+    }
+}));
+
 // import "brace/theme/eclipse";
 
 const ajv = new Ajv({allErrors: true, verbose: true});
 const jsonThemeLight = null; //"ace/theme/eclipse";
 const jsonThemeDark = "ace/theme/monokai";
 
-const titleStyles = theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2)
-    },
-    container: {
-        display: 'flex',
-        flexWrap: 'wrap',
-    },
-    closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1)
-    },
-    linkButton: {
-        position: 'absolute',
-        right: theme.spacing(32),
-        top: theme.spacing(1)
-    },
-    openButton: {
-        position: 'absolute',
-        right: theme.spacing(26),
-        top: theme.spacing(1)
-    },
-    smallerButton: {
-        position: 'absolute',
-        right: theme.spacing(17),
-        top: theme.spacing(1)
-    },
-    largerButton: {
-        position: 'absolute',
-        right: theme.spacing(11),
-        top: theme.spacing(1)
-    }
-});
-
-const DialogTitle = withStyles(titleStyles)(props => {
-    const {children, classes, onClose, onMakeDialogSmaller, onMakeDialogLarger, onCopyDataLink, onOpenDataLink} = props;
+const DialogTitle = (props => {
+    const {children,  onClose, onMakeDialogSmaller, onMakeDialogLarger, onCopyDataLink, onOpenDataLink} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
@@ -126,24 +110,9 @@ const DialogTitle = withStyles(titleStyles)(props => {
     );
 });
 
-const DialogContent = withStyles(theme => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
-const useStyles = makeStyles(() => ({
-    dialogPaper: {
-        minHeight: '98vh',
-    }
-}));
+const DialogActions = MuiDialogActions;
 
 DataDetailsDialog.propTypes = {
     open: PropTypes.bool.isRequired,
@@ -156,7 +125,7 @@ DataDetailsDialog.propTypes = {
 export default function DataDetailsDialog(props) {
 
     const theme = useTheme();
-    const classes = useStyles();
+
     const tableRef = createRef();
     const jsonEditorRef = useRef(null);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
@@ -269,7 +238,7 @@ export default function DataDetailsDialog(props) {
     }, [jsonPath]);
 
     return (
-        <Dialog
+        <StyledDialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
             aria-labelledby="customized-dialog-title"
             classes={{paper: classes.dialogPaper}}
@@ -317,7 +286,11 @@ export default function DataDetailsDialog(props) {
                     Container: props => <div {...props} />
                 }}
             />
-            <DialogContent style={{height: '75vh'}}>
+            <DialogContent
+                style={{height: '75vh'}}
+                classes={{
+                    root: classes.root
+                }}>
                 <Editor
                     ref={jsonEditorRef}
                     value={props.dataRow != null ? props.dataRow.properties : {}}
@@ -331,7 +304,10 @@ export default function DataDetailsDialog(props) {
                 />
             </DialogContent>
             <Divider/>
-            <DialogActions>
+            <DialogActions
+                classes={{
+                    root: classes.root2
+                }}>
                 <Tooltip id="copy-content-tooltip" title="Copy content">
                     <IconButton color={"inherit"} onClick={copyContent} size="large">
                         <span className="material-icons">content_copy</span>
@@ -355,7 +331,7 @@ export default function DataDetailsDialog(props) {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </Dialog>
+        </StyledDialog>
     );
 }
 

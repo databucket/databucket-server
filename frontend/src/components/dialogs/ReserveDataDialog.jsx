@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import {Checkbox, FormControlLabel, InputLabel, MenuItem, Select, Slider, Tooltip} from "@mui/material";
@@ -9,15 +9,32 @@ import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import AccessContext from "../../context/access/AccessContext";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
+const PREFIX = 'ReserveDataDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    reserveButton: `${PREFIX}-reserveButton`,
+    content: `${PREFIX}-content`,
+    button: `${PREFIX}-button`,
+    formControl: `${PREFIX}-formControl`,
+    selectEmpty: `${PREFIX}-selectEmpty`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`&.${classes.root}`]: {
         flexGrow: 1
     },
-    reserveButton: {
+
+    [`& .${classes.reserveButton}`]: {
         marginLeft: '10px',
         padding: theme.spacing(1)
     },
-    content: {
+
+    [`& .${classes.content}`]: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
@@ -25,16 +42,19 @@ const useStyles = makeStyles((theme) => ({
         padding: "15px",
         margin: theme.spacing(1),
     },
-    button: {
+
+    [`& .${classes.button}`]: {
         marginTop: "13px"
     },
-    formControl: {
+
+    [`& .${classes.formControl}`]: {
         margin: theme.spacing(1),
         minWidth: 150,
     },
-    selectEmpty: {
+
+    [`& .${classes.selectEmpty}`]: {
         marginTop: theme.spacing(2),
-    },
+    }
 }));
 
 // ReserveDataDialog.propTypes = {
@@ -66,7 +86,7 @@ const marks = [
 
 export default function ReserveDataDialog(props) {
 
-    const classes = useStyles();
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const accessContext = useContext(AccessContext);
@@ -99,7 +119,7 @@ export default function ReserveDataDialog(props) {
     }
 
     return (
-        <div className={classes.root}>
+        <Root className={classes.root}>
             <Tooltip title={'Reserve data'}>
                 <IconButton
                     onClick={handleMenu}
@@ -170,6 +190,6 @@ export default function ReserveDataDialog(props) {
                     </FormControl>
                 </div>
             </Menu>
-        </div>
+        </Root>
     );
 }

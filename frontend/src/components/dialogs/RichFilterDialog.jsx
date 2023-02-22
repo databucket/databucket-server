@@ -1,6 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import {styled} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import MuiDialogTitle from '@mui/material/DialogTitle';
@@ -10,7 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import PropTypes from "prop-types";
 import {Tabs} from "@mui/material";
-import {getPostOptions, getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "../../utils/MaterialTableHelper";
+import {getPostOptions} from "../../utils/MaterialTableHelper";
 import Tab from "@mui/material/Tab";
 import {MessageBox} from "../utils/MessageBox";
 import PropertiesTable from "../utils/PropertiesTable";
@@ -27,34 +26,74 @@ import FilterMenuSelector from "../data/FilterMenuSelector";
 import {getDataFilterDialogSize, setDataFilterDialogSize} from "../../utils/ConfigurationStorage";
 import {debounce2} from "../utils/UseWindowDimension";
 
-const styles = theme => ({
-    root: {
+const PREFIX = 'RichFilterDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    root3: `${PREFIX}-root3`,
+    selected: `${PREFIX}-selected`,
+    dialogPaper: `${PREFIX}-dialogPaper`,
+    oneLine: `${PREFIX}-oneLine`,
+    tabs: `${PREFIX}-tabs`,
+    devGrabSpace: `${PREFIX}-devGrabSpace`,
+    divActionGrabSpace: `${PREFIX}-divActionGrabSpace`,
+    container: `${PREFIX}-container`,
+    closeButton: `${PREFIX}-closeButton`,
+    smallerButton: `${PREFIX}-smallerButton`,
+    largerButton: `${PREFIX}-largerButton`
+};
+
+const StyledDialog = styled(Dialog)(({theme}) => ({
+    [`& .${classes.dialogPaper}`]: {
+        minHeight: '80vh',
+    },
+
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+    },
+
+    [`& .${classes.tabs}`]: {
+        flexGrow: 1
+    },
+
+    [`& .${classes.devGrabSpace}`]: {
+        width: '250px'
+    },
+
+    [`& .${classes.divActionGrabSpace}`]: {
+        width: '30px'
+    },
+    [`& .${classes.root}`]: {
         margin: 0,
         padding: theme.spacing(2),
     },
-    container: {
+    [`& .${classes.container}`]: {
         display: 'flex',
         flexWrap: 'wrap',
     },
-    closeButton: {
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
     },
-    smallerButton: {
+    [`& .${classes.smallerButton}`]: {
         position: 'absolute',
         right: theme.spacing(15),
         top: theme.spacing(1)
     },
-    largerButton: {
+    [`& .${classes.largerButton}`]: {
         position: 'absolute',
         right: theme.spacing(10),
         top: theme.spacing(1)
     }
-});
+}));
 
-const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
+
+const DialogTitle = (props => {
+    const {children, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
@@ -89,18 +128,9 @@ const DialogTitle = withStyles(styles)(props => {
     );
 });
 
-const DialogContent = withStyles(theme => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+const DialogActions = MuiDialogActions;
 
 RichFilterDialog.propTypes = {
     open: PropTypes.bool.isRequired,
@@ -112,7 +142,7 @@ RichFilterDialog.propTypes = {
 
 export default function RichFilterDialog(props) {
 
-    const classes = useStyles();
+
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
     const [activeTab, setActiveTab] = useState(0);
@@ -133,7 +163,13 @@ export default function RichFilterDialog(props) {
             const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
             const disabledRulesLogic = makeRulesDisabled(props.activeLogic);
             let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
-            setState({...state, properties: getClassProperties(), logic: disabledRulesLogic, tree: tree, config: config});
+            setState({
+                ...state,
+                properties: getClassProperties(),
+                logic: disabledRulesLogic,
+                tree: tree,
+                config: config
+            });
         }
     }, [props.open]);
 
@@ -248,7 +284,7 @@ export default function RichFilterDialog(props) {
     }
 
     return (
-        <Dialog
+        <StyledDialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
             aria-labelledby="task-execution-dialog-title"
             open={props.open}
@@ -259,11 +295,12 @@ export default function RichFilterDialog(props) {
                 id="customized-dialog-title"
                 onClose={handleClose}
                 onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller : null}
-                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger: null}
+                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger : null}
             >
                 <div className={classes.oneLine}>
                     <Typography variant="h6">{'Data filter'}</Typography>
-                    <FilterMenuSelector filters={getBucketFilters(props.bucket, accessContext.filters)} onFilterSelected={onFilterSelected}/>
+                    <FilterMenuSelector filters={getBucketFilters(props.bucket, accessContext.filters)}
+                                        onFilterSelected={onFilterSelected}/>
                     <Tabs
                         className={classes.tabs}
                         value={activeTab}
@@ -277,34 +314,44 @@ export default function RichFilterDialog(props) {
                 </div>
             </DialogTitle>
             <EnumsProvider>
-                <DialogContent dividers style={{height: '62vh'}} ref = {dialogContentRef}>
+                <DialogContent
+                    dividers
+                    style={{height: '62vh'}}
+                    ref={dialogContentRef}
+                    classes={{
+                        root: classes.root
+                    }}>
                     {props.open && activeTab === 0 &&
-                    <div>
-                        <Query
-                            {...state.config}
-                            value={state.tree}
-                            onChange={onRulesChange}
-                            renderBuilder={renderBuilder}
-                        />
-                        {renderResult({tree: state.tree, config: state.config})}
-                    </div>
+                        <div>
+                            <Query
+                                {...state.config}
+                                value={state.tree}
+                                onChange={onRulesChange}
+                                renderBuilder={renderBuilder}
+                            />
+                            {renderResult({tree: state.tree, config: state.config})}
+                        </div>
                     }
 
                     {props.open && activeTab === 1 &&
-                    <PropertiesTable
-                        used={[]}
-                        data={state.properties}
-                        enums={accessContext.enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        pageSize={null}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={[]}
+                            data={state.properties}
+                            enums={accessContext.enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            pageSize={null}
+                            parentContentRef={dialogContentRef}
+                        />}
 
                 </DialogContent>
             </EnumsProvider>
-            <DialogActions>
-                <Typography color={'primary'}>{`${appliesCount} data ${appliesCount > 1 ? 'rows' : 'row'} ${appliesCount > 1 ? 'match' : 'matches'} the rules`}</Typography>
+            <DialogActions
+                classes={{
+                    root: classes.root2
+                }}>
+                <Typography
+                    color={'primary'}>{`${appliesCount} data ${appliesCount > 1 ? 'rows' : 'row'} ${appliesCount > 1 ? 'match' : 'matches'} the rules`}</Typography>
                 <div className={classes.divActionGrabSpace}/>
                 <Button
                     variant="contained"
@@ -318,44 +365,9 @@ export default function RichFilterDialog(props) {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </Dialog>
+        </StyledDialog>
     );
 }
 
 
-const useStyles = makeStyles(() => ({
-    dialogPaper: {
-        minHeight: '80vh',
-    },
-    oneLine: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-    tabs: {
-        flexGrow: 1
-    },
-    devGrabSpace: {
-        width: '250px'
-    },
-    divActionGrabSpace: {
-        width: '30px'
-    }
-}));
-
-const tabStyles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: getSettingsTabHooverBackgroundColor(theme),
-            opacity: 1
-        },
-        "&$selected": {
-            // backgroundColor: getSettingsTabSelectedBackgroundColor(theme),
-            color: getSettingsTabSelectedColor(theme),
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(tabStyles)(Tab)
+const StyledTab = Tab

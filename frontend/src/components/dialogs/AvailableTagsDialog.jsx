@@ -1,19 +1,33 @@
 import React, {useState} from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import {ListItem, ListItemText, ListSubheader, Tooltip} from "@mui/material";
 import List from "@mui/material/List";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
+const PREFIX = 'AvailableTagsDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    availableTagsButton: `${PREFIX}-availableTagsButton`,
+    content: `${PREFIX}-content`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`&.${classes.root}`]: {
         flexGrow: 1
     },
-    availableTagsButton: {
+
+    [`& .${classes.availableTagsButton}`]: {
         marginLeft: '10px',
         padding: theme.spacing(1)
     },
-    content: {
+
+    [`& .${classes.content}`]: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
@@ -26,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AvailableTagsDialog(props) {
 
-    const classes = useStyles();
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
@@ -39,7 +53,7 @@ export default function AvailableTagsDialog(props) {
     };
 
     return (
-        <div className={classes.root}>
+        <Root className={classes.root}>
             <Tooltip title={'Available tags'}>
                 <IconButton
                     onClick={handleMenu}
@@ -84,6 +98,6 @@ export default function AvailableTagsDialog(props) {
                     </List>
                 </div>
             </Menu>
-        </div>
+        </Root>
     );
 }

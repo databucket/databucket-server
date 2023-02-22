@@ -1,8 +1,44 @@
 import React, {useState} from 'react';
+import {styled} from '@mui/material/styles';
 import PropTypes from "prop-types";
 import MenuItem from "@mui/material/MenuItem";
 import {IconButton, Menu, Tooltip} from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+
+const PREFIX = 'TaskMenuSelector';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    view: `${PREFIX}-view`,
+    select: `${PREFIX}-select`,
+    description: `${PREFIX}-description`
+};
+
+const Root = styled('div/')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root}`]: {
+        flexGrow: 1
+    },
+
+    [`& .${classes.view}`]: {
+        paddingLeft: theme.spacing(2),
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.select}`]: {
+        marginLeft: '10px',
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.description}`]: {
+        padding: theme.spacing(2),
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+    }
+}));
 
 TaskMenuSelector.propTypes = {
     tasks: PropTypes.array.isRequired,
@@ -10,7 +46,7 @@ TaskMenuSelector.propTypes = {
 }
 
 export default function TaskMenuSelector(props) {
-    const classes = useStyles();
+
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -30,7 +66,7 @@ export default function TaskMenuSelector(props) {
 
     if (props.tasks != null && props.tasks.length > 0)
         return (
-            <div className={classes.root}>
+            <Root className={classes.root}>
                 <Tooltip title={'Select task'}>
                     <IconButton
                         className={classes.select}
@@ -64,28 +100,8 @@ export default function TaskMenuSelector(props) {
                         </MenuItem>
                     ))}
                 </Menu>
-            </div>
+            </Root>
         );
     else
         return (<div/>);
-};
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1
-    },
-    view: {
-        paddingLeft: theme.spacing(2),
-        padding: theme.spacing(1)
-    },
-    select: {
-        marginLeft: '10px',
-        padding: theme.spacing(1)
-    },
-    description: {
-        padding: theme.spacing(2),
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis"
-    }
-}));
+}

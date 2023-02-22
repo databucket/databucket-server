@@ -1,5 +1,5 @@
 import React, {createRef, useState} from 'react';
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
@@ -25,21 +25,34 @@ import {MessageBox} from "../utils/MessageBox";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import StyledIcon from "../utils/StyledIcon";
 
-const styles = (theme) => ({
-    root: {
+const PREFIX = 'EditEnumDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root2}`]: {
         margin: 0,
         padding: theme.spacing(2),
     },
-    closeButton: {
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
-    },
-});
+    }
+}));
 
-const DialogTitle = withStyles(styles)((props) => {
-    const {children, classes, onClose, ...other} = props;
+const DialogTitle = ((props) => {
+    const {children,  onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
@@ -56,11 +69,7 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
 
 EditEnumDialog.propTypes = {
@@ -119,7 +128,7 @@ export default function EditEnumDialog(props) {
     }
 
     return (
-        <div>
+        <Root>
             <Tooltip title='Define items'>
                 <Button
                     endIcon={<MoreHoriz/>}
@@ -138,7 +147,11 @@ export default function EditEnumDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     {`Enum: ${props.name}`}
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent
+                    dividers
+                    classes={{
+                        root: classes.root
+                    }}>
                     <MaterialTable
                         title={`Value list`}
                         tableRef={tableRef}
@@ -211,6 +224,6 @@ export default function EditEnumDialog(props) {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </div>
+        </Root>
     );
 }

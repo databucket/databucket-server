@@ -1,6 +1,6 @@
 import React, {createRef, useEffect, useState} from 'react';
+import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
-import withStyles from '@mui/styles/withStyles';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import MuiDialogTitle from '@mui/material/DialogTitle';
@@ -20,29 +20,47 @@ import {getClearDataHistoryByIdUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
 
-const styles = theme => ({
-    root: {
+const PREFIX = 'DataHistoryDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    root3: `${PREFIX}-root3`,
+    container: `${PREFIX}-container`,
+    clearHistoryButton: `${PREFIX}-clearHistoryButton`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const StyledDialog = styled(Dialog)((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root3}`]: {
         margin: 0,
         padding: theme.spacing(2),
     },
-    container: {
+
+    [`& .${classes.container}`]: {
         display: 'flex',
         flexWrap: 'wrap',
     },
-    clearHistoryButton: {
+
+    [`& .${classes.clearHistoryButton}`]: {
         position: 'absolute',
         right: theme.spacing(6),
         top: theme.spacing(1)
     },
-    closeButton: {
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
     }
-});
+}));
 
-const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose, onClearDataHistory} = props;
+const DialogTitle = (props => {
+    const {children,  onClose, onClearDataHistory} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
@@ -66,18 +84,9 @@ const DialogTitle = withStyles(styles)(props => {
     );
 });
 
-const DialogContent = withStyles(theme => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+const DialogActions = MuiDialogActions;
 
 DataHistoryDialog.propTypes = {
     bucket: PropTypes.object,
@@ -158,7 +167,7 @@ export default function DataHistoryDialog(props) {
 
 
     return (
-        <Dialog
+        <StyledDialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
             aria-labelledby="customized-dialog-title"
             open={state.open}
@@ -168,7 +177,11 @@ export default function DataHistoryDialog(props) {
             <DialogTitle id="customized-dialog-title" onClose={handleClose} onClearDataHistory={handleClearDataHistory}>
                 Data history [Id: {state.dataRowId}]
             </DialogTitle>
-            <DialogContent dividers>
+            <DialogContent
+                dividers
+                classes={{
+                    root: classes.root
+                }}>
                 <MaterialTable
                     tableRef={tableRef}
                     columns={state.columns}
@@ -191,7 +204,10 @@ export default function DataHistoryDialog(props) {
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
             </DialogContent>
-            <DialogActions/>
-        </Dialog>
+            <DialogActions
+                classes={{
+                    root: classes.root2
+                }} />
+        </StyledDialog>
     );
 }
