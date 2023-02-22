@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -8,11 +8,33 @@ import IconButton from '@mui/material/IconButton';
 import DynamicIcon from '../utils/DynamicIcon';
 import {Typography} from "@mui/material";
 
-const StyledMenu = withStyles({
-    paper: {
+const PREFIX = 'FieldSelectEnum';
+
+const classes = {
+    paper: `${PREFIX}-paper`,
+    root: `${PREFIX}-root`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.paper}`]: {
         border: '1px solid #d3d4d5',
     },
-})(props => (
+
+    [`& .${classes.root}`]: {
+        // '&:focus': {
+        //     backgroundColor: theme.palette.secondary.main,
+        //     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+        //         color: theme.palette.common.white,
+        //     },
+        // },
+    }
+}));
+
+const StyledMenu = (props => (
     <Menu
         // elevation={10}
         getContentAnchorEl={null}
@@ -28,16 +50,7 @@ const StyledMenu = withStyles({
     />
 ));
 
-const StyledMenuItem = withStyles(theme => ({
-    root: {
-        // '&:focus': {
-        //     backgroundColor: theme.palette.secondary.main,
-        //     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-        //         color: theme.palette.common.white,
-        //     },
-        // },
-    },
-}))(MenuItem);
+const StyledMenuItem = MenuItem;
 
 export default function FieldSelectEnum(props) {
 
@@ -55,7 +68,7 @@ export default function FieldSelectEnum(props) {
     };
 
     return (
-        <div>
+        <Root>
             {iconsEnabled ?
                 <IconButton onClick={handleClick} color="default" size="large">
                     <DynamicIcon iconName={items.filter(item => item.value === props.value)[0].icon}/>
@@ -69,18 +82,22 @@ export default function FieldSelectEnum(props) {
                 keepMounted
                 open={Boolean(anchorEl)}
                 onClose={() => handleClose(null, null)}
-            >
+                classes={{
+                    paper: classes.paper
+                }}>
                 {items.map((item) => (
                     <StyledMenuItem
                         onClick={() => handleClose(item.value)}
                         selected={item.value === props.value}
                         key={item.value}
-                    >
+                        classes={{
+                            root: classes.root
+                        }}>
                         {iconsEnabled && <ListItemIcon> <DynamicIcon iconName={item.icon}/> </ListItemIcon>}
                         <ListItemText primary={item.text}/>
                     </StyledMenuItem>
                 ))}
             </StyledMenu>
-        </div>
+        </Root>
     );
 }

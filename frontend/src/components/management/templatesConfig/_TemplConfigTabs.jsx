@@ -1,16 +1,9 @@
 import React, {useState} from 'react';
+import {styled} from '@mui/material/styles';
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
 
-import {
-    getSettingsTabHooverBackgroundColor,
-    getSettingsTabsBackgroundColor,
-    getSettingsTabsColor,
-    getSettingsTabSelectedBackgroundColor,
-    getSettingsTabSelectedColor
-} from "../../../utils/MaterialTableHelper";
+import {getSettingsTabsBackgroundColor, getSettingsTabsColor} from "../../../utils/MaterialTableHelper";
 import TemplConfigTeamsTab from "./TemplConfigTeamsTab";
 import PropTypes from "prop-types";
 import TemplConfigClassesTab from "./TemplConfigClassesTab";
@@ -24,39 +17,39 @@ import TemplConfigViewsTab from "./TemplConfigViewsTab";
 import TemplConfigTasksTab from "./TemplConfigTasksTab";
 import TemplConfigDataTab from "./TemplConfigDataTab";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
+const PREFIX = '_TemplConfigTabs';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    selected: `${PREFIX}-selected`,
+    root2: `${PREFIX}-root2`,
+    tabs: `${PREFIX}-tabs`,
+    panel: `${PREFIX}-panel`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root2}`]: {
         flexGrow: 1,
         display: 'flex'
     },
-    tabs: {
+
+    [`& .${classes.tabs}`]: {
         color: getSettingsTabsColor(theme),
         backgroundColor: getSettingsTabsBackgroundColor(theme),
         borderRight: `1px solid ${theme.palette.divider}`,
         width: '10%'
     },
-    panel: {
+
+    [`& .${classes.panel}`]: {
         width: '90%'
     }
-
 }));
 
-const styles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: getSettingsTabHooverBackgroundColor(theme),
-            opacity: 1
-        },
-        "&$selected": {
-            backgroundColor: getSettingsTabSelectedBackgroundColor(theme),
-            color: getSettingsTabSelectedColor(theme),
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(styles)(Tab)
+const StyledTab = Tab
 
 _TemplConfigTabs.propTypes = {
     template: PropTypes.object.isRequired,
@@ -65,7 +58,7 @@ _TemplConfigTabs.propTypes = {
 
 export default function _TemplConfigTabs(props) {
 
-    const classes = useStyles();
+
     const [activeTab, setActiveTab] = useState('1');
 
     const handleChangeTab = (event, newActiveTab) => {
@@ -73,7 +66,7 @@ export default function _TemplConfigTabs(props) {
     }
 
     return (
-        <div>
+        <Root>
             <div className={classes.root}>
                 <div className={classes.tabs}>
                     <Tabs
@@ -97,19 +90,30 @@ export default function _TemplConfigTabs(props) {
                     </Tabs>
                 </div>
                 <div className={classes.panel}>
-                    {activeTab === '1' && <TemplConfigTeamsTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '2' && <TemplConfigEnumsTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '3' && <TemplConfigClassesTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '4' && <TemplConfigGroupsTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '5' && <TemplConfigBucketsTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '6' && <TemplConfigTagsTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '7' && <TemplConfigColumnsTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '8' && <TemplConfigFiltersTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '9' && <TemplConfigViewsTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '10' && <TemplConfigTasksTab template={props.template} setTemplate={props.setTemplate}/>}
-                    {activeTab === '11' && <TemplConfigDataTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '1' &&
+                        <TemplConfigTeamsTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '2' &&
+                        <TemplConfigEnumsTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '3' &&
+                        <TemplConfigClassesTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '4' &&
+                        <TemplConfigGroupsTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '5' &&
+                        <TemplConfigBucketsTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '6' &&
+                        <TemplConfigTagsTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '7' &&
+                        <TemplConfigColumnsTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '8' &&
+                        <TemplConfigFiltersTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '9' &&
+                        <TemplConfigViewsTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '10' &&
+                        <TemplConfigTasksTab template={props.template} setTemplate={props.setTemplate}/>}
+                    {activeTab === '11' &&
+                        <TemplConfigDataTab template={props.template} setTemplate={props.setTemplate}/>}
                 </div>
             </div>
-        </div>
+        </Root>
     );
 }
