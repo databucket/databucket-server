@@ -2,12 +2,12 @@ import React, {createRef, useContext, useEffect, useRef, useState} from 'react';
 import {createTagLookup} from "../../../utils/JsonHelper";
 import {getBodyHeight, getGetOptions, getPutOptions, getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 import TagsContext from "../../../context/tags/TagsContext";
-import {Divider, TextField, Tooltip} from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
+import {Divider, TextField, Tooltip} from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 import {debounce2, useWindowDimension} from "../../utils/UseWindowDimension";
 import {Link, useParams} from "react-router-dom";
 import {getDataByIdUrl2} from "../../../utils/UrlBuilder";
@@ -20,7 +20,7 @@ import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
 import "brace/theme/monokai";
-import CloseIcon from "@material-ui/icons/Cancel";
+import CloseIcon from "@mui/icons-material/Cancel";
 import {setPathname} from "../../../utils/ConfigurationStorage";
 // import "brace/theme/eclipse";
 
@@ -153,7 +153,11 @@ export default function DataDetailsPage() {
     setPathname(null); // clear path
     return (
         <div style={{height: getBodyHeight(height)}}>
-            <IconButton component={Link} to={getProjectDataPath()} aria-label="Close">
+            <IconButton
+                component={Link}
+                to={getProjectDataPath()}
+                aria-label="Close"
+                size="large">
                 <CloseIcon/>
             </IconButton>
             <MaterialTable
@@ -192,7 +196,7 @@ export default function DataDetailsPage() {
                 mode="code"
                 ace={ace}
                 onChange={handleChange}
-                theme={theme.palette.type === 'light' ? jsonThemeLight : jsonThemeDark}
+                theme={theme.palette.mode === 'light' ? jsonThemeLight : jsonThemeDark}
                 statusBar={false}
                 htmlElementProps={{style: {height: "100%"}}}
             />
@@ -201,7 +205,11 @@ export default function DataDetailsPage() {
             <Grid container spacing={0} alignItems="center">
                 <Grid item xs>
                     <Tooltip id="copy-content-tooltip" title="Copy content">
-                        <IconButton color={"inherit"} onClick={copyContent} style={{marginLeft: "30px"}}>
+                        <IconButton
+                            color={"inherit"}
+                            onClick={copyContent}
+                            style={{marginLeft: "30px"}}
+                            size="large">
                             <span className="material-icons">content_copy</span>
                         </IconButton>
                     </Tooltip>

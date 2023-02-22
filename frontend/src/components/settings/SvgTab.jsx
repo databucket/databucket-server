@@ -1,8 +1,8 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useRef, useState} from "react";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import Refresh from "@mui/icons-material/Refresh";
+import FilterList from "@mui/icons-material/FilterList";
+import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     getButtonColor,
@@ -23,7 +23,7 @@ import {
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
-import IconButton from "@material-ui/core/IconButton";
+import IconButton from "@mui/material/IconButton";
 import parse from "html-react-parser";
 import {parseCustomSvg} from "../utils/SvgHelper";
 
@@ -115,7 +115,7 @@ export default function SvgTab() {
                         searchable: false,
                         filtering: false,
                         editable: false,
-                        render: rowData => <IconButton>{parseCustomSvg(rowData.structure, getButtonColor(theme))}</IconButton>,
+                        render: rowData => <IconButton size="large">{parseCustomSvg(rowData.structure, getButtonColor(theme))}</IconButton>,
                     },
                     getColumnName(),
                     getColumnCreatedBy(),

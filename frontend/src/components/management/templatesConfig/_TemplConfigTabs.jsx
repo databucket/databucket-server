@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
-import Tab from "@material-ui/core/Tab";
-import Tabs from "@material-ui/core/Tabs";
-import {makeStyles, withStyles} from "@material-ui/core/styles";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
 
 import {
     getSettingsTabHooverBackgroundColor,
@@ -79,9 +80,9 @@ export default function _TemplConfigTabs(props) {
                         value={activeTab}
                         onChange={handleChangeTab}
                         variant="scrollable"
-                        scrollButtons="on"
+                        scrollButtons
                         orientation={'vertical'}
-                    >
+                        allowScrollButtonsMobile>
                         <StyledTab value="1" label="Teams"/>
                         <StyledTab value="2" label="Enums"/>
                         <StyledTab value="3" label="Classes"/>

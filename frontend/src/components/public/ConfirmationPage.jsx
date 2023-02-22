@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import "./SignUpPage.css";
 import Logo from "../../images/databucket-logo.png";
-import {Paper} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
+import {Paper} from "@mui/material";
+import Typography from "@mui/material/Typography";
 import {MessageBox} from "../utils/MessageBox";
 import {Redirect, useParams} from "react-router-dom";
 import {getConfirmationUrl} from "../../utils/UrlBuilder";

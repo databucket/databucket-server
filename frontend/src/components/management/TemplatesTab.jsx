@@ -14,10 +14,10 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
+import Refresh from "@mui/icons-material/Refresh";
+import FilterList from "@mui/icons-material/FilterList";
 import SelectProjectsDialog from "../dialogs/SelectProjectsDialog";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 import {handleErrors} from "../../utils/FetchHelper";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import ProjectsContext from "../../context/projects/ProjectsContext";
@@ -31,7 +31,7 @@ import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import EditTemplateConfigurationDialog from "../dialogs/EditTemplateConfigurationDialog";
 import SelectTemplatesDialog from "../dialogs/SelectTemplatesDialog";
-import MoreHoriz from "@material-ui/icons/MoreHoriz";
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
 
 export default function TemplatesTab() {
 

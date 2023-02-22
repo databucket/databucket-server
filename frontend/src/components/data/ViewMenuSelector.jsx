@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import PropTypes from "prop-types";
-import MenuItem from "@material-ui/core/MenuItem";
-import Typography from "@material-ui/core/Typography";
-import {Grid, IconButton, Menu, Tooltip} from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import {Grid, IconButton, Menu, Tooltip} from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 
 ViewMenuSelector.propTypes = {
     views: PropTypes.array.isRequired,
@@ -53,7 +53,7 @@ export default function ViewMenuSelector(props) {
                             aria-controls="long-menu"
                             onClick={handleClick}
                             color={'inherit'}
-                        >
+                            size="large">
                             <span className="material-icons">double_arrow</span>
                         </IconButton>
                     </Tooltip>

@@ -1,12 +1,12 @@
 import React, {useState} from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
+import withStyles from '@mui/styles/withStyles';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
 import DynamicIcon from '../utils/DynamicIcon';
-import {Typography} from "@material-ui/core";
+import {Typography} from "@mui/material";
 
 const StyledMenu = withStyles({
     paper: {
@@ -57,10 +57,7 @@ export default function FieldSelectEnum(props) {
     return (
         <div>
             {iconsEnabled ?
-                <IconButton
-                    onClick={handleClick}
-                    color="default"
-                >
+                <IconButton onClick={handleClick} color="default" size="large">
                     <DynamicIcon iconName={items.filter(item => item.value === props.value)[0].icon}/>
                 </IconButton>
                 :

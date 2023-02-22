@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
-import {makeStyles} from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
+import makeStyles from '@mui/styles/makeStyles';
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 import {Link, Redirect, Route, Switch} from "react-router-dom";
 import {getAppBarBackgroundColor} from "../../utils/Themes";
 import {getManagementProjectsPath, getManagementTemplatesPath, getManagementUsersPath, getProjectDataPath} from "../../route/AppRouter";
@@ -73,15 +73,23 @@ export default function _ManagementTabs() {
                         <AppBar className={classes.appBar}>
                             <Toolbar variant={'dense'}>
                                 {hasProject() ? (
-                                    <IconButton color="inherit" edge="start" component={Link} to={getProjectDataPath()} aria-label="Close">
+                                    <IconButton
+                                        color="inherit"
+                                        edge="start"
+                                        component={Link}
+                                        to={getProjectDataPath()}
+                                        aria-label="Close"
+                                        size="large">
                                         <CloseIcon/>
                                     </IconButton>
                                 ) : (<div/>)}
 
-                                <Tabs value={getTabsValue(location.pathname)}
-                                      variant="scrollable"
-                                      scrollButtons="on"
-                                      className={classes.tabs}>
+                                <Tabs
+                                    value={getTabsValue(location.pathname)}
+                                    variant="scrollable"
+                                    scrollButtons
+                                    className={classes.tabs}
+                                    allowScrollButtonsMobile>
                                     <Tab label="Projects" value={tabs[0]} component={Link} to={getManagementProjectsPath()}/>
                                     <Tab label="Users" value={tabs[1]} component={Link} to={getManagementUsersPath()}/>
                                     <Tab label="Templates" value={tabs[2]} component={Link} to={getManagementTemplatesPath()}/>

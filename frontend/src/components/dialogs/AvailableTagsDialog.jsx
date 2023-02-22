@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import {ListItem, ListItemText, ListSubheader, Tooltip} from "@material-ui/core";
-import List from "@material-ui/core/List";
+import makeStyles from '@mui/styles/makeStyles';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import {ListItem, ListItemText, ListSubheader, Tooltip} from "@mui/material";
+import List from "@mui/material/List";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -41,7 +41,11 @@ export default function AvailableTagsDialog(props) {
     return (
         <div className={classes.root}>
             <Tooltip title={'Available tags'}>
-                <IconButton onClick={handleMenu} color={'inherit'} className={classes.availableTagsButton}>
+                <IconButton
+                    onClick={handleMenu}
+                    color={'inherit'}
+                    className={classes.availableTagsButton}
+                    size="large">
                     <span className="material-icons">local_offer</span>
                 </IconButton>
             </Tooltip>

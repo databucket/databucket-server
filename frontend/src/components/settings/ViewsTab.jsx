@@ -1,8 +1,8 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import Refresh from "@mui/icons-material/Refresh";
+import FilterList from "@mui/icons-material/FilterList";
+import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
@@ -36,7 +36,7 @@ import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SelectMultiViewFeaturesLookup from "../lookup/SelectMultiViewFeaturesLookup";
-import CloneIcon from "@material-ui/icons/ViewStream";
+import CloneIcon from "@mui/icons-material/ViewStream";
 
 export default function ViewsTab() {
 

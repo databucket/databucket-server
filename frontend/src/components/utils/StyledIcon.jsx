@@ -1,7 +1,7 @@
 import React from 'react';
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
-import {SvgIcon} from "@material-ui/core";
+import {SvgIcon} from "@mui/material";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 
 StyledIcon.propTypes = {

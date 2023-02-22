@@ -1,13 +1,13 @@
 import React, {useContext} from 'react';
 import PropTypes from "prop-types";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ShowGroupsIcon from "@material-ui/icons/ArrowDropDownCircleOutlined";
-import ListItemText from "@material-ui/core/ListItemText";
-import List from "@material-ui/core/List";
-import MenuItem from "@material-ui/core/MenuItem";
-import Menu from "@material-ui/core/Menu";
-import Divider from "@material-ui/core/Divider";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ShowGroupsIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
+import ListItemText from "@mui/material/ListItemText";
+import List from "@mui/material/List";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
+import Divider from "@mui/material/Divider";
 import AccessContext from "../../context/access/AccessContext";
 
 GroupMenuSelector.propTypes = {

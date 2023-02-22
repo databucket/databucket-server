@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import PropTypes from "prop-types";
-import MenuItem from "@material-ui/core/MenuItem";
-import {IconButton, Menu, Tooltip} from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import MenuItem from "@mui/material/MenuItem";
+import {IconButton, Menu, Tooltip} from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 
 FilterMenuSelector.propTypes = {
     filters: PropTypes.array.isRequired,
@@ -37,7 +37,7 @@ export default function FilterMenuSelector(props) {
                         aria-controls="long-menu"
                         onClick={handleClick}
                         color={'inherit'}
-                    >
+                        size="large">
                         <span className="material-icons">arrow_circle_down</span>
                     </IconButton>
                 </Tooltip>

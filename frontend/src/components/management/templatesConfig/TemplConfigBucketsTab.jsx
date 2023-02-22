@@ -1,7 +1,7 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import FilterList from "@mui/icons-material/FilterList";
+import {useTheme} from "@mui/material/styles";
 import {
     getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
@@ -91,7 +91,7 @@ export default function TemplConfigBucketsTab(props) {
                         searchable: false,
                         filtering: false,
                         initialEditValue: 'panorama_fish_eye',
-                        render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
+                        render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.mode}/>,
                         editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
                     getColumnName(),

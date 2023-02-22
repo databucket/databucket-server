@@ -1,11 +1,11 @@
 import {getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp, getTableBodyHeight} from "../../utils/MaterialTableHelper";
 import {getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
+import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable from "material-table";
 import React, {useEffect, useState} from "react";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 import {MessageBox} from "./MessageBox";
 import {useWindowDimension} from "./UseWindowDimension";
 import SelectSingleFieldLookup, {commonFields} from "../lookup/SelectSingleFieldLookup";

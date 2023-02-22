@@ -1,6 +1,6 @@
 import React from "react";
-import Grid from "@material-ui/core/Grid";
-import {CircularProgress} from "@material-ui/core";
+import Grid from "@mui/material/Grid";
+import {CircularProgress} from "@mui/material";
 
 export const CenteredWaitingCircularProgress = () => {
     return (
@@ -9,7 +9,7 @@ export const CenteredWaitingCircularProgress = () => {
             spacing={0}
             direction="column"
             alignItems="center"
-            justify="center"
+            justifyContent="center"
             style={{minHeight: '100vh'}}
         >
             <Grid item xs={3}>

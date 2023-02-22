@@ -13,12 +13,12 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import ResetPasswordIcon from "@material-ui/icons/VpnKey";
+import Refresh from "@mui/icons-material/Refresh";
+import FilterList from "@mui/icons-material/FilterList";
+import ResetPasswordIcon from "@mui/icons-material/VpnKey";
 import SelectMultiRolesLookup from "../lookup/SelectMultiRolesLookup";
 import SelectProjectsDialog from "../dialogs/SelectProjectsDialog";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 import {handleErrors} from "../../utils/FetchHelper";
 import ResetPasswordDialog from "./ResetPasswordDialog";
 import RolesContext from "../../context/roles/RolesContext";

@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
 import "./SignUpPage.css";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import Logo from "../../images/databucket-logo.png";
-import {Input, InputLabel, Paper} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
-import FormControl from "@material-ui/core/FormControl";
+import {Input, InputLabel, Paper} from "@mui/material";
+import Typography from "@mui/material/Typography";
+import FormControl from "@mui/material/FormControl";
 import {MessageBox} from "../utils/MessageBox";
-import Link from "@material-ui/core/Link";
+import Link from "@mui/material/Link";
 import {Redirect} from "react-router-dom";
 import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";

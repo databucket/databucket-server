@@ -1,10 +1,10 @@
 import React, {useContext, useState} from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from "@material-ui/core/MenuItem";
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from "@mui/material/MenuItem";
 import AccessContext from "../../context/access/AccessContext";
 import {getActiveProjectId} from "../../utils/ConfigurationStorage";
-import {Tooltip} from "@material-ui/core";
+import {Tooltip} from "@mui/material";
 import {Link} from "react-router-dom";
 import {getGivenProjectDataPath} from "../../route/AppRouter";
 
@@ -35,7 +35,7 @@ export default function UserProjects(props) {
         return (
             <div>
                 <Tooltip title={'Open project'}>
-                    <IconButton onClick={handleMenu} color={'inherit'}>
+                    <IconButton onClick={handleMenu} color={'inherit'} size="large">
                         <span className="material-icons">exit_to_app</span>
                     </IconButton>
                 </Tooltip>

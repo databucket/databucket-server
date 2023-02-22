@@ -1,10 +1,11 @@
 import React from 'react';
 import {Link, Route, Switch} from "react-router-dom";
-import {Tab, Tabs} from "@material-ui/core";
+import {Tab, Tabs} from "@mui/material";
 import {getProjectDataPath, getProjectSettingsPath} from "../../route/AppRouter";
-import {makeStyles, withStyles} from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Cancel";
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Cancel";
 import {getLastSettingsPageName, setLastSettingsPageName, setPathname} from "../../utils/ConfigurationStorage";
 import ProjectRoute from "../../route/ProjectRoute";
 import NotFoundPage from "../NotFoundPage";
@@ -104,15 +105,19 @@ export default function _ProjectSettingsTabs() {
             render={({location}) => (
                 <div className={classes.root}>
                     <div className={classes.tabs}>
-                        <IconButton component={Link} to={getProjectDataPath()} aria-label="Close">
+                        <IconButton
+                            component={Link}
+                            to={getProjectDataPath()}
+                            aria-label="Close"
+                            size="large">
                             <CloseIcon/>
                         </IconButton>
                         <Tabs
                             value={getTabsValue(location.pathname)}
                             variant="scrollable"
-                            scrollButtons="on"
+                            scrollButtons
                             orientation={'vertical'}
-                        >
+                            allowScrollButtonsMobile>
                             <StyledTab label="Teams" value={tabs[0]} component={Link} to={`${getProjectSettingsPath()}/teams`}/>
                             <StyledTab label="Users" value={tabs[1]} component={Link} to={`${getProjectSettingsPath()}/users`}/>
                             <StyledTab label="Classes" value={tabs[2]} component={Link} to={`${getProjectSettingsPath()}/classes`}/>

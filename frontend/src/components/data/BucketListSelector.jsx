@@ -1,13 +1,13 @@
 import React, {useContext, useEffect, useState} from 'react';
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import List from "@material-ui/core/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import List from "@mui/material/List";
 import AccessContext from "../../context/access/AccessContext";
-import {Tooltip} from "@material-ui/core";
+import {Tooltip} from "@mui/material";
 import PropTypes from "prop-types";
 import StyledIcon from "../utils/StyledIcon";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 
 BucketListSelector.propTypes = {
     leftPanelWidth: PropTypes.number.isRequired
@@ -70,7 +70,7 @@ export default function BucketListSelector(props) {
                                     iconName={bucket.iconName}
                                     iconColor={bucket.iconColor}
                                     iconSvg={bucket.iconSvg}
-                                    themeType={theme.palette.type}
+                                    themeType={theme.palette.mode}
                                 />
                             </ListItemIcon>
                             <ListItemText primary={getBucketVisibleName(bucket.name)}/>
