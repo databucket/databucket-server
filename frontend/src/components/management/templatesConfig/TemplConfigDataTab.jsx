@@ -1,7 +1,7 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import FilterList from "@mui/icons-material/FilterList";
+import {useTheme} from "@mui/material/styles";
 import {
     getDeleteOptions,
     getPostOptions, getPutOptions,
@@ -15,9 +15,9 @@ import PropTypes from "prop-types";
 import {getBaseUrl} from "../../../utils/UrlBuilder";
 import {handleErrors} from "../../../utils/FetchHelper";
 import {getManageDataMapper} from "../../../utils/NullValueMappers";
-import Refresh from "@material-ui/icons/Refresh";
-import Grid from "@material-ui/core/Grid";
-import Divider from "@material-ui/core/Divider";
+import Refresh from "@mui/icons-material/Refresh";
+import Grid from "@mui/material/Grid";
+import Divider from "@mui/material/Divider";
 import DataContext from "../../../context/templatesData/DataContext";
 import DataItemsContext from "../../../context/templatesDataItems/DataItemsContext";
 

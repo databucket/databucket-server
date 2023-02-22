@@ -1,13 +1,13 @@
 import React, {createRef, useState} from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Done';
-import Typography from '@material-ui/core/Typography';
-import MoreHoriz from "@material-ui/icons/MoreHoriz";
-import Tooltip from "@material-ui/core/Tooltip";
+import withStyles from '@mui/styles/withStyles';
+import Dialog from '@mui/material/Dialog';
+import MuiDialogTitle from '@mui/material/DialogTitle';
+import MuiDialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Done';
+import Typography from '@mui/material/Typography';
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import Tooltip from "@mui/material/Tooltip";
 import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
@@ -19,10 +19,10 @@ import {
     getLastPageSizeOnDialog,
     setLastPageSizeOnDialog
 } from "../../utils/ConfigurationStorage";
-import {useTheme} from '@material-ui/core/styles';
+import {useTheme} from '@mui/material/styles';
 import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import {useWindowDimension} from "./UseWindowDimension";
 // import TableIcons from "./TableIcons";
 
@@ -45,7 +45,11 @@ const DialogTitle = withStyles(styles)((props) => {
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}

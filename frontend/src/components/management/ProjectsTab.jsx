@@ -14,9 +14,9 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import Refresh from "@mui/icons-material/Refresh";
+import FilterList from "@mui/icons-material/FilterList";
+import {useTheme} from "@mui/material/styles";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
 import {

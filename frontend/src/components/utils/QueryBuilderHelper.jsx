@@ -1,6 +1,6 @@
 import InitialConfig from 'react-awesome-query-builder/lib/config/material';
 import {Builder, Utils as QbUtils} from "react-awesome-query-builder";
-import Typography from "@material-ui/core/Typography";
+import Typography from "@mui/material/Typography";
 import React from "react";
 
 export const getInitialTree = (loadedInitLogic, tree, config) => {

@@ -1,12 +1,12 @@
 import React, {useContext, useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import {Checkbox, FormControlLabel, InputLabel, MenuItem, Select, Slider, Tooltip} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
+import makeStyles from '@mui/styles/makeStyles';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import {Checkbox, FormControlLabel, InputLabel, MenuItem, Select, Slider, Tooltip} from "@mui/material";
+import Typography from "@mui/material/Typography";
 import {getUsername, hasAdminRole} from "../../utils/ConfigurationStorage";
-import FormControl from "@material-ui/core/FormControl";
-import Button from "@material-ui/core/Button";
+import FormControl from "@mui/material/FormControl";
+import Button from "@mui/material/Button";
 import AccessContext from "../../context/access/AccessContext";
 
 const useStyles = makeStyles((theme) => ({
@@ -101,7 +101,11 @@ export default function ReserveDataDialog(props) {
     return (
         <div className={classes.root}>
             <Tooltip title={'Reserve data'}>
-                <IconButton onClick={handleMenu} color={'inherit'} className={classes.reserveButton}>
+                <IconButton
+                    onClick={handleMenu}
+                    color={'inherit'}
+                    className={classes.reserveButton}
+                    size="large">
                     <span className="material-icons">add_task</span>
                 </IconButton>
             </Tooltip>

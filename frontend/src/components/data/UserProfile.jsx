@@ -1,15 +1,15 @@
 import React, {useContext, useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Menu from '@material-ui/core/Menu';
-import Typography from "@material-ui/core/Typography";
-import SetLightTheme from "@material-ui/icons/Brightness7";
-import SetDarkTheme from "@material-ui/icons/Brightness4";
+import makeStyles from '@mui/styles/makeStyles';
+import IconButton from '@mui/material/IconButton';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import Menu from '@mui/material/Menu';
+import Typography from "@mui/material/Typography";
+import SetLightTheme from "@mui/icons-material/Brightness7";
+import SetDarkTheme from "@mui/icons-material/Brightness4";
 import {getUsername, saveThemeName} from "../../utils/ConfigurationStorage";
 import CustomThemeContext from "../../context/theme/CustomThemeContext";
-import Button from "@material-ui/core/Button";
-import {Tooltip} from "@material-ui/core";
+import Button from "@mui/material/Button";
+import {Tooltip} from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
     oneLine: {
@@ -62,7 +62,7 @@ export default function UserProfile(props) {
     return (
         <div>
             <Tooltip title={'User profile'}>
-                <IconButton onClick={handleMenu} color={'inherit'}>
+                <IconButton onClick={handleMenu} color={'inherit'} size="large">
                     <AccountCircle/>
                 </IconButton>
             </Tooltip>

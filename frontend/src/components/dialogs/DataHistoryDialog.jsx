@@ -1,20 +1,21 @@
 import React, {createRef, useEffect, useState} from 'react';
-import {useTheme, withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
+import { useTheme } from '@mui/material/styles';
+import withStyles from '@mui/styles/withStyles';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import MuiDialogTitle from '@mui/material/DialogTitle';
+import MuiDialogContent from '@mui/material/DialogContent';
+import MuiDialogActions from '@mui/material/DialogActions';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
 import MaterialTable from 'material-table';
-import LockedIcon from '@material-ui/icons/Lock';
-import UnlockedIcon from '@material-ui/icons/LockOpen';
+import LockedIcon from '@mui/icons-material/Lock';
+import UnlockedIcon from '@mui/icons-material/LockOpen';
 import DataHistoryPropertiesDiffDialog from './DataHistoryPropertiesDiffDialog';
 import PropTypes from "prop-types";
 import {createTagLookup} from "../../utils/JsonHelper";
 import {getDeleteOptions, getTableHeaderBackgroundColor} from "../../utils/MaterialTableHelper";
-import {Tooltip} from "@material-ui/core";
+import {Tooltip} from "@mui/material";
 import {getClearDataHistoryByIdUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
@@ -46,13 +47,17 @@ const DialogTitle = withStyles(styles)(props => {
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
             <Tooltip id="clear-history" title="Clear data history">
-                <IconButton className={classes.clearHistoryButton} onClick={onClearDataHistory} color={"inherit"}>
+                <IconButton
+                    className={classes.clearHistoryButton}
+                    onClick={onClearDataHistory}
+                    color={"inherit"}
+                    size="large">
                     <span className="material-icons">delete</span>
                 </IconButton>
             </Tooltip>
             {onClose ? (
                 <Tooltip id="close" title="Close">
-                    <IconButton className={classes.closeButton} onClick={onClose}>
+                    <IconButton className={classes.closeButton} onClick={onClose} size="large">
                         <CloseIcon/>
                     </IconButton>
                 </Tooltip>

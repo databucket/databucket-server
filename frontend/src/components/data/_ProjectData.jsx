@@ -1,18 +1,19 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
-import {makeStyles, useTheme} from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
+import { useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import Drawer from '@mui/material/Drawer';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import List from '@mui/material/List';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import UserProfile from "./UserProfile";
 import {
     getLastManagementPageName,
@@ -152,7 +153,7 @@ export default function ProjectData() {
                             className={clsx(styleClasses.menuButton, {
                                 [styleClasses.hide]: open,
                             })}
-                        >
+                            size="large">
                             <MenuIcon/>
                         </IconButton>
                         <BucketTabSelector/>
@@ -175,7 +176,7 @@ export default function ProjectData() {
                     }}
                 >
                     <div className={styleClasses.toolbar}>
-                        <IconButton onClick={handleDrawerClose}>
+                        <IconButton onClick={handleDrawerClose} size="large">
                             {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
                         </IconButton>
                     </div>
@@ -237,7 +238,6 @@ export default function ProjectData() {
         </div>
     );
 }
-;
 
 const useStyles = makeStyles((theme) => ({
     root: {

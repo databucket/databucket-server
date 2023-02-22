@@ -1,22 +1,22 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import PropTypes from 'prop-types';
-import Dialog from '@material-ui/core/Dialog';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
+import Dialog from '@mui/material/Dialog';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 import {iconsNames} from "../utils/AvailableIcons";
-import {TextField} from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import Divider from "@material-ui/core/Divider";
-import Link from "@material-ui/core/Link";
+import {TextField} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Link from "@mui/material/Link";
 import StyledIconButton from "../utils/StyledIconButton";
 import {getButtonColor} from "../../utils/MaterialTableHelper";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 import SvgContext from "../../context/svgs/SvgContext";
 import {MessageBox} from "../utils/MessageBox";
 import {parseCustomSvg} from "../utils/SvgHelper";
 import ColorPicker from "material-ui-color-picker";
-import Typography from "@material-ui/core/Typography";
+import Typography from "@mui/material/Typography";
 import {DarkTheme, getAppBarBackgroundColor, LightTheme} from "../../utils/Themes";
 import StyledIcon from "../utils/StyledIcon";
 
@@ -100,7 +100,7 @@ function SimpleDialog(props) {
                 </Grid>
                 <Grid item xs>
                     <Tooltip id="reset-color" title="Reset color">
-                        <IconButton color={"inherit"} onClick={handleRemoveColor}>
+                        <IconButton color={"inherit"} onClick={handleRemoveColor} size="large">
                             <span className="material-icons">format_color_reset</span>
                         </IconButton>
                     </Tooltip>
@@ -112,7 +112,7 @@ function SimpleDialog(props) {
             <div>
                 {iconsNames.map((iName, key) => (
                     <Tooltip title={iName} key={key}>
-                        <IconButton onClick={() => handleItemClick(iName)} color={"inherit"}>
+                        <IconButton onClick={() => handleItemClick(iName)} color={"inherit"} size="large">
                             <span className="material-icons">{iName}</span>
                         </IconButton>
                     </Tooltip>
@@ -125,7 +125,7 @@ function SimpleDialog(props) {
                     {
                         svgs.map((svg) => (
                             <Tooltip title={svg.name} key={svg.id}>
-                                <IconButton onClick={() => handleSvgItemClick(svg)}>
+                                <IconButton onClick={() => handleSvgItemClick(svg)} size="large">
                                     {parseCustomSvg(svg.structure, getButtonColor(theme))}
                                 </IconButton>
                             </Tooltip>

@@ -1,22 +1,23 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {makeStyles, withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import MuiDialogTitle from '@mui/material/DialogTitle';
+import MuiDialogContent from '@mui/material/DialogContent';
+import MuiDialogActions from '@mui/material/DialogActions';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
 import PropTypes from "prop-types";
-import {CircularProgress, Tabs} from "@material-ui/core";
+import {CircularProgress, Tabs} from "@mui/material";
 import {getDeleteOptions, getPostOptions, getPutOptions, getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "../../utils/MaterialTableHelper";
-import Tab from "@material-ui/core/Tab";
+import Tab from "@mui/material/Tab";
 import {MessageBox} from "../utils/MessageBox";
 import TaskActions from "../utils/TaskActions";
 import PropertiesTable from "../utils/PropertiesTable";
 import {getBucketTags, getBucketTasks} from "../data/BucketDataTableHelper";
 import EnumsProvider from "../../context/enums/EnumsProvider";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import TaskMenuSelector from "../data/TaskMenuSelector";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getClearDataHistoryByRulesUrl, getDataUrl} from "../../utils/UrlBuilder";
@@ -25,7 +26,7 @@ import {Query, Utils as QbUtils} from "react-awesome-query-builder";
 import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
 import {getTaskExecutionDialogSize, setTaskExecutionDialogSize} from "../../utils/ConfigurationStorage";
-import Grid from "@material-ui/core/Grid";
+import Grid from "@mui/material/Grid";
 import {debounce2} from "../utils/UseWindowDimension";
 
 const styles = theme => ({
@@ -59,14 +60,30 @@ const DialogTitle = withStyles(styles)(props => {
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
+            <IconButton
+                aria-label="Smaller"
+                className={classes.smallerButton}
+                onClick={onMakeDialogSmaller}
+                color={"inherit"}
+                disabled={onMakeDialogSmaller == null}
+                size="large">
                 <span className="material-icons">fullscreen_exit</span>
             </IconButton>
-            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
+            <IconButton
+                aria-label="Larger"
+                className={classes.largerButton}
+                onClick={onMakeDialogLarger}
+                color={"inherit"}
+                disabled={onMakeDialogLarger == null}
+                size="large">
                 <span className="material-icons">fullscreen</span>
             </IconButton>
             {onClose ? (
-                <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="Close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}
@@ -376,7 +393,7 @@ export default function TaskExecutionDialog(props) {
                         spacing={0}
                         direction="column"
                         alignItems="center"
-                        justify="center"
+                        justifyContent="center"
                         style={{minHeight: '50vh'}}
                     >
                         <Grid item xs={3}>

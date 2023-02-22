@@ -1,12 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
-import Tab from "@material-ui/core/Tab";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Tabs from "@material-ui/core/Tabs";
-import {lighten, makeStyles, withStyles} from "@material-ui/core/styles";
+import Tab from "@mui/material/Tab";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Tabs from "@mui/material/Tabs";
+import { lighten } from "@mui/material/styles";
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
 import {getAppBarBackgroundColor} from "../../utils/Themes";
 import AccessContext from "../../context/access/AccessContext";
-import {Tooltip} from "@material-ui/core";
+import {Tooltip} from "@mui/material";
 import StyledIconButtonTab from "../utils/StyledIconButtonTab";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 
@@ -72,16 +74,16 @@ export default function BucketTabSelector() {
         <Tabs
             value={bucketsTabs.indexOf(activeBucket)}
             variant="scrollable"
-            scrollButtons="on"
+            scrollButtons
             className={classes.tabs}
-        >
+            allowScrollButtonsMobile>
             {bucketsTabs.map((bucket) => (
                 <StyledTab key={bucket.id} component="div" onClick={() => handleChangedTab(bucket)} label={
                     <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
                     <span>
                         <StyledIconButtonTab iconName={bucket.iconName} iconColor={getIconColor('banner', bucket.iconColor)} iconSvg={bucket.iconSvg} />
                         {getBucketVisibleName(bucket.name)}
-                        <IconButton color={'inherit'} onClick={() => handleRemovedTab(bucket)}>
+                        <IconButton color={'inherit'} onClick={() => handleRemovedTab(bucket)} size="large">
                             <CloseIcon style={{fontSize: 18}}/>
                         </IconButton>
                     </span>

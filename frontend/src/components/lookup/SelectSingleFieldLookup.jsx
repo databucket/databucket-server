@@ -1,9 +1,9 @@
 import React from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Select from '@material-ui/core/Select';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemText from '@mui/material/ListItemText';
+import Select from '@mui/material/Select';
 import PropTypes from "prop-types";
-import {ListSubheader} from "@material-ui/core";
+import {ListSubheader} from "@mui/material";
 
 SelectSingleFieldLookup.propTypes = {
     selected: PropTypes.string.isRequired,

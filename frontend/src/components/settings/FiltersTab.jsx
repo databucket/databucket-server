@@ -1,8 +1,8 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import Refresh from "@mui/icons-material/Refresh";
+import FilterList from "@mui/icons-material/FilterList";
+import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
@@ -24,7 +24,7 @@ import {
 import {getFiltersMapper} from "../../utils/NullValueMappers";
 import FiltersContext from "../../context/filters/FiltersContext";
 import EditFilterRulesDialog from "../dialogs/EditFilterRulesDialog";
-import CloneIcon from '@material-ui/icons/ViewStream'
+import CloneIcon from '@mui/icons-material/ViewStream'
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import ClassesContext from "../../context/classes/ClassesContext";
 import TagsContext from "../../context/tags/TagsContext";

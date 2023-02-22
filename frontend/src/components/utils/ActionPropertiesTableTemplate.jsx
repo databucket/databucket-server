@@ -1,10 +1,10 @@
 import {getTableBodyHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
 import {convertPropertiesDates, getPropertyByUuid, getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
+import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable, {MTableEditField} from "material-table";
 import React, {useState} from "react";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
 import {useWindowDimension} from "./UseWindowDimension";

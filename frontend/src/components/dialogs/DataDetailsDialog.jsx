@@ -1,16 +1,18 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
-import {makeStyles, useTheme, withStyles} from '@material-ui/core/styles';
+import { useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
 import PropTypes from 'prop-types';
 import MaterialTable from 'material-table';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
-import {Divider, TextField, Tooltip} from '@material-ui/core';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import MuiDialogTitle from '@mui/material/DialogTitle';
+import MuiDialogContent from '@mui/material/DialogContent';
+import MuiDialogActions from '@mui/material/DialogActions';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
+import {Divider, TextField, Tooltip} from '@mui/material';
 import {createTagLookup} from "../../utils/JsonHelper";
 import {getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../utils/MaterialTableHelper";
 import {getDataDetailsDialogSize, setDataDetailsDialogSize} from "../../utils/ConfigurationStorage";
@@ -71,28 +73,51 @@ const DialogTitle = withStyles(titleStyles)(props => {
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
             <Tooltip id="link-tooltip" title="Copy direct link to data">
-                <IconButton className={classes.linkButton} onClick={onCopyDataLink} color={"inherit"}>
+                <IconButton
+                    className={classes.linkButton}
+                    onClick={onCopyDataLink}
+                    color={"inherit"}
+                    size="large">
                     <span className="material-icons">link</span>
                 </IconButton>
             </Tooltip>
             <Tooltip id="open-in-new-tooltip" title="Open details in new tab">
-                <IconButton className={classes.openButton} onClick={onOpenDataLink} color={"inherit"}>
+                <IconButton
+                    className={classes.openButton}
+                    onClick={onOpenDataLink}
+                    color={"inherit"}
+                    size="large">
                     <span className="material-icons">open_in_new</span>
                 </IconButton>
             </Tooltip>
             <Tooltip id="smaller-window-tooltip" title="Smaller">
-                <IconButton className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
+                <IconButton
+                    className={classes.smallerButton}
+                    onClick={onMakeDialogSmaller}
+                    color={"inherit"}
+                    disabled={onMakeDialogSmaller == null}
+                    size="large">
                     <span className="material-icons">fullscreen_exit</span>
                 </IconButton>
             </Tooltip>
             <Tooltip id="larger-window-tooltip" title="Larger">
-                <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
+                <IconButton
+                    aria-label="Larger"
+                    className={classes.largerButton}
+                    onClick={onMakeDialogLarger}
+                    color={"inherit"}
+                    disabled={onMakeDialogLarger == null}
+                    size="large">
                     <span className="material-icons">fullscreen</span>
                 </IconButton>
             </Tooltip>
             {onClose ? (
                 <Tooltip id="close-window-tooltip" title="Close">
-                    <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
+                    <IconButton
+                        aria-label="Close"
+                        className={classes.closeButton}
+                        onClick={onClose}
+                        size="large">
                         <CloseIcon/>
                     </IconButton>
                 </Tooltip>
@@ -300,7 +325,7 @@ export default function DataDetailsDialog(props) {
                     mode="code"
                     ace={ace}
                     onChange={handleChange}
-                    theme={theme.palette.type === 'light' ? jsonThemeLight : jsonThemeDark}
+                    theme={theme.palette.mode === 'light' ? jsonThemeLight : jsonThemeDark}
                     statusBar={false}
                     htmlElementProps={{style: {height: "100%"}}}
                 />
@@ -308,7 +333,7 @@ export default function DataDetailsDialog(props) {
             <Divider/>
             <DialogActions>
                 <Tooltip id="copy-content-tooltip" title="Copy content">
-                    <IconButton color={"inherit"} onClick={copyContent}>
+                    <IconButton color={"inherit"} onClick={copyContent} size="large">
                         <span className="material-icons">content_copy</span>
                     </IconButton>
                 </Tooltip>

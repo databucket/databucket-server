@@ -10,7 +10,7 @@ import {
     getTableHeight,
     getTableRowBackgroundColor, getTableToolbarBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material/styles";
 import {
     getLastActiveView, getLastBucketOrder,
     getLastBucketSearchedText,
@@ -22,7 +22,7 @@ import {
     setLastPageSize
 } from "../../utils/ConfigurationStorage";
 import {useWindowDimension} from "../utils/UseWindowDimension";
-import {Grid, Icon} from "@material-ui/core";
+import {Grid, Icon} from "@mui/material";
 import ViewMenuSelector from "./ViewMenuSelector";
 import AccessContext from "../../context/access/AccessContext";
 import MissingBucketTable from "./MissingBucketTable";
@@ -46,11 +46,11 @@ import prepareTableColumns, {
     getFetchColumns
 } from "./BucketDataTableHelper";
 import MissingActiveView from "./MissingActiveView";
-import Refresh from "@material-ui/icons/Refresh";
-import RateReviewOutlined from "@material-ui/icons/RateReviewOutlined";
-import History from "@material-ui/icons/History";
-import FilterList from "@material-ui/icons/FilterList";
-import DuplicateIcon from '@material-ui/icons/ViewStream'
+import Refresh from "@mui/icons-material/Refresh";
+import RateReviewOutlined from "@mui/icons-material/RateReviewOutlined";
+import History from "@mui/icons-material/History";
+import FilterList from "@mui/icons-material/FilterList";
+import DuplicateIcon from '@mui/icons-material/ViewStream'
 import {getDataByIdUrl, getDataHistoryUrl, getDataReserveUrl, getDataUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";

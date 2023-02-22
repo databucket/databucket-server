@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react'
-import {withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
-import CompareIcon from '@material-ui/icons/YoutubeSearchedFor';
+import withStyles from '@mui/styles/withStyles';
+import Dialog from '@mui/material/Dialog';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import MuiDialogTitle from '@mui/material/DialogTitle';
+import MuiDialogContent from '@mui/material/DialogContent';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
+import CompareIcon from '@mui/icons-material/YoutubeSearchedFor';
 import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
 import ReactDiffViewer from "react-diff-viewer";
-import {useTheme} from "@material-ui/core";
+import {useTheme} from "@mui/material";
 
 const styles = theme => ({
     root: {
@@ -33,7 +33,11 @@ const DialogTitle = withStyles(styles)(props => {
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
-                <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="Close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}
@@ -141,7 +145,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <ReactDiffViewer
-                        useDarkTheme={theme.palette.type === 'dark'}
+                        useDarkTheme={theme.palette.mode === 'dark'}
                         oldValue={state.oldValue}
                         newValue={state.newValue}
                         splitView={true}

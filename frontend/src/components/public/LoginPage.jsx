@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import "./LoginPage.css";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import Logo from "../../images/databucket-logo.png";
 import {Input, InputAdornment, InputLabel, Paper} from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
@@ -106,7 +106,7 @@ export default function LoginPage() {
                                     aria-label="toggle password visibility"
                                     onClick={handleClickShowPassword}
                                     onMouseDown={handleMouseDownPassword}
-                                >
+                                    size="large">
                                     {showPassword ? <Visibility/> : <VisibilityOff/>}
                                 </IconButton>
                             </InputAdornment>

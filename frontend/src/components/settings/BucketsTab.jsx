@@ -1,8 +1,8 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import Refresh from "@mui/icons-material/Refresh";
+import FilterList from "@mui/icons-material/FilterList";
+import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
@@ -143,7 +143,7 @@ export default function BucketsTab() {
                         searchable: false,
                         filtering: false,
                         initialEditValue: {"name":"trip_origin","color":null,"svg":null},
-                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
+                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.mode}/>,
                         editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
                     getColumnName("20%"),
