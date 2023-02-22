@@ -1,4 +1,4 @@
-import {createTheme} from "@material-ui/core/styles";
+import { createTheme, adaptV4Theme } from "@mui/material/styles";
 
 export function getTheme(name) {
     switch (name) {
@@ -9,9 +9,9 @@ export function getTheme(name) {
     }
 }
 
-export const LightTheme = createTheme({
+export const LightTheme = createTheme(adaptV4Theme({
     palette: {
-        type: 'light',
+        mode: 'light',
         background: {
             default: '#f7f7f7',
             paper: '#eeeeee',
@@ -28,11 +28,11 @@ export const LightTheme = createTheme({
             // secondary: '#585858'
         }
     },
-});
+}));
 
-export const DarkTheme = createTheme({
+export const DarkTheme = createTheme(adaptV4Theme({
     palette: {
-        type: 'dark',
+        mode: 'dark',
         background: {
             default: '#2f3129',
             paper: '#43453e',
@@ -49,7 +49,7 @@ export const DarkTheme = createTheme({
             // secondary: '#c2c4be'
         }
     },
-});
+}));
 
 export const getAppBarBackgroundColor = () => {
     return '#0d47a1';

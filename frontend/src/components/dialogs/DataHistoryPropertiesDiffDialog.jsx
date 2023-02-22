@@ -12,7 +12,7 @@ import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-import ReactDiffViewer from "react-diff-viewer";
+// import ReactDiffViewer from "react-diff-viewer";
 import {useTheme} from "@mui/material";
 
 const styles = theme => ({
@@ -144,13 +144,13 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                     Properties difference
                 </DialogTitle>
                 <DialogContent dividers>
-                    <ReactDiffViewer
-                        useDarkTheme={theme.palette.mode === 'dark'}
-                        oldValue={state.oldValue}
-                        newValue={state.newValue}
-                        splitView={true}
-                        disableWordDiff={false}
-                    />
+                    {/*<ReactDiffViewer*/}
+                    {/*    useDarkTheme={theme.palette.mode === 'dark'}*/}
+                    {/*    oldValue={state.oldValue}*/}
+                    {/*    newValue={state.newValue}*/}
+                    {/*    splitView={true}*/}
+                    {/*    disableWordDiff={false}*/}
+                    {/*/>*/}
                 </DialogContent>
                 <MessageBox
                     config={messageBox}

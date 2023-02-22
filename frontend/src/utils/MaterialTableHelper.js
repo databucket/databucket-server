@@ -1,11 +1,11 @@
 import React from "react";
 import {fetchHelper} from "./FetchHelper";
 import {getToken} from "./ConfigurationStorage";
-import {darken, lighten, rgbToHex} from '@material-ui/core/styles';
-import UserIcon from "@material-ui/icons/AccountCircle";
-import DisabledUserIcon from "@material-ui/icons/NotInterested";
-import ExpiredUserIcon from "@material-ui/icons/EventBusy";
-import Tooltip from "@material-ui/core/Tooltip";
+import {darken, lighten, rgbToHex} from '@mui/material/styles';
+import UserIcon from "@mui/icons-material/AccountCircle";
+import DisabledUserIcon from "@mui/icons-material/NotInterested";
+import ExpiredUserIcon from "@mui/icons-material/EventBusy";
+import Tooltip from "@mui/material/Tooltip";
 import {DarkTheme, LightTheme} from "./Themes";
 
 const reverseMapping = (payload) => {
@@ -99,63 +99,63 @@ export const getButtonColor = (theme) => {
 }
 
 export const getTableHeaderBackgroundColor = (theme) => {
-    if (theme.palette.type === 'light') {
+    if (theme.palette.mode === 'light') {
         return darken(theme.palette.background.default, 0.15);
     } else
         return lighten(theme.palette.background.default, 0.15);
 }
 
 export const getTableToolbarBackgroundColor = (theme) => {
-    if (theme.palette.type === 'light') {
+    if (theme.palette.mode === 'light') {
         return darken(theme.palette.background.default, 0.07);
     } else
         return lighten(theme.palette.background.default, 0.07);
 }
 
 export const getTableRowBackgroundColor = (rowData, theme) => {
-    if (theme.palette.type === 'light')
+    if (theme.palette.mode === 'light')
         return rowData.tableData.id % 2 === 1 ? darken(theme.palette.background.default, 0.04) : darken(theme.palette.background.default, 0.02);
     else
         return rowData.tableData.id % 2 === 1 ? lighten(theme.palette.background.default, 0.04) : lighten(theme.palette.background.default, 0.02);
 }
 
 export const getTableRowForegroundColor = (rowData, theme, editable) => {
-    if (theme.palette.type === 'light')
+    if (theme.palette.mode === 'light')
         return editable ? theme.palette.foreground.default : theme.palette.color.red;
     else
         return editable ? theme.palette.foreground.default : theme.palette.color.red;
 }
 
 export const getSettingsTabsColor = (theme) => {
-    if (theme.palette.type === 'light') {
+    if (theme.palette.mode === 'light') {
         return theme.palette.text;
     } else
         return theme.palette.primary.contrastText;
 }
 
 export const getSettingsTabsBackgroundColor = (theme) => {
-    if (theme.palette.type === 'light') {
+    if (theme.palette.mode === 'light') {
         return darken(theme.palette.background.paper, 0.1);
     } else
         return theme.palette.background.paper;
 }
 
 export const getSettingsTabHooverBackgroundColor = (theme) => {
-    if (theme.palette.type === 'light') {
+    if (theme.palette.mode === 'light') {
         return darken(theme.palette.background.paper, 0.03);
     } else
         return lighten(theme.palette.background.paper, 0.1);
 }
 
 export const getSettingsTabSelectedBackgroundColor = (theme) => {
-    if (theme.palette.type === 'light') {
+    if (theme.palette.mode === 'light') {
         return darken(theme.palette.background.paper, 0.05);
     } else
         return lighten(theme.palette.background.paper, 0.05);
 }
 
 export const getSettingsTabSelectedColor = (theme) => {
-    if (theme.palette.type === 'light') {
+    if (theme.palette.mode === 'light') {
         return darken(theme.palette.secondary.main, 0.2);
     } else
         return theme.palette.secondary.main;
