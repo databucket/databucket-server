@@ -1,5 +1,5 @@
 import React, {createRef, useState} from 'react';
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
@@ -24,23 +24,34 @@ import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
 import {useWindowDimension} from "./UseWindowDimension";
-// import TableIcons from "./TableIcons";
+const PREFIX = 'SelectMultiDialog';
 
-const styles = (theme) => ({
-    root: {
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root2}`]: {
         margin: 0,
         padding: theme.spacing(2),
     },
-    closeButton: {
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
-    },
-});
+    }
+}));
 
-const DialogTitle = withStyles(styles)((props) => {
-    const {children, classes, onClose, ...other} = props;
+const DialogTitle = ((props) => {
+    const {children,  onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
@@ -57,11 +68,7 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
 SelectMultiDialog.propTypes = {
     columns: PropTypes.array.isRequired,
@@ -99,7 +106,7 @@ export default function SelectMultiDialog(props) {
     }
 
     return (
-        <div>
+        <Root>
             <Tooltip title={props.tooltipTitle}>
                 <Button
                     endIcon={<MoreHoriz/>}
@@ -119,7 +126,11 @@ export default function SelectMultiDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     {props.dialogTitle}
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent
+                    dividers
+                    classes={{
+                        root: classes.root
+                    }}>
                     <MaterialTable
                         title={props.tableTitle != null ? props.tableTitle : '-'}
                         tableRef={tableRef}
@@ -148,6 +159,6 @@ export default function SelectMultiDialog(props) {
                     />
                 </DialogContent>
             </Dialog>
-        </div>
+        </Root>
     );
 }

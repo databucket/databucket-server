@@ -1,22 +1,31 @@
 import React from 'react';
+import { styled } from '@mui/material/styles';
 import Snackbar from '@mui/material/Snackbar';
 import { Alert, AlertTitle } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
+const PREFIX = 'MessageBox';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
+const classes = {
+    root: `${PREFIX}-root`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`&.${classes.root}`]: {
         width: '100%',
         '& > * + *': {
             marginTop: theme.spacing(2),
         },
-    },
+    }
 }));
 
 export const MessageBox = (props) => {
-    const classes = useStyles();
+
 
     return (
-        <div className={classes.root}>
+        <Root className={classes.root}>
             <Snackbar
                 anchorOrigin={{
                     vertical: 'top',
@@ -31,6 +40,6 @@ export const MessageBox = (props) => {
                     {props.config.message}
                 </Alert>
             </Snackbar>
-        </div>
+        </Root>
     );
 }

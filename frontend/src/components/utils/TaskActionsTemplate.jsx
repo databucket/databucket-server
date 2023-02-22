@@ -1,4 +1,5 @@
 import React from "react";
+import { styled } from '@mui/material/styles';
 import FormControl from "@mui/material/FormControl";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -8,16 +9,23 @@ import Checkbox from "@mui/material/Checkbox";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import PropTypes from "prop-types";
-import makeStyles from '@mui/styles/makeStyles';
 import ActionPropertiesTableTemplate from "./ActionPropertiesTableTemplate";
 
-const useStyles = makeStyles(() => ({
-    settingsContainer: {
+const PREFIX = 'TaskActionsTemplate';
+
+const classes = {
+    settingsContainer: `${PREFIX}-settingsContainer`,
+    propertiesContainer: `${PREFIX}-propertiesContainer`
+};
+
+const Root = styled('div')(() => ({
+    [`& .${classes.settingsContainer}`]: {
         height: '27%',
         marginLeft: '20px',
         marginTop: '10px'
     },
-    propertiesContainer: {
+
+    [`& .${classes.propertiesContainer}`]: {
         height: '72%'
     }
 }));
@@ -33,7 +41,7 @@ TaskActionsTemplate.propTypes = {
 
 export default function TaskActionsTemplate(props) {
 
-    const classes = useStyles();
+
     const actionsPropertiesContentRef = React.useRef(null);
 
     const handleActionTypeChange = (event) => {
@@ -64,7 +72,7 @@ export default function TaskActionsTemplate(props) {
     }
 
     return (
-        <div style={{height: '95%'}}>
+        <Root style={{height: '95%'}}>
             <div className={classes.settingsContainer}>
                 <FormControl component="fieldset">
                     <RadioGroup row value={props.actions.type || ''} onChange={handleActionTypeChange}>
@@ -144,6 +152,6 @@ export default function TaskActionsTemplate(props) {
                 />
             </div>
             }
-        </div>
+        </Root>
     );
-};
+}
