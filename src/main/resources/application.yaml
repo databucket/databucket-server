@@ -27,3 +27,6 @@ logging:
     org.hibernate: error
     pl.databucket.service.data.DataService: error
     pl.databucket.service.BucketService: error
+springfox:
+  documentation:
+    enabled: false
