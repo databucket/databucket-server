@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
 import {MessageBox} from "../utils/MessageBox";
 import FilterRulesEditor from "../utils/FilterRulesEditor";
-import {Utils as QbUtils} from "react-awesome-query-builder";
+import {Utils as QbUtils} from "@react-awesome-query-builder/ui";
 import {getObjectLengthStr} from "../../utils/JsonHelper";
 import {Tabs} from "@mui/material";
 import Tab from "@mui/material/Tab";

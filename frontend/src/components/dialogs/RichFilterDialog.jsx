@@ -19,7 +19,7 @@ import Button from "@mui/material/Button";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getDataUrl} from "../../utils/UrlBuilder";
 import {getClassById} from "../../utils/JsonHelper";
-import {Query, Utils as QbUtils} from "react-awesome-query-builder";
+import {Query, Utils as QbUtils} from "@react-awesome-query-builder/ui";
 import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
 import FilterMenuSelector from "../data/FilterMenuSelector";
