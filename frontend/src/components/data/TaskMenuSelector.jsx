@@ -7,20 +7,13 @@ import {IconButton, Menu, Tooltip} from "@mui/material";
 const PREFIX = 'TaskMenuSelector';
 
 const classes = {
-    root: `${PREFIX}-root`,
     view: `${PREFIX}-view`,
     select: `${PREFIX}-select`,
     description: `${PREFIX}-description`
 };
 
-const Root = styled('div/')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root}`]: {
-        flexGrow: 1
-    },
+const Root = styled('div')(({theme}) => ({
+    flexGrow: 1,
 
     [`& .${classes.view}`]: {
         paddingLeft: theme.spacing(2),
@@ -66,7 +59,7 @@ export default function TaskMenuSelector(props) {
 
     if (props.tasks != null && props.tasks.length > 0)
         return (
-            <Root className={classes.root}>
+            <Root>
                 <Tooltip title={'Select task'}>
                     <IconButton
                         className={classes.select}

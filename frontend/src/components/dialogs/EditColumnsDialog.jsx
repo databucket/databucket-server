@@ -23,8 +23,6 @@ const PREFIX = 'EditColumnsDialog';
 
 const classes = {
     root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
-    root3: `${PREFIX}-root3`,
     selected: `${PREFIX}-selected`,
     oneLine: `${PREFIX}-oneLine`,
     tabs: `${PREFIX}-tabs`,
@@ -91,7 +89,6 @@ EditColumnsDialog.propTypes = {
 }
 
 export default function EditColumnsDialog(props) {
-
 
     const [properties, setProperties] = useState(null);
     const [columns, setColumns] = useState(convertNullValuesInCollection(props.configuration.columns, getColumnMapper()));
@@ -186,7 +183,7 @@ export default function EditColumnsDialog(props) {
                 </DialogContent>
                 <DialogActions
                     classes={{
-                        root: classes.root2
+                        root: classes.root
                     }}/>
             </Dialog>
         </Root>

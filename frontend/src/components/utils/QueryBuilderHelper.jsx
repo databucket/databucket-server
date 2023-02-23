@@ -1,5 +1,5 @@
-import InitialConfig from 'react-awesome-query-builder/lib/config/material';
-import {Builder, Utils as QbUtils} from "react-awesome-query-builder";
+import {BasicConfig} from '@react-awesome-query-builder/mui';
+import {Builder, Utils as QbUtils} from "@react-awesome-query-builder/ui";
 import Typography from "@mui/material/Typography";
 import React from "react";
 
@@ -53,7 +53,7 @@ export const createConfig = (propFields, tags, users, enums) => {
     fields['modifiedBy'] = modifiedBy(userList);
     fields['modifiedAt'] = modifiedAt;
 
-    return {...InitialConfig, fields: fields};
+    return {...BasicConfig, fields: fields};
 }
 
 const reduceUsersToList = (fullUserList) => {

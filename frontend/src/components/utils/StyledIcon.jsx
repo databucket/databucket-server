@@ -1,15 +1,7 @@
 import React from 'react';
 import {parseCustomSvg} from "./SvgHelper";
-import PropTypes from "prop-types";
 import {SvgIcon} from "@mui/material";
 import {getIconColor} from "../../utils/MaterialTableHelper";
-
-StyledIcon.propTypes = {
-    iconName: PropTypes.string.isRequired,
-    iconColor: PropTypes.string.isRequired,
-    iconSvg: PropTypes.string.isRequired,
-    themeType: PropTypes.string.isRequired
-};
 
 export default function StyledIcon(props) {
     if (props.iconSvg != null)
@@ -21,7 +13,7 @@ export default function StyledIcon(props) {
     else
         return (
             <span
-                style={{color: getIconColor(props.themeType, props.iconColor)}}
+                style={{color: getIconColor(props.themeType, props.iconColor).main}}
                 className="material-icons"
             >
                 {props.iconName}

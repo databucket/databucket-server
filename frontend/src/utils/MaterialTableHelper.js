@@ -266,8 +266,9 @@ export const getIconColor = (type, color) => {
             return rgbToHex(lighten(color, 0.25));
         } else if (type === 'banner') {
             return rgbToHex(lighten(color, 0.15));
-        } else
+        } else {
             return color;
+        }
     } else {
         if (type === 'light-display') {
             return LightTheme.palette.text.primary;
@@ -275,7 +276,8 @@ export const getIconColor = (type, color) => {
             return DarkTheme.palette.text.primary;
         } else if (type === 'banner-display') {
             return DarkTheme.palette.text.primary;
-        } else
-            return color;
+        } else {
+            return LightTheme.palette.text.primary;
+        }
     }
 }
