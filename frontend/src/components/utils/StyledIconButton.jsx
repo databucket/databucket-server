@@ -11,14 +11,8 @@ const classes = {
     customStyles: `${PREFIX}-customStyles`
 };
 
-const TheStyledIconButton = styled(IconButton)((
-    {
-        theme
-    }
-) => ({
-    [`&.${classes.customStyles}`]: {
-        color: (props) => props.iconColor
-    }
+const TheStyledIconButton = styled(IconButton)(({theme}) => ({
+    color: (props) => getIconColor(theme.palette.mode, props.iconColor)
 }));
 
 TheStyledIconButton.propTypes = {
@@ -33,17 +27,15 @@ export default function StyledIconButton(props) {
 
     if (props.iconSvg != null)
         return (
-            <StyledIconButton onClick={props.onClick} className={classes.customStyles} size="large">
+            <StyledIconButton onClick={props.onClick}
+                              size="large">
                 {parseCustomSvg(props.iconSvg, getIconColor(theme.palette.mode, props.iconColor))}
             </StyledIconButton>
         );
     else
         return (
             <IconButton onClick={props.onClick} className={classes.customStyles} size="large">
-                <span
-                    style={{color: getIconColor(theme.palette.mode, props.iconColor)}}
-                    className="material-icons"
-                >
+                <span className="material-icons">
                 {props.iconName}
                 </span>
             </IconButton>

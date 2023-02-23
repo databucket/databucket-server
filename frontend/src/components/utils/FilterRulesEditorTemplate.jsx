@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React, {useEffect, useState} from 'react';
-import {Query, Builder, Utils as QbUtils} from 'react-awesome-query-builder';
+import {Query, Builder, Utils as QbUtils} from '@react-awesome-query-builder/ui';
 import Typography from "@mui/material/Typography";
 import PropertiesTable, {mergeProperties} from "./PropertiesTable";
 import {createConfig, getInitialTree} from "./QueryBuilderHelper";

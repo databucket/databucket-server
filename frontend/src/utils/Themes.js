@@ -1,15 +1,17 @@
-import { createTheme, adaptV4Theme } from "@mui/material/styles";
-
 export function getTheme(name) {
-    switch (name) {
-        case 'dark':
-            return DarkTheme;
-        default:
-            return LightTheme;
+    if (name === 'dark') {
+        return DarkTheme;
+    } else {
+        return LightTheme;
     }
 }
 
-export const LightTheme = createTheme(adaptV4Theme({
+export const getDesignTokens = (mode) => ({
+    mode,
+    ...(mode === 'light') ? LightTheme : DarkTheme
+});
+
+export const LightTheme = {
     palette: {
         mode: 'light',
         background: {
@@ -28,9 +30,9 @@ export const LightTheme = createTheme(adaptV4Theme({
             // secondary: '#585858'
         }
     },
-}));
+};
 
-export const DarkTheme = createTheme(adaptV4Theme({
+export const DarkTheme = {
     palette: {
         mode: 'dark',
         background: {
@@ -49,7 +51,7 @@ export const DarkTheme = createTheme(adaptV4Theme({
             // secondary: '#c2c4be'
         }
     },
-}));
+};
 
 export const getAppBarBackgroundColor = () => {
     return '#0d47a1';

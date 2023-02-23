@@ -1,69 +1,27 @@
 import React, {useContext, useState} from 'react';
-import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
 import Typography from "@mui/material/Typography";
 import SetLightTheme from "@mui/icons-material/Brightness7";
 import SetDarkTheme from "@mui/icons-material/Brightness4";
-import {getUsername, saveThemeName} from "../../utils/ConfigurationStorage";
-import CustomThemeContext from "../../context/theme/CustomThemeContext";
+import {getUsername} from "../../utils/ConfigurationStorage";
 import Button from "@mui/material/Button";
 import {Tooltip} from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import CustomThemeContext from "../../context/theme/CustomThemeContext";
+import {useTheme} from "@mui/material/styles";
 
-const PREFIX = 'UserProfile';
-
-const classes = {
-    oneLine: `${PREFIX}-oneLine`,
-    content: `${PREFIX}-content`,
-    button: `${PREFIX}-button`
-};
-
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.oneLine}`]: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-
-    [`& .${classes.content}`]: {
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
-        padding: "15px",
-        margin: theme.spacing(1),
-    },
-
-    [`& .${classes.button}`]: {
-        marginTop: "13px"
-    }
-}));
 
 export default function UserProfile(props) {
-
+    let currentMode = useTheme().palette.mode;
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const [customThemeName] = useContext(CustomThemeContext);
+    const {toggleColorMode} = useContext(CustomThemeContext);
 
     const handleLogout = () => {
         props.onLogout();
     }
-
-    const handleChangeTheme = () => {
-        let newThemeName;
-        if (customThemeName === 'light')
-            newThemeName = 'dark';
-        else
-            newThemeName = 'light';
-
-        saveThemeName(newThemeName);
-        window.location.reload();
-    };
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -74,7 +32,7 @@ export default function UserProfile(props) {
     };
 
     return (
-        <Root>
+        <div>
             <Tooltip title={'User profile'}>
                 <IconButton onClick={handleMenu} color={'inherit'} size="large">
                     <AccountCircle/>
@@ -95,28 +53,29 @@ export default function UserProfile(props) {
                 open={open}
                 onClose={handleClose}
             >
-                <div className={classes.content}>
-                    <div className={classes.oneLine}>
-                        <AccountCircle/>
-                        <Typography color="secondary" style={{marginLeft: "10px"}}>{getUsername()}</Typography>
-                    </div>
+                <MenuItem sx={{cursor: "default"}}>
+                    <AccountCircle/>
+                    <Typography color="secondary" style={{marginLeft: "10px"}}>{getUsername()}</Typography>
+                </MenuItem>
+                <MenuItem>
                     <Button
-                        className={classes.button}
-                        startIcon={customThemeName === 'light' ? <SetDarkTheme/> : <SetLightTheme/>}
-                        onClick={handleChangeTheme}
+                        startIcon={currentMode === 'light' ? <SetDarkTheme/> : <SetLightTheme/>}
+                        onClick={toggleColorMode}
+                        color="inherit"
                     >
-                        {customThemeName === 'light' ? "Dark" : "Light"}
+                        {currentMode === 'light' ? "Dark" : "Light"}
                     </Button>
+                </MenuItem>
+                <MenuItem>
                     <Button
                         variant="contained"
-                        className={classes.button}
                         onClick={handleLogout}
                         color="primary"
                     >
                         Logout
                     </Button>
-                </div>
+                </MenuItem>
             </Menu>
-        </Root>
+        </div>
     );
 }

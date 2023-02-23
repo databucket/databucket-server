@@ -1,15 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {styled} from '@mui/material/styles';
+import {lighten, styled} from '@mui/material/styles';
 import Tab from "@mui/material/Tab";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Tabs from "@mui/material/Tabs";
-import {lighten} from "@mui/material/styles";
 import {getAppBarBackgroundColor} from "../../utils/Themes";
 import AccessContext from "../../context/access/AccessContext";
 import {Tooltip} from "@mui/material";
-import StyledIconButtonTab from "../utils/StyledIconButtonTab";
 import {getIconColor} from "../../utils/MaterialTableHelper";
+import StyledIconButton from "../utils/StyledIconButton";
 
 const PREFIX = 'BucketTabSelector';
 
@@ -19,14 +18,8 @@ const classes = {
     tabs: `${PREFIX}-tabs`
 };
 
-const StyledTabs = styled(Tabs)((
-    {
-        theme
-    }
-) => ({
-    [`&.${classes.tabs}`]: {
-        flex: 1,
-    },
+const StyledTabs = styled(Tabs)(({theme}) => ({
+    flex: 1,
     [`&.${classes.root}`]: {
         textTransform: "initial"
     },
@@ -82,22 +75,27 @@ export default function BucketTabSelector() {
             value={bucketsTabs.indexOf(activeBucket)}
             variant="scrollable"
             scrollButtons
-            className={classes.tabs}
             allowScrollButtonsMobile>
             {bucketsTabs.map((bucket) => (
-                <StyledTab key={bucket.id} component="div" onClick={() => handleChangedTab(bucket)} label={
-                    <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
+                <StyledTab key={bucket.id}
+                           component="div"
+                           onClick={() => handleChangedTab(bucket)}
+                           iconPosition="start"
+                           classes={{root: classes.root}}
+                           icon={<StyledIconButton iconName={bucket.iconName}
+                                                   iconColor={getIconColor('banner', bucket.iconColor)}
+                                                   iconSvg={bucket.iconSvg}/>}
+                           label={
+                               <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
                     <span>
-                        <StyledIconButtonTab iconName={bucket.iconName}
-                                             iconColor={getIconColor('banner', bucket.iconColor)}
-                                             iconSvg={bucket.iconSvg}/>
                         {getBucketVisibleName(bucket.name)}
-                        <IconButton color={'inherit'} onClick={() => handleRemovedTab(bucket)} size="large">
-                            <CloseIcon style={{fontSize: 18}}/>
+                        <IconButton color="inherit"
+                                    onClick={() => handleRemovedTab(bucket)} size="large">
+                            <CloseIcon sx={{fontSize: 18}}/>
                         </IconButton>
                     </span>
-                    </Tooltip>
-                }
+                               </Tooltip>
+                           }
                 />
             ))}
         </StyledTabs>

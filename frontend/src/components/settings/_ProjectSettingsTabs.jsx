@@ -41,22 +41,14 @@ import UsersTab from "./UsersTab";
 const PREFIX = '_ProjectSettingsTabs';
 
 const classes = {
-    root: `${PREFIX}-root`,
     selected: `${PREFIX}-selected`,
-    root2: `${PREFIX}-root2`,
     tabs: `${PREFIX}-tabs`,
     panel: `${PREFIX}-panel`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root2}`]: {
-        flexGrow: 1,
-        display: 'flex'
-    },
+const Container = styled('div')(({theme}) => ({
+    flexGrow: 1,
+    display: 'flex',
 
     [`& .${classes.tabs}`]: {
         color: getSettingsTabsColor(theme),
@@ -73,7 +65,6 @@ const Root = styled('div')((
 const StyledTab = Tab
 
 export default function _ProjectSettingsTabs() {
-
 
     const tabs = ['teams', 'users', 'classes', 'icons', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks', 'templates'];
 
@@ -96,7 +87,7 @@ export default function _ProjectSettingsTabs() {
         <Route
             path="/"
             render={({location}) => (
-                <Root className={classes.root}>
+                <Container>
                     <div className={classes.tabs}>
                         <IconButton
                             component={Link}
@@ -193,7 +184,7 @@ export default function _ProjectSettingsTabs() {
                             </ColumnsProvider> </TagsProvider> </ClassesProvider> </UsersProvider>
                         </BucketsProvider> </GroupsProvider> </RolesProvider>
                     </div>
-                </Root>
+                </Container>
             )}
         />
     );

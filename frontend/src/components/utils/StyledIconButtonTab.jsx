@@ -1,7 +1,6 @@
 import React from 'react';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import IconButton from "@mui/material/IconButton";
-import { useTheme } from "@mui/material/styles";
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
 
@@ -11,11 +10,7 @@ const classes = {
     button: `${PREFIX}-button`
 };
 
-const StyledIconButton = styled(IconButton)((
-    {
-        theme
-    }
-) => ({
+const StyledIconButton = styled(IconButton)(({theme}) => ({
     [`&.${classes.button}`]: {
         color: (props) => props.iconColor != null ? props.iconColor : theme.palette.primary.contrastText,
         "&:disabled": {

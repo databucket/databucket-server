@@ -1,6 +1,8 @@
 import {createContext} from "react";
 
-// const ManageUsersContext = createContext([null, {}]);
-const CustomThemeContext = createContext(null);
+const CustomThemeContext = createContext({
+    toggleColorMode: () => {
+    }
+});
 
 export default CustomThemeContext;

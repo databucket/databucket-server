@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React, {useContext, useEffect, useState} from 'react';
-import {Query, Builder, Utils as QbUtils} from 'react-awesome-query-builder';
+import {Query, Builder, Utils as QbUtils} from '@react-awesome-query-builder/ui';
 import EnumsContext from "../../context/enums/EnumsContext";
 import Typography from "@mui/material/Typography";
 import PropertiesTable, {mergeProperties} from "./PropertiesTable";

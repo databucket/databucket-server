@@ -24,8 +24,6 @@ const PREFIX = 'TaskEditConfigDialog';
 
 const classes = {
     root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
-    root3: `${PREFIX}-root3`,
     selected: `${PREFIX}-selected`,
     dialogPaper: `${PREFIX}-dialogPaper`,
     oneLine: `${PREFIX}-oneLine`,
@@ -216,7 +214,7 @@ export default function TaskEditConfigDialog(props) {
                 </DialogContent>
                 <DialogActions
                     classes={{
-                        root: classes.root2
+                        root: classes.root
                     }}/>
             </Dialog>
             <MessageBox
