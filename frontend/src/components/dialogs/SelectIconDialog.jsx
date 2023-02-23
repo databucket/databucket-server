@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import PropTypes from 'prop-types';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
@@ -15,7 +15,7 @@ import {useTheme} from "@mui/material/styles";
 import SvgContext from "../../context/svgs/SvgContext";
 import {MessageBox} from "../utils/MessageBox";
 import {parseCustomSvg} from "../utils/SvgHelper";
-// import ColorPicker from "material-ui-color-picker";
+import {MuiColorInput} from 'mui-color-input'
 import Typography from "@mui/material/Typography";
 import {DarkTheme, getAppBarBackgroundColor, LightTheme} from "../../utils/Themes";
 import StyledIcon from "../utils/StyledIcon";
@@ -34,7 +34,7 @@ function SimpleDialog(props) {
     const [currentIcon, setCurrentIcon] = useState({name: initIcon.name, color: initIcon.color, svg: initIcon.svg});
     const svgContext = useContext(SvgContext);
     const {svgs, fetchSvgs} = svgContext;
-    // const colorPickerRef = useRef();
+    const colorPickerRef = useRef();
 
     useEffect(() => {
         if (svgs == null)
@@ -67,10 +67,10 @@ function SimpleDialog(props) {
         setCurrentIcon({...currentIcon, color: null});
     }
 
-    // const handleChangedColor = (newColor) => {
-    //     if (newColor != null)
-    //         setCurrentIcon({...currentIcon, color: newColor});
-    // }
+    const handleChangedColor = (newColor) => {
+        if (newColor != null)
+            setCurrentIcon({...currentIcon, color: newColor});
+    }
 
     return (
         <Dialog
@@ -85,18 +85,18 @@ function SimpleDialog(props) {
                     <Typography style={{marginLeft: "20px"}}>Color:</Typography>
                 </Grid>
                 <Grid item xs={1}>
-                    {/*{currentIcon.color === null && (*/}
-                    {/*    <ColorPicker*/}
-                    {/*        ref={colorPickerRef}*/}
-                    {/*        onChange={handleChangedColor}*/}
-                    {/*        defaultValue={getButtonColor(theme)}*/}
-                    {/*    />)}*/}
-                    {/*{currentIcon.color !== null && (*/}
-                    {/*    <ColorPicker*/}
-                    {/*        ref={colorPickerRef}*/}
-                    {/*        onChange={handleChangedColor}*/}
-                    {/*        defaultValue={currentIcon.color}*/}
-                    {/*    />)}*/}
+                    {currentIcon.color === null && (
+                        <MuiColorInput
+                            ref={colorPickerRef}
+                            onChange={handleChangedColor}
+                            value={getButtonColor(theme)}
+                        />)}
+                    {currentIcon.color !== null && (
+                        <MuiColorInput
+                            ref={colorPickerRef}
+                            onChange={handleChangedColor}
+                            value={currentIcon.color}
+                        />)}
                 </Grid>
                 <Grid item xs>
                     <Tooltip id="reset-color" title="Reset color">
@@ -205,7 +205,9 @@ function SimpleDialog(props) {
                         />
                     </Grid>
                     <Grid item xs={2}>
-                        <Link style={{marginLeft: "10px"}} target='_blank' href='https://fonts.google.com/icons?selected=Material+Icons' color="primary">More icons...</Link><br/>
+                        <Link style={{marginLeft: "10px"}} target='_blank'
+                              href='https://fonts.google.com/icons?selected=Material+Icons' color="primary">More
+                            icons...</Link><br/>
                     </Grid>
                     <Grid item xs={1}/>
                     <Grid item xs>

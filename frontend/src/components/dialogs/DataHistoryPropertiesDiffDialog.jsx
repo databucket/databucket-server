@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
@@ -12,8 +12,7 @@ import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-// import ReactDiffViewer from "react-diff-viewer";
-// import {useTheme} from "@mui/material";
+import ReactDiffViewer from "react-diff-viewer-continued";
 
 const PREFIX = 'DataHistoryPropertiesDiffDialog';
 
@@ -41,7 +40,7 @@ const Root = styled('div')((
 }));
 
 const DialogTitle = (props => {
-    const {children,  onClose} = props;
+    const {children, onClose} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
@@ -62,7 +61,7 @@ const DialogContent = MuiDialogContent;
 
 export default function DataHistoryPropertiesDiffDialog(props) {
 
-    // const theme = useTheme();
+    const theme = useTheme();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [state, setState] = useState({
         bucket: null,
@@ -117,8 +116,8 @@ export default function DataHistoryPropertiesDiffDialog(props) {
 
     const getPreviousId = (history, row) => {
         let result = -1;
-        for (let i = 0; i < history.length; i++) {
-            let obj = history[i];
+        for (const element of history) {
+            let obj = element;
             if (obj.hasOwnProperty('properties') && obj.properties === true && obj.id !== row.id) {
                 result = obj.id;
             }
@@ -157,13 +156,13 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                     classes={{
                         root: classes.root
                     }}>
-                    {/*<ReactDiffViewer*/}
-                    {/*    useDarkTheme={theme.palette.mode === 'dark'}*/}
-                    {/*    oldValue={state.oldValue}*/}
-                    {/*    newValue={state.newValue}*/}
-                    {/*    splitView={true}*/}
-                    {/*    disableWordDiff={false}*/}
-                    {/*/>*/}
+                    <ReactDiffViewer
+                        useDarkTheme={theme.palette.mode === 'dark'}
+                        oldValue={state.oldValue}
+                        newValue={state.newValue}
+                        splitView={true}
+                        disableWordDiff={false}
+                    />
                 </DialogContent>
                 <MessageBox
                     config={messageBox}
