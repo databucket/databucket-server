@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {forwardRef} from 'react';
 import {styled, useTheme} from '@mui/material/styles';
 import IconButton from "@mui/material/IconButton";
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
 import {getIconColor} from "../../utils/MaterialTableHelper";
+import {Icon} from "@mui/material";
 
 const PREFIX = 'StyledIconButton';
 
@@ -22,22 +23,27 @@ TheStyledIconButton.propTypes = {
     onClick: PropTypes.func
 };
 
-export default function StyledIconButton(props) {
+export default forwardRef(function StyledIconButton({onClick, iconName, iconColor, iconSvg, ...props}, ref) {
     const theme = useTheme();
 
-    if (props.iconSvg != null)
+    if (iconSvg !== null) {
         return (
-            <StyledIconButton onClick={props.onClick}
-                              size="large">
-                {parseCustomSvg(props.iconSvg, getIconColor(theme.palette.mode, props.iconColor))}
-            </StyledIconButton>
+            <TheStyledIconButton onClick={onClick}
+                                 size="large"
+                                 {...props}
+                                 ref={ref}>
+                {parseCustomSvg(iconSvg, getIconColor(theme.palette.mode, iconColor))}
+            </TheStyledIconButton>
         );
-    else
+    } else {
         return (
-            <IconButton onClick={props.onClick} className={classes.customStyles} size="large">
-                <span className="material-icons">
-                {props.iconName}
-                </span>
+            <IconButton onClick={onClick}
+                        className={classes.customStyles}
+                        size="large"
+                        {...props}
+                        ref={ref}>
+                <Icon>{iconName}</Icon>
             </IconButton>
         );
-}
+    }
+});

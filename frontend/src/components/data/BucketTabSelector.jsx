@@ -8,28 +8,23 @@ import {getAppBarBackgroundColor} from "../../utils/Themes";
 import AccessContext from "../../context/access/AccessContext";
 import {Tooltip} from "@mui/material";
 import {getIconColor} from "../../utils/MaterialTableHelper";
-import StyledIconButton from "../utils/StyledIconButton";
-
-const PREFIX = 'BucketTabSelector';
-
-const classes = {
-    root: `${PREFIX}-root`,
-    selected: `${PREFIX}-selected`,
-    tabs: `${PREFIX}-tabs`
-};
+import StyledIcon from "../utils/StyledIcon";
 
 const StyledTabs = styled(Tabs)(({theme}) => ({
     flex: 1,
-    [`&.${classes.root}`]: {
-        textTransform: "initial"
-    },
-    [`&.${classes.root}:hover`]: {
-        backgroundColor: lighten(getAppBarBackgroundColor(), 0.05),
-        opacity: 1
-    }
+    textTransform: "initial",
 }));
 
-const StyledTab = Tab
+const StyledTab = styled(Tab)(({theme}) => ({
+    backgroundColor: lighten(getAppBarBackgroundColor(), 0.05),
+
+    '&.Mui-selected': {
+        color: '#fff',
+    },
+    '&.Mui-focusVisible': {
+        backgroundColor: 'rgba(100, 95, 228, 0.32)',
+    },
+}));
 
 export default function BucketTabSelector() {
 
@@ -81,10 +76,11 @@ export default function BucketTabSelector() {
                            component="div"
                            onClick={() => handleChangedTab(bucket)}
                            iconPosition="start"
-                           classes={{root: classes.root}}
-                           icon={<StyledIconButton iconName={bucket.iconName}
-                                                   iconColor={getIconColor('banner', bucket.iconColor)}
-                                                   iconSvg={bucket.iconSvg}/>}
+                           icon={<StyledIcon iconName={bucket.iconName}
+                                             iconColor={getIconColor('banner', bucket.iconColor)}
+                                             iconSvg={bucket.iconSvg}
+                                             sx={{marginRight: 1}}
+                           />}
                            label={
                                <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
                     <span>

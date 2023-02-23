@@ -6,22 +6,26 @@ import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {
-    arraysEquals,
-    convertNullValuesInObject,
-    isItemChanged,
-    validateItem
-} from "../../utils/JsonHelper";
+import {arraysEquals, convertNullValuesInObject, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnClass,
-    getColumnDescription, getColumnGroups,
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnRole, getColumnTeams, getColumnUsers
+    getColumnDescription,
+    getColumnGroups,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName,
+    getColumnRole,
+    getColumnTeams,
+    getColumnUsers
 } from "../utils/StandardColumns";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import GroupsContext from "../../context/groups/GroupsContext";
@@ -36,6 +40,8 @@ import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
 import StyledIcon from "../utils/StyledIcon";
+
+const EditComponent = props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>;
 
 export default function BucketsTab() {
 
@@ -114,7 +120,12 @@ export default function BucketsTab() {
                 .catch(error => {
                     e = true;
                     if (error.includes('already used by items'))
-                        setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                        setMessageBox({
+                            open: true,
+                            severity: 'warning',
+                            title: 'Item can not be removed',
+                            message: error
+                        });
                     else
                         setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                 })
@@ -130,6 +141,7 @@ export default function BucketsTab() {
         setConfirmRemove({open: false, id: 0, name: ''});
     }
 
+
     return (
         <div>
             <MaterialTable
@@ -142,9 +154,10 @@ export default function BucketsTab() {
                         field: 'icon',
                         searchable: false,
                         filtering: false,
-                        initialEditValue: {"name":"trip_origin","color":null,"svg":null},
-                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.mode}/>,
-                        editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
+                        initialEditValue: {"name": "trip_origin", "color": null, "svg": null},
+                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color}
+                                                       iconSvg={rowData.icon.svg} themeType={theme.palette.mode}/>,
+                        editComponent: EditComponent
                     },
                     getColumnName("20%"),
                     getColumnDescription("20%"),

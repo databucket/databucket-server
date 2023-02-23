@@ -336,7 +336,13 @@ export default function BucketDataTable(props) {
     const consolidateAllConditions = (tableSearch, tableFilters) => {
         let allConditions = [];
         if (tableSearch != null && tableSearch.length > 0)
-            allConditions.push({left_source: 'field', left_value: 'properties', operator: 'like', right_source: 'const', right_value: '%' + tableSearch + '%'});
+            allConditions.push({
+                left_source: 'field',
+                left_value: 'properties',
+                operator: 'like',
+                right_source: 'const',
+                right_value: '%' + tableSearch + '%'
+            });
 
         if (filtering && tableFilters.length > 0) {
             for (const filter of tableFilters) {
@@ -346,32 +352,92 @@ export default function BucketDataTable(props) {
                     if (filter.column.type === 'numeric')
                         if (Array.isArray(filter.value)) {
                             if (filter.value.length > 0)
-                                allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                                allConditions.push({
+                                    left_source: leftSource,
+                                    left_value: filter.column.source,
+                                    operator: 'in',
+                                    right_source: 'const',
+                                    right_value: filter.value
+                                });
                         } else
-                            allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: '=', right_source: 'const', right_value: parseFloat(filter.value)});
+                            allConditions.push({
+                                left_source: leftSource,
+                                left_value: filter.column.source,
+                                operator: '=',
+                                right_source: 'const',
+                                right_value: parseFloat(filter.value)
+                            });
                     else if (filter.column.type === 'boolean')
-                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: '=', right_source: 'const', right_value: (filter.value === 'checked')});
+                        allConditions.push({
+                            left_source: leftSource,
+                            left_value: filter.column.source,
+                            operator: '=',
+                            right_source: 'const',
+                            right_value: (filter.value === 'checked')
+                        });
                     else if (Array.isArray(filter.value) && filter.value.length > 0)
-                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                        allConditions.push({
+                            left_source: leftSource,
+                            left_value: filter.column.source,
+                            operator: 'in',
+                            right_source: 'const',
+                            right_value: filter.value
+                        });
                     else if (filter.value.length > 0)
-                        allConditions.push({left_source: leftSource, left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: '%' + filter.value + '%'});
+                        allConditions.push({
+                            left_source: leftSource,
+                            left_value: filter.column.source,
+                            operator: 'like',
+                            right_source: 'const',
+                            right_value: '%' + filter.value + '%'
+                        });
 
                 } else {
                     if (filter.column.type === 'numeric')
                         if (Array.isArray(filter.value)) {
                             if (filter.value.length > 0) {
                                 const numericList = filter.value.map(value => parseFloat(value));
-                                allConditions.push({left_source: 'field', left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: numericList});
+                                allConditions.push({
+                                    left_source: 'field',
+                                    left_value: filter.column.source,
+                                    operator: 'in',
+                                    right_source: 'const',
+                                    right_value: numericList
+                                });
                             }
                         } else
-                            allConditions.push({left_source: 'field', left_value: filter.column.source, operator: '=', right_source: 'const', right_value: parseFloat(filter.value)});
+                            allConditions.push({
+                                left_source: 'field',
+                                left_value: filter.column.source,
+                                operator: '=',
+                                right_source: 'const',
+                                right_value: parseFloat(filter.value)
+                            });
                     else if (filter.column.type === 'boolean')
-                        allConditions.push({left_source: 'field', left_value: filter.column.source, operator: '=', right_source: 'const', right_value: (filter.value === 'checked')});
+                        allConditions.push({
+                            left_source: 'field',
+                            left_value: filter.column.source,
+                            operator: '=',
+                            right_source: 'const',
+                            right_value: (filter.value === 'checked')
+                        });
                     else if (Array.isArray(filter.value) && filter.value.length > 0)
-                        allConditions.push({left_source: 'field', left_value: filter.column.source, operator: 'in', right_source: 'const', right_value: filter.value});
+                        allConditions.push({
+                            left_source: 'field',
+                            left_value: filter.column.source,
+                            operator: 'in',
+                            right_source: 'const',
+                            right_value: filter.value
+                        });
                     else if (filter.value.length > 0) {
                         const filterValue = (filter.value === '@currentUser') ? getUsername() : '%' + filter.value + '%';
-                        allConditions.push({left_source: 'field', left_value: filter.column.source, operator: 'like', right_source: 'const', right_value: filterValue});
+                        allConditions.push({
+                            left_source: 'field',
+                            left_value: filter.column.source,
+                            operator: 'like',
+                            right_source: 'const',
+                            right_value: filterValue
+                        });
                     }
                 }
             }
@@ -394,7 +460,9 @@ export default function BucketDataTable(props) {
     };
 
     const richFilterAction = {
-        icon: () => state.activeLogic != null ? <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon> : <span className="material-icons">filter_alt</span>,
+        icon: () => state.activeLogic != null ?
+            <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon> :
+            <span className="material-icons">filter_alt</span>,
         tooltip: 'Rich filter',
         isFreeAction: true,
         onClick: () => {
@@ -403,7 +471,8 @@ export default function BucketDataTable(props) {
     };
 
     const filterAction = {
-        icon: () => filtering && tableRef.current.state.query.filters.length > 0 ? <FilterList color={'secondary'}/> : <FilterList/>,
+        icon: () => filtering && tableRef.current.state.query.filters.length > 0 ? <FilterList color={'secondary'}/> :
+            <FilterList/>,
         tooltip: 'Enable/disable filter',
         isFreeAction: true,
         onClick: () => {
@@ -615,7 +684,11 @@ export default function BucketDataTable(props) {
                         searchFieldStyle: {width: 500},
                         maxBodyHeight: getTableHeight(height),
                         minBodyHeight: getTableHeight(height),
-                        headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
+                        headerStyle: {
+                            position: 'sticky',
+                            top: 0,
+                            backgroundColor: getTableHeaderBackgroundColor(theme)
+                        },
                         cellStyle: {whiteSpace: 'nowrap'},
                         rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                     }}
@@ -636,10 +709,12 @@ export default function BucketDataTable(props) {
                                     <Grid container direction="row">
                                         <Grid container direction={"row"} item xs={3} alignItems="center">
                                             <Grid item>
-                                                {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) && <ReserveDataDialog onReserve={onDataReserve}/>}
+                                                {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
+                                                    <ReserveDataDialog onReserve={onDataReserve}/>}
                                             </Grid>
                                             <Grid item>
-                                                {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView) && <AvailableTagsDialog bucketTags={state.bucketTags}/>}
+                                                {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView) &&
+                                                    <AvailableTagsDialog bucketTags={state.bucketTags}/>}
                                             </Grid>
                                             <Grid item>
                                                 <ViewMenuSelector
