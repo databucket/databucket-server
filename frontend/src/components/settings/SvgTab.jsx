@@ -7,18 +7,22 @@ import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage
 import {
     getButtonColor,
     getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {
-    isItemChanged,
-    validateItem
-} from "../../utils/JsonHelper";
+import {isItemChanged, validateItem} from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnCreatedBy, getColumnCreatedAt
+    getColumnCreatedAt,
+    getColumnCreatedBy,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
 } from "../utils/StandardColumns";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
@@ -69,7 +73,12 @@ export default function SvgTab() {
                     insertSvg(file.name, event.target.result);
                 }
             } else
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: "It doesn't seem to be an svg file!"});
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: "It doesn't seem to be an svg file!"
+                });
 
             reader.readAsText(file);
         }
@@ -77,15 +86,25 @@ export default function SvgTab() {
 
     const insertSvg = (name, svgContent) => {
         const size = ['24', '24px'];
-        const svgObj = parse(svgContent);
+        const svgObj = parse(svgContent.trim());
         if (svgObj.type !== "svg") {
-            setMessageBox({open: true, severity: 'error', title: 'Error', message: "It seems, the file content isn't an svg object!"});
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: "It seems, the file content isn't an svg object!"
+            });
             return;
         }
         if ((svgObj.props.height != null && !size.includes(svgObj.props.height))
             || (svgObj.props.width != null && !size.includes(svgObj.props.width))
             || (svgObj.props.viewBox != null && svgObj.props.viewBox !== "0 0 24 24")) {
-            setMessageBox({open: true, severity: 'error', title: 'Error', message: "The SVG object is expected to be configured with viewBox=\"0 0 24 24\" height=\"24px\" width=\"24px\"!"});
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: "The SVG object is expected to be configured with viewBox=\"0 0 24 24\" height=\"24px\" width=\"24px\"!"
+            });
             return;
         }
 
@@ -104,7 +123,6 @@ export default function SvgTab() {
     return (
         <div>
             <MaterialTable
-
                 title='Svg icons'
                 tableRef={tableRef}
                 columns={[
@@ -114,8 +132,9 @@ export default function SvgTab() {
                         field: 'structure',
                         searchable: false,
                         filtering: false,
-                        editable: false,
-                        render: rowData => <IconButton size="large">{parseCustomSvg(rowData.structure, getButtonColor(theme))}</IconButton>,
+                        editable: "never",
+                        render: rowData => <IconButton
+                            size="large">{parseCustomSvg(rowData.structure, getButtonColor(theme))}</IconButton>,
                     },
                     getColumnName(),
                     getColumnCreatedBy(),
@@ -240,9 +259,19 @@ export default function SvgTab() {
                                     .catch(error => {
                                         e = true;
                                         if (error.includes('already used by items'))
-                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'warning',
+                                                title: 'Item can not be removed',
+                                                message: error
+                                            });
                                         else
-                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'error',
+                                                title: 'Error',
+                                                message: error
+                                            });
                                         reject();
                                     })
                                     .then(() => {

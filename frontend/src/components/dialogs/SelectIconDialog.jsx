@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {createRef, forwardRef, useContext, useEffect, useRef, useState} from 'react';
 import PropTypes from 'prop-types';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
@@ -110,8 +110,8 @@ function SimpleDialog(props) {
             <div style={{height: "10px"}}/>
             <Divider/>
             <div>
-                {iconsNames.map((iName, key) => (
-                    <Tooltip title={iName} key={key}>
+                {iconsNames.map((iName) => (
+                    <Tooltip title={iName} key={iName}>
                         <IconButton onClick={() => handleItemClick(iName)} color={"inherit"} size="large">
                             <span className="material-icons">{iName}</span>
                         </IconButton>
@@ -231,8 +231,13 @@ SelectIconDialog.propTypes = {
     onChange: PropTypes.func
 };
 
+const TooltipIconButton = forwardRef((props, ref) =>
+    <StyledIconButton{...props} ref={ref}/>);
+const SomeContent = React.forwardRef((props, ref) =>
+    <Button {...props} ref={ref}>Hello, World!</Button>);
 export default function SelectIconDialog(props) {
     const theme = useTheme();
+    const dialogRef = createRef();
     const {icon, onChange} = props;
     const [open, setOpen] = React.useState(false);
     const [selectedIcon, setSelectedIcon] = React.useState({name: icon.name, color: icon.color, svg: icon.svg});
@@ -248,16 +253,16 @@ export default function SelectIconDialog(props) {
     };
 
     return (
-        <div>
+        <>
             <Tooltip title={'Change icon'}>
-                <StyledIconButton
+                {/*<SomeContent/>*/}
+                <TooltipIconButton
                     onClick={handleClickOpen}
                     iconName={selectedIcon.name}
                     iconColor={selectedIcon.color != null ? selectedIcon.color : getButtonColor(theme)}
-                    iconSvg={selectedIcon.svg}
-                />
+                    iconSvg={selectedIcon.svg}/>
             </Tooltip>
             <SimpleDialog initIcon={selectedIcon} open={open} onClose={handleClose}/>
-        </div>
+        </>
     );
 }

@@ -9,16 +9,13 @@ export default function App() {
 
     clearAllSearchedText();
     clearAllOrders();
-    // const [themeName] = useContext(CustomThemeContext);
     return (
         <StyledEngineProvider injectFirst>
-            {/*<ThemeProvider theme={getTheme(themeName)}>*/}
             <CssBaseline>
                 <StaticStylesSelector themeName={getThemeName()}>
                     <AppRouter/>
                 </StaticStylesSelector>
             </CssBaseline>
-            {/*</ThemeProvider>*/}
         </StyledEngineProvider>
     );
 }

@@ -1,7 +1,6 @@
 import React, {createRef, useState} from 'react';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Done';
@@ -15,32 +14,25 @@ import {
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
-import {
-    getLastPageSizeOnDialog,
-    setLastPageSizeOnDialog
-} from "../../utils/ConfigurationStorage";
-import {useTheme} from '@mui/material/styles';
+import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
 import {useWindowDimension} from "./UseWindowDimension";
+import MuiDialogTitle from "@mui/material/DialogTitle";
+
 const PREFIX = 'SelectMultiDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
     closeButton: `${PREFIX}-closeButton`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root2}`]: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
+const Root = styled('div')(({theme}) => ({
+    padding: theme.spacing(0),
+}));
+const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
 
     [`& .${classes.closeButton}`]: {
         position: 'absolute',
@@ -51,9 +43,9 @@ const Root = styled('div')((
 }));
 
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <StyledDialogTitle disableTypography {...other}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
                 <IconButton
@@ -64,7 +56,7 @@ const DialogTitle = ((props) => {
                     <CloseIcon/>
                 </IconButton>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
 });
 
@@ -96,7 +88,9 @@ export default function SelectMultiDialog(props) {
     };
 
     const handleSave = () => {
-        props.onChange(selection.map((item) => {return item.id}));
+        props.onChange(selection.map((item) => {
+            return item.id
+        }));
         setOpen(false);
     }
 
@@ -126,11 +120,7 @@ export default function SelectMultiDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     {props.dialogTitle}
                 </DialogTitle>
-                <DialogContent
-                    dividers
-                    classes={{
-                        root: classes.root
-                    }}>
+                <DialogContent dividers>
                     <MaterialTable
                         title={props.tableTitle != null ? props.tableTitle : '-'}
                         tableRef={tableRef}

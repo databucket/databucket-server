@@ -1,5 +1,17 @@
-import {getTableBodyHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
-import {convertPropertiesDates, getPropertyByUuid, getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
+import {
+    getTableBodyHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    moveDown,
+    moveUp
+} from "../../utils/MaterialTableHelper";
+import {
+    convertPropertiesDates,
+    getPropertyByUuid,
+    getPropertyTitle,
+    isItemChanged,
+    validateItem
+} from "../../utils/JsonHelper";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable, {MTableEditField} from "material-table";
@@ -199,7 +211,11 @@ export default function ActionPropertiesTableTemplate(props) {
                 title={'Modify properties:'}
                 tableRef={tableRef}
                 columns={[
-                    {title: '#', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''},
+                    {
+                        title: '#',
+                        cellStyle: {width: '1%'},
+                        render: (rowData) => rowData ? rowData.tableData.id + 1 : ''
+                    },
                     {
                         title: 'Property',
                         field: 'uuid',
