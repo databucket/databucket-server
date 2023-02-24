@@ -90,7 +90,7 @@ tasks.register('deleteStatic', Delete) {
     delete "src/main/resources/static"
 }
 
-tasks.register('buildFrontend') {
+tasks.register('buildFrontend', GradleBuild) {
     String npm = 'npm'
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         npm = 'npm.cmd'
@@ -108,12 +108,16 @@ tasks.register('buildFrontend') {
 }
 
 tasks.register('copyFrontend') {
+    dependsOn tasks.named('buildFrontend')
+
     copy {
         from "frontend/build"
         into "src/main/resources/static"
     }
 }
 
-copyFrontend.dependsOn buildFrontend
-
-bootJar.dependsOn copyFrontend
+clean.dependsOn tasks.named("deleteStatic")
+bootJar.dependsOn tasks.named("copyFrontend")
+springBoot {
+    buildInfo()
+}
