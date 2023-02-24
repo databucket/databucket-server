@@ -21,7 +21,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    all*.exclude module : 'spring-boot-starter-logging'
+    all*.exclude module: 'spring-boot-starter-logging'
 }
 
 repositories {
@@ -86,38 +86,56 @@ test {
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
-tasks.register('deleteStatic', Delete) {
-    delete "src/main/resources/static"
+tasks.register('deleteStatic') {
+    doLast {
+        delete "src/main/resources/static"
+    }
 }
 
-tasks.register('buildFrontend', GradleBuild) {
-    String npm = 'npm'
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        npm = 'npm.cmd'
+tasks.register('buildFrontend') {
+    doLast {
+        String npm = 'npm'
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            npm = 'npm.cmd'
+        }
+
+        exec {
+            workingDir 'frontend'
+            commandLine npm, 'install'
+        }
+
+        exec {
+            workingDir 'frontend'
+            commandLine npm, 'run', 'build'
+        }
     }
 
-    exec {
-        workingDir 'frontend'
-        commandLine npm, 'install'
-    }
-
-    exec {
-        workingDir 'frontend'
-        commandLine npm, 'run', 'build'
-    }
 }
 
 tasks.register('copyFrontend') {
     dependsOn tasks.named('buildFrontend')
 
-    copy {
-        from "frontend/build"
-        into "src/main/resources/static"
+    doLast {
+        copy {
+            from "frontend/build"
+            into "src/main/resources/static"
+        }
+
+        exec {
+            workingDir "src/main/resources/static"
+            commandLine "ls", "-la"
+        }
     }
 }
 
-clean.dependsOn tasks.named("deleteStatic")
-bootJar.dependsOn tasks.named("copyFrontend")
+tasks.named("clean") {
+    dependsOn tasks.named("deleteStatic")
+}
+
+tasks.named("compileJava") {
+    dependsOn tasks.named("copyFrontend")
+    mustRunAfter tasks.named("clean")
+}
 springBoot {
     buildInfo()
 }
