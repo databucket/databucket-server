@@ -1,8 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import {styled, useTheme} from '@mui/material/styles';
-import clsx from 'clsx';
 import Drawer from '@mui/material/Drawer';
-import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -10,7 +8,6 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import UserProfile from "./UserProfile";
@@ -30,7 +27,6 @@ import {
     setToken
 } from "../../utils/ConfigurationStorage";
 import {Link, Redirect} from 'react-router-dom';
-import {getAppBarBackgroundColor} from "../../utils/Themes";
 import BucketDataTable from "./BucketDataTable";
 import {getProjectSettingsPath} from "../../route/AppRouter";
 import GroupMenuSelector from "./GroupMenuSelector";
@@ -44,104 +40,36 @@ import {getButtonColor, getPostOptions} from "../../utils/MaterialTableHelper";
 import {getBaseUrl, getSwaggerDocPath} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
 import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
+import {CustomAppBar, drawerWidth} from "../common/CustomAppBar";
+import {Box, ListItemButton} from "@mui/material";
 
-const PREFIX = '_ProjectData';
-
-const classes = {
-    root: `${PREFIX}-root`,
-    grow: `${PREFIX}-grow`,
-    appBar: `${PREFIX}-appBar`,
-    appBarShift: `${PREFIX}-appBarShift`,
-    menuButton: `${PREFIX}-menuButton`,
-    hide: `${PREFIX}-hide`,
-    drawer: `${PREFIX}-drawer`,
-    drawerOpen: `${PREFIX}-drawerOpen`,
-    drawerClose: `${PREFIX}-drawerClose`,
-    toolbar: `${PREFIX}-toolbar`,
-    content: `${PREFIX}-content`
-};
-
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root}`]: {
-        display: 'flex',
-    },
-
-    [`& .${classes.grow}`]: {
-        flexGrow: 1,
-    },
-
-    [`& .${classes.appBar}`]: {
-        zIndex: theme.zIndex.drawer + 1,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-    },
-
-    [`& .${classes.appBarShift}`]: {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-
-    [`& .${classes.menuButton}`]: {
-        marginRight: theme.spacing(2)
-    },
-
-    [`& .${classes.hide}`]: {
-        display: 'none',
-    },
-
-    [`& .${classes.drawer}`]: {
-        width: drawerWidth,
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-    },
-
-    [`& .${classes.drawerOpen}`]: {
-        width: drawerWidth,
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-
-    [`& .${classes.drawerClose}`]: {
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-        overflowX: 'hidden',
-        width: theme.spacing(7) + 1,
-        [theme.breakpoints.up('sm')]: {
-            width: theme.spacing(9) + 1,
-        },
-    },
-
-    [`& .${classes.toolbar}`]: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-    },
-
-    [`& .${classes.content}`]: {
+const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
+    ({theme, open}) => ({
         flexGrow: 1,
         padding: theme.spacing(0),
-    }
+        transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        marginLeft: `-${drawerWidth}px`,
+        ...(open && {
+            transition: theme.transitions.create('margin', {
+                easing: theme.transitions.easing.easeOut,
+                duration: theme.transitions.duration.enteringScreen,
+            }),
+            marginLeft: 0,
+        }),
+    }),
+);
+
+const DrawerHeader = styled('div')(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-end',
 }));
-
-const drawerWidth = 260;
-
 export default function ProjectData() {
 
     const drawerRef = useRef(null);
@@ -150,7 +78,6 @@ export default function ProjectData() {
     const [open, setOpen] = useState(isLeftPanelOpen());
     const [logged, setLogged] = useState(hasToken() && hasProject());
     const accessContext = useContext(AccessContext);
-    const [currentDrawerWidth, setCurrentDrawerWidth] = useState(0);
     const {
         fetchAccessTree,
         projects,
@@ -164,13 +91,6 @@ export default function ProjectData() {
         enums, fetchSessionEnums,
         fetchSessionUsers
     } = accessContext;
-
-    useEffect(() => {
-        if (open)
-            setCurrentDrawerWidth(drawerWidth);
-        else
-            setCurrentDrawerWidth(73);
-    }, [open]);
 
     useEffect(() => {
         fetchSessionUsers();
@@ -192,9 +112,20 @@ export default function ProjectData() {
     }, [views, tasks]);
 
     useEffect(() => {
-        if (views != null && tasks == null)
-            fetchSessionTasks();
+        if (views != null) {
+            if (columns == null) {
+                fetchSessionColumns();
+            }
+            if (tasks == null) {
+                fetchSessionTasks();
+            }
+        }
     }, [views]);
+
+    useEffect(() => {
+        if (views != null && tasks != null && filters == null)
+            fetchSessionFilters();
+    }, [views, tasks]);
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -233,24 +164,16 @@ export default function ProjectData() {
 
     setPathname(null); // clear path
     return (
-        <Root>
-            <div className={classes.root}>
-                <AppBar
-                    position="fixed"
-                    className={clsx(classes.appBar, {
-                        [classes.appBarShift]: open,
-                    })}
-                    style={{background: getAppBarBackgroundColor()}}
-                >
+        <>
+            <Box sx={{display: 'flex'}}>
+                <CustomAppBar open={open} position="fixed">
                     <Toolbar>
                         <IconButton
                             color="inherit"
                             aria-label="open drawer"
                             onClick={handleDrawerOpen}
                             edge="start"
-                            className={clsx(classes.menuButton, {
-                                [classes.hide]: open,
-                            })}
+                            sx={{mr: 2, ...(open && {display: 'none'})}}
                             size="large">
                             <MenuIcon/>
                         </IconButton>
@@ -258,35 +181,33 @@ export default function ProjectData() {
                         <UserProfile onLogout={handleLogout}/>
                         <UserProjects onChangeProject={onChangeProject}/>
                     </Toolbar>
-                </AppBar>
+                </CustomAppBar>
                 <Drawer
-                    ref={drawerRef}
-                    variant="permanent"
-                    className={clsx(classes.drawer, {
-                        [classes.drawerOpen]: open,
-                        [classes.drawerClose]: !open,
-                    })}
-                    classes={{
-                        paper: clsx({
-                            [classes.drawerOpen]: open,
-                            [classes.drawerClose]: !open,
-                        }),
+                    sx={{
+                        width: drawerWidth,
+                        flexShrink: 0,
+                        '& .MuiDrawer-paper': {
+                            width: drawerWidth,
+                            boxSizing: 'border-box',
+                        },
                     }}
+                    variant="persistent"
+                    anchor="left"
+                    open={open}
                 >
-                    <div className={classes.toolbar}>
+                    <DrawerHeader>
                         <IconButton onClick={handleDrawerClose} size="large">
                             {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
                         </IconButton>
-                    </div>
+                    </DrawerHeader>
                     <Divider/>
                     <GroupMenuSelector open={open}/>
-                    <BucketListSelector leftPanelWidth={currentDrawerWidth}/>
-                    <div className={classes.grow}/>
+                    <BucketListSelector/>
                     <Divider/>
                     <List>
                         {
                             hasRobotRole() && (
-                                <ListItem button target='_blank' component={Link} to={getSwaggerDocPath()}>
+                                <ListItemButton target='_blank' component={Link} to={getSwaggerDocPath()}>
                                     <ListItemIcon>
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                              fill={getButtonColor(theme)}>
@@ -296,13 +217,13 @@ export default function ProjectData() {
                                     </ListItemIcon>
                                     <ListItemText primary={'Swagger'}
                                                   primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
-                                </ListItem>
+                                </ListItemButton>
                             )
                         }
                         {
                             hasAdminRole() && (
-                                <ListItem button component={Link}
-                                          to={getProjectSettingsPath() + "/" + getLastSettingsPageName()}>
+                                <ListItemButton component={Link}
+                                                to={getProjectSettingsPath() + "/" + getLastSettingsPageName()}>
                                     <ListItemIcon>
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                              fill={getButtonColor(theme)}>
@@ -312,12 +233,12 @@ export default function ProjectData() {
                                     </ListItemIcon>
                                     <ListItemText primary={'Settings'}
                                                   primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
-                                </ListItem>
+                                </ListItemButton>
                             )
                         }
                         {
                             hasSuperRole() && (
-                                <ListItem button component={Link} to={"/management/" + getLastManagementPageName()}>
+                                <ListItemButton component={Link} to={"/management/" + getLastManagementPageName()}>
                                     <ListItemIcon>
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                              fill={getButtonColor(theme)}>
@@ -330,21 +251,21 @@ export default function ProjectData() {
                                     </ListItemIcon>
                                     <ListItemText primary={'Management'}
                                                   primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
-                                </ListItem>
+                                </ListItemButton>
                             )
                         }
                         <InfoDialog/>
                     </List>
                 </Drawer>
-                <main className={classes.content}>
-                    <div className={classes.toolbar}/>
-                    <BucketDataTable leftPanelWidth={currentDrawerWidth}/>
-                </main>
-            </div>
+                <Main open={open}>
+                    <DrawerHeader/>
+                    <BucketDataTable/>
+                </Main>
+            </Box>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </Root>
+        </>
     );
 }

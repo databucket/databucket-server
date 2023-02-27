@@ -8,11 +8,13 @@ import {
     getPutOptions,
     getTableHeaderBackgroundColor,
     getTableHeight,
-    getTableRowBackgroundColor, getTableToolbarBackgroundColor
+    getTableRowBackgroundColor,
+    getTableToolbarBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {useTheme} from "@mui/material/styles";
 import {
-    getLastActiveView, getLastBucketOrder,
+    getLastActiveView,
+    getLastBucketOrder,
     getLastBucketSearchedText,
     getLastPageSize,
     getUsername,
@@ -27,21 +29,27 @@ import ViewMenuSelector from "./ViewMenuSelector";
 import AccessContext from "../../context/access/AccessContext";
 import MissingBucketTable from "./MissingBucketTable";
 import {
-    isFeatureEnabled,
-    FEATURE_SEARCH,
-    FEATURE_MODIFYING,
-    FEATURE_DETAILS,
-    FEATURE_HISTORY,
+    FEATURE_AVAILABLE_TAGS,
     FEATURE_CREATION,
+    FEATURE_DETAILS,
+    FEATURE_DUPLICATE,
+    FEATURE_EXPORT,
+    FEATURE_FILTER,
+    FEATURE_HISTORY,
+    FEATURE_MODIFYING,
     FEATURE_REMOVAL,
     FEATURE_RESERVATION,
-    FEATURE_EXPORT, FEATURE_TASKS, FEATURE_DUPLICATE, FEATURE_RICH_FILTER, FEATURE_FILTER, FEATURE_AVAILABLE_TAGS
+    FEATURE_RICH_FILTER,
+    FEATURE_SEARCH,
+    FEATURE_TASKS,
+    isFeatureEnabled
 } from "../utils/ViewFeatures";
 import prepareTableColumns, {
     convertDataBeforeAdd,
     convertDataBeforeModify,
     getActiveView,
-    getBucketTags, getBucketTasks,
+    getBucketTags,
+    getBucketTasks,
     getBucketViews,
     getFetchColumns
 } from "./BucketDataTableHelper";
@@ -59,23 +67,17 @@ import DataHistoryDialog from "../dialogs/DataHistoryDialog";
 import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
-import PropTypes from "prop-types";
 import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
 
-BucketDataTable.propTypes = {
-    leftPanelWidth: PropTypes.number.isRequired
-}
-
-export default function BucketDataTable(props) {
+export default function BucketDataTable() {
 
     const theme = useTheme();
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [height, width] = useWindowDimension();
-    const [tableWidth, setTableWidth] = useState(500);
+    const [height] = useWindowDimension();
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
     const {buckets, activeBucket, views, columns, filters, tags, tasks, enums, users} = accessContext;
@@ -106,10 +108,6 @@ export default function BucketDataTable(props) {
     });
     let searchText = activeBucket != null ? getLastBucketSearchedText(activeBucket.id) : "";
     const [changedBucket, setChangedBucket] = useState(false);
-
-    useEffect(() => {
-        setTableWidth(width - props.leftPanelWidth - 1);
-    }, [width, height, props.leftPanelWidth]);
 
     // active bucket has been changed
     useEffect(() => {
@@ -599,7 +597,7 @@ export default function BucketDataTable(props) {
         return <MissingActiveView/>
     else {
         return (
-            <div style={{width: tableWidth}}>
+            <>
                 <MaterialTable
                     tableRef={tableRef}
                     columns={state.tableColumns}
@@ -787,7 +785,7 @@ export default function BucketDataTable(props) {
                     activeLogic={state.activeLogic}
                     setActiveLogic={setActiveLogic}
                 />
-            </div>
+            </>
         );
     }
 }

@@ -1,26 +1,20 @@
 import React, {useState} from 'react';
-import { styled } from '@mui/material/styles';
+import {styled} from '@mui/material/styles';
 import PropTypes from "prop-types";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import {Grid, IconButton, Menu, Tooltip} from "@mui/material";
+
 const PREFIX = 'ViewMenuSelector';
 
 const classes = {
-    root: `${PREFIX}-root`,
     view: `${PREFIX}-view`,
     select: `${PREFIX}-select`,
     description: `${PREFIX}-description`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`&.${classes.root}`]: {
-        flexGrow: 1
-    },
+const Root = styled('div')(({theme}) => ({
+    flexGrow: 1,
 
     [`& .${classes.view}`]: {
         paddingLeft: theme.spacing(2),
@@ -79,9 +73,9 @@ export default function ViewMenuSelector(props) {
     }
 
     return (
-        <Root className={classes.root}>
+        <Root>
             <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
-                { props.views.length > 1 &&
+                {props.views.length > 1 &&
                     <Tooltip title={'Select view'}>
                         <IconButton
                             className={classes.select}

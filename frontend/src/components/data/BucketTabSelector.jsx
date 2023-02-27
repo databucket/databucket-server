@@ -1,29 +1,17 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {lighten, styled} from '@mui/material/styles';
-import Tab from "@mui/material/Tab";
+import React, {useContext} from 'react';
+import {styled} from '@mui/material/styles';
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Tabs from "@mui/material/Tabs";
-import {getAppBarBackgroundColor} from "../../utils/Themes";
 import AccessContext from "../../context/access/AccessContext";
 import {Tooltip} from "@mui/material";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 import StyledIcon from "../utils/StyledIcon";
+import {CustomTab} from "../common/CustomAppBar";
 
 const StyledTabs = styled(Tabs)(({theme}) => ({
     flex: 1,
     textTransform: "initial",
-}));
-
-const StyledTab = styled(Tab)(({theme}) => ({
-    backgroundColor: lighten(getAppBarBackgroundColor(), 0.05),
-
-    '&.Mui-selected': {
-        color: '#fff',
-    },
-    '&.Mui-focusVisible': {
-        backgroundColor: 'rgba(100, 95, 228, 0.32)',
-    },
 }));
 
 export default function BucketTabSelector() {
@@ -32,12 +20,6 @@ export default function BucketTabSelector() {
     const accessContext = useContext(AccessContext);
     const {bucketsTabs, activeBucket, setActiveBucket, removeTab} = accessContext;
     let removing = false; // indicate whether changing tab is invoked by selection or by removing
-
-    // This timeout allows to load Material Icons before first rendering
-    const [delay, setDelay] = useState(true);
-    useEffect(() => {
-        setTimeout(() => setDelay(false), 700)
-    }, []);
 
     const getBucketVisibleName = (name) => {
         return name.length > 17 ? name.substring(0, 15) + "..." : name;
@@ -65,14 +47,15 @@ export default function BucketTabSelector() {
         removeTab(bucket);
     }
 
-    const tabs = (
+    // const tabs = (
+    return (
         <StyledTabs
             value={bucketsTabs.indexOf(activeBucket)}
             variant="scrollable"
             scrollButtons
             allowScrollButtonsMobile>
             {bucketsTabs.map((bucket) => (
-                <StyledTab key={bucket.id}
+                <CustomTab key={bucket.id}
                            component="div"
                            onClick={() => handleChangedTab(bucket)}
                            iconPosition="start"
@@ -96,6 +79,4 @@ export default function BucketTabSelector() {
             ))}
         </StyledTabs>
     );
-
-    return !delay && tabs;
 }

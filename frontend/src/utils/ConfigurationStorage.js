@@ -161,7 +161,7 @@ export const isLeftPanelOpen = () => {
 }
 
 export const setLeftPanelOpen = (open) => {
-    localStorage.setItem(LEFT_PANEL_OPEN, open);
+    localStorage.setItem(LEFT_PANEL_OPEN, JSON.stringify(open));
 }
 
 // ********************************  PROJECT CONTEXT  ********************************

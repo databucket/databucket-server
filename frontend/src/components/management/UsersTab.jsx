@@ -3,12 +3,19 @@ import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getManagementTableHeight,
-    getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor, getTableRowBackgroundColor, getUserIcon
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getUserIcon
 } from "../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
-    convertNullValuesInObject, getArrayLengthStr, getRolesNames,
+    convertNullValuesInObject,
+    getArrayLengthStr,
+    getRolesNames,
     getSelectedValues,
     isItemChanged,
     validateItem
@@ -25,16 +32,29 @@ import RolesContext from "../../context/roles/RolesContext";
 import ManageUsersContext from "../../context/users/ManageUsersContext";
 import ProjectsContext from "../../context/projects/ProjectsContext";
 import {
-    getColumnCreatedBy,
     getColumnCreatedAt,
+    getColumnCreatedBy,
+    getColumnDescription,
     getColumnEnabled,
     getColumnExpirationDate,
-    getColumnModifiedBy, getColumnModifiedAt, getColumnDescription, getColumnId,
+    getColumnId,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
+
+const editRolesComponent = (roles) => props =>
+    <SelectMultiRolesLookup rowData={props.rowData} roles={roles}
+                            onChange={props.onChange}/>;
+const selectProjectComponent = (projects) => props =>
+    <SelectProjectsDialog
+        projects={projects != null ? projects : []}
+        rowData={props.rowData}
+        onChange={props.onChange}
+    />
 export default function UsersTab() {
 
     const theme = useTheme();
@@ -84,7 +104,15 @@ export default function UsersTab() {
                 tableRef={tableRef}
                 columns={[
                     getColumnId(),
-                    {title: 'State', filtering: false, cellStyle: { width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
+                    {
+                        title: 'State',
+                        filtering: false,
+                        cellStyle: {width: '1%'},
+                        editable: 'never',
+                        searchable: false,
+                        sorting: false,
+                        render: (rowData) => getUserIcon(rowData)
+                    },
                     getColumnEnabled(),
                     {title: 'Name', field: 'username', editable: 'onAdd', filtering: true},
                     {title: 'Email', field: 'email', filtering: true},
@@ -92,19 +120,12 @@ export default function UsersTab() {
                     {
                         title: 'Roles', field: 'rolesIds', filtering: false, sorting: false,
                         render: rowData => getRolesNames(roles, rowData['rolesIds']),
-                        editComponent: props => <SelectMultiRolesLookup rowData={props.rowData} roles={roles}
-                                                                        onChange={props.onChange}/>
+                        editComponent: editRolesComponent(roles)
                     },
                     {
                         title: 'Projects', field: 'projectsIds', filtering: false, searchable: false, sorting: false,
                         render: rowData => getArrayLengthStr(rowData['projectsIds']),
-                        editComponent: props => (
-                            <SelectProjectsDialog
-                                projects={projects != null ? projects : []}
-                                rowData={props.rowData}
-                                onChange={props.onChange}
-                            />
-                        )
+                        editComponent: selectProjectComponent(projects)
                     },
                     getColumnExpirationDate(),
                     getColumnCreatedAt(),
@@ -134,20 +155,20 @@ export default function UsersTab() {
                 }}
                 actions={[
                     rowData => ({
-                        icon: () => <ResetPasswordIcon/>,
+                        icon: ResetPasswordIcon,
                         tooltip: 'Reset Password',
                         onClick: (event, rowData) => {
                             setResetPasswordDialog({open: true, username: rowData.username});
                         }
                     }),
                     {
-                        icon: () => <Refresh/>,
+                        icon: Refresh,
                         tooltip: 'Refresh',
                         isFreeAction: true,
                         onClick: () => fetchUsers()
                     },
                     {
-                        icon: () => <FilterList/>,
+                        icon: FilterList,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)
