@@ -1,21 +1,21 @@
 import React, {createRef, useState} from 'react';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import Tooltip from "@mui/material/Tooltip";
 import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
-    getTableRowBackgroundColor, moveDown, moveUp
+    getTableRowBackgroundColor,
+    moveDown,
+    moveUp
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
-import {useTheme} from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
 import EditIconDialog from "./SelectIconDialog";
@@ -28,38 +28,29 @@ import StyledIcon from "../utils/StyledIcon";
 const PREFIX = 'EditEnumDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
     closeButton: `${PREFIX}-closeButton`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root2}`]: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-
-    [`& .${classes.closeButton}`]: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.palette.grey[500],
-    }
+const Root = styled('div')(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2)
 }));
 
+
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
-            <Typography variant="h6">{children}</Typography>
+        <MuiDialogTitle {...other}>
+            {children}
             {onClose ? (
                 <IconButton
                     aria-label="close"
-                    className={classes.closeButton}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
                     onClick={onClose}
                     size="large">
                     <CloseIcon/>
@@ -71,6 +62,7 @@ const DialogTitle = ((props) => {
 
 const DialogContent = MuiDialogContent;
 
+const EditComponent = props => <EditIconDialog icon={props.value} onChange={props.onChange}/>
 
 EditEnumDialog.propTypes = {
     name: PropTypes.string.isRequired,
@@ -90,7 +82,11 @@ export default function EditEnumDialog(props) {
 
     const getColumns = () => {
         let columnsArray = [];
-        columnsArray.push({title: '#', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''});
+        columnsArray.push({
+            title: '#',
+            cellStyle: {width: '1%'},
+            render: (rowData) => rowData ? rowData.tableData.id + 1 : ''
+        });
         columnsArray.push({title: 'Value', field: 'value'});
         columnsArray.push({title: 'Text', field: 'text'});
         if (props.iconsEnabled)
@@ -98,8 +94,11 @@ export default function EditEnumDialog(props) {
                 title: 'Icon',
                 field: 'icon',
                 initialEditValue: {name: "help", color: null, svg: null},
-                render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.mode}/>,
-                editComponent: props => <EditIconDialog icon={props.value} onChange={props.onChange} />
+                render: rowData => <StyledIcon iconName={rowData.icon.name}
+                                               iconColor={rowData.icon.color}
+                                               iconSvg={rowData.icon.svg}
+                                               themeType={theme.palette.mode}/>,
+                editComponent: EditComponent
             });
         return columnsArray;
     }

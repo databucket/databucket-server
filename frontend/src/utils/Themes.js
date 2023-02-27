@@ -12,6 +12,11 @@ export const getDesignTokens = (mode) => ({
 });
 
 export const LightTheme = {
+    common: {
+        toolbar: {
+            backgroundColor: '#0d47a1'
+        }
+    },
     palette: {
         mode: 'light',
         background: {
@@ -33,6 +38,11 @@ export const LightTheme = {
 };
 
 export const DarkTheme = {
+    common: {
+        toolbar: {
+            backgroundColor: '#0d47a1'
+        }
+    },
     palette: {
         mode: 'dark',
         background: {

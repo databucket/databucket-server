@@ -4,17 +4,10 @@ import ListItemText from "@mui/material/ListItemText";
 import List from "@mui/material/List";
 import AccessContext from "../../context/access/AccessContext";
 import {ListItemButton, Tooltip} from "@mui/material";
-import PropTypes from "prop-types";
 import StyledIcon from "../utils/StyledIcon";
-import {useTheme} from "@mui/material/styles";
-
-BucketListSelector.propTypes = {
-    leftPanelWidth: PropTypes.number.isRequired
-}
 
 export default function BucketListSelector(props) {
 
-    const theme = useTheme();
     const accessContext = useContext(AccessContext);
     const {groups, buckets, activeGroup, activeBucket, addTab} = accessContext;
     const [filteredBuckets, setFilteredBuckets] = useState([]);
@@ -44,7 +37,7 @@ export default function BucketListSelector(props) {
     }
 
     const getTooltipName = (name, visibleName) => {
-        if (visibleName.endsWith("...") || props.leftPanelWidth < 100)
+        if (visibleName.endsWith("..."))
             return <h2>{name}</h2>;
         else
             return "";
@@ -70,7 +63,6 @@ export default function BucketListSelector(props) {
                                         iconName={bucket.iconName}
                                         iconColor={bucket.iconColor}
                                         iconSvg={bucket.iconSvg}
-                                        themeType={theme.palette.mode}
                                     />
                                 </ListItemIcon>
                                 <ListItemText primary={getBucketVisibleName(bucket.name)}/>

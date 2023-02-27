@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import EnumsReducer from "./EnumsReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -46,8 +46,11 @@ const EnumsProvider = props => {
         });
     }
 
+    const enumContext = useMemo(() => {
+        return {enums: state.enums, fetchEnums, addEnum, editEnum, removeEnum};
+    }, [state]);
     return (
-        <EnumsContext.Provider value={{enums: state.enums, fetchEnums, addEnum, editEnum, removeEnum}}>
+        <EnumsContext.Provider value={enumContext}>
             {props.children}
         </EnumsContext.Provider>
     );
