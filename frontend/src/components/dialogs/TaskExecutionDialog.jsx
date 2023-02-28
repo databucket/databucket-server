@@ -21,7 +21,7 @@ import TaskMenuSelector from "../data/TaskMenuSelector";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getClearDataHistoryByRulesUrl, getDataUrl} from "../../utils/UrlBuilder";
 import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
-import {Query, Utils as QbUtils} from "@react-awesome-query-builder/ui";
+import {Query, Utils as QbUtils} from "@react-awesome-query-builder/mui";
 import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
 import {getTaskExecutionDialogSize, setTaskExecutionDialogSize} from "../../utils/ConfigurationStorage";

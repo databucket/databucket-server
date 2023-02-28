@@ -72,6 +72,51 @@ import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
 
+const richFilterIcon = (activeLogic) => () => activeLogic != null ?
+    <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon> :
+    <span className="material-icons">filter_alt</span>;
+
+const taskActionIcon = () => <span className="material-icons">edit_note</span>;
+const filterIcon = (filtering) => () => filtering && tableRef.current.state.query.filters.length > 0 ?
+    <FilterList color={'secondary'}/> :
+    <FilterList/>;
+
+const tableContainer = (props) => <div {...props} />;
+const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange, theme) => (props) => {
+    return (
+        <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
+            <Grid container direction="row">
+                <Grid container direction={"row"} item xs={3} alignItems="center">
+                    <Grid item>
+                        {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
+                            <ReserveDataDialog onReserve={onDataReserve}/>}
+                    </Grid>
+                    <Grid item>
+                        {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView) &&
+                            <AvailableTagsDialog bucketTags={state.bucketTags}/>}
+                    </Grid>
+                    <Grid item>
+                        <ViewMenuSelector
+                            views={state.bucketViews}
+                            activeView={state.activeView}
+                            onChange={view => onViewSelected(view)}
+                        />
+                    </Grid>
+                </Grid>
+                <Grid item xs={9}>
+                    <MTableToolbar
+                        {...props}
+                        showTitle={false}
+                        onSearchChanged={text => {
+                            handleSearchChange(text);
+                            props.onSearchChanged(text);
+                        }}
+                    />
+                </Grid>
+            </Grid>
+        </div>
+    );
+};
 export default function BucketDataTable() {
 
     const theme = useTheme();
@@ -449,7 +494,7 @@ export default function BucketDataTable() {
     }
 
     const tasksAction = {
-        icon: () => <span className="material-icons">edit_note</span>,
+        icon: taskActionIcon,
         tooltip: 'Task execution',
         isFreeAction: true,
         onClick: () => {
@@ -458,19 +503,14 @@ export default function BucketDataTable() {
     };
 
     const richFilterAction = {
-        icon: () => state.activeLogic != null ?
-            <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon> :
-            <span className="material-icons">filter_alt</span>,
+        icon: richFilterIcon(state.activeLogic),
         tooltip: 'Rich filter',
         isFreeAction: true,
-        onClick: () => {
-            onOpenRichFilterDialog();
-        }
+        onClick: onOpenRichFilterDialog
     };
 
     const filterAction = {
-        icon: () => filtering && tableRef.current.state.query.filters.length > 0 ? <FilterList color={'secondary'}/> :
-            <FilterList/>,
+        icon: filterIcon(filtering),
         tooltip: 'Enable/disable filter',
         isFreeAction: true,
         onClick: () => {
@@ -480,7 +520,7 @@ export default function BucketDataTable() {
     };
 
     const refreshAction = {
-        icon: () => <Refresh/>,
+        icon: Refresh,
         tooltip: 'Refresh',
         isFreeAction: true,
         onClick: () => {
@@ -489,7 +529,7 @@ export default function BucketDataTable() {
     };
 
     const detailsAction = {
-        icon: () => <RateReviewOutlined/>,
+        icon: RateReviewOutlined,
         tooltip: 'Data details',
         onClick: (event, rowData) => {
             onOpenDataDetailsDialog(rowData);
@@ -497,7 +537,7 @@ export default function BucketDataTable() {
     };
 
     const historyAction = {
-        icon: () => <History/>,
+        icon: History,
         tooltip: 'Data history',
         onClick: (event, rowData) => {
             onOpenDataHistoryDialog(rowData);
@@ -505,7 +545,7 @@ export default function BucketDataTable() {
     };
 
     const duplicateAction = {
-        icon: () => <DuplicateIcon/>,
+        icon: DuplicateIcon,
         tooltip: 'Duplicate data',
         onClick: (event, rowData) => {
             onDuplicateData(rowData);
@@ -700,47 +740,10 @@ export default function BucketDataTable() {
                         }
                     }}
                     components={{
-                        Container: props => <div {...props} />,
-                        Toolbar: props => {
-                            return (
-                                <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
-                                    <Grid container direction="row">
-                                        <Grid container direction={"row"} item xs={3} alignItems="center">
-                                            <Grid item>
-                                                {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
-                                                    <ReserveDataDialog onReserve={onDataReserve}/>}
-                                            </Grid>
-                                            <Grid item>
-                                                {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView) &&
-                                                    <AvailableTagsDialog bucketTags={state.bucketTags}/>}
-                                            </Grid>
-                                            <Grid item>
-                                                <ViewMenuSelector
-                                                    views={state.bucketViews}
-                                                    activeView={state.activeView}
-                                                    onChange={view => onViewSelected(view)}
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                        <Grid item xs={9}>
-                                            <MTableToolbar
-                                                {...props}
-                                                showTitle={false}
-                                                onSearchChanged={text => {
-                                                    handleSearchChange(text);
-                                                    props.onSearchChanged(text);
-                                                }}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </div>
-                            );
-                        }
+                        Container: tableContainer,
+                        Toolbar: tableToolbar(state, onViewSelected, onDataReserve, handleSearchChange, theme)
                     }}
                     onOrderChange={(colId, ord) => {
-                        // console.log("onOrderChange: (colId, ord)");
-                        // console.log(colId);
-                        // console.log(ord);
                         let order = (colId >= 0) ? {colId, ord} : null;
                         setLastBucketOrder(activeBucket.id, order);
                     }}

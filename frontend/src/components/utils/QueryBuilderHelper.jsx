@@ -1,7 +1,7 @@
-import {BasicConfig} from '@react-awesome-query-builder/mui';
-import {Builder, Utils as QbUtils} from "@react-awesome-query-builder/ui";
+import {Builder, MuiConfig, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import Typography from "@mui/material/Typography";
 import React from "react";
+import {styled} from "@mui/material/styles";
 
 export const getInitialTree = (loadedInitLogic, tree, config) => {
     if (tree && Object.keys(tree).length > 0) {
@@ -13,27 +13,40 @@ export const getInitialTree = (loadedInitLogic, tree, config) => {
     }
 }
 
+const StyledDiv = styled('div')(({theme}) => ({
+    margin: theme.spacing(2)
+}));
+
 export const renderResult = ({tree, config}) => {
     const pureSql = JSON.stringify(QbUtils.sqlFormat(tree, config));
     if (pureSql != null) {
         const sql = pureSql.substring(1, pureSql.length - 1).replaceAll("prop.", "").replaceAll("*", ".");
         return (
-            <div style={{margin: '10px'}}>
+            <StyledDiv>
                 <Typography>{sql}</Typography>
-            </div>
+            </StyledDiv>
         );
     } else return (<div/>);
 };
 
+const StyledBuilder = styled('div')(({theme}) => ({
+    "& .rule": {
+        backgroundColor: theme.palette.background.paper
+    },
+
+    "& .group": {
+        backgroundColor: theme.palette.primary.contrastText
+    },
+}));
 export const renderBuilder = (props) => (
-    <div className="query-builder-container" style={{padding: '10px'}}>
+    <StyledBuilder className="query-builder-container">
         <div className="query-builder qb-lite">
             <Builder {...props} />
         </div>
-    </div>
+    </StyledBuilder>
 );
 
-export const createConfig = (propFields, tags, users, enums) => {
+export const createConfig = (propFields, tags, users, enums, currentTheme) => {
     let fields = {};
 
     if (propFields != null && propFields.length > 0)
@@ -53,11 +66,21 @@ export const createConfig = (propFields, tags, users, enums) => {
     fields['modifiedBy'] = modifiedBy(userList);
     fields['modifiedAt'] = modifiedAt;
 
-    return {...BasicConfig, fields: fields};
+    return {
+        ...MuiConfig,
+        fields: fields,
+        settings: {
+            ...MuiConfig.settings,
+            theme: {mui: currentTheme}
+        }
+    };
 }
 
 const reduceUsersToList = (fullUserList) => {
-    return [...fullUserList.map(({username}) => ({value: username, title: username})), {value: '@currentUser', title: '@currentUser'}];
+    return [...fullUserList.map(({username}) => ({value: username, title: username})), {
+        value: '@currentUser',
+        title: '@currentUser'
+    }];
 }
 
 const reduceTagsToList = (fullTagList) => {
@@ -73,7 +96,10 @@ const buildPropertiesFields = (propFields, enums) => {
         };
 
         if (subfield.type === 'select') {
-            const list = enums.find(e => e.id === field.enumId).items.map(item => ({value: item.value, title: item.text}));
+            const list = enums.find(e => e.id === field.enumId).items.map(item => ({
+                value: item.value,
+                title: item.text
+            }));
             subfield['fieldSettings'] = {listValues: list};
         }
 

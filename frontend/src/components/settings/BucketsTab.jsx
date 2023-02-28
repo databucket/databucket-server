@@ -155,8 +155,9 @@ export default function BucketsTab() {
                         searchable: false,
                         filtering: false,
                         initialEditValue: {"name": "trip_origin", "color": null, "svg": null},
-                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color}
-                                                       iconSvg={rowData.icon.svg} themeType={theme.palette.mode}/>,
+                        render: rowData => <StyledIcon iconName={rowData.icon.name}
+                                                       iconColor={rowData.icon.color}
+                                                       iconSvg={rowData.icon.svg}/>,
                         editComponent: EditComponent
                     },
                     getColumnName("20%"),

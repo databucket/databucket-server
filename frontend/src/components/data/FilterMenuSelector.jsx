@@ -12,7 +12,7 @@ const classes = {
     description: `${PREFIX}-description`
 };
 
-const Root = styled('div/')(({theme}) => ({
+const Root = styled('div')(({theme}) => ({
     flexGrow: 1,
 
     [`& .${classes.view}`]: {

@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
 import {MessageBox} from "../utils/MessageBox";
 import FilterRulesEditor from "../utils/FilterRulesEditor";
-import {Utils as QbUtils} from "@react-awesome-query-builder/ui";
+import {Utils as QbUtils} from "@react-awesome-query-builder/mui";
 import {getObjectLengthStr} from "../../utils/JsonHelper";
 import {Tabs} from "@mui/material";
 import Tab from "@mui/material/Tab";
@@ -22,9 +22,6 @@ import MuiDialogActions from "@mui/material/DialogActions";
 const PREFIX = 'EditFilterRulesDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
-    root3: `${PREFIX}-root3`,
     selected: `${PREFIX}-selected`,
     dialogPaper: `${PREFIX}-dialogPaper`,
     oneLine: `${PREFIX}-oneLine`,
@@ -50,11 +47,13 @@ const Root = styled('div')(({theme}) => ({
 
     [`& .${classes.devGrabSpace}`]: {
         width: '200px'
-    },
-    [`& .${classes.root}`]: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
+    }
+}));
+
+const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(1),
+
     [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
@@ -67,7 +66,7 @@ const Root = styled('div')(({theme}) => ({
 const DialogTitle = ((props) => {
     const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <StyledDialogTitle {...other}>
             {children}
             {onClose ? (
                 <IconButton
@@ -78,7 +77,7 @@ const DialogTitle = ((props) => {
                     <CloseIcon/>
                 </IconButton>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
 });
 
@@ -164,10 +163,7 @@ export default function EditFilterRulesDialog(props) {
                 <DialogContent
                     dividers
                     style={{height: '75vh'}}
-                    ref={dialogContentRef}
-                    classes={{
-                        root: classes.root
-                    }}>
+                    ref={dialogContentRef}>
                     {open &&
                         <FilterRulesEditor
                             activeTab={activeTab}
@@ -179,10 +175,7 @@ export default function EditFilterRulesDialog(props) {
                             parentContentRef={dialogContentRef}
                         />}
                 </DialogContent>
-                <DialogActions
-                    classes={{
-                        root: classes.root2
-                    }}/>
+                <DialogActions/>
             </Dialog>
             <MessageBox
                 config={messageBox}

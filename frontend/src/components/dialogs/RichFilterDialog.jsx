@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {styled} from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import MuiDialogTitle from '@mui/material/DialogTitle';
@@ -8,7 +8,7 @@ import MuiDialogActions from '@mui/material/DialogActions';
 import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import PropTypes from "prop-types";
-import {Tabs} from "@mui/material";
+import {Box, Grid, Tabs} from "@mui/material";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import Tab from "@mui/material/Tab";
 import {MessageBox} from "../utils/MessageBox";
@@ -19,7 +19,7 @@ import Button from "@mui/material/Button";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getDataUrl} from "../../utils/UrlBuilder";
 import {getClassById} from "../../utils/JsonHelper";
-import {Query, Utils as QbUtils} from "@react-awesome-query-builder/ui";
+import {Query, Utils as QbUtils} from "@react-awesome-query-builder/mui";
 import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
 import FilterMenuSelector from "../data/FilterMenuSelector";
@@ -34,9 +34,7 @@ const classes = {
     root3: `${PREFIX}-root3`,
     selected: `${PREFIX}-selected`,
     dialogPaper: `${PREFIX}-dialogPaper`,
-    oneLine: `${PREFIX}-oneLine`,
     tabs: `${PREFIX}-tabs`,
-    devGrabSpace: `${PREFIX}-devGrabSpace`,
     divActionGrabSpace: `${PREFIX}-divActionGrabSpace`,
     container: `${PREFIX}-container`,
     closeButton: `${PREFIX}-closeButton`,
@@ -49,18 +47,8 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
         minHeight: '80vh',
     },
 
-    [`& .${classes.oneLine}`]: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-
     [`& .${classes.tabs}`]: {
         flexGrow: 1
-    },
-
-    [`& .${classes.devGrabSpace}`]: {
-        width: '250px'
     },
 
     [`& .${classes.divActionGrabSpace}`]: {
@@ -91,42 +79,53 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     }
 }));
 
+const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
+}));
 
-const DialogTitle = (props => {
+const DialogTitleGrid = (props => {
     const {children, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root}>
-            <Typography variant="h6">{children}</Typography>
-            <IconButton
-                aria-label="Smaller"
-                className={classes.smallerButton}
-                onClick={onMakeDialogSmaller}
-                color={"inherit"}
-                disabled={onMakeDialogSmaller == null}
-                size="large">
-                <span className="material-icons">fullscreen_exit</span>
-            </IconButton>
-            <IconButton
-                aria-label="Larger"
-                className={classes.largerButton}
-                onClick={onMakeDialogLarger}
-                color={"inherit"}
-                disabled={onMakeDialogLarger == null}
-                size="large">
-                <span className="material-icons">fullscreen</span>
-            </IconButton>
-            {onClose ? (
-                <IconButton
-                    aria-label="Close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                    size="large">
-                    <CloseIcon/>
-                </IconButton>
-            ) : null}
-        </MuiDialogTitle>
+        <StyledDialogTitle>
+            <Grid container direction="row" sx={{alignItems: 'center'}}>
+                {children}
+                <Grid item xs>
+                    <Box sx={{display: 'flex', justifyContent: "flex-end"}}>
+                        <IconButton
+                            aria-label="Smaller"
+                            onClick={onMakeDialogSmaller}
+                            color={"inherit"}
+                            disabled={onMakeDialogSmaller == null}
+                            size="large">
+                            <span className="material-icons">fullscreen_exit</span>
+                        </IconButton>
+                        <IconButton
+                            aria-label="Larger"
+                            onClick={onMakeDialogLarger}
+                            color={"inherit"}
+                            disabled={onMakeDialogLarger == null}
+                            size="large">
+                            <span className="material-icons">fullscreen</span>
+                        </IconButton>
+                        {onClose ? (
+                            <IconButton
+                                aria-label="Close"
+                                onClick={onClose}
+                                size="large">
+                                <CloseIcon/>
+                            </IconButton>
+                        ) : null}
+                    </Box>
+                </Grid>
+            </Grid>
+        </StyledDialogTitle>
     );
 });
+
+const TopPaddedGridItem = styled(Grid)(({theme}) => ({
+    padding: theme.spacing(1)
+}));
 
 const DialogContent = MuiDialogContent;
 
@@ -142,13 +141,13 @@ RichFilterDialog.propTypes = {
 
 export default function RichFilterDialog(props) {
 
-
+    const theme = useTheme();
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [appliesCount, setAppliesCount] = useState(0);
-    const [state, setState] = useState({properties: [], logic: null, tree: null, config: null});
+    const [state, setState] = useState({properties: [], logic: {}, tree: {}, config: {}});
     const [dialogSize, setDialogSize] = useState('md');
     const dialogContentRef = React.useRef(null);
 
@@ -160,16 +159,26 @@ export default function RichFilterDialog(props) {
         if (props.open) {
             setActiveTab(0);
             const properties = getClassProperties();
-            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
+            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums, theme);
             const disabledRulesLogic = makeRulesDisabled(props.activeLogic);
-            let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
-            setState({
-                ...state,
-                properties: getClassProperties(),
-                logic: disabledRulesLogic,
-                tree: tree,
-                config: config
-            });
+            if (Object.keys(state.tree).length === 0) {
+                let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
+                setState({
+                    ...state,
+                    properties: getClassProperties(),
+                    logic: disabledRulesLogic,
+                    tree: tree,
+                    config: config
+                });
+            } else {
+                setState({
+                    ...state,
+                    properties: getClassProperties(),
+                    logic: disabledRulesLogic,
+                    tree: state.tree,
+                    config: config
+                });
+            }
         }
     }, [props.open]);
 
@@ -291,28 +300,30 @@ export default function RichFilterDialog(props) {
             fullWidth={true}
             maxWidth={dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
         >
-            <DialogTitle
+            <DialogTitleGrid
                 id="customized-dialog-title"
                 onClose={handleClose}
                 onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller : null}
                 onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger : null}
             >
-                <div className={classes.oneLine}>
-                    <Typography variant="h6">{'Data filter'}</Typography>
+                <TopPaddedGridItem item>
+                    {'Data filter'}
+                </TopPaddedGridItem>
+                <TopPaddedGridItem item xs>
                     <FilterMenuSelector filters={getBucketFilters(props.bucket, accessContext.filters)}
                                         onFilterSelected={onFilterSelected}/>
+                </TopPaddedGridItem>
+                <Grid item xs={6}>
                     <Tabs
                         className={classes.tabs}
                         value={activeTab}
                         onChange={handleChangedTab}
-                        centered
                     >
                         <StyledTab label="Rules"/>
                         <StyledTab label="Properties"/>
                     </Tabs>
-                    <div className={classes.devGrabSpace}/>
-                </div>
-            </DialogTitle>
+                </Grid>
+            </DialogTitleGrid>
             <EnumsProvider>
                 <DialogContent
                     dividers
@@ -321,7 +332,7 @@ export default function RichFilterDialog(props) {
                     classes={{
                         root: classes.root
                     }}>
-                    {props.open && activeTab === 0 &&
+                    {props.open && activeTab === 0 && Object.keys(state.tree).length > 0 &&
                         <div>
                             <Query
                                 {...state.config}
