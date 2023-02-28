@@ -51,6 +51,7 @@ export default function BucketTabSelector() {
     return (
         <StyledTabs
             value={bucketsTabs.indexOf(activeBucket)}
+            textColor="inherit"
             variant="scrollable"
             scrollButtons
             allowScrollButtonsMobile>

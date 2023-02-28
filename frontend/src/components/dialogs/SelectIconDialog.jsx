@@ -1,4 +1,4 @@
-import React, {createRef, forwardRef, useContext, useEffect, useRef, useState} from 'react';
+import React, {forwardRef, useContext, useEffect, useRef, useState} from 'react';
 import PropTypes from 'prop-types';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
@@ -154,7 +154,6 @@ function SimpleDialog(props) {
                                 iconName={currentIcon.name}
                                 iconColor={currentIcon.color}
                                 iconSvg={currentIcon.svg}
-                                themeType={'banner-display'}
                             />
                         </div>
                     </Grid>
@@ -172,7 +171,6 @@ function SimpleDialog(props) {
                                 iconName={currentIcon.name}
                                 iconColor={currentIcon.color}
                                 iconSvg={currentIcon.svg}
-                                themeType={'light-display'}
                             />
                         </div>
                     </Grid>
@@ -190,7 +188,6 @@ function SimpleDialog(props) {
                             iconName={currentIcon.name}
                             iconColor={currentIcon.color}
                             iconSvg={currentIcon.svg}
-                            themeType={'dark-display'}
                         />
                     </Grid>
                     <Grid item xs={1}/>
@@ -233,11 +230,8 @@ SelectIconDialog.propTypes = {
 
 const TooltipIconButton = forwardRef((props, ref) =>
     <StyledIconButton{...props} ref={ref}/>);
-const SomeContent = React.forwardRef((props, ref) =>
-    <Button {...props} ref={ref}>Hello, World!</Button>);
 export default function SelectIconDialog(props) {
     const theme = useTheme();
-    const dialogRef = createRef();
     const {icon, onChange} = props;
     const [open, setOpen] = React.useState(false);
     const [selectedIcon, setSelectedIcon] = React.useState({name: icon.name, color: icon.color, svg: icon.svg});
@@ -255,7 +249,6 @@ export default function SelectIconDialog(props) {
     return (
         <>
             <Tooltip title={'Change icon'}>
-                {/*<SomeContent/>*/}
                 <TooltipIconButton
                     onClick={handleClickOpen}
                     iconName={selectedIcon.name}

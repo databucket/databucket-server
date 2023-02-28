@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {styled, useTheme} from '@mui/material/styles';
 import Drawer from '@mui/material/Drawer';
 import Toolbar from '@mui/material/Toolbar';
@@ -72,7 +72,6 @@ const DrawerHeader = styled('div')(({theme}) => ({
 }));
 export default function ProjectData() {
 
-    const drawerRef = useRef(null);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const theme = useTheme();
     const [open, setOpen] = useState(isLeftPanelOpen());

@@ -96,8 +96,7 @@ export default function EditEnumDialog(props) {
                 initialEditValue: {name: "help", color: null, svg: null},
                 render: rowData => <StyledIcon iconName={rowData.icon.name}
                                                iconColor={rowData.icon.color}
-                                               iconSvg={rowData.icon.svg}
-                                               themeType={theme.palette.mode}/>,
+                                               iconSvg={rowData.icon.svg}/>,
                 editComponent: EditComponent
             });
         return columnsArray;

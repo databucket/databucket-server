@@ -2,7 +2,7 @@ import React, {useMemo, useState} from "react";
 import {getThemeName, saveThemeName} from "../../utils/ConfigurationStorage";
 import CustomThemeContext from "./CustomThemeContext";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
-import {getDesignTokens} from "../../utils/Themes";
+import {getTheme} from "../../utils/Themes";
 
 
 const CustomThemeProvider = props => {
@@ -17,7 +17,7 @@ const CustomThemeProvider = props => {
             },
         }), [],
     );
-    const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
+    const theme = useMemo(() => createTheme(getTheme(mode)), [mode]);
     return (
         <CustomThemeContext.Provider value={colorMode}>
             <ThemeProvider theme={theme}>

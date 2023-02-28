@@ -3,7 +3,10 @@ import React, {useContext, useEffect, useState} from "react";
 import FilterList from "@mui/icons-material/FilterList";
 import {useTheme} from "@mui/material/styles";
 import {
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
 import {isItemChanged, validateItem} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
@@ -24,7 +27,12 @@ import PropTypes from "prop-types";
 import SelectIconDialog from "../../dialogs/SelectIconDialog";
 import RolesContext from "../../../context/roles/RolesContext";
 import {getClassesLookup} from "../../../utils/LookupHelper";
-import {getTemplatesArtefacts, getTemplatesArtefactsEditable, templateArtefactCreationEnrichment, templateArtefactModifyingEnrichment} from "./_TemplUtils";
+import {
+    getTemplatesArtefacts,
+    getTemplatesArtefactsEditable,
+    templateArtefactCreationEnrichment,
+    templateArtefactModifyingEnrichment
+} from "./_TemplUtils";
 import StyledIcon from "../../utils/StyledIcon";
 
 TemplConfigBucketsTab.propTypes = {
@@ -91,7 +99,11 @@ export default function TemplConfigBucketsTab(props) {
                         searchable: false,
                         filtering: false,
                         initialEditValue: 'panorama_fish_eye',
-                        render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.mode}/>,
+                        render: rowData => <StyledIcon
+                            iconName={rowData.icon.name}
+                            iconColor={rowData.icon.color}
+                            iconSvg={rowData.icon.svg}
+                        />,
                         editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
                     getColumnName(),

@@ -6,11 +6,6 @@ export function getTheme(name) {
     }
 }
 
-export const getDesignTokens = (mode) => ({
-    mode,
-    ...(mode === 'light') ? LightTheme : DarkTheme
-});
-
 export const LightTheme = {
     common: {
         toolbar: {
@@ -62,7 +57,3 @@ export const DarkTheme = {
         }
     },
 };
-
-export const getAppBarBackgroundColor = () => {
-    return '#0d47a1';
-}

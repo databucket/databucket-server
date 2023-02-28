@@ -259,7 +259,7 @@ export const getBodyHeight = (height) => {
 }
 
 export const getIconColor = (type, color) => {
-    if (color != null) {
+    if (!!color) {
         if (type === 'light') {
             return rgbToHex(darken(color, 0.1));
         } else if (type === 'dark') {
@@ -270,11 +270,11 @@ export const getIconColor = (type, color) => {
             return color;
         }
     } else {
-        if (type === 'light-display') {
+        if (type === 'light') {
             return LightTheme.palette.text.primary;
-        } else if (type === 'dark-display') {
+        } else if (type === 'dark') {
             return DarkTheme.palette.text.primary;
-        } else if (type === 'banner-display') {
+        } else if (type === 'banner') {
             return DarkTheme.palette.text.primary;
         } else {
             return LightTheme.palette.text.primary;
