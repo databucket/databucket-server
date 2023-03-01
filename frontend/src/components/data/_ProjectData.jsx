@@ -65,6 +65,7 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
 const DrawerHeader = styled('div')(({theme}) => ({
     display: 'flex',
     alignItems: 'center',
+    margin: theme.spacing(0.5, 0),
     padding: theme.spacing(0, 1),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
@@ -203,7 +204,7 @@ export default function ProjectData() {
                     <GroupMenuSelector open={open}/>
                     <BucketListSelector/>
                     <Divider/>
-                    <List>
+                    <List sx={{marginTop: "auto"}}>
                         {
                             hasRobotRole() && (
                                 <ListItemButton target='_blank' component={Link} to={getSwaggerDocPath()}>

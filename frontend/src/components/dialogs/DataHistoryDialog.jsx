@@ -1,6 +1,5 @@
 import React, {createRef, useEffect, useState} from 'react';
-import { styled } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import MuiDialogTitle from '@mui/material/DialogTitle';
@@ -23,23 +22,14 @@ import {MessageBox} from "../utils/MessageBox";
 const PREFIX = 'DataHistoryDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
-    root3: `${PREFIX}-root3`,
     container: `${PREFIX}-container`,
     clearHistoryButton: `${PREFIX}-clearHistoryButton`,
     closeButton: `${PREFIX}-closeButton`
 };
 
-const StyledDialog = styled(Dialog)((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root3}`]: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
+const StyledDialog = styled(Dialog)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
 
     [`& .${classes.container}`]: {
         display: 'flex',
@@ -59,10 +49,9 @@ const StyledDialog = styled(Dialog)((
     }
 }));
 
-const DialogTitle = (props => {
-    const {children,  onClose, onClearDataHistory} = props;
+const DialogTitle = (({children, onClose, onClearDataHistory}) => {
     return (
-        <MuiDialogTitle disableTypography className={classes.root}>
+        <MuiDialogTitle>
             <Typography variant="h6">{children}</Typography>
             <Tooltip id="clear-history" title="Clear data history">
                 <IconButton
@@ -111,13 +100,15 @@ export default function DataHistoryDialog(props) {
                 {title: 'Id', field: 'index'},
                 {
                     title: 'Modified at', field: 'modified_at', type: 'datetime', editable: 'never',
-                    render: rowData => <div>{rowData != null ? rowData.modified_at != null ? new Date(rowData.modified_at).toLocaleString() : null : null}</div>
+                    render: rowData =>
+                        <div>{rowData != null ? rowData.modified_at != null ? new Date(rowData.modified_at).toLocaleString() : null : null}</div>
                 },
                 {title: 'Modified by', field: 'modified_by', editable: 'never'},
                 {title: 'Tag', field: 'tag_id', editable: 'never', lookup: tagsLookup},
                 {
                     title: 'Reserved', field: 'reserved', editable: 'never',
-                    render: rowData => <div>{rowData.reserved != null ? rowData.reserved ? <LockedIcon color="action"/> : <UnlockedIcon color="action"/> : ''}</div>
+                    render: rowData => <div>{rowData.reserved != null ? rowData.reserved ?
+                        <LockedIcon color="action"/> : <UnlockedIcon color="action"/> : ''}</div>
                 },
                 {
                     title: 'Properties', field: 'properties', editable: 'never',
@@ -151,17 +142,13 @@ export default function DataHistoryDialog(props) {
     };
 
     const handleClearDataHistory = () => {
-        let resultOk = true;
         fetch(getClearDataHistoryByIdUrl(props.bucket, props.dataRowId), getDeleteOptions())
             .then(handleErrors)
+            .then(result => {
+                setState({...state, history: []});
+            })
             .catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(result => {
-                if (resultOk) {
-                    setState({...state, history: []});
-                }
             });
     }
 
@@ -177,11 +164,7 @@ export default function DataHistoryDialog(props) {
             <DialogTitle id="customized-dialog-title" onClose={handleClose} onClearDataHistory={handleClearDataHistory}>
                 Data history [Id: {state.dataRowId}]
             </DialogTitle>
-            <DialogContent
-                dividers
-                classes={{
-                    root: classes.root
-                }}>
+            <DialogContent dividers>
                 <MaterialTable
                     tableRef={tableRef}
                     columns={state.columns}
@@ -204,10 +187,7 @@ export default function DataHistoryDialog(props) {
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
             </DialogContent>
-            <DialogActions
-                classes={{
-                    root: classes.root2
-                }} />
+            <DialogActions/>
         </StyledDialog>
     );
 }
