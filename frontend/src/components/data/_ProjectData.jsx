@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {styled, useTheme} from '@mui/material/styles';
-import Drawer from '@mui/material/Drawer';
+import MuiDrawer from '@mui/material/Drawer';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -43,6 +43,27 @@ import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularP
 import {CustomAppBar, drawerWidth} from "../common/CustomAppBar";
 import {Box, ListItemButton} from "@mui/material";
 
+const openedMixin = (theme) => ({
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+    }),
+    overflowX: 'hidden',
+});
+
+const closedMixin = (theme) => ({
+    transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+    }),
+    overflowX: 'hidden',
+    width: `calc(${theme.spacing(7)} + 1px)`,
+    [theme.breakpoints.up('sm')]: {
+        width: `calc(${theme.spacing(8)} + 1px)`,
+    },
+});
+
 const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
     ({theme, open}) => ({
         flexGrow: 1,
@@ -58,6 +79,23 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
                 duration: theme.transitions.duration.enteringScreen,
             }),
             marginLeft: 0,
+        }),
+    }),
+);
+
+const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})(
+    ({theme, open}) => ({
+        width: drawerWidth,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        boxSizing: 'border-box',
+        ...(open && {
+            ...openedMixin(theme),
+            '& .MuiDrawer-paper': openedMixin(theme),
+        }),
+        ...(!open && {
+            ...closedMixin(theme),
+            '& .MuiDrawer-paper': closedMixin(theme),
         }),
     }),
 );
@@ -183,16 +221,7 @@ export default function ProjectData() {
                     </Toolbar>
                 </CustomAppBar>
                 <Drawer
-                    sx={{
-                        width: drawerWidth,
-                        flexShrink: 0,
-                        '& .MuiDrawer-paper': {
-                            width: drawerWidth,
-                            boxSizing: 'border-box',
-                        },
-                    }}
-                    variant="persistent"
-                    anchor="left"
+                    variant="permanent"
                     open={open}
                 >
                     <DrawerHeader>
