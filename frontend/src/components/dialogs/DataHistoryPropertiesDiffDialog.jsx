@@ -6,7 +6,6 @@ import IconButton from '@mui/material/IconButton';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
 import CompareIcon from '@mui/icons-material/YoutubeSearchedFor';
 import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
@@ -17,20 +16,12 @@ import ReactDiffViewer from "react-diff-viewer-continued";
 const PREFIX = 'DataHistoryPropertiesDiffDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
     closeButton: `${PREFIX}-closeButton`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root2}`]: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
+const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
 
     [`& .${classes.closeButton}`]: {
         position: 'absolute',
@@ -39,11 +30,10 @@ const Root = styled('div')((
     }
 }));
 
-const DialogTitle = (props => {
-    const {children, onClose} = props;
+const DialogTitle = (({children, onClose}) => {
     return (
-        <MuiDialogTitle disableTypography className={classes.root}>
-            <Typography variant="h6">{children}</Typography>
+        <StyledDialogTitle>
+            {children}
             {onClose ? (
                 <IconButton
                     aria-label="Close"
@@ -53,7 +43,7 @@ const DialogTitle = (props => {
                     <CloseIcon/>
                 </IconButton>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
 });
 
@@ -131,7 +121,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
     };
 
     return (
-        <Root>
+        <>
             <Tooltip title='Show changes'>
                 <IconButton
                     onClick={handleClickOpen}
@@ -151,11 +141,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleClose}>
                     Properties difference
                 </DialogTitle>
-                <DialogContent
-                    dividers
-                    classes={{
-                        root: classes.root
-                    }}>
+                <DialogContent dividers>
                     <ReactDiffViewer
                         useDarkTheme={theme.palette.mode === 'dark'}
                         oldValue={state.oldValue}
@@ -169,6 +155,6 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
             </Dialog>
-        </Root>
+        </>
     );
 }

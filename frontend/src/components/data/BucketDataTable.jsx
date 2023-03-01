@@ -122,7 +122,7 @@ export default function BucketDataTable() {
     const theme = useTheme();
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [height] = useWindowDimension();
+    // const [height] = useWindowDimension();
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
     const {buckets, activeBucket, views, columns, filters, tags, tasks, enums, users} = accessContext;
@@ -720,8 +720,8 @@ export default function BucketDataTable() {
                         padding: 'dense',
                         search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
                         searchFieldStyle: {width: 500},
-                        maxBodyHeight: getTableHeight(height),
-                        minBodyHeight: getTableHeight(height),
+                        // maxBodyHeight: getTableHeight(height),
+                        // minBodyHeight: getTableHeight(height),
                         headerStyle: {
                             position: 'sticky',
                             top: 0,

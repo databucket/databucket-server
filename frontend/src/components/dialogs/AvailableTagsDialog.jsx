@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { styled } from '@mui/material/styles';
+import {styled} from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import {ListItem, ListItemText, ListSubheader, Tooltip} from "@mui/material";
@@ -8,19 +8,12 @@ import List from "@mui/material/List";
 const PREFIX = 'AvailableTagsDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
     availableTagsButton: `${PREFIX}-availableTagsButton`,
     content: `${PREFIX}-content`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`&.${classes.root}`]: {
-        flexGrow: 1
-    },
+const Root = styled('div')(({theme}) => ({
+    flexGrow: 1,
 
     [`& .${classes.availableTagsButton}`]: {
         marginLeft: '10px',
@@ -53,7 +46,7 @@ export default function AvailableTagsDialog(props) {
     };
 
     return (
-        <Root className={classes.root}>
+        <Root>
             <Tooltip title={'Available tags'}>
                 <IconButton
                     onClick={handleMenu}
@@ -91,9 +84,9 @@ export default function AvailableTagsDialog(props) {
                     >
                         {props.bucketTags.map((tag) => (
                             <ListItem key={`tag-${tag.id}`}>
-                                <ListItemText primary={`[${tag.id}] ${tag.name}`} />
+                                <ListItemText primary={`[${tag.id}] ${tag.name}`}/>
                             </ListItem>
-                            ))
+                        ))
                         }
                     </List>
                 </div>
