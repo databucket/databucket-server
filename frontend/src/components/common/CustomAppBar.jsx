@@ -25,6 +25,8 @@ export const CustomAppBar = styled(AppBar, {
 export const CustomTab = styled(Tab)(({theme}) => ({
 
     "&:hover": {
+        opacity: 0.9,
+        color: theme.palette.primary.contrastText,
         backgroundColor: lighten(theme.common.toolbar.backgroundColor, 0.05)
     },
 
