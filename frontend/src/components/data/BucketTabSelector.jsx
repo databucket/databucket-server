@@ -9,7 +9,7 @@ import {getIconColor} from "../../utils/MaterialTableHelper";
 import StyledIcon from "../utils/StyledIcon";
 import {CustomTab} from "../common/CustomAppBar";
 
-const StyledTabs = styled(Tabs)(({theme}) => ({
+const StyledTabs = styled(Tabs)(() => ({
     flex: 1,
     textTransform: "initial",
 }));
@@ -47,7 +47,6 @@ export default function BucketTabSelector() {
         removeTab(bucket);
     }
 
-    // const tabs = (
     return (
         <StyledTabs
             value={bucketsTabs.indexOf(activeBucket)}
