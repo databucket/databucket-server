@@ -58,10 +58,7 @@ const closedMixin = (theme) => ({
         duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: 'hidden',
-    width: `calc(${theme.spacing(8)} + 1px)`,
-    [theme.breakpoints.up('sm')]: {
-        width: `calc(${theme.spacing(9)} + 1px)`,
-    },
+    width: `calc(${theme.spacing(9)} + 1px)`,
 });
 
 const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
@@ -72,13 +69,12 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
-        marginLeft: `-${drawerWidth}px`,
+        marginLeft: 0,
         ...(open && {
             transition: theme.transitions.create('margin', {
                 easing: theme.transitions.easing.easeOut,
                 duration: theme.transitions.duration.enteringScreen,
             }),
-            marginLeft: 0,
         }),
     }),
 );
@@ -165,12 +161,14 @@ export default function ProjectData() {
             fetchSessionFilters();
     }, [views, tasks]);
 
-    const handleDrawerOpen = () => {
+    const handleDrawerOpen = (event) => {
+        event.stopPropagation();
         setOpen(true);
         setLeftPanelOpen(true);
     };
 
-    const handleDrawerClose = () => {
+    const handleDrawerClose = (event) => {
+        event.stopPropagation();
         setOpen(false);
         setLeftPanelOpen(false);
     };
