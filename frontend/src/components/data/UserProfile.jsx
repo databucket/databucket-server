@@ -39,7 +39,7 @@ export default function UserProfile(props) {
                 </IconButton>
             </Tooltip>
             <Menu
-                id="menu-appbar"
+                id="user-menu"
                 anchorEl={anchorEl}
                 anchorOrigin={{
                     vertical: 'top',

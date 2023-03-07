@@ -637,7 +637,7 @@ export default function BucketDataTable() {
         return <MissingActiveView/>
     else {
         return (
-            <>
+            <React.StrictMode>
                 <MaterialTable
                     tableRef={tableRef}
                     columns={state.tableColumns}
@@ -788,7 +788,7 @@ export default function BucketDataTable() {
                     activeLogic={state.activeLogic}
                     setActiveLogic={setActiveLogic}
                 />
-            </>
+            </React.StrictMode>
         );
     }
 }

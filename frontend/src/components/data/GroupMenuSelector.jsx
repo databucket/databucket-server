@@ -9,6 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import Divider from "@mui/material/Divider";
 import AccessContext from "../../context/access/AccessContext";
+import {ListItemButton} from "@mui/material";
 
 GroupMenuSelector.propTypes = {
     open: PropTypes.bool.isRequired // is the left list of buckets open?
@@ -53,10 +54,10 @@ export default function GroupMenuSelector(props) {
         return (
             <div>
                 <List>
-                    <ListItem button key={'key'} aria-controls="groups-menu" aria-haspopup="true" onClick={handleClick}>
+                    <ListItemButton key={'key'} aria-controls="groups-menu" aria-haspopup="true" onClick={handleClick}>
                         {props.open === true ? (<ListItemIcon><ShowGroupsIcon/></ListItemIcon>) : (<div/>)}
                         <ListItemText primary={getSelectedName()}/>
-                    </ListItem>
+                    </ListItemButton>
                 </List>
                 <Divider/>
                 <Menu

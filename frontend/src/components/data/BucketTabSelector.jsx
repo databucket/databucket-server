@@ -32,7 +32,8 @@ export default function BucketTabSelector() {
             return "";
     }
 
-    const handleChangedTab = (bucket) => {
+    const handleChangedTab = (event, bucket) => {
+        event.stopPropagation();
         if (!removing) {
             if (bucket !== activeBucket) {
                 setActiveBucket(bucket);
@@ -42,7 +43,8 @@ export default function BucketTabSelector() {
         }
     };
 
-    const handleRemovedTab = (bucket) => {
+    const handleRemovedTab = (event, bucket) => {
+        event.stopPropagation();
         removing = true;
         removeTab(bucket);
     }
@@ -58,7 +60,7 @@ export default function BucketTabSelector() {
             {bucketsTabs.map((bucket) => (
                 <CustomTab key={bucket.id}
                            component="div"
-                           onClick={() => handleChangedTab(bucket)}
+                           onClick={(event) => handleChangedTab(event, bucket)}
                            iconPosition="start"
                            icon={<StyledIcon iconName={bucket.iconName}
                                              iconColor={getIconColor('banner', bucket.iconColor)}
@@ -67,13 +69,13 @@ export default function BucketTabSelector() {
                            />}
                            label={
                                <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
-                    <span>
-                        {getBucketVisibleName(bucket.name)}
-                        <IconButton color="inherit"
-                                    onClick={() => handleRemovedTab(bucket)} size="large">
-                            <CloseIcon sx={{fontSize: 18}}/>
-                        </IconButton>
-                    </span>
+                                   <span>
+                                       {getBucketVisibleName(bucket.name)}
+                                       <IconButton color="inherit"
+                                                   onClick={(event) => handleRemovedTab(event, bucket)} size="large">
+                                           <CloseIcon sx={{fontSize: 18}}/>
+                                       </IconButton>
+                                   </span>
                                </Tooltip>
                            }
                 />

@@ -40,7 +40,7 @@ export default function UserProjects(props) {
                     </IconButton>
                 </Tooltip>
                 <Menu
-                    id="menu-appbar"
+                    id="project-menu"
                     anchorEl={anchorEl}
                     anchorOrigin={{
                         vertical: 'top',
