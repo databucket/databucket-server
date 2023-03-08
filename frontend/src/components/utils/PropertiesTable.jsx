@@ -1,4 +1,11 @@
-import {getPageSizeOptionsOnDialog, getTableBodyHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
+import {
+    getPageSizeOptionsOnDialog,
+    getTableBodyHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    moveDown,
+    moveUp
+} from "../../utils/MaterialTableHelper";
 import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
@@ -8,7 +15,6 @@ import React, {useEffect, useState} from "react";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import {useTheme} from "@mui/material/styles";
 import {MessageBox} from "./MessageBox";
-import {useWindowDimension} from "./UseWindowDimension";
 import PropTypes from "prop-types";
 
 PropertiesTable.propTypes = {
@@ -24,7 +30,6 @@ export default function PropertiesTable(props) {
 
     const theme = useTheme();
     const tableRef = React.createRef();
-    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const data = props.data;
@@ -42,7 +47,7 @@ export default function PropertiesTable(props) {
         setTimeout(() => setDelay(false), 1)
     }, []);
 
-    const getBodyHeight = (windowHeight) => {
+    const getBodyHeight = () => {
         return getTableBodyHeight(props.parentContentRef, 66);
     }
 
@@ -74,7 +79,11 @@ export default function PropertiesTable(props) {
                 title={props.title}
                 tableRef={tableRef}
                 columns={[
-                    {title: '#', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''},
+                    {
+                        title: '#',
+                        cellStyle: {width: '1%'},
+                        render: (rowData) => rowData ? rowData.tableData.id + 1 : ''
+                    },
                     {title: 'Title', field: 'title', type: 'string', emptyValue: '', initialEditValue: ''},
                     {title: 'Path', field: 'path', type: 'string', emptyValue: '', initialEditValue: ''},
                     {
@@ -118,8 +127,8 @@ export default function PropertiesTable(props) {
                     filtering: false,
                     padding: 'dense',
                     headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    minBodyHeight: getBodyHeight(height),
-                    maxBodyHeight: getBodyHeight(height),
+                    minBodyHeight: getBodyHeight(),
+                    maxBodyHeight: getBodyHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

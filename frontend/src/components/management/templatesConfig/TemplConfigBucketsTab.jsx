@@ -21,7 +21,6 @@ import {
     getColumnRole,
     getColumnTeams
 } from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 import PropTypes from "prop-types";
 import SelectIconDialog from "../../dialogs/SelectIconDialog";
@@ -43,7 +42,6 @@ TemplConfigBucketsTab.propTypes = {
 export default function TemplConfigBucketsTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -130,8 +128,8 @@ export default function TemplConfigBucketsTab(props) {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getTemplateTableHeight(height),
-                    minBodyHeight: getTemplateTableHeight(height),
+                    maxBodyHeight: getTemplateTableHeight(),
+                    minBodyHeight: getTemplateTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

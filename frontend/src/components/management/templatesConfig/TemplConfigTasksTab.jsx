@@ -3,7 +3,10 @@ import React, {useContext, useEffect, useState} from "react";
 import FilterList from "@mui/icons-material/FilterList";
 import {useTheme} from "@mui/material/styles";
 import {
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
 import {getClassByUid, isItemChanged, validateItem} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
@@ -18,11 +21,15 @@ import {
     getColumnModifiedBy,
     getColumnName
 } from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 import PropTypes from "prop-types";
 import {getActionsType} from "../../dialogs/TaskEditConfigDialog";
-import {getTemplatesArtefacts, getTemplatesArtefactsEditable, templateArtefactCreationEnrichment, templateArtefactModifyingEnrichment} from "./_TemplUtils";
+import {
+    getTemplatesArtefacts,
+    getTemplatesArtefactsEditable,
+    templateArtefactCreationEnrichment,
+    templateArtefactModifyingEnrichment
+} from "./_TemplUtils";
 import {getClassesLookup} from "../../../utils/LookupHelper";
 import TaskEditConfigDialogTemplate from "../../dialogs/TaskEditConfigDialogTemplate";
 
@@ -34,7 +41,6 @@ TemplConfigTasksTab.propTypes = {
 export default function TemplConfigTasksTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -100,7 +106,17 @@ export default function TemplConfigTasksTab(props) {
                         filtering: false,
                         searchable: false,
                         sorting: false,
-                        initialEditValue: {properties: [], actions: { type: 'remove', setTag: false, tagId: 0, setReserved: false, reserved: false, properties: [] }},
+                        initialEditValue: {
+                            properties: [],
+                            actions: {
+                                type: 'remove',
+                                setTag: false,
+                                tagId: 0,
+                                setReserved: false,
+                                reserved: false,
+                                properties: []
+                            }
+                        },
                         render: rowData => getActionsType(rowData.configuration.actions),
                         editComponent: props => (
                             <TaskEditConfigDialogTemplate
@@ -130,8 +146,8 @@ export default function TemplConfigTasksTab(props) {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getTemplateTableHeight(height),
-                    minBodyHeight: getTemplateTableHeight(height),
+                    maxBodyHeight: getTemplateTableHeight(),
+                    minBodyHeight: getTemplateTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

@@ -4,13 +4,22 @@ import FilterList from "@mui/icons-material/FilterList";
 import {useTheme} from "@mui/material/styles";
 import {
     getDeleteOptions,
-    getPostOptions, getPutOptions,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getPostOptions,
+    getPutOptions,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
 import {convertNullValuesInObject, getSelectedValues, isItemChanged, validateItem} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
-import {getColumnDescription, getColumnId, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {
+    getColumnDescription,
+    getColumnId,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
+} from "../../utils/StandardColumns";
 import PropTypes from "prop-types";
 import {getBaseUrl} from "../../../utils/UrlBuilder";
 import {handleErrors} from "../../../utils/FetchHelper";
@@ -29,7 +38,6 @@ TemplConfigDataTab.propTypes = {
 export default function TemplConfigDataTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -51,7 +59,7 @@ export default function TemplConfigDataTab(props) {
     return (
         <div>
             <Grid container spacing={0}>
-                <Grid item xs={4} >
+                <Grid item xs={4}>
                     <MaterialTable
                         title='Data set'
                         tableRef={tableRef}
@@ -69,8 +77,8 @@ export default function TemplConfigDataTab(props) {
                             debounceInterval: 700,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                            maxBodyHeight: getTemplateTableHeight(height),
-                            minBodyHeight: getTemplateTableHeight(height),
+                            maxBodyHeight: getTemplateTableHeight(),
+                            minBodyHeight: getTemplateTableHeight(),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{
@@ -97,7 +105,12 @@ export default function TemplConfigDataTab(props) {
                                         .then(handleErrors)
                                         .catch(error => {
                                             reject();
-                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'error',
+                                                title: 'Error',
+                                                message: error
+                                            });
                                         })
                                         .then((data) => {
                                             if (data != null) {
@@ -137,7 +150,12 @@ export default function TemplConfigDataTab(props) {
                                     fetch(getBaseUrl('templates/data'), getPutOptions(payload))
                                         .then(handleErrors)
                                         .catch(error => {
-                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'error',
+                                                title: 'Error',
+                                                message: error
+                                            });
                                             reject();
                                         })
                                         .then((data) => {
@@ -156,7 +174,12 @@ export default function TemplConfigDataTab(props) {
                                             .then(handleErrors)
                                             .catch(error => {
                                                 e = true;
-                                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                                setMessageBox({
+                                                    open: true,
+                                                    severity: 'error',
+                                                    title: 'Error',
+                                                    message: error
+                                                });
                                                 reject();
                                             })
                                             .then(() => {
@@ -171,8 +194,8 @@ export default function TemplConfigDataTab(props) {
                         }}
                     />
                 </Grid>
-                <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
-                <Grid item xs={8} >
+                <Divider orientation="vertical" flexItem style={{marginRight: "-1px"}}/>
+                <Grid item xs={8}>
                     <div style={{marginLeft: '1px'}}>
                         <MaterialTable
                             title='Data items'
@@ -194,8 +217,8 @@ export default function TemplConfigDataTab(props) {
                                 debounceInterval: 700,
                                 padding: 'dense',
                                 headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                                maxBodyHeight: getTemplateTableHeight(height),
-                                minBodyHeight: getTemplateTableHeight(height),
+                                maxBodyHeight: getTemplateTableHeight(),
+                                minBodyHeight: getTemplateTableHeight(),
                                 rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                             }}
                             components={{
@@ -236,7 +259,12 @@ export default function TemplConfigDataTab(props) {
                                             .then(handleErrors)
                                             .catch(error => {
                                                 reject();
-                                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                                setMessageBox({
+                                                    open: true,
+                                                    severity: 'error',
+                                                    title: 'Error',
+                                                    message: error
+                                                });
                                             })
                                             .then((data) => {
                                                 if (data != null) {
@@ -276,7 +304,12 @@ export default function TemplConfigDataTab(props) {
                                         fetch(getBaseUrl('templates/data'), getPutOptions(payload))
                                             .then(handleErrors)
                                             .catch(error => {
-                                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                                setMessageBox({
+                                                    open: true,
+                                                    severity: 'error',
+                                                    title: 'Error',
+                                                    message: error
+                                                });
                                                 reject();
                                             })
                                             .then((data) => {
@@ -295,7 +328,12 @@ export default function TemplConfigDataTab(props) {
                                                 .then(handleErrors)
                                                 .catch(error => {
                                                     e = true;
-                                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                                    setMessageBox({
+                                                        open: true,
+                                                        severity: 'error',
+                                                        title: 'Error',
+                                                        message: error
+                                                    });
                                                     reject();
                                                 })
                                                 .then(() => {

@@ -18,7 +18,6 @@ import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/Conf
 import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
-import {useWindowDimension} from "./UseWindowDimension";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 
 const PREFIX = 'SelectMultiDialog';
@@ -76,7 +75,6 @@ SelectMultiDialog.propTypes = {
 export default function SelectMultiDialog(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const [open, setOpen] = useState(false);
     const [data] = useState(setSelectionItemsByIds(props.data, props.ids));
     const tableRef = createRef();
@@ -139,8 +137,8 @@ export default function SelectMultiDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                            maxBodyHeight: getDialogTableHeight(height, 30),
-                            minBodyHeight: getDialogTableHeight(height, 30),
+                            maxBodyHeight: getDialogTableHeight(30),
+                            minBodyHeight: getDialogTableHeight(30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{

@@ -35,7 +35,6 @@ import UsersContext from "../../context/users/UsersContext";
 import {getBucketMapper} from "../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
 import ClassesContext from "../../context/classes/ClassesContext";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
@@ -46,7 +45,6 @@ const EditComponent = props => <SelectIconDialog icon={props.value} onChange={pr
 export default function BucketsTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
@@ -187,8 +185,8 @@ export default function BucketsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

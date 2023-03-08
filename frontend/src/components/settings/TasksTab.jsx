@@ -6,24 +6,28 @@ import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {
-    convertNullValuesInObject, getClassById,
-    isItemChanged,
-    validateItem
-} from "../../utils/JsonHelper";
+import {convertNullValuesInObject, getClassById, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
+    getColumnBuckets,
+    getColumnClass,
+    getColumnClasses,
     getColumnDescription,
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnBuckets, getColumnClasses, getColumnClass, getColumnFilter
+    getColumnFilter,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
 } from "../utils/StandardColumns";
 import {getTasksMapper} from "../../utils/NullValueMappers";
 import TasksContext from "../../context/tasks/TasksContext";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import ClassesContext from "../../context/classes/ClassesContext";
@@ -35,7 +39,6 @@ import CloneIcon from "@mui/icons-material/ViewStream";
 export default function TasksTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -117,7 +120,17 @@ export default function TasksTab() {
                         filtering: false,
                         searchable: false,
                         sorting: false,
-                        initialEditValue: {properties: [], actions: { type: 'remove', setTag: false, tagId: 0, setReserved: false, reserved: false, properties: [] }},
+                        initialEditValue: {
+                            properties: [],
+                            actions: {
+                                type: 'remove',
+                                setTag: false,
+                                tagId: 0,
+                                setReserved: false,
+                                reserved: false,
+                                properties: []
+                            }
+                        },
                         render: rowData => getActionsType(rowData.configuration.actions),
                         editComponent: props => (
                             <TaskEditConfigDialog
@@ -145,8 +158,8 @@ export default function TasksTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -248,9 +261,19 @@ export default function TasksTab() {
                                     .catch(error => {
                                         e = true;
                                         if (error.includes('already used by items'))
-                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'warning',
+                                                title: 'Item can not be removed',
+                                                message: error
+                                            });
                                         else
-                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'error',
+                                                title: 'Error',
+                                                message: error
+                                            });
                                         reject();
                                     })
                                     .then(() => {

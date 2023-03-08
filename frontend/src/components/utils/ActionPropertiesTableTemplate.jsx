@@ -19,7 +19,6 @@ import React, {useState} from "react";
 import {useTheme} from "@mui/material/styles";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
-import {useWindowDimension} from "./UseWindowDimension";
 import moment from 'moment';
 
 ActionPropertiesTableTemplate.propTypes = {
@@ -34,7 +33,6 @@ ActionPropertiesTableTemplate.propTypes = {
 export default function ActionPropertiesTableTemplate(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const data = convertPropertiesDates(props.data, props.properties);
@@ -48,7 +46,7 @@ export default function ActionPropertiesTableTemplate(props) {
         props.onChange(newData);
     }
 
-    const getBodyHeight = (windowHeight) => {
+    const getBodyHeight = () => {
         return getTableBodyHeight(props.parentContentRef, 66);
     }
 
@@ -270,8 +268,8 @@ export default function ActionPropertiesTableTemplate(props) {
                     search: true,
                     filtering: false,
                     padding: 'dense',
-                    minBodyHeight: getBodyHeight(height),
-                    maxBodyHeight: getBodyHeight(height),
+                    minBodyHeight: getBodyHeight(),
+                    maxBodyHeight: getBodyHeight(),
                     headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
@@ -281,13 +279,13 @@ export default function ActionPropertiesTableTemplate(props) {
                 editable={getEditable()}
                 actions={[
                     rowData => ({
-                        icon: () => <ArrowDropDown/>,
+                        icon: ArrowDropDown,
                         tooltip: 'Move down',
                         onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === data.length - 1)
                     }),
                     rowData => ({
-                        icon: () => <ArrowDropUp/>,
+                        icon: ArrowDropUp,
                         tooltip: 'Move up',
                         onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === 0)
