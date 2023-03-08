@@ -29,57 +29,23 @@ import {debounce} from "../utils/Debouncer";
 const PREFIX = 'RichFilterDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
-    root3: `${PREFIX}-root3`,
-    selected: `${PREFIX}-selected`,
-    dialogPaper: `${PREFIX}-dialogPaper`,
-    tabs: `${PREFIX}-tabs`,
-    divActionGrabSpace: `${PREFIX}-divActionGrabSpace`,
-    container: `${PREFIX}-container`,
-    closeButton: `${PREFIX}-closeButton`,
-    smallerButton: `${PREFIX}-smallerButton`,
-    largerButton: `${PREFIX}-largerButton`
+    divActionGrabSpace: `${PREFIX}-divActionGrabSpace`
 };
 
 const StyledDialog = styled(Dialog)(({theme}) => ({
-    [`& .${classes.dialogPaper}`]: {
-        minHeight: '80vh',
-    },
-
-    [`& .${classes.tabs}`]: {
-        flexGrow: 1
-    },
+    minHeight: '80vh',
 
     [`& .${classes.divActionGrabSpace}`]: {
         width: '30px'
-    },
-    [`& .${classes.root}`]: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    [`& .${classes.container}`]: {
-        display: 'flex',
-        flexWrap: 'wrap',
-    },
-    [`& .${classes.closeButton}`]: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1)
-    },
-    [`& .${classes.smallerButton}`]: {
-        position: 'absolute',
-        right: theme.spacing(15),
-        top: theme.spacing(1)
-    },
-    [`& .${classes.largerButton}`]: {
-        position: 'absolute',
-        right: theme.spacing(10),
-        top: theme.spacing(1)
     }
 }));
 
 const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
+}));
+
+const StyledDialogContent = styled(MuiDialogContent)(({theme}) => ({
     margin: 0,
     padding: theme.spacing(2),
 }));
@@ -127,7 +93,6 @@ const TopPaddedGridItem = styled(Grid)(({theme}) => ({
     padding: theme.spacing(1)
 }));
 
-const DialogContent = MuiDialogContent;
 
 const DialogActions = MuiDialogActions;
 
@@ -315,7 +280,7 @@ export default function RichFilterDialog(props) {
                 </TopPaddedGridItem>
                 <Grid item xs={6}>
                     <Tabs
-                        className={classes.tabs}
+                        sx={{flexGrow: 1}}
                         value={activeTab}
                         onChange={handleChangedTab}
                     >
@@ -325,13 +290,10 @@ export default function RichFilterDialog(props) {
                 </Grid>
             </DialogTitleGrid>
             <EnumsProvider>
-                <DialogContent
+                <StyledDialogContent
                     dividers
-                    style={{height: '62vh'}}
-                    ref={dialogContentRef}
-                    classes={{
-                        root: classes.root
-                    }}>
+                    sx={{height: '62vh'}}
+                    ref={dialogContentRef}>
                     {props.open && activeTab === 0 && Object.keys(state.tree).length > 0 &&
                         <div>
                             <Query
@@ -355,12 +317,9 @@ export default function RichFilterDialog(props) {
                             parentContentRef={dialogContentRef}
                         />}
 
-                </DialogContent>
+                </StyledDialogContent>
             </EnumsProvider>
-            <DialogActions
-                classes={{
-                    root: classes.root2
-                }}>
+            <DialogActions>
                 <Typography
                     color={'primary'}>{`${appliesCount} data ${appliesCount > 1 ? 'rows' : 'row'} ${appliesCount > 1 ? 'match' : 'matches'} the rules`}</Typography>
                 <div className={classes.divActionGrabSpace}/>

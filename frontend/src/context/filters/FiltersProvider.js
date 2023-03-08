@@ -48,7 +48,7 @@ const FiltersProvider = props => {
 
     const filters = useMemo(() => {
         return {filters: state.filters, fetchFilters, addFilter, editFilter, removeFilter};
-    }, []);
+    }, [state.filters]);
     return (
         <FiltersContext.Provider value={filters}>
             {props.children}

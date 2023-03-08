@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import {styled} from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
-import {Checkbox, FormControlLabel, InputLabel, MenuItem, Select, Slider, Tooltip} from "@mui/material";
+import {Box, Checkbox, FormControlLabel, InputLabel, MenuItem, Select, Slider, Tooltip} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {getUsername, hasAdminRole} from "../../utils/ConfigurationStorage";
 import FormControl from "@mui/material/FormControl";
@@ -14,17 +14,11 @@ const PREFIX = 'ReserveDataDialog';
 const classes = {
     root: `${PREFIX}-root`,
     reserveButton: `${PREFIX}-reserveButton`,
-    content: `${PREFIX}-content`,
     button: `${PREFIX}-button`,
     formControl: `${PREFIX}-formControl`,
-    selectEmpty: `${PREFIX}-selectEmpty`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
+const Root = styled(Box)(({theme}) => ({
     [`&.${classes.root}`]: {
         flexGrow: 1
     },
@@ -34,32 +28,11 @@ const Root = styled('div')((
         padding: theme.spacing(1)
     },
 
-    [`& .${classes.content}`]: {
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
-        padding: "15px",
-        margin: theme.spacing(1),
-    },
-
     [`& .${classes.button}`]: {
         marginTop: "13px"
     },
 
-    [`& .${classes.formControl}`]: {
-        margin: theme.spacing(1),
-        minWidth: 150,
-    },
-
-    [`& .${classes.selectEmpty}`]: {
-        marginTop: theme.spacing(2),
-    }
 }));
-
-// ReserveDataDialog.propTypes = {
-//     onReserve: PropTypes.func.isRequired
-// }
 
 const marks = [
     {
@@ -84,8 +57,21 @@ const marks = [
     }
 ];
 
-export default function ReserveDataDialog(props) {
+const Content = styled('div')(({theme}) => ({
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    padding: "15px",
+    margin: theme.spacing(1),
 
+    [`& .${classes.formControl}`]: {
+        margin: theme.spacing(1),
+        minWidth: 150,
+    },
+}));
+
+export default function ReserveDataDialog(props) {
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -109,8 +95,9 @@ export default function ReserveDataDialog(props) {
         setState({...state, number: newValue});
     }
 
-    const onChangeUser = (user) => {
-        setState({...state, username: user.username});
+    const onChangeUser = (event) => {
+        const user = event.target.value;
+        setState({...state, username: user});
     }
 
     const handleReserve = () => {
@@ -119,7 +106,7 @@ export default function ReserveDataDialog(props) {
     }
 
     return (
-        <Root className={classes.root}>
+        <Root>
             <Tooltip title={'Reserve data'}>
                 <IconButton
                     onClick={handleMenu}
@@ -130,7 +117,7 @@ export default function ReserveDataDialog(props) {
                 </IconButton>
             </Tooltip>
             <Menu
-                id="menu-appbar"
+                id="reserve-data-menu"
                 anchorEl={anchorEl}
                 anchorOrigin={{
                     vertical: 'top',
@@ -144,7 +131,7 @@ export default function ReserveDataDialog(props) {
                 open={open}
                 onClose={handleClose}
             >
-                <div className={classes.content}>
+                <Content>
                     <FormControl className={classes.formControl}>
                         <Typography gutterBottom>
                             Number of data rows
@@ -162,21 +149,23 @@ export default function ReserveDataDialog(props) {
                         />
                     </FormControl>
                     {hasAdminRole() &&
-                    <FormControl className={classes.formControl}>
-                        <InputLabel id="user-select-label">Target owner</InputLabel>
-                        <Select
-                            labelId="user-select-label"
-                            id="user-select"
-                            value={state.username}
-                            // onChange={onChangeUser}
-                        >
-                            {users.map(user => (
-                                <MenuItem key={user.id} value={user.username} onClick={() => onChangeUser(user)}>
-                                    {user.username}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                        <FormControl fullWidth>
+                            <InputLabel id="user-select-label">Target owner</InputLabel>
+                            <Select
+                                labelId="user-select-label"
+                                id="user-select"
+                                value={state.username}
+                                label="Target owner"
+                                onChange={onChangeUser}
+                            >
+                                {users.map(user => (
+                                    <MenuItem key={user.id}
+                                              value={user.username}>
+                                        {user.username}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     }
                     <FormControlLabel
                         control={<Checkbox checked={state.random} onChange={handleChangeRandom} name="checkRandom"/>}
@@ -188,7 +177,7 @@ export default function ReserveDataDialog(props) {
                             Reserve
                         </Button>
                     </FormControl>
-                </div>
+                </Content>
             </Menu>
         </Root>
     );

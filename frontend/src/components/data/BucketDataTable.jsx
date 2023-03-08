@@ -754,38 +754,38 @@ export default function BucketDataTable() {
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
 
-                <DataDetailsDialog
+                {detailsState.open && <DataDetailsDialog
                     bucket={activeBucket}
                     open={detailsState.open}
                     dataRow={detailsState.dataRow}
                     tags={tags}
                     onChange={(dataRow, changed) => onCloseDataDetailsDialog(dataRow, changed)}
-                />
+                />}
 
-                <DataHistoryDialog
+                {historyState.open && <DataHistoryDialog
                     bucket={activeBucket}
                     dataRowId={historyState.dataRowId}
                     history={historyState.history}
                     tags={tags}
                     open={historyState.open}
                     onClose={() => onCloseDataHistoryDialog()}
-                />
+                />}
 
-                <TaskExecutionDialog
+                {taskState.open && <TaskExecutionDialog
                     bucket={activeBucket}
                     open={taskState.open}
                     onClose={onCloseTaskExecutionEditorDialog}
                     reload={resetPageAndReload}
                     activeLogic={state.activeLogic}
-                />
+                />}
 
-                <RichFilterDialog
+                {richFilterState.open && <RichFilterDialog
                     bucket={activeBucket}
                     open={richFilterState.open}
                     onClose={onCloseRichFilterDialog}
                     activeLogic={state.activeLogic}
                     setActiveLogic={setActiveLogic}
-                />
+                />}
             </>
         );
     }

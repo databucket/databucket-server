@@ -1,6 +1,5 @@
 import React, {useContext} from 'react';
 import PropTypes from "prop-types";
-import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ShowGroupsIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 import ListItemText from "@mui/material/ListItemText";

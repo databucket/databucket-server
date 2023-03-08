@@ -56,7 +56,7 @@ const ClassesProvider = props => {
             removeClass,
             classesLookup: state.classesLookup
         }
-    }, [state.classes]);
+    }, [state.classes, state.classesLookup]);
     return (
         <ClassesContext.Provider value={classes}>
             {props.children}

@@ -66,3 +66,16 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `yarn build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+
+
+## Material Table
+The original project is out of maintenance and there's an ugly performance bug when calculating table cell width.
+We fixed it via a fork from the repo + adding it to the project as a git submodule.
+https://git-scm.com/book/en/v2/Git-Tools-Submodules
+
+### Cloning the Submodule
+As the material-table is now served from our git submodule, we need to be sure to clone our project including submodules:
+```bash
+$ git clone --recurse-submodules git@github.com:databucket/databucket-server.git
+```
