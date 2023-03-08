@@ -26,15 +26,6 @@ import "brace/theme/monokai";
 const PREFIX = 'DataDetailsDialog';
 
 const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
-    root3: `${PREFIX}-root3`,
-    container: `${PREFIX}-container`,
-    closeButton: `${PREFIX}-closeButton`,
-    linkButton: `${PREFIX}-linkButton`,
-    openButton: `${PREFIX}-openButton`,
-    smallerButton: `${PREFIX}-smallerButton`,
-    largerButton: `${PREFIX}-largerButton`,
     dialogPaper: `${PREFIX}-dialogPaper`
 };
 
@@ -44,7 +35,14 @@ const StyledDialog = styled(Dialog)(() => ({
     }
 }));
 
-// import "brace/theme/eclipse";
+const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
+    display: "flex",
+    alignItems: "center"
+
+}));
+
 
 const ajv = new Ajv({allErrors: true, verbose: true});
 const jsonThemeLight = null; //"ace/theme/eclipse";
@@ -53,11 +51,10 @@ const jsonThemeDark = "ace/theme/monokai";
 const DialogTitle = (props => {
     const {children, onClose, onMakeDialogSmaller, onMakeDialogLarger, onCopyDataLink, onOpenDataLink} = props;
     return (
-        <MuiDialogTitle className={classes.root}>
+        <StyledDialogTitle>
             {children}
             <Tooltip id="link-tooltip" title="Copy direct link to data">
                 <IconButton
-                    className={classes.linkButton}
                     onClick={onCopyDataLink}
                     color={"inherit"}
                     size="large">
@@ -66,7 +63,6 @@ const DialogTitle = (props => {
             </Tooltip>
             <Tooltip id="open-in-new-tooltip" title="Open details in new tab">
                 <IconButton
-                    className={classes.openButton}
                     onClick={onOpenDataLink}
                     color={"inherit"}
                     size="large">
@@ -75,7 +71,6 @@ const DialogTitle = (props => {
             </Tooltip>
             <Tooltip id="smaller-window-tooltip" title="Smaller">
                 <IconButton
-                    className={classes.smallerButton}
                     onClick={onMakeDialogSmaller}
                     color={"inherit"}
                     disabled={onMakeDialogSmaller == null}
@@ -86,7 +81,6 @@ const DialogTitle = (props => {
             <Tooltip id="larger-window-tooltip" title="Larger">
                 <IconButton
                     aria-label="Larger"
-                    className={classes.largerButton}
                     onClick={onMakeDialogLarger}
                     color={"inherit"}
                     disabled={onMakeDialogLarger == null}
@@ -98,14 +92,14 @@ const DialogTitle = (props => {
                 <Tooltip id="close-window-tooltip" title="Close">
                     <IconButton
                         aria-label="Close"
-                        className={classes.closeButton}
+                        sx={{marginLeft: "auto"}}
                         onClick={onClose}
                         size="large">
                         <CloseIcon/>
                     </IconButton>
                 </Tooltip>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
 });
 
@@ -120,6 +114,8 @@ DataDetailsDialog.propTypes = {
     tags: PropTypes.array,
     onChange: PropTypes.func.isRequired
 };
+
+const TableContainer = props => <div {...props} />;
 
 export default function DataDetailsDialog(props) {
 
@@ -283,7 +279,7 @@ export default function DataDetailsDialog(props) {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
             />
             <DialogContent
@@ -304,10 +300,7 @@ export default function DataDetailsDialog(props) {
                 />
             </DialogContent>
             <Divider/>
-            <DialogActions
-                classes={{
-                    root: classes.root2
-                }}>
+            <DialogActions>
                 <Tooltip id="copy-content-tooltip" title="Copy content">
                     <IconButton color={"inherit"} onClick={copyContent} size="large">
                         <span className="material-icons">content_copy</span>
