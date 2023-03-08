@@ -77,5 +77,9 @@ https://git-scm.com/book/en/v2/Git-Tools-Submodules
 ### Cloning the Submodule
 As the material-table is now served from our git submodule, we need to be sure to clone our project including submodules:
 ```bash
-$ git clone --recurse-submodules git@github.com:databucket/databucket-server.git
+git clone --recurse-submodules git@github.com:databucket/databucket-server.git
+```
+If you're switching from another branch and the material-table folder is empty, then you need to init the submodule:
+```bash
+git submodule update --init
 ```
