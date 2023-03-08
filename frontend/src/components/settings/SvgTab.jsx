@@ -24,7 +24,6 @@ import {
     getColumnModifiedBy,
     getColumnName
 } from "../utils/StandardColumns";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
 import IconButton from "@mui/material/IconButton";
@@ -35,7 +34,6 @@ export default function SvgTab() {
 
     const theme = useTheme();
     const inputRef = useRef(null);
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -155,8 +153,8 @@ export default function SvgTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

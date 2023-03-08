@@ -1,6 +1,12 @@
 import React, {createRef, useContext, useEffect, useRef, useState} from 'react';
 import {createTagLookup} from "../../../utils/JsonHelper";
-import {getBodyHeight, getGetOptions, getPutOptions, getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../../utils/MaterialTableHelper";
+import {
+    getBodyHeight,
+    getGetOptions,
+    getPutOptions,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
+} from "../../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
 import {useTheme} from "@mui/material/styles";
 import TagsContext from "../../../context/tags/TagsContext";
@@ -8,7 +14,7 @@ import {Divider, TextField, Tooltip} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
-import {debounce2, useWindowDimension} from "../../utils/UseWindowDimension";
+import {debounce} from "../../utils/Debouncer";
 import {Link, useParams} from "react-router-dom";
 import {getDataByIdUrl2} from "../../../utils/UrlBuilder";
 import {handleErrors} from "../../../utils/FetchHelper";
@@ -32,7 +38,6 @@ export default function DataDetailsPage() {
 
     const inputParams = useParams();
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = createRef();
     const jsonEditorRef = useRef(null);
     const jsonPathRef = useRef(null);
@@ -121,7 +126,7 @@ export default function DataDetailsPage() {
         }
     }
 
-    const debouncedChangedJsonPath = useRef(debounce2(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
+    const debouncedChangedJsonPath = useRef(debounce(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
 
     const handleChangedJsonPath = (event) => {
         debouncedChangedJsonPath(event.target.value);
@@ -152,7 +157,7 @@ export default function DataDetailsPage() {
     document.title = `Databucket [${inputParams.bucketName}: ${inputParams.dataId}]`;
     setPathname(null); // clear path
     return (
-        <div style={{height: getBodyHeight(height)}}>
+        <div style={{height: getBodyHeight()}}>
             <IconButton
                 component={Link}
                 to={getProjectDataPath()}

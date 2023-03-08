@@ -27,7 +27,6 @@ import {
 import {getEnumMapper} from "../../utils/NullValueMappers";
 import EditEnumDialog from "../dialogs/EditEnumDialog";
 import EnumsContext from "../../context/enums/EnumsContext";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 const EditEnumComponent = props => (
@@ -42,7 +41,6 @@ const EditEnumComponent = props => (
 export default function EnumsTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -103,8 +101,8 @@ export default function EnumsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

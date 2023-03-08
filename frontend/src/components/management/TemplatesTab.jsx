@@ -4,12 +4,17 @@ import {MessageBox} from "../utils/MessageBox";
 import {
     getDeleteOptions,
     getManagementTableHeight,
-    getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
-    convertNullValuesInObject, getArrayLengthStr,
+    convertNullValuesInObject,
+    getArrayLengthStr,
     getSelectedValues,
     isItemChanged,
     validateItem
@@ -22,12 +27,14 @@ import {handleErrors} from "../../utils/FetchHelper";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import ProjectsContext from "../../context/projects/ProjectsContext";
 import {
-    getColumnCreatedBy,
     getColumnCreatedAt,
-    getColumnModifiedBy, getColumnModifiedAt, getColumnDescription, getColumnName,
+    getColumnCreatedBy,
+    getColumnDescription,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName,
 } from "../utils/StandardColumns";
 import {getTemplateMapper} from "../../utils/NullValueMappers";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import EditTemplateConfigurationDialog from "../dialogs/EditTemplateConfigurationDialog";
 import SelectTemplatesDialog from "../dialogs/SelectTemplatesDialog";
@@ -36,7 +43,6 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 export default function TemplatesTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
@@ -94,11 +100,20 @@ export default function TemplatesTab() {
                 title='Templates'
                 tableRef={tableRef}
                 columns={[
-                    {title: '#', width: '1%', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''},
+                    {
+                        title: '#',
+                        width: '1%',
+                        cellStyle: {width: '1%'},
+                        render: (rowData) => rowData ? rowData.tableData.id + 1 : ''
+                    },
                     getColumnName(),
                     getColumnDescription('20%'),
                     {
-                        title: 'Base templates', field: 'templatesIds', filtering: false, searchable: false, sorting: false,
+                        title: 'Base templates',
+                        field: 'templatesIds',
+                        filtering: false,
+                        searchable: false,
+                        sorting: false,
                         render: rowData => getArrayLengthStr(rowData['templatesIds']),
                         editComponent: props => (
                             <SelectTemplatesDialog
@@ -122,7 +137,7 @@ export default function TemplatesTab() {
                     {
                         title: 'Configuration',
                         field: 'configuration',
-                        cellStyle: { width: '1%'},
+                        cellStyle: {width: '1%'},
                         searchable: false,
                         sorting: false,
                         render: (rowData) => <MoreHoriz/>,
@@ -164,8 +179,8 @@ export default function TemplatesTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getManagementTableHeight(height),
-                    minBodyHeight: getManagementTableHeight(height),
+                    maxBodyHeight: getManagementTableHeight(),
+                    minBodyHeight: getManagementTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -173,13 +188,13 @@ export default function TemplatesTab() {
                 }}
                 actions={[
                     {
-                        icon: () => <Refresh/>,
+                        icon: Refresh,
                         tooltip: 'Refresh',
                         isFreeAction: true,
                         onClick: () => fetchTemplates()
                     },
                     {
-                        icon: () => <FilterList/>,
+                        icon: FilterList,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)

@@ -22,7 +22,6 @@ import EditIconDialog from "./SelectIconDialog";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import {MessageBox} from "../utils/MessageBox";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import StyledIcon from "../utils/StyledIcon";
 
 const PREFIX = 'EditEnumDialog';
@@ -74,7 +73,6 @@ EditEnumDialog.propTypes = {
 export default function EditEnumDialog(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [open, setOpen] = useState(false);
@@ -166,8 +164,8 @@ export default function EditEnumDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                            maxBodyHeight: getDialogTableHeight(height, 30),
-                            minBodyHeight: getDialogTableHeight(height, 30),
+                            maxBodyHeight: getDialogTableHeight(30),
+                            minBodyHeight: getDialogTableHeight(30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{

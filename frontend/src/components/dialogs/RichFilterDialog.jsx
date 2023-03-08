@@ -24,7 +24,7 @@ import {createConfig, getInitialTree, renderBuilder, renderResult} from "../util
 import AccessContext from "../../context/access/AccessContext";
 import FilterMenuSelector from "../data/FilterMenuSelector";
 import {getDataFilterDialogSize, setDataFilterDialogSize} from "../../utils/ConfigurationStorage";
-import {debounce2} from "../utils/UseWindowDimension";
+import {debounce} from "../utils/Debouncer";
 
 const PREFIX = 'RichFilterDialog';
 
@@ -232,7 +232,7 @@ export default function RichFilterDialog(props) {
     }, [props.open, state.logic]);
 
     const refreshAppliesCount = useCallback(
-        debounce2(({open, bucket, logic}) => {
+        debounce(({open, bucket, logic}) => {
             if (open) {
                 let resultOk = true;
                 fetch(getDataUrl(bucket) + '/get?limit=0', getPostOptions({logic}))

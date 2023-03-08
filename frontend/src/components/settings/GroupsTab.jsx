@@ -6,36 +6,38 @@ import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {
-    arraysEquals,
-    convertNullValuesInObject,
-    isItemChanged,
-    validateItem
-} from "../../utils/JsonHelper";
+import {arraysEquals, convertNullValuesInObject, isItemChanged, validateItem} from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnBuckets,
     getColumnDescription,
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnRole, getColumnShortName, getColumnTeams, getColumnUsers
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName,
+    getColumnRole,
+    getColumnShortName,
+    getColumnTeams,
+    getColumnUsers
 } from "../utils/StandardColumns";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import GroupsContext from "../../context/groups/GroupsContext";
 import UsersContext from "../../context/users/UsersContext";
 import RolesContext from "../../context/roles/RolesContext";
 import {getGroupMapper} from "../../utils/NullValueMappers";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function GroupsTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -119,8 +121,8 @@ export default function GroupsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -221,9 +223,19 @@ export default function GroupsTab() {
                                     .catch(error => {
                                         e = true
                                         if (error.includes('already used by items'))
-                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'warning',
+                                                title: 'Item can not be removed',
+                                                message: error
+                                            });
                                         else
-                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'error',
+                                                title: 'Error',
+                                                message: error
+                                            });
                                         reject();
                                     })
                                     .then(() => {

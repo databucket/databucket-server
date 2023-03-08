@@ -23,7 +23,6 @@ import {
     setLastBucketSearchedText,
     setLastPageSize
 } from "../../utils/ConfigurationStorage";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {Grid, Icon} from "@mui/material";
 import ViewMenuSelector from "./ViewMenuSelector";
 import AccessContext from "../../context/access/AccessContext";
@@ -81,12 +80,11 @@ const filterIcon = (filtering) => () => filtering && tableRef.current.state.quer
     <FilterList color={'secondary'}/> :
     <FilterList/>;
 
-const tableContainer = (props) => <div {...props} />;
 const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange, theme) => (props) => {
     return (
         <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
             <Grid container direction="row">
-                <Grid container direction={"row"} item xs={3} alignItems="center">
+                <Grid container item direction="row" xs={3} alignItems="center">
                     <Grid item>
                         {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
                             <ReserveDataDialog onReserve={onDataReserve}/>}
@@ -122,7 +120,6 @@ export default function BucketDataTable() {
     const theme = useTheme();
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [height] = useWindowDimension();
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
     const {buckets, activeBucket, views, columns, filters, tags, tasks, enums, users} = accessContext;
@@ -720,8 +717,8 @@ export default function BucketDataTable() {
                         padding: 'dense',
                         search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
                         searchFieldStyle: {width: 500},
-                        maxBodyHeight: getTableHeight(height),
-                        minBodyHeight: getTableHeight(height),
+                        maxBodyHeight: getTableHeight(),
+                        minBodyHeight: getTableHeight(),
                         headerStyle: {
                             position: 'sticky',
                             top: 0,
@@ -740,7 +737,6 @@ export default function BucketDataTable() {
                         }
                     }}
                     components={{
-                        Container: tableContainer,
                         Toolbar: tableToolbar(state, onViewSelected, onDataReserve, handleSearchChange, theme)
                     }}
                     onOrderChange={(colId, ord) => {

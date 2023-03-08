@@ -216,29 +216,30 @@ export const moveDown = (dataCollection, itemId) => {
     });
 }
 
-export const getTableHeight = (height) => {
-    const tableHeight = ((height - 64 - 64 - 52 - 2) / height * 100).toFixed(2);
-    return `${tableHeight}vh`;
+export const getTableHeight = () => {
+    // Total Height - Appbar (72) - Toolbar (64) - Footer (52)
+    const staticElements = 72 + 64 + 52 + 2;
+    return `calc(100vh - ${staticElements}px)`;
 }
 
-export const getManagementTableHeight = (height) => {
-    const tableHeight = ((height - 64 - 64 - 40) / height * 100).toFixed(2);
-    return `${tableHeight}vh`;
+export const getManagementTableHeight = () => {
+    const staticElements = 64 + 64 + 40;
+    return `calc(100vh - ${staticElements}px)`;
 }
 
-export const getSettingsTableHeight = (height) => {
-    const tableHeight = ((height - 64 - 64 + 10) / height * 100).toFixed(2);
-    return `${tableHeight}vh`;
+export const getSettingsTableHeight = () => {
+    // Header (64) + footer (52)
+    const staticElements = 64 + 52;
+    return `calc(100vh - ${staticElements}px)`;
 }
 
-export const getTemplateTableHeight = (height) => {
-    const tableHeight = ((height - 250) / height * 100).toFixed(2);
-    return `${tableHeight}vh`;
+export const getTemplateTableHeight = () => {
+    return `calc(100vh - 250px)`;
 }
 
-export const getDialogTableHeight = (height, custom) => {
-    const tableHeight = ((height - 64 - 64 - 52 - 2) / height * 100).toFixed(2) - custom;
-    return `${tableHeight}vh`;
+export const getDialogTableHeight = (custom) => {
+    const staticElements = 64 + 64 + 52 + 2;
+    return `calc(100vh - ${staticElements}px - ${custom}vh)`;
 }
 
 export const getPropertiesTableHeight = (height, custom) => {
@@ -253,9 +254,9 @@ export const getTableBodyHeight = (parentRef, tableHeadHeight) => {
     return newHeight;
 }
 
-export const getBodyHeight = (height) => {
-    const bodyHeight = ((height - 64 - 64 - 60) / height * 100).toFixed(2);
-    return `${bodyHeight}vh`;
+export const getBodyHeight = () => {
+    const staticElements = 64 + 64 + 60;
+    return `calc(100vh - ${staticElements}px)`;
 }
 
 export const getIconColor = (type, color) => {

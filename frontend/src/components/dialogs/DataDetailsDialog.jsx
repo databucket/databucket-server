@@ -18,7 +18,7 @@ import {getDataDetailsDialogSize, setDataDetailsDialogSize} from "../../utils/Co
 import {MessageBox} from "../utils/MessageBox";
 import jp from "jsonpath";
 import {getDirectDataPath} from "../../route/AppRouter";
-import {debounce2} from "../utils/UseWindowDimension";
+import {debounce} from "../utils/Debouncer";
 import {JsonEditor as Editor} from 'jsoneditor-react';
 import Ajv from 'ajv';
 import ace from 'brace';
@@ -213,7 +213,7 @@ export default function DataDetailsDialog(props) {
         }
     }
 
-    const debouncedSave = useRef(debounce2(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
+    const debouncedSave = useRef(debounce(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
 
     const handleChangedJsonPath = (event) => {
         debouncedSave(event.target.value);

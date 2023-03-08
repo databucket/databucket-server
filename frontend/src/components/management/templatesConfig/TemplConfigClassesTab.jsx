@@ -3,15 +3,27 @@ import React, {useContext, useState} from "react";
 import FilterList from "@mui/icons-material/FilterList";
 import {useTheme} from "@mui/material/styles";
 import {
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
 import {getArrayLengthStr, isItemChanged, validateItem} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
-import {getColumnCreatedAt, getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {
+    getColumnCreatedAt,
+    getColumnDescription,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
+} from "../../utils/StandardColumns";
 import PropTypes from "prop-types";
 import EditTemplateClassFieldsDialog from "../../dialogs/EditTemplateClassFieldsDialog";
-import {getTemplatesArtefactsEditable, templateArtefactCreationEnrichment, templateArtefactModifyingEnrichment} from "./_TemplUtils";
+import {
+    getTemplatesArtefactsEditable,
+    templateArtefactCreationEnrichment,
+    templateArtefactModifyingEnrichment
+} from "./_TemplUtils";
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 
 TemplConfigClassesTab.propTypes = {
@@ -22,7 +34,6 @@ TemplConfigClassesTab.propTypes = {
 export default function TemplConfigClassesTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -85,8 +96,8 @@ export default function TemplConfigClassesTab(props) {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getTemplateTableHeight(height),
-                    minBodyHeight: getTemplateTableHeight(height),
+                    maxBodyHeight: getTemplateTableHeight(),
+                    minBodyHeight: getTemplateTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

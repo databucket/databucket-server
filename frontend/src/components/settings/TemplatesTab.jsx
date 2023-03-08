@@ -5,17 +5,15 @@ import FilterList from "@mui/icons-material/FilterList";
 import {useTheme} from "@mui/material/styles";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
-    getPageSizeOptions, getPostOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-import {
-    getColumnDescription,
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName
-} from "../utils/StandardColumns";
-import {useWindowDimension} from "../utils/UseWindowDimension";
+import {getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../utils/StandardColumns";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import {PlayCircleOutline} from "@mui/icons-material";
@@ -23,7 +21,6 @@ import {PlayCircleOutline} from "@mui/icons-material";
 export default function TemplatesTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -73,8 +70,8 @@ export default function TemplatesTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

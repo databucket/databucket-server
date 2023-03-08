@@ -2,8 +2,13 @@ import MaterialTable from "material-table";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getDeleteOptions, getManagementTableHeight,
-    getPageSizeOptions, getPostOptions, getPutOptions, getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getDeleteOptions,
+    getManagementTableHeight,
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
@@ -20,11 +25,14 @@ import {useTheme} from "@mui/material/styles";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
 import {
+    getColumnCreatedAt,
     getColumnCreatedBy,
-    getColumnCreatedAt, getColumnDescription,
+    getColumnDescription,
     getColumnEnabled,
     getColumnExpirationDate,
-    getColumnId, getColumnModifiedBy, getColumnModifiedAt,
+    getColumnId,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
     getColumnName
 } from "../utils/StandardColumns";
 import ManageUsersContext from "../../context/users/ManageUsersContext";
@@ -32,7 +40,6 @@ import SelectUsersDialog from "../dialogs/SelectUsersDialog";
 import RolesContext from "../../context/roles/RolesContext";
 import {getManageProjectMapper} from "../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import SelectTemplatesDialog from "../dialogs/SelectTemplatesDialog";
@@ -40,7 +47,6 @@ import SelectTemplatesDialog from "../dialogs/SelectTemplatesDialog";
 export default function ProjectsTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -168,8 +174,8 @@ export default function ProjectsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getManagementTableHeight(height),
-                    minBodyHeight: getManagementTableHeight(height),
+                    maxBodyHeight: getManagementTableHeight(),
+                    minBodyHeight: getManagementTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -260,7 +266,7 @@ export default function ProjectsTab() {
                                         editProject(convertNullValuesInObject(project, getManageProjectMapper()));
                                         if (!arraysEquals(newData, oldData, 'usersIds'))
                                             notifyUsers('PROJECT', project.id, project['usersIds']);
-                                            notifyTemplates('PROJECT', project.id, project['templatesIds']);
+                                        notifyTemplates('PROJECT', project.id, project['templatesIds']);
                                         resolve();
                                     }
                                 });

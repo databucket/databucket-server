@@ -26,7 +26,7 @@ import {createConfig, getInitialTree, renderBuilder, renderResult} from "../util
 import AccessContext from "../../context/access/AccessContext";
 import {getTaskExecutionDialogSize, setTaskExecutionDialogSize} from "../../utils/ConfigurationStorage";
 import Grid from "@mui/material/Grid";
-import {debounce2} from "../utils/UseWindowDimension";
+import {debounce} from "../utils/Debouncer";
 
 const PREFIX = 'TaskExecutionDialog';
 
@@ -219,7 +219,7 @@ export default function TaskExecutionDialog(props) {
     }, [props.open, state.logic]);
 
     const refreshAppliesCount = useCallback(
-        debounce2(({open, bucket, logic}) => {
+        debounce(({open, bucket, logic}) => {
             if (open) {
                 let resultOk = true;
                 fetch(getDataUrl(bucket) + '/get?limit=0', getPostOptions({logic}))

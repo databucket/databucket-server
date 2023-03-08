@@ -1,5 +1,5 @@
 import React, {createRef, useState} from 'react';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
@@ -11,19 +11,16 @@ import Tooltip from "@mui/material/Tooltip";
 import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
-import {
-    getLastPageSizeOnDialog,
-    setLastPageSizeOnDialog
-} from "../../utils/ConfigurationStorage";
-import {useTheme} from '@mui/material/styles';
+import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import PropTypes from 'prop-types';
 import Button from "@mui/material/Button";
 import RadioChecked from "@mui/icons-material/RadioButtonChecked";
 import RadioUnchecked from "@mui/icons-material/RadioButtonUnchecked";
-import {useWindowDimension} from "./UseWindowDimension";
+
 const PREFIX = 'SelectSingleDialog';
 
 const classes = {
@@ -51,7 +48,7 @@ const Root = styled('div')((
 }));
 
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const {children, onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
@@ -84,7 +81,6 @@ SelectSingleDialog.propTypes = {
 export default function SelectSingleDialog(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const [open, setOpen] = useState(false);
     const [data] = useState(props.data);
     const tableRef = createRef();
@@ -118,7 +114,8 @@ export default function SelectSingleDialog(props) {
             editable: 'never',
             filtering: false,
             cellStyle: {width: '1%'},
-            render: rowData => (rowData['id'] === props.id ? <RadioChecked color={'secondary'} fontSize={'small'}/> : <RadioUnchecked fontSize={'small'}/>)
+            render: rowData => (rowData['id'] === props.id ? <RadioChecked color={'secondary'} fontSize={'small'}/> :
+                <RadioUnchecked fontSize={'small'}/>)
         };
     };
 
@@ -166,8 +163,8 @@ export default function SelectSingleDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                            maxBodyHeight: getDialogTableHeight(height, 30),
-                            minBodyHeight: getDialogTableHeight(height, 30),
+                            maxBodyHeight: getDialogTableHeight(30),
+                            minBodyHeight: getDialogTableHeight(30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{

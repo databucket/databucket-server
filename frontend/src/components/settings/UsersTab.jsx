@@ -2,12 +2,19 @@ import MaterialTable from "material-table";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getPageSizeOptions, getPutOptions, getSettingsTableHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, getUserIcon
+    getPageSizeOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getUserIcon
 } from "../../utils/MaterialTableHelper";
 import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
-    convertNullValuesInObject, getArrayLengthStr, getRolesNames,
+    convertNullValuesInObject,
+    getArrayLengthStr,
+    getRolesNames,
     getSelectedValues,
     isItemChanged,
     validateItem
@@ -19,18 +26,19 @@ import {handleErrors} from "../../utils/FetchHelper";
 import RolesContext from "../../context/roles/RolesContext";
 import UsersContext from "../../context/users/UsersContext";
 import {
-    getColumnModifiedBy, getColumnModifiedAt, getColumnCreatedBy, getColumnCreatedAt,
+    getColumnCreatedAt,
+    getColumnCreatedBy,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function UsersTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
@@ -74,7 +82,14 @@ export default function UsersTab() {
                 title='Users'
                 tableRef={tableRef}
                 columns={[
-                    {filtering: false, cellStyle: { width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
+                    {
+                        filtering: false,
+                        cellStyle: {width: '1%'},
+                        editable: 'never',
+                        searchable: false,
+                        sorting: false,
+                        render: (rowData) => getUserIcon(rowData)
+                    },
                     {title: 'Name', field: 'username', editable: 'onAdd', filtering: true,},
                     {
                         title: 'Roles', field: 'rolesIds', filtering: false, editable: 'never', sorting: false,
@@ -109,8 +124,8 @@ export default function UsersTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
