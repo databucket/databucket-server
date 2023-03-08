@@ -63,9 +63,9 @@ const Root = styled('div')(({theme}) => ({
 }));
 
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <MuiDialogTitle className={classes.root} {...other}>
             {children}
             {onClose ? (
                 <IconButton
@@ -170,36 +170,36 @@ export default function TaskEditConfigDialogTemplate(props) {
                 </DialogTitle>
                 <DialogContent
                     dividers
-                    style={{height:'75vh'}}
-                    ref = {dialogContentRef}
+                    style={{height: '75vh'}}
+                    ref={dialogContentRef}
                     classes={{
                         root: classes.root
                     }}>
                     {open && activeTab === 0 &&
-                    <TaskActionsTemplate
-                        actions={actions}
-                        properties={properties}
-                        tags={filteredTags}
-                        onChange={setActions}
-                        pageSize={null}
-                        customHeight={20}
-                        enums={props.enums}
-                    />}
+                        <TaskActionsTemplate
+                            actions={actions}
+                            properties={properties}
+                            tags={filteredTags}
+                            onChange={setActions}
+                            pageSize={null}
+                            customHeight={20}
+                            enums={props.enums}
+                        />}
                     {open && activeTab === 1 &&
-                    <PropertiesTable
-                        used={getUsedUuids()}
-                        data={properties}
-                        enums={props.enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        pageSize={null}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={getUsedUuids()}
+                            data={properties}
+                            enums={props.enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            pageSize={null}
+                            parentContentRef={dialogContentRef}
+                        />}
                 </DialogContent>
                 <DialogActions
                     classes={{
                         root: classes.root2
-                    }} />
+                    }}/>
             </Dialog>
             <MessageBox
                 config={messageBox}

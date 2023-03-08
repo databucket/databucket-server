@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import EventsReducer from "./EventsReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -46,8 +46,11 @@ const EventsProvider = props => {
         });
     }
 
+    const events = useMemo(() => {
+        return {events: state.events, fetchEvents, addEvent, editEvent, removeEvent};
+    }, [state.events]);
     return (
-        <EventsContext.Provider value={{events: state.events, fetchEvents, addEvent, editEvent, removeEvent}}>
+        <EventsContext.Provider value={events}>
             {props.children}
         </EventsContext.Provider>
     );

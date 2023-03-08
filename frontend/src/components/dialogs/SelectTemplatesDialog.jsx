@@ -1,7 +1,7 @@
 import React from 'react';
 import SelectMultiDialog from "../utils/SelectMultiDialog";
 import PropTypes from 'prop-types';
-import {getColumnDescription, getColumnName, getColumnModifiedAt, getColumnModifiedBy} from "../utils/StandardColumns";
+import {getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../utils/StandardColumns";
 
 SelectTemplatesDialog.propTypes = {
     templates: PropTypes.array.isRequired,

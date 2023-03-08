@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import ClassesReducer from "./ClassesReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -47,8 +47,18 @@ const ClassesProvider = props => {
         });
     }
 
+    const classes = useMemo(() => {
+        return {
+            classes: state.classes,
+            fetchClasses,
+            addClass,
+            editClass,
+            removeClass,
+            classesLookup: state.classesLookup
+        }
+    }, [state.classes]);
     return (
-        <ClassesContext.Provider value={{classes: state.classes, fetchClasses, addClass, editClass, removeClass, classesLookup: state.classesLookup}}>
+        <ClassesContext.Provider value={classes}>
             {props.children}
         </ClassesContext.Provider>
     );

@@ -158,7 +158,7 @@ export default function ProjectData() {
 
     useEffect(() => {
         if (views != null && tasks != null && filters == null)
-            fetchSessionFilters();
+                fetchSessionFilters();
     }, [views, tasks]);
 
     const handleDrawerOpen = (event) => {

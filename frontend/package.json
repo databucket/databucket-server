@@ -21,7 +21,7 @@
     "jsoneditor": "9.10.0",
     "jsoneditor-react": "3.1.2",
     "jsonpath": "1.1.1",
-    "material-table": "2.0.3",
+    "material-table": "file:material-table",
     "material-ui-confirm": "3.0.8",
     "moment": "2.29.4",
     "mui-color-input": "^1.0.5",

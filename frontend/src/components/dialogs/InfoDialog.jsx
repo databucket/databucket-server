@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -20,8 +20,7 @@ import DockerLogo from "../../images/docker-logo.png";
 import TravisLogo from "../../images/travis-ci-logo.png";
 import SwaggerLogo from "../../images/swagger-logo.png";
 import Link from "@mui/material/Link";
-import {useTheme} from "@mui/material/styles";
-import { Tooltip } from "@mui/material";
+import {Tooltip} from "@mui/material";
 import {getButtonColor} from "../../utils/MaterialTableHelper";
 
 

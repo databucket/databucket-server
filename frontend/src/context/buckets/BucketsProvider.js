@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import BucketsContext from "./BucketsContext";
 import BucketsReducer from "./BucketsReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
@@ -71,12 +71,19 @@ const BucketsProvider = props => {
         }
         dispatch({
             type: "NOTIFY_BUCKETS",
-            payload: {itemsTargetFieldName: itemsTargetFieldName, sourceObjectId: sourceObjectId, sourceObjectItemsIds: sourceObjectItemsIds}
+            payload: {
+                itemsTargetFieldName: itemsTargetFieldName,
+                sourceObjectId: sourceObjectId,
+                sourceObjectItemsIds: sourceObjectItemsIds
+            }
         });
     }
 
+    const buckets = useMemo(() => {
+        return {buckets: state.buckets, fetchBuckets, addBucket, editBucket, removeBucket, notifyBuckets};
+    }, [state.buckets]);
     return (
-        <BucketsContext.Provider value={{buckets: state.buckets, fetchBuckets, addBucket, editBucket, removeBucket, notifyBuckets}}>
+        <BucketsContext.Provider value={buckets}>
             {props.children}
         </BucketsContext.Provider>
     );

@@ -1,6 +1,5 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
-import { styled } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import MaterialTable from 'material-table';
 import Button from '@mui/material/Button';
@@ -10,7 +9,6 @@ import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogActions from '@mui/material/DialogActions';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
 import {Divider, TextField, Tooltip} from '@mui/material';
 import {createTagLookup} from "../../utils/JsonHelper";
 import {getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../utils/MaterialTableHelper";
@@ -24,6 +22,7 @@ import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
 import "brace/theme/monokai";
+
 const PREFIX = 'DataDetailsDialog';
 
 const classes = {
@@ -52,10 +51,10 @@ const jsonThemeLight = null; //"ace/theme/eclipse";
 const jsonThemeDark = "ace/theme/monokai";
 
 const DialogTitle = (props => {
-    const {children,  onClose, onMakeDialogSmaller, onMakeDialogLarger, onCopyDataLink, onOpenDataLink} = props;
+    const {children, onClose, onMakeDialogSmaller, onMakeDialogLarger, onCopyDataLink, onOpenDataLink} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root}>
-            <Typography variant="h6">{children}</Typography>
+        <MuiDialogTitle className={classes.root}>
+            {children}
             <Tooltip id="link-tooltip" title="Copy direct link to data">
                 <IconButton
                     className={classes.linkButton}
@@ -227,7 +226,8 @@ export default function DataDetailsDialog(props) {
                 let filtered = [];
                 try {
                     filtered = jp.query(fullJson, jsonPath);
-                } catch (err) {}
+                } catch (err) {
+                }
                 jsonEditor.aceEditor.setReadOnly(true);
                 jsonEditor.set(filtered);
             } else {

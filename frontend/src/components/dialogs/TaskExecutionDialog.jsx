@@ -97,8 +97,8 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
 const DialogTitle = (props => {
     const {children, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root}>
-            <Typography variant="h6">{children}</Typography>
+        <MuiDialogTitle className={classes.root}>
+            {children}
             <IconButton
                 aria-label="Smaller"
                 className={classes.smallerButton}
@@ -219,7 +219,7 @@ export default function TaskExecutionDialog(props) {
     }, [props.open, state.logic]);
 
     const refreshAppliesCount = useCallback(
-        debounce(({open, bucket, logic}) => {
+        () => debounce(({open, bucket, logic}) => {
             if (open) {
                 let resultOk = true;
                 fetch(getDataUrl(bucket) + '/get?limit=0', getPostOptions({logic}))

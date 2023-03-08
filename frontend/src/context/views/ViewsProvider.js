@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import ViewsReducer from "./ViewsReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -62,12 +62,19 @@ const ViewsProvider = props => {
         }
         dispatch({
             type: "NOTIFY_VIEWS",
-            payload: {itemsTargetFieldName: itemsTargetFieldName, sourceObjectId: sourceObjectId, sourceObjectItemsIds: sourceObjectItemsIds}
+            payload: {
+                itemsTargetFieldName: itemsTargetFieldName,
+                sourceObjectId: sourceObjectId,
+                sourceObjectItemsIds: sourceObjectItemsIds
+            }
         });
     }
 
+    const views = useMemo(() => {
+        return {views: state.views, fetchViews, addView, editView, removeView, notifyViews};
+    }, [state.views]);
     return (
-        <ViewsContext.Provider value={{views: state.views, fetchViews, addView, editView, removeView, notifyViews}}>
+        <ViewsContext.Provider value={views}>
             {props.children}
         </ViewsContext.Provider>
     );

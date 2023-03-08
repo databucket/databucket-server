@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import AccessContext from "./AccessContext";
 import AccessReducer from "./AccessReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
@@ -36,13 +36,14 @@ const AccessProvider = props => {
 
     const fetchSessionColumns = () => {
         const columnsIds = [...new Set(state.views.map(({columnsId}) => columnsId))];
-        if (columnsIds.length > 0)
+        if (columnsIds.length > 0) {
             fetch(getSessionUrlWithIds('columns', columnsIds), getGetOptions())
                 .then(handleErrors)
                 .then(columns => dispatch({type: "FETCH_SESSION_COLUMNS", payload: columns}))
                 .catch(err => console.log(err));
-        else
+        } else {
             dispatch({type: "FETCH_SESSION_COLUMNS", payload: []});
+        }
     }
 
     const fetchSessionFilters = () => {
@@ -54,8 +55,9 @@ const AccessProvider = props => {
                 .then(handleErrors)
                 .then(filters => dispatch({type: "FETCH_SESSION_FILTERS", payload: filters}))
                 .catch(err => console.log(err));
-        } else
-            dispatch({type: "FETCH_SESSION_FILTERS", payload: []})
+        } else {
+            dispatch({type: "FETCH_SESSION_FILTERS", payload: []});
+        }
     }
 
     const fetchSessionClasses = () => {
@@ -128,39 +130,40 @@ const AccessProvider = props => {
         });
     };
 
+    const accessValue = useMemo(() => {
+        return {
+            activeGroup: state.activeGroup,
+            activeBucket: state.activeBucket,
+            bucketsTabs: state.bucketsTabs,
+            projects: state.projects,
+            groups: state.groups,
+            buckets: state.buckets,
+            views: state.views,
+            columns: state.columns,
+            filters: state.filters,
+            classes: state.classes,
+            tasks: state.tasks,
+            tags: state.tags,
+            svgs: state.svgs,
+            enums: state.enums,
+            users: state.users,
+            fetchAccessTree,
+            setActiveGroup,
+            setActiveBucket,
+            addTab,
+            removeTab,
+            fetchSessionColumns,
+            fetchSessionFilters,
+            fetchSessionClasses,
+            fetchSessionTasks,
+            fetchSessionTags,
+            fetchSessionSvgs,
+            fetchSessionEnums,
+            fetchSessionUsers
+        };
+    }, [state]);
     return (
-        <AccessContext.Provider value={
-            {
-                activeGroup: state.activeGroup,
-                activeBucket: state.activeBucket,
-                bucketsTabs: state.bucketsTabs,
-                projects: state.projects,
-                groups: state.groups,
-                buckets: state.buckets,
-                views: state.views,
-                columns: state.columns,
-                filters: state.filters,
-                classes: state.classes,
-                tasks: state.tasks,
-                tags: state.tags,
-                svgs: state.svgs,
-                enums: state.enums,
-                users: state.users,
-                fetchAccessTree,
-                setActiveGroup,
-                setActiveBucket,
-                addTab,
-                removeTab,
-                fetchSessionColumns,
-                fetchSessionFilters,
-                fetchSessionClasses,
-                fetchSessionTasks,
-                fetchSessionTags,
-                fetchSessionSvgs,
-                fetchSessionEnums,
-                fetchSessionUsers
-            }
-        }>
+        <AccessContext.Provider value={accessValue}>
             {props.children}
         </AccessContext.Provider>
     );

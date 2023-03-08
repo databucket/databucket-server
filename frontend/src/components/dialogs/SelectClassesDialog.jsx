@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SelectMultiDialog from "../utils/SelectMultiDialog";
-import {
-    getColumnDescription,
-    getColumnName, getColumnModifiedAt, getColumnModifiedBy
-} from "../utils/StandardColumns";
+import {getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../utils/StandardColumns";
 
 SelectClassesDialog.propTypes = {
     classes: PropTypes.array.isRequired,

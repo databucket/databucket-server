@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import ProjectsContext from "./ProjectsContext";
@@ -60,12 +60,19 @@ const ProjectsProvider = props => {
         }
         dispatch({
             type: "NOTIFY_PROJECTS",
-            payload: {itemsTargetFieldName: itemsTargetFieldName, sourceObjectId: sourceObjectId, sourceObjectItemsIds: sourceObjectItemsIds}
+            payload: {
+                itemsTargetFieldName: itemsTargetFieldName,
+                sourceObjectId: sourceObjectId,
+                sourceObjectItemsIds: sourceObjectItemsIds
+            }
         });
     }
 
+    const projects = useMemo(() => {
+        return {projects: state.projects, fetchProjects, addProject, editProject, removeProject, notifyProjects};
+    }, [state.projects]);
     return (
-        <ProjectsContext.Provider value={{projects: state.projects, fetchProjects, addProject, editProject, removeProject, notifyProjects}}>
+        <ProjectsContext.Provider value={projects}>
             {props.children}
         </ProjectsContext.Provider>
     );

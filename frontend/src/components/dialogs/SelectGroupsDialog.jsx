@@ -2,8 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import SelectMultiDialog from "../utils/SelectMultiDialog";
 import {
-    getColumnDescription, getColumnModifiedAt, getColumnModifiedBy,
-    getColumnName, getColumnShortName
+    getColumnDescription,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName,
+    getColumnShortName
 } from "../utils/StandardColumns";
 
 SelectGroupsDialog.propTypes = {

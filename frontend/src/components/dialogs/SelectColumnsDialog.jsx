@@ -1,9 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    getColumnDescription, getColumnModifiedAt, getColumnModifiedBy,
-    getColumnName
-} from "../utils/StandardColumns";
+import {getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../utils/StandardColumns";
 import SelectSingleDialog from "../utils/SelectSingleDialog";
 
 SelectColumnsDialog.propTypes = {

@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import GroupsContext from "./GroupsContext";
@@ -64,12 +64,19 @@ const GroupsProvider = props => {
         }
         dispatch({
             type: "NOTIFY_GROUPS",
-            payload: {itemsTargetFieldName: itemsTargetFieldName, sourceObjectId: sourceObjectId, sourceObjectItemsIds: sourceObjectItemsIds}
+            payload: {
+                itemsTargetFieldName: itemsTargetFieldName,
+                sourceObjectId: sourceObjectId,
+                sourceObjectItemsIds: sourceObjectItemsIds
+            }
         });
     }
 
+    const groups = useMemo(() => {
+        return {groups: state.groups, fetchGroups, addGroup, editGroup, removeGroup, notifyGroups};
+    }, [state.groups]);
     return (
-        <GroupsContext.Provider value={{groups: state.groups, fetchGroups, addGroup, editGroup, removeGroup, notifyGroups}}>
+        <GroupsContext.Provider value={groups}>
             {props.children}
         </GroupsContext.Provider>
     );

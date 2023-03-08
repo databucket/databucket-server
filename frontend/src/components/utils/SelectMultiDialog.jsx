@@ -4,7 +4,6 @@ import Dialog from '@mui/material/Dialog';
 import MuiDialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import Tooltip from "@mui/material/Tooltip";
 import {
@@ -44,8 +43,8 @@ const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
 const DialogTitle = ((props) => {
     const {children, onClose, ...other} = props;
     return (
-        <StyledDialogTitle disableTypography {...other}>
-            <Typography variant="h6">{children}</Typography>
+        <StyledDialogTitle {...other}>
+            {children}
             {onClose ? (
                 <IconButton
                     aria-label="close"

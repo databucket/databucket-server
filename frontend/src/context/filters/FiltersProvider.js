@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import FiltersReducer from "./FiltersReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -46,8 +46,11 @@ const FiltersProvider = props => {
         });
     }
 
+    const filters = useMemo(() => {
+        return {filters: state.filters, fetchFilters, addFilter, editFilter, removeFilter};
+    }, []);
     return (
-        <FiltersContext.Provider value={{filters: state.filters, fetchFilters, addFilter, editFilter, removeFilter}}>
+        <FiltersContext.Provider value={filters}>
             {props.children}
         </FiltersContext.Provider>
     );

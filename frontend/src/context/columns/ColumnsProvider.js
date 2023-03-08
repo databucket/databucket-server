@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useMemo, useReducer} from 'react';
 import ColumnsReducer from "./ColumnsReducer";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -46,8 +46,11 @@ const ColumnsProvider = props => {
         });
     }
 
+    const columns = useMemo(() => {
+        return {columns: state.columns, fetchColumns, addColumns, editColumns, removeColumns};
+    }, [state.columns]);
     return (
-        <ColumnsContext.Provider value={{columns: state.columns, fetchColumns, addColumns, editColumns, removeColumns}}>
+        <ColumnsContext.Provider value={columns}>
             {props.children}
         </ColumnsContext.Provider>
     );

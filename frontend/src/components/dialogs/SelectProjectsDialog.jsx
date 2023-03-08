@@ -6,7 +6,9 @@ import {
     getColumnEnabled,
     getColumnExpirationDate,
     getColumnId,
-    getColumnName, getColumnModifiedAt, getColumnModifiedBy
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
 } from "../utils/StandardColumns";
 
 SelectProjectsDialog.propTypes = {

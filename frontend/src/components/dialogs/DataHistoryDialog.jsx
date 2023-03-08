@@ -6,7 +6,6 @@ import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogActions from '@mui/material/DialogActions';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
 import MaterialTable from 'material-table';
 import LockedIcon from '@mui/icons-material/Lock';
 import UnlockedIcon from '@mui/icons-material/LockOpen';
@@ -52,7 +51,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
 const DialogTitle = (({children, onClose, onClearDataHistory}) => {
     return (
         <MuiDialogTitle>
-            <Typography variant="h6">{children}</Typography>
+            {children}
             <Tooltip id="clear-history" title="Clear data history">
                 <IconButton
                     className={classes.clearHistoryButton}

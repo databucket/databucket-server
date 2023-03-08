@@ -1,11 +1,10 @@
 import React, {useContext, useEffect, useState} from 'react';
-import { styled } from '@mui/material/styles';
+import {styled} from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from 'prop-types';
@@ -43,10 +42,10 @@ const Root = styled('div')((
 }));
 
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
-            <Typography variant="h6">{children}</Typography>
+        <MuiDialogTitle className={classes.root} {...other}>
+            {children}
             {onClose ? (
                 <IconButton
                     aria-label="close"
@@ -122,19 +121,19 @@ export default function EditTemplateClassFieldsDialog(props) {
                         root: classes.root
                     }}>
                     {open &&
-                    <PropertiesTable
-                        data={data}
-                        enums={enums}
-                        onChange={setData}
-                        title={''}
-                        parentContentRef={dialogContentRef}
-                    />
+                        <PropertiesTable
+                            data={data}
+                            enums={enums}
+                            onChange={setData}
+                            title={''}
+                            parentContentRef={dialogContentRef}
+                        />
                     }
                 </DialogContent>
                 <DialogActions
                     classes={{
                         root: classes.root2
-                    }} />
+                    }}/>
             </Dialog>
         </Root>
     );

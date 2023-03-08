@@ -11,7 +11,7 @@ export default function prepareTableColumns(columns, tags, enums, users, sort) {
             if (sort != null && colId === sort.colId)
                 return prepareColumn(col, columns.configuration.properties, tags, enums, users, sort.ord);
             else
-                return prepareColumn(col, columns.configuration.properties, tags, enums, users,null);
+                return prepareColumn(col, columns.configuration.properties, tags, enums, users, null);
         });
     } else
         return [];
@@ -24,7 +24,7 @@ const prepareColumn = (column, properties, tags, enums, users, ord) => {
         editable: column.editable,
         filtering: column.filtering,
         hidden: column.hidden != null ? column.hidden : false,
-        width: column.width != null ? column.width : ""
+        // width: column.width || 0,
     };
 
     if (ord != null)
@@ -167,7 +167,7 @@ export const getBucketFilters = (activeBucket, filters) => {
 }
 
 export const sleep = (ms) => {
-    return function(x) {
+    return function (x) {
         return new Promise(resolve => setTimeout(() => resolve(x), ms));
     };
 }

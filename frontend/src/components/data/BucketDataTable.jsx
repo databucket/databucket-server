@@ -203,8 +203,8 @@ export default function BucketDataTable() {
                 tableColumns: [],
                 resetPage: true
             });
-
-    }, [activeBucket, enums, tags, views, columns, filters]);
+    }, [activeBucket]);
+    // }, [activeBucket, enums, tags, views, columns, filters]);
 
     const handleSearchChange = (text) => {
         searchText = text;
@@ -626,6 +626,30 @@ export default function BucketDataTable() {
         return editable;
     }
 
+    const tableOptions = {
+        paging: true,
+        pageSize: pageSize,
+        pageSizeOptions: getPageSizeOptionsOnDialog(),
+        // actionsColumnIndex: -1,
+        debounceInterval: 700,
+        sorting: true,
+        selection: false,
+        filtering: filtering,
+        exportButton: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
+        padding: 'dense',
+        search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
+        searchFieldStyle: {width: 500},
+        maxBodyHeight: getTableHeight(),
+        minBodyHeight: getTableHeight(),
+        headerStyle: {
+            position: 'sticky',
+            top: 0,
+            backgroundColor: getTableHeaderBackgroundColor(theme)
+        },
+        cellStyle: {whiteSpace: 'nowrap'},
+        rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+    };
+
     if (activeBucket == null && buckets.length === 0)
         return <MissingBucketTable/>
     else if (activeBucket == null && buckets.length > 0)
@@ -634,7 +658,7 @@ export default function BucketDataTable() {
         return <MissingActiveView/>
     else {
         return (
-            <React.StrictMode>
+            <>
                 <MaterialTable
                     tableRef={tableRef}
                     columns={state.tableColumns}
@@ -704,29 +728,7 @@ export default function BucketDataTable() {
                             }
                         })
                     }
-                    options={{
-                        paging: true,
-                        pageSize: pageSize,
-                        pageSizeOptions: getPageSizeOptionsOnDialog(),
-                        // actionsColumnIndex: -1,
-                        debounceInterval: 700,
-                        sorting: true,
-                        selection: false,
-                        filtering: filtering,
-                        exportButton: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
-                        padding: 'dense',
-                        search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
-                        searchFieldStyle: {width: 500},
-                        maxBodyHeight: getTableHeight(),
-                        minBodyHeight: getTableHeight(),
-                        headerStyle: {
-                            position: 'sticky',
-                            top: 0,
-                            backgroundColor: getTableHeaderBackgroundColor(theme)
-                        },
-                        cellStyle: {whiteSpace: 'nowrap'},
-                        rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
-                    }}
+                    options={tableOptions}
                     localization={{
                         body: {
                             addTooltip: 'Add'
@@ -784,7 +786,7 @@ export default function BucketDataTable() {
                     activeLogic={state.activeLogic}
                     setActiveLogic={setActiveLogic}
                 />
-            </React.StrictMode>
+            </>
         );
     }
 }

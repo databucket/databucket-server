@@ -61,7 +61,7 @@ const Root = styled('div')(({theme}) => ({
 const DialogTitle = ((props) => {
     const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <MuiDialogTitle className={classes.root} {...other}>
             {children}
             {onClose ? (
                 <IconButton
