@@ -80,6 +80,8 @@ const filterIcon = (filtering) => () => filtering && tableRef.current.state.quer
     <FilterList color={'secondary'}/> :
     <FilterList/>;
 
+const tableContainer = (props) => (<div {...props}/>);
+
 const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange, theme) => (props) => {
     return (
         <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
@@ -115,6 +117,7 @@ const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange, 
         </div>
     );
 };
+
 export default function BucketDataTable() {
 
     const theme = useTheme();
@@ -739,6 +742,7 @@ export default function BucketDataTable() {
                         }
                     }}
                     components={{
+                        Container: tableContainer,
                         Toolbar: tableToolbar(state, onViewSelected, onDataReserve, handleSearchChange, theme)
                     }}
                     onOrderChange={(colId, ord) => {
