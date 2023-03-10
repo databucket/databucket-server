@@ -142,7 +142,7 @@ export default function ProjectData() {
     };
 
     if (!logged)
-        return (<Redirect to="/login"/>);
+        return (<Redirect to="/login-form"/>);
 
     if (projects == null || enums == null || columns == null || filters == null || tasks == null)
         return (<CenteredWaitingCircularProgress />);

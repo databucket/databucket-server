@@ -25,6 +25,9 @@ spring:
           enable: true
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://auth.test.local/auth/realms/databucket
       client:
         registration:
           dopauth:

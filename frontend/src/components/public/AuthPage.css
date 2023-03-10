@@ -1,0 +1,7 @@
+.AuthContainer {
+    min-width: 20vw;
+}
+
+.AuthContainer .MuiPaper-root {
+    margin-top: 5vh;
+}

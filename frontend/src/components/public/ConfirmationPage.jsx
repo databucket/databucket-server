@@ -35,7 +35,7 @@ export default function ConfirmationPage() {
     }, [inputParams]);
 
     if (redirect)
-        return (<Redirect to="/login"/>);
+        return (<Redirect to="/login-form"/>);
     else
         return (
             <div className="ContainerClass">

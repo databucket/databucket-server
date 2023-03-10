@@ -3,11 +3,15 @@ import "./LoginPage.css";
 import Button from "@material-ui/core/Button";
 import Logo from "../../images/databucket-logo.png";
 import {
-    Avatar, Input, InputAdornment, InputLabel,
+    Avatar,
+    Input,
+    InputAdornment,
+    InputLabel,
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Paper, Tooltip
+    Paper,
+    Tooltip
 } from "@material-ui/core";
 import ActiveProjectIcon from "@material-ui/icons/FolderSpecial";
 import DisabledProjectIcon from "@material-ui/icons/NotInterested";
@@ -16,11 +20,20 @@ import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
-    setToken,
+    getPathname,
+    hasAdminRole,
+    hasMemberRole,
+    hasProject,
+    hasSuperRole,
+    hasToken,
+    logOut,
     setActiveProjectId,
-    setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut, getPathname, setPathname
+    setPathname,
+    setRoles,
+    setToken,
+    setUsername
 } from '../../utils/ConfigurationStorage';
-import {Redirect} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import FormControl from "@material-ui/core/FormControl";
 import IconButton from "@material-ui/core/IconButton";
 import {Visibility, VisibilityOff} from "@material-ui/icons";
@@ -31,7 +44,6 @@ import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRout
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import ReactGA from 'react-ga';
 import MaterialLink from "@material-ui/core/Link";
-import {Link} from "react-router-dom";
 
 const initialState = {
     username: "",
@@ -45,7 +57,15 @@ const initialState = {
 
 export default function LoginPage() {
 
-    const [{username, password, projects, resetPassword, changePassword, register, showPassword}, setState] = useState(initialState);
+    const [{
+        username,
+        password,
+        projects,
+        resetPassword,
+        changePassword,
+        register,
+        showPassword
+    }, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
 
     const onChange = e => {
@@ -102,7 +122,12 @@ export default function LoginPage() {
                     } else if (hasSuperRole()) {
                         setState(prevState => ({...prevState, projects: null, changePassword: false}));
                     } else
-                        setMessageBox({open: true, severity: 'error', title: 'Login failed', message: 'This user does not have required role to see the project frontend!'});
+                        setMessageBox({
+                            open: true,
+                            severity: 'error',
+                            title: 'Login failed',
+                            message: 'This user does not have required role to see the project frontend!'
+                        });
                 }
             }).catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Login failed', message: error});
@@ -155,18 +180,16 @@ export default function LoginPage() {
                         }
                     />
                 </FormControl>
-                <div className="ForgotPasswordLink">
-                    <MaterialLink
-                        component="button"
-                        variant="caption"
-                        color="inherit"
-                        onClick={() => {
-                            setState(prevState => ({...prevState, resetPassword: true}));
-                        }}
-                    >
-                        Forgot your password?
-                    </MaterialLink>
-                </div>
+                <MaterialLink
+                    component="button"
+                    variant="caption"
+                    color="inherit"
+                    onClick={() => {
+                        setState(prevState => ({...prevState, resetPassword: true}));
+                    }}
+                >
+                    Forgot your password?
+                </MaterialLink>
                 <div className="ButtonLogin">
                     <Button
                         fullWidth={true}

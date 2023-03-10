@@ -1,6 +1,6 @@
 import React from "react";
 import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
-import LoginPage from '../components/public/LoginPage';
+// import LoginPage from '../components/public/LoginPage';
 import NotFoundPage from '../components/NotFoundPage';
 import PublicRoute from './PublicRoute'
 import ProjectRoute from './ProjectRoute'
@@ -27,8 +27,8 @@ export default function AppRouter() {
         >
             <Switch>
                 <Redirect exact from='/' to={getProjectDataPath()}/>
-                <PublicRoute exact restricted={true} path="/auth" component={AuthPage}/>
-                <PublicRoute exact restricted={true} path="/login" component={LoginPage}/>
+                {/*<PublicRoute exact restricted={true} path="/login" component={LoginPage}/>*/}
+                <PublicRoute exact restricted={true} path="/login-form" component={AuthPage}/>
                 <Route exact restricted={true} path="/forgot-password" component={ForgotPasswordPage}/>
                 <Route exact restricted={true} path="/sign-up" component={SignUpPage}/>
                 <Route path="/confirmation/*" component={ConfirmationPage}/>
@@ -42,7 +42,7 @@ export default function AppRouter() {
 }
 
 export const getProjectDataPath = () => {
-    return hasProject() ? `/project/${getActiveProjectId()}` : '/auth'
+    return hasProject() ? `/project/${getActiveProjectId()}` : '/login-form'
 }
 
 export const getGivenProjectDataPath = (projectId) => {
@@ -50,7 +50,7 @@ export const getGivenProjectDataPath = (projectId) => {
 }
 
 export const getProjectSettingsPath = () => {
-    return hasProject() ? `/project/${getActiveProjectId()}/settings` : '/auth'
+    return hasProject() ? `/project/${getActiveProjectId()}/settings` : '/login-form'
 }
 
 export const getManagementProjectsPath = () => {

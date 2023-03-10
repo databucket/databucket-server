@@ -36,6 +36,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework:spring-tx:5.3.25'
@@ -112,11 +113,6 @@ tasks.register('copyFrontend') {
         copy {
             from "frontend/build"
             into "src/main/resources/static"
-        }
-
-        exec {
-            workingDir "src/main/resources/static"
-            commandLine "ls", "-la"
         }
     }
 }

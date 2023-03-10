@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
     };
 
     if (back)
-        return (<Redirect to="/login"/>);
+        return (<Redirect to="/login-form"/>);
     else
         return (
             <div className="ContainerClass">

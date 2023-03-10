@@ -85,7 +85,7 @@ export default function ChangePasswordPage() {
     };
 
     if (back)
-        return (<Redirect to="/login"/>);
+        return (<Redirect to="/login-form"/>);
     else
     return (
         redirect === true ? (

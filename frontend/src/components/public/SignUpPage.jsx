@@ -173,7 +173,7 @@ export default function SignUpPage() {
     };
 
     if (back)
-        return (<Redirect to="/login"/>);
+        return (<Redirect to="/login-form"/>);
     else
         return (
             <div className="ContainerClassSingUp">

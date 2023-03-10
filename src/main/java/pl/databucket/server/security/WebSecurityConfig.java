@@ -1,44 +1,38 @@
 package pl.databucket.server.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Log4j2
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@Order(2)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
-
-    @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
 
     @Bean
     public JwtAuthenticationFilter authenticationTokenFilterBean() {
         return new JwtAuthenticationFilter();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain formSecurityFilterChain(HttpSecurity http,
+        JwtAuthenticationEntryPoint unauthorizedHandler) throws Exception {
         http.sessionManagement().invalidSessionUrl("/");
 
         http.cors().and().csrf().disable()
             .authorizeRequests()
+            .antMatchers(
+                "/api/public/**", // public endpoint
+                "/**/static/**",
+                "/**/favicon.ico",
+                "/login*",
+                "/sign-up"
+            ).permitAll()
 //            .antMatchers(
 //                "/",
 //                "/api/public/**", // public endpoint
@@ -67,22 +61,33 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                "/**/*.css",
 //                "/**/*.js"
 //            ).permitAll()
-            .antMatchers(HttpMethod.GET,
-                "/index*", "/static/**", "/*.js", "/*.json", "/*.ico", "/api/public/auth-options")
-            .permitAll()
             .anyRequest().authenticated()
             .and()
-            .oauth2Client()
+            .formLogin()
+            .loginPage("/login-form")
+            .loginProcessingUrl("/public/sign-in")
+            .defaultSuccessUrl("/index.html", true)
+            .failureUrl("/login-form?error=true")
+            .failureHandler((request, response, exception) -> {
+                log.error("Oops", exception);
+            })
             .and()
+            .logout()
+            .logoutUrl("/logout")
+            .deleteCookies("JSESSIONID")
+            .logoutSuccessHandler((request, response, authentication) -> {
+                log.debug(authentication);
+            });
+
+        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+//            .anyRequest().authenticated()
+//            .and()
 //            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
+//            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//
 //        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-    }
-
-    @Bean
-    public BCryptPasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
+//        return http.build();
     }
 
 }

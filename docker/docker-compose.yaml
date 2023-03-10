@@ -12,10 +12,12 @@ services:
       POSTGRES_DB: databucket
 
   databucket:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.build
     container_name: databucket
-    expose:
-      - "8080"
+    ports:
+      - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/databucket
@@ -45,4 +47,4 @@ services:
     #      - "2015:2015"
     #      - "2019:2019"
     volumes:
-      - "${PWD}/docker/Caddyfile:/etc/caddy/Caddyfile"
+      - "${PWD}/Caddyfile:/etc/caddy/Caddyfile"
