@@ -10,16 +10,16 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Log4j2
-@Configuration
+//@Configuration
 public class WebSecurityConfig {
 
 
-    @Bean
+//    @Bean
     public JwtAuthenticationFilter authenticationTokenFilterBean() {
         return new JwtAuthenticationFilter();
     }
 
-    @Bean
+//    @Bean
     public SecurityFilterChain formSecurityFilterChain(HttpSecurity http,
         JwtAuthenticationEntryPoint unauthorizedHandler) throws Exception {
         http.sessionManagement().invalidSessionUrl("/");

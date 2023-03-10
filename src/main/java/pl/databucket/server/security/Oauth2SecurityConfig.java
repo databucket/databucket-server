@@ -1,23 +1,23 @@
 package pl.databucket.server.security;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+
+@Log4j2
 
 @Configuration
-@Order(2)
+//@Order(2)
 public class Oauth2SecurityConfig {
 
     @Bean
-    protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-        return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
+    public JwtOauthTokenFilter jwtOauthTokenFilter() {
+        return new JwtOauthTokenFilter();
     }
 
     @Bean
@@ -56,17 +56,20 @@ public class Oauth2SecurityConfig {
 //                "/**/*.js"
 //            ).permitAll()
             .antMatchers(HttpMethod.GET,
-                "/", "/login**", "/index*", "/static/**", "/*.js", "/*.json", "/*.ico", "/api/public/auth-options")
+                "/", "/login**", "/index*", "/static/**", "/*.js", "/*.json", "/*.ico", "/api/auth/auth-options")
             .permitAll()
             .anyRequest().authenticated()
             .and()
             .oauth2Login()
+            .defaultSuccessUrl("/login-callback")
             .and()
             .logout()
             .addLogoutHandler(keycloakLogoutHandler)
             .logoutSuccessUrl("/");
-//            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-        http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+//            .and()
+//            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler);
+//        http.oauth2ResourceServer().jwt();
+//        http.addFilterBefore(jwtOauthTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

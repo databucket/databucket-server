@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
     };
 
     const handleReset = () => {
-        fetch(getBaseUrl('public/forgot-password'), {
+        fetch(getBaseUrl('auth/forgot-password'), {
             method: 'POST',
             body: JSON.stringify({email: email, url: window.location.origin + getContextPath() + "/confirmation/forgot-password/"}),
             headers: {'Content-Type': 'application/json'}

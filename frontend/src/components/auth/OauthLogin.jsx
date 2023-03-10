@@ -7,16 +7,16 @@ export default function OauthLoginComponent({authOptions}) {
             <Typography className="Title" variant="h5">
                 Other Options
             </Typography>
-            {authOptions.map(option => {
-                return (<div key={option.name} className="ButtonLogin">
+            {authOptions && authOptions.map(option => {
+                return (
                     <Button
+                        key={option.name}
                         component="button"
                         color="inherit"
                         href={option.url}
                     >
                         {option.name}
-                    </Button>
-                </div>)
+                    </Button>)
             })}
         </Box>
     );

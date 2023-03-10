@@ -15,6 +15,8 @@ import ForgotPasswordPage from "../components/public/ForgotPasswordPage";
 import SignUpPage from "../components/public/SignUpPage";
 import ConfirmationPage from "../components/public/ConfirmationPage";
 import AuthPage from "../components/public/AuthPage";
+import LoginCallbackPage from "../components/public/LoginCallbackPage";
+import SelectProjectsPage from "../components/public/SelectProjectPage";
 
 export default function AppRouter() {
 
@@ -29,9 +31,11 @@ export default function AppRouter() {
                 <Redirect exact from='/' to={getProjectDataPath()}/>
                 {/*<PublicRoute exact restricted={true} path="/login" component={LoginPage}/>*/}
                 <PublicRoute exact restricted={true} path="/login-form" component={AuthPage}/>
+                <PublicRoute exact restricted={true} path="/login-callback" component={LoginCallbackPage}/>
                 <Route exact restricted={true} path="/forgot-password" component={ForgotPasswordPage}/>
                 <Route exact restricted={true} path="/sign-up" component={SignUpPage}/>
                 <Route path="/confirmation/*" component={ConfirmationPage}/>
+                <Route path="/select-project" render={(props) => (<SelectProjectsPage {...props}/>)}/>
                 <ChangePasswordRoute exact path="/change-password" component={ChangePasswordPage}/>
                 <ManagementRoute path="/management" component={_ManagementTabs}/>
                 <ProjectRoute path="/project" component={_ProjectRouteInternal}/>

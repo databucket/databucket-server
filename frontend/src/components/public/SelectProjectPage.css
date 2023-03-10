@@ -1,0 +1,19 @@
+.ProjectsContainer {
+    margin: 10vh auto;
+    display: flex;
+    min-width: 20vw;
+    max-width: 22vw;
+    min-height: 500px;
+    max-height: 700px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.TitleGrid {
+    padding: 30px;
+}
+
+.ProjectsList {
+    overflow: auto;
+}
