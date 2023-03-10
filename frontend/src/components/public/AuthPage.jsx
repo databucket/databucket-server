@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from "react";
 import Logo from "../../images/databucket-logo.png";
-import Typography from "@material-ui/core/Typography";
-import Divider from '@material-ui/core/Divider';
 import {Redirect} from 'react-router-dom';
 import {MessageBox} from "../utils/MessageBox";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import OauthLoginComponent from "../auth/OauthLogin";
-import Paper from "@material-ui/core/Paper";
+import {Box, Divider, Paper, Typography} from "@material-ui/core";
 import LoginFormComponent from "../auth/LoginForm";
 import "./AuthPage.css"
 
@@ -43,18 +41,20 @@ export default function AuthPage() {
     }
 
     return (
-        <div className="AuthContainer">
-            {<img src={Logo} alt=''/>}
-            <Paper variant="outlined" elevation={1}>
-                <LoginFormComponent/>
-                <Divider variant="inline"/>
-                <OauthLoginComponent authOptions={authOptions}/>
-            </Paper>
-            <Typography variant="caption">3.5.0</Typography>
-            <MessageBox
-                config={messageBox}
-                onClose={() => setMessageBox({...messageBox, open: false})}
-            />
-        </div>
+        <Box>
+            <div className="AuthContainer">
+                {<img src={Logo} alt=''/>}
+                <Paper variant="outlined" elevation={1}>
+                    <LoginFormComponent/>
+                    <Divider variant="inline"/>
+                    <OauthLoginComponent authOptions={authOptions}/>
+                </Paper>
+                <Typography variant="caption">3.5.0</Typography>
+                <MessageBox
+                    config={messageBox}
+                    onClose={() => setMessageBox({...messageBox, open: false})}
+                />
+            </div>
+        </Box>
     );
 }
