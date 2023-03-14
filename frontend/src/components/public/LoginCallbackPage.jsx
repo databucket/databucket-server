@@ -20,7 +20,11 @@ export default function LoginCallbackPage() {
             .then(value => value.json())
             .then(data => handleSuccessfulLogin(data, {projects: data.projects}))
             .then(value => {
-                history.replace("/select-project", {projects: value.projects})
+                if (!value.projectId){
+                    history.replace("/select-project", {projects: value.projects})
+                } else {
+                    history.push(`/project/${value.projectId}`)
+                }
             })
             .catch(error => {
                 console.error(error);

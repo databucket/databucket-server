@@ -75,10 +75,11 @@ export default function ProjectData() {
 
     useEffect(() => {
         fetchSessionUsers();
-    }, []);
-
-    useEffect(() => {
         fetchAccessTree();
+        fetchSessionClasses();
+        fetchSessionTags();
+        fetchSessionSvgs();
+        fetchSessionEnums();
     }, []);
 
     useEffect(() => {
@@ -90,22 +91,6 @@ export default function ProjectData() {
         if (views != null && tasks != null && filters == null)
             fetchSessionFilters();
     }, [views, tasks]);
-
-    useEffect(() => {
-        fetchSessionClasses();
-    }, []);
-
-    useEffect(() => {
-        fetchSessionTags();
-    }, []);
-
-    useEffect(() => {
-        fetchSessionSvgs();
-    }, []);
-
-    useEffect(() => {
-        fetchSessionEnums();
-    }, []);
 
     useEffect(() => {
         if (views != null && tasks == null)

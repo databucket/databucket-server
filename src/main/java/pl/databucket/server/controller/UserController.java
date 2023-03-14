@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,33 +36,24 @@ import pl.databucket.server.service.UserService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/users")
 @RestController
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private TokenProvider jwtTokenUtil;
-
+    private final UserService userService;
+    private final TeamService teamService;
+    private final ModelMapper modelMapper;
+    private final TokenProvider jwtTokenUtil;
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(UserController.class);
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
     @GetMapping
-    public ResponseEntity<?> getUsers() {
+    public ResponseEntity<?> getUsers(UsernamePasswordAuthenticationToken auth) {
         try {
-            List<User> users = userService.getUsers(
-                ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getProjectId());
+            List<User> users = userService.getUsers(((CustomUserDetails) auth.getPrincipal()).getProjectId());
             Set<Short> projectTeams = teamService.getTeams().stream().map(Team::getId).collect(Collectors.toSet());
             List<UserDtoResponse> usersDto = users.stream().map(item -> modelMapper.map(item, UserDtoResponse.class))
-                .collect(Collectors.toList());
+                .toList();
 
             // filter teams from current project
             for (UserDtoResponse userDto : usersDto) {
@@ -70,7 +62,7 @@ public class UserController {
                 }
             }
 
-            return new ResponseEntity<>(usersDto, HttpStatus.OK);
+            return ResponseEntity.ok(usersDto);
         } catch (IllegalArgumentException | ItemNotFoundException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }
@@ -83,7 +75,7 @@ public class UserController {
             User user = userService.modifyUser(userDtoRequest);
             UserDtoResponse userDtoResponse = new UserDtoResponse();
             modelMapper.map(user, userDtoResponse);
-            return new ResponseEntity<>(userDtoResponse, HttpStatus.OK);
+            return ResponseEntity.ok(userDtoResponse);
         } catch (SomeItemsNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -96,7 +88,7 @@ public class UserController {
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDtoRequest changePasswordDtoRequest) {
         try {
             userService.changePassword(changePasswordDtoRequest);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }
@@ -113,7 +105,7 @@ public class UserController {
                 .token(jwtTokenUtil.generateToken(SecurityContextHolder.getContext().getAuthentication(),
                     userDto.getProjectId()))
                 .build();
-            return new ResponseEntity<>(authDtoResponse, HttpStatus.OK);
+            return ResponseEntity.ok(authDtoResponse);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }

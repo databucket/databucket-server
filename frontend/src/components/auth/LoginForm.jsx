@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import "./LoginForm.css";
 import {
-    Box,
     Button,
     FormControl,
     IconButton,
@@ -13,13 +12,17 @@ import {
     Typography
 } from "@material-ui/core";
 import {Visibility, VisibilityOff} from "@material-ui/icons";
-import {getBaseUrl} from "../../utils/UrlBuilder";
+import {getActiveProjectId} from "../../utils/ConfigurationStorage";
+import {handleSuccessfulLogin} from "../utils/AuthHelper";
+import {handleLoginErrors} from "../../utils/FetchHelper";
+import {useHistory} from "react-router-dom";
 
 export default function LoginFormComponent() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const history = useHistory()
 
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
@@ -29,34 +32,20 @@ export default function LoginFormComponent() {
         e.preventDefault();
 
         const formData = new FormData(e.target);
-        fetch(getBaseUrl('public/sign-in'), {
+        fetch("/login-form", {
             method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: formData.get('username'),
-                password: formData.get('password'),
-            }),
+            body: formData,
         })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.fieldErrors) {
-                    data.fieldErrors.forEach(fieldError => {
-                        if (fieldError.field === 'username') {
-                            // setEmailError(fieldError.message);
-                        }
-
-                        if (fieldError.field === 'password') {
-                            // setPasswordError(fieldError.message);
-                        }
-                    });
+            .then(handleLoginErrors)
+            .then((data) => handleSuccessfulLogin(data, {}))
+            .then(value => {
+                if (!value.projectId){
+                    history.replace("/select-project", {projects: value.projects})
                 } else {
-                    alert("Success !!");
+                    history.push(`/project/${value.projectId}`)
                 }
             })
-            .catch((err) => err);
+            .catch((err) => console.error(err));
     };
 
     const handleClickShowPassword = () => {
@@ -64,7 +53,7 @@ export default function LoginFormComponent() {
     }
 
     return (
-        <Box className="Container">
+        <form className="Container" onSubmit={handleLogin}>
             <Typography className="Title" variant="h5">
                 Login
             </Typography>
@@ -82,6 +71,7 @@ export default function LoginFormComponent() {
                 <Input
                     id="standard-adornment-password"
                     name="password"
+                    autocomplete="current-password"
                     // inputProps={{ style: { backgroundColor: "red" } }} //TODO nie działa tylko dla Chrome
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -99,6 +89,7 @@ export default function LoginFormComponent() {
                     }
                 />
             </FormControl>
+            <input hidden name="projectid" type="text" value={getActiveProjectId()}/>
             <Link
                 component="button"
                 variant="caption"
@@ -116,9 +107,7 @@ export default function LoginFormComponent() {
                     color="primary"
                     size={'large'}
                     disabled={!(username.length > 0 && password.length > 0)}
-                    onClick={() => {
-                        handleLogin();
-                    }}
+                    type="submit"
                 >
                     Login
                 </Button>
@@ -132,6 +121,6 @@ export default function LoginFormComponent() {
             >
                 Don't have an account?
             </Link>
-        </Box>
+        </form>
     );
 };

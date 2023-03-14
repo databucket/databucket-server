@@ -12,10 +12,11 @@ export function fetchHelper(token) {
 }
 
 export function handleLoginErrors(response) {
-    return response.text().then(text => {
+    return response.text()
+        .then(text => {
         const body = text !== '' ? JSON.parse(text) : JSON.parse("{}");
         if (!response.ok) {
-            const error = body.message || response.statusText;
+            const error = body.message || body.error || response.statusText;
             return Promise.reject(error);
         }
         return body;

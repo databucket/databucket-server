@@ -15,17 +15,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class KeycloakLogoutHandler implements LogoutHandler {
+public class OAuth2LogoutHandler implements LogoutHandler {
 
     private final RestTemplate restTemplate;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response,
         Authentication auth) {
-        logoutFromKeycloak((OidcUser) auth.getPrincipal());
+        logoutFromOAuth2((OidcUser) auth.getPrincipal());
     }
 
-    private void logoutFromKeycloak(OidcUser user) {
+    private void logoutFromOAuth2(OidcUser user) {
         String endSessionEndpoint = user.getIssuer() + "/protocol/openid-connect/logout";
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromUriString(endSessionEndpoint)
@@ -33,9 +33,9 @@ public class KeycloakLogoutHandler implements LogoutHandler {
 
         ResponseEntity<String> logoutResponse = restTemplate.getForEntity(builder.toUriString(), String.class);
         if (logoutResponse.getStatusCode().is2xxSuccessful()) {
-            log.info("Successfully logged out from Keycloak");
+            log.info("Successfully logged out from OAuth2");
         } else {
-            log.error("Could not propagate logout to Keycloak");
+            log.error("Could not propagate logout to OAuth2");
         }
     }
 

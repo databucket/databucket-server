@@ -15,9 +15,9 @@ public class WebSecurityConfig {
 
 
 //    @Bean
-    public JwtAuthenticationFilter authenticationTokenFilterBean() {
-        return new JwtAuthenticationFilter();
-    }
+//    public JwtAuthenticationFilter authenticationTokenFilterBean() {
+//        return new JwtAuthenticationFilter();
+//    }
 
 //    @Bean
     public SecurityFilterChain formSecurityFilterChain(HttpSecurity http,
@@ -79,7 +79,7 @@ public class WebSecurityConfig {
                 log.debug(authentication);
             });
 
-        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
 //            .anyRequest().authenticated()
 //            .and()

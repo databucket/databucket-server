@@ -12,14 +12,10 @@ import {
 } from "../../utils/ConfigurationStorage";
 import {sortByKey} from "../../utils/JsonHelper";
 
-export const signIn = (state) => {
-    return fetch(getBaseUrl('public/sign-in'), {
-        method: 'POST',
-        body: JSON.stringify(state.projectId == null ? {
-            username: state.username,
-            password: state.password
-        } : {username: state.username, password: state.password, projectId: state.projectId}),
-        headers: {'Content-Type': 'application/json'}
+export const signIn = (formData, state) => {
+    return fetch("/login-form", {
+        method: "POST",
+        body: formData,
     })
         .then(handleLoginErrors)
         .then(value => handleSuccessfulLogin(value, state));
@@ -27,7 +23,10 @@ export const signIn = (state) => {
 
 export const handleSuccessfulLogin = (data, state) => {
     logOut();
-    setUsername(state.username);
+    setUsername(data.username);
+    if (!!data.token) {
+        setToken(data.token);
+    }
     if (data.changePassword != null && data.changePassword === true) {
         setToken(data.token);
         return {...state, changePassword: true};

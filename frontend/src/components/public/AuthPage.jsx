@@ -7,9 +7,16 @@ import OauthLoginComponent from "../auth/OauthLogin";
 import {Box, Divider, Paper, Typography} from "@material-ui/core";
 import LoginFormComponent from "../auth/LoginForm";
 import "./AuthPage.css"
+import {useParams} from "react-router-dom";
 
 export default function AuthPage() {
 
+    const {error} = useParams();
+    useEffect(() => {
+        if (!!error) {
+            setMessageBox({open: true, severity: 'error', title: 'Login failed', message: ""});
+        }
+    }, [error])
     const [authOptions, setAuthOptions] = useState([]);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     useEffect(() => {
@@ -32,18 +39,6 @@ export default function AuthPage() {
                 });
             })
     }, []);
-    // const handleSignIn = () => {
-    // signIn(username, password, null);
-    // }
-
-    // const handleKeypress = e => {
-    //     if (e.key === 'Enter')
-    //         handleSignIn();
-    // };
-    //
-    // const redirectTo = (pagePath) => {
-    //     return (<Redirect to={pagePath}/>);
-    // }
 
     return (
         <Box>

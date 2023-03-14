@@ -72,7 +72,7 @@ export const setActiveProjectId = (projectId) => {
 }
 
 export const getActiveProjectId = () => {
-    return parseInt(localStorage.getItem(PROJECT_ID), 10);
+    return parseInt(localStorage.getItem(PROJECT_ID) || "0", 10);
 }
 
 export const clearActiveProjectId = () => {

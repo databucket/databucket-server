@@ -43,12 +43,16 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
 
-        return new CustomUserDetails(
-            user.getUsername(),
-            user.getPassword(),
-            getAuthority(user),
-            user.getEnabled(),
-            user.isSuperUser());
+        return CustomUserDetails.builder()
+            .username(user.getUsername())
+            .password(user.getPassword())
+            .authorities(getAuthority(user))
+            .enabled(user.getEnabled())
+            .expired(user.isExpired())
+            .superUser(user.isSuperUser())
+            .changePassword(user.isChangePassword())
+            .projects(user.getProjects())
+            .build();
     }
 
     public User getUserByUsername(String username) {
