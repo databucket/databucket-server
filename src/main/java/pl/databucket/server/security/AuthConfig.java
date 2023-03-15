@@ -11,6 +11,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -27,13 +31,36 @@ public class AuthConfig {
     }
 
     @Bean
+    public JwtAuthenticationProvider jwtAuthProvider(JwtDecoder jwtDecoder) {
+        return new JwtAuthenticationProvider(jwtDecoder);
+    }
+
+    @Bean
+    public JwtGrantedAuthoritiesConverter jwtGrantedAuthenticationConverter() {
+        // create a custom JWT converter to map the "roles" from the token as granted authorities
+        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(TokenProvider.AUTHORITIES_KEY);
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        return jwtGrantedAuthoritiesConverter;
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthenticationConverter());
+        return jwtAuthenticationConverter;
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http,
         BCryptPasswordEncoder encoder,
         UserDetailsService userDetailService,
-        DaoAuthenticationProvider daoAuthenticationProvider)
+        DaoAuthenticationProvider daoAuthenticationProvider,
+        JwtAuthenticationProvider jwtAuthProvider)
         throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         return builder
+            .authenticationProvider(jwtAuthProvider)
             .authenticationProvider(daoAuthenticationProvider)
             .userDetailsService(userDetailService)
             .passwordEncoder(encoder)

@@ -1,6 +1,9 @@
 package pl.databucket.server.controller;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -9,16 +12,18 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pl.databucket.server.dto.AuthReqDTO;
 import pl.databucket.server.dto.AuthRespDTO;
 import pl.databucket.server.dto.ChangePasswordDtoRequest;
 import pl.databucket.server.dto.UserDtoRequest;
@@ -48,9 +53,11 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
     @GetMapping
-    public ResponseEntity<?> getUsers(UsernamePasswordAuthenticationToken auth) {
+    public ResponseEntity<?> getUsers(Authentication auth) {
         try {
-            List<User> users = userService.getUsers(((CustomUserDetails) auth.getPrincipal()).getProjectId());
+            Jwt jwt = (Jwt) auth.getPrincipal();
+            Long projectId = jwt.getClaim(TokenProvider.PROJECT_ID);
+            List<User> users = userService.getUsers(projectId.intValue());
             Set<Short> projectTeams = teamService.getTeams().stream().map(Team::getId).collect(Collectors.toSet());
             List<UserDtoResponse> usersDto = users.stream().map(item -> modelMapper.map(item, UserDtoResponse.class))
                 .toList();
@@ -98,12 +105,12 @@ public class UserController {
      * Can be used when changing project
      */
     @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
-    @PostMapping(value = "/change-project")
-    public ResponseEntity<?> changeProject(@Valid @RequestBody AuthReqDTO userDto) {
+    @PutMapping(value = "/change-project")
+    public ResponseEntity<?> changeProject(
+        @Valid @RequestParam int projectId, Authentication auth) {
         try {
             AuthRespDTO authDtoResponse = AuthRespDTO.builder()
-                .token(jwtTokenUtil.generateToken(SecurityContextHolder.getContext().getAuthentication(),
-                    userDto.getProjectId()))
+                .token(jwtTokenUtil.generateToken(auth, projectId))
                 .build();
             return ResponseEntity.ok(authDtoResponse);
         } catch (IllegalArgumentException e1) {
@@ -111,4 +118,19 @@ public class UserController {
         }
     }
 
+    @GetMapping("/authorities")
+    public Map<String, Object> getPrincipalInfo(JwtAuthenticationToken principal) {
+
+        Collection<String> authorities = principal.getAuthorities()
+            .stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.toList());
+
+        Map<String, Object> info = new HashMap<>();
+        info.put("name", principal.getName());
+        info.put("authorities", authorities);
+        info.put("tokenAttributes", principal.getTokenAttributes());
+
+        return info;
+    }
 }

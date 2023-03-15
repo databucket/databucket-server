@@ -1,6 +1,7 @@
 jwt:
-  secret: veryverysecret
-  expire.hours: 24
+  secret: noctzekapmeoaycaesxkmndqacqqahooszvhevakrkriilinfwbetcbtaeuujqjlyelgtziezxneqiehodjzulhxswgcfhjaupegnqjpvukxjfsiujwxumnftlivyagq
+  expire:
+    hours: 24
 
 server:
   port: 8080
@@ -47,3 +48,4 @@ spring:
 logging:
   level:
     pl.databucket.service.data.DataService: debug
+    org.springframework.security: debug

@@ -12,24 +12,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import pl.databucket.server.dto.AuthRespDTO;
 
 @Log4j2
-
 @Configuration
-//@Order(2)
 public class OAuth2SecurityConfig {
-
-//    @Bean
-//    public JwtAuthenticationFilter authenticationTokenFilterBean() {
-//        return new JwtAuthenticationFilter();
-//    }
 
     @Bean
     public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http,
         OAuth2LogoutHandler oauth2LogoutHandler,
-        JwtAuthenticationFilter authenticationTokenFilter,
         TokenProvider tokenUtils,
         ModelMapper modelMapper,
         ObjectMapper mapper) throws Exception {
@@ -85,12 +76,9 @@ public class OAuth2SecurityConfig {
             .logoutSuccessUrl("/");
 //            .and()
 //            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler);
-//        http.oauth2ResourceServer().jwt().authenticationManager(manager);
+        http.oauth2ResourceServer().jwt();
         http.sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        BearerTokenAuthenticationFilter authenticationTokenFilter = new BearerTokenAuthenticationFilter(manager);
-        http.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
-//        http.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -107,6 +95,4 @@ public class OAuth2SecurityConfig {
     private AuthenticationSuccessHandler getSuccessHandler(TokenProvider tokenUtils, ModelMapper modelMapper) {
         return new JwtAuthSuccessHandler(tokenUtils, modelMapper);
     }
-
-
 }

@@ -1,6 +1,12 @@
 import React from "react";
 
-import {getActiveProjectId, hasSuperRole, setActiveProjectId, setToken} from "../../utils/ConfigurationStorage";
+import {
+    getActiveProjectId,
+    getToken,
+    hasSuperRole,
+    setActiveProjectId,
+    setToken
+} from "../../utils/ConfigurationStorage";
 import {Link, useHistory} from "react-router-dom";
 import {getManagementProjectsPath} from "../../route/AppRouter";
 import {
@@ -21,9 +27,8 @@ import {
     NotInterested as DisabledProjectIcon
 } from "@material-ui/icons";
 import "./SelectProjectPage.css"
-import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-import {handleErrors} from "../../utils/FetchHelper";
+import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
 
 export default function SelectProjectsPage(props) {
     let history = useHistory();
@@ -34,17 +39,19 @@ export default function SelectProjectsPage(props) {
     const projects = props.location.state && props.location.state.projects;
     const selectProject = (id) => {
         setActiveProjectId(id);
-        const options = getPostOptions({projectId: id});
-        fetch(getBaseUrl('users/change-project'), options)
+        fetch(getBaseUrl(`users/change-project?projectId=${id}`), {
+            method: 'PUT',
+            headers: fetchHelper(getToken())
+        })
             .then(handleErrors)
-            .catch(error => {
-                console.error(error);
-                // setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-            })
             .then(data => {
                 setToken(data.token);
                 setActiveProjectId(id);
                 history.push(`/project/${id}`)
+            })
+            .catch(error => {
+                console.error(error);
+                // setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
             });
     };
     return (

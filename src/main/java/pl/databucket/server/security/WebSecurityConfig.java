@@ -1,25 +1,20 @@
 package pl.databucket.server.security;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Deprecated(forRemoval = true)
 @Log4j2
 //@Configuration
 public class WebSecurityConfig {
-
 
 //    @Bean
 //    public JwtAuthenticationFilter authenticationTokenFilterBean() {
 //        return new JwtAuthenticationFilter();
 //    }
 
-//    @Bean
+    //    @Bean
     public SecurityFilterChain formSecurityFilterChain(HttpSecurity http,
         JwtAuthenticationEntryPoint unauthorizedHandler) throws Exception {
         http.sessionManagement().invalidSessionUrl("/");

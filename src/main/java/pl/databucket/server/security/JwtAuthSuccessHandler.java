@@ -41,6 +41,7 @@ public class JwtAuthSuccessHandler implements AuthenticationSuccessHandler {
     private AuthRespDTO buildAuthResponse(Authentication authentication, String projectid) {
         if (authentication instanceof OAuth2AuthenticationToken token) {
             //TODO: If OAuth user doesn't exist, we need to create it in DB
+            // Maybe separate Oauth login success from Form one
             return AuthRespDTO.builder()
                 .message("We need to redirect you to Create User / Just do it")
                 .username(token.getPrincipal().getName())
