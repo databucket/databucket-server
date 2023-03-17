@@ -1,26 +1,29 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useMemo} from "react";
 import "./AuthPage.css"
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import {handleSuccessfulLogin} from "../utils/AuthHelper";
-import {useHistory} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
 import {getActiveProjectId} from "../../utils/ConfigurationStorage";
+import {fetchHelper} from "../../utils/FetchHelper";
 
 
 export default function LoginCallbackPage() {
 
-    const history = useHistory()
+    const history = useHistory();
+    const {search} = useLocation();
+    const query = useMemo(() => new URLSearchParams(search), [search]);
 
     const activeProjectId = getActiveProjectId();
     const targetUrl = getBaseUrl(`auth/user-info`)
     useEffect(() => {
         fetch(!!activeProjectId ? targetUrl + `?projectId=${activeProjectId}` : targetUrl, {
             method: 'GET',
-            headers: {'Content-Type': 'application/json'}
+            headers: fetchHelper(query.get("token"))
         })
             .then(value => value.json())
             .then(data => handleSuccessfulLogin(data, {projects: data.projects}))
             .then(value => {
-                if (!value.projectId){
+                if (!value.projectId) {
                     history.replace("/select-project", {projects: value.projects})
                 } else {
                     history.push(`/project/${value.projectId}`)

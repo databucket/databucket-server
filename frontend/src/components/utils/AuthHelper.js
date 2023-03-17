@@ -27,18 +27,18 @@ export const handleSuccessfulLogin = (data, state) => {
     if (!!data.token) {
         setToken(data.token);
     }
-    if (data.changePassword != null && data.changePassword === true) {
-        setToken(data.token);
-        return {...state, changePassword: true};
-    } else if (data.projects != null) {
+    // if (data.changePassword != null && data.changePassword === true) {
+    //     setToken(data.token);
+    //     return {...state, changePassword: true};
+    // } else if (data.projects != null) {
+    if (data.projects != null) {
         setRoles(data.roles);
 
         if (hasSuperRole()) {
             setToken(data.token);
         }
 
-        let sortedProjects = sortByKey(data.projects, 'id');
-        return {...state, projects: sortedProjects, changePassword: false};
+        return {...state, projects: data.projects, changePassword: false};
     } else if (data.token != null) {
         setRoles(data.roles);
         setToken(data.token);

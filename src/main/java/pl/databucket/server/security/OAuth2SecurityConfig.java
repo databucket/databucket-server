@@ -2,7 +2,6 @@ package pl.databucket.server.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,6 +12,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import pl.databucket.server.dto.AuthRespDTO;
+import pl.databucket.server.service.ManageUserService;
+import pl.databucket.server.service.UserService;
 
 @Log4j2
 @Configuration
@@ -21,10 +22,10 @@ public class OAuth2SecurityConfig {
     @Bean
     public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http,
         OAuth2LogoutHandler oauth2LogoutHandler,
-        TokenProvider tokenUtils,
-        ModelMapper modelMapper,
-        ObjectMapper mapper) throws Exception {
-        AuthenticationSuccessHandler successHandler = getSuccessHandler(tokenUtils, modelMapper);
+        AuthResponseBuilder authResponseBuilder,
+        ObjectMapper mapper,
+        AuthenticationSuccessHandler oAuth2SuccessHandler) throws Exception {
+        AuthenticationSuccessHandler successHandler = getFormSuccessHandler(authResponseBuilder);
         AuthenticationFailureHandler failureHandler = getAuthenticationFailureHandler(mapper);
         http.cors().and().csrf().disable()
             .authorizeRequests()
@@ -68,7 +69,7 @@ public class OAuth2SecurityConfig {
             .and()
             .oauth2Login()
             .defaultSuccessUrl("/login-callback")
-            .successHandler(successHandler)
+            .successHandler(oAuth2SuccessHandler)
             .failureHandler(failureHandler)
             .and()
             .logout()
@@ -92,7 +93,13 @@ public class OAuth2SecurityConfig {
         };
     }
 
-    private AuthenticationSuccessHandler getSuccessHandler(TokenProvider tokenUtils, ModelMapper modelMapper) {
-        return new JwtAuthSuccessHandler(tokenUtils, modelMapper);
+    private AuthenticationSuccessHandler getFormSuccessHandler(AuthResponseBuilder authResponseBuilder) {
+        return new FormAuthSuccessHandler(authResponseBuilder);
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler oAuth2SuccessHandler(
+        AuthResponseBuilder authResponseBuilder, ManageUserService manageUserService, UserService userService) {
+        return new OAuth2AuthSuccessHandler(authResponseBuilder, manageUserService, userService);
     }
 }

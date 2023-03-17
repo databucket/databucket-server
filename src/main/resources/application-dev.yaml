@@ -48,4 +48,4 @@ spring:
 logging:
   level:
     pl.databucket.service.data.DataService: debug
-    org.springframework.security: debug
+#    org.springframework.security: debug

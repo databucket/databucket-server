@@ -1,18 +1,16 @@
 package pl.databucket.server.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import pl.databucket.server.dto.AuthProjectDTO;
 import pl.databucket.server.dto.AuthRespDTO;
@@ -20,33 +18,14 @@ import pl.databucket.server.dto.AuthRespDTO.AuthRespDTOBuilder;
 import pl.databucket.server.entity.Project;
 import pl.databucket.server.exception.AuthForbiddenException;
 
+@Component
 @RequiredArgsConstructor
-public class JwtAuthSuccessHandler implements AuthenticationSuccessHandler {
+public class AuthResponseBuilder {
 
     private final TokenProvider tokenUtils;
     private final ModelMapper modelMapper;
-    private static final ObjectMapper mapper = new JsonMapper();
 
-    @Override
-    public void onAuthenticationSuccess(HttpServletRequest request,
-        HttpServletResponse response, Authentication authentication) throws IOException {
-        String projectid = request.getParameter("projectid");
-        AuthRespDTO authResponse = buildAuthResponse(authentication, projectid);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(mapper.writeValueAsString(authResponse));
-
-    }
-
-    private AuthRespDTO buildAuthResponse(Authentication authentication, String projectid) {
-        if (authentication instanceof OAuth2AuthenticationToken token) {
-            //TODO: If OAuth user doesn't exist, we need to create it in DB
-            // Maybe separate Oauth login success from Form one
-            return AuthRespDTO.builder()
-                .message("We need to redirect you to Create User / Just do it")
-                .username(token.getPrincipal().getName())
-                .build();
-        }
+    public AuthRespDTO buildAuthResponse(UsernamePasswordAuthenticationToken authentication, String projectid) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         AuthRespDTOBuilder responseBuilder = AuthRespDTO.builder().username(user.getUsername());
 
@@ -128,6 +107,7 @@ public class JwtAuthSuccessHandler implements AuthenticationSuccessHandler {
         } else if (user.getProjects().size() > 1) {
             List<AuthProjectDTO> projects = user.getProjects().stream()
                 .map(item -> modelMapper.map(item, AuthProjectDTO.class))
+                .sorted(Comparator.comparing(AuthProjectDTO::getId))
                 .toList();
             List<String> roles = user.getAuthorities().stream()
                 .map(item -> modelMapper.map(item.getAuthority(), String.class))

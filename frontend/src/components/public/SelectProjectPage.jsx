@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 
 import {
     getActiveProjectId,
@@ -37,6 +37,11 @@ export default function SelectProjectsPage(props) {
         history.push(`/project/${getActiveProjectId()}`)
     }
     const projects = props.location.state && props.location.state.projects;
+    useEffect(() => {
+        if (!projects) {
+        }
+    }, []);
+
     const selectProject = (id) => {
         setActiveProjectId(id);
         fetch(getBaseUrl(`users/change-project?projectId=${id}`), {

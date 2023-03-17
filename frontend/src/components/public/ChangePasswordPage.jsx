@@ -1,19 +1,11 @@
-import {
-    Input,
-    InputLabel,
-    Paper
-} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
-import FormControl from "@material-ui/core/FormControl";
-import Button from "@material-ui/core/Button";
-import React, {useState} from "react";
+import {Button, FormControl, Input, InputLabel, Link as MaterialLink, Paper, Typography} from "@material-ui/core";
+import React, {forwardRef, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {clearToken, getToken, getUsername} from "../../utils/ConfigurationStorage";
 import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
-import {Redirect} from "react-router-dom";
+import {Link, Redirect} from "react-router-dom";
 import {getProjectDataPath} from "../../route/AppRouter";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-import Link from "@material-ui/core/Link";
 
 const initialState = {
     password: "",
@@ -21,8 +13,17 @@ const initialState = {
     newPasswordConfirmation: ""
 };
 
+const FancyLink = forwardRef(({navigate, ...props}, ref) => {
+    return (
+        <MaterialLink
+            ref={ref}
+            variant="caption"
+            color="inherit"
+            {...props}
+        >{props.children}</MaterialLink>
+    )
+});
 export default function ChangePasswordPage() {
-    const [back, setBack] = useState(false);
     const [{password, newPassword, newPasswordConfirmation}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [redirect, setRedirect] = useState(false);
@@ -61,9 +62,9 @@ export default function ChangePasswordPage() {
     }
 
     const getPasswordStrength = (pwd) => {
-        const strongRegex = new RegExp("^(?=.{14,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
-        const mediumRegex = new RegExp("^(?=.{10,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$", "g");
-        const enoughRegex = new RegExp("(?=.{8,}).*", "g");
+        const strongRegex = /^(?=.{14,})(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*\W).*$/g;
+        const mediumRegex = /^(?=.{10,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*\d))|((?=.*[a-z])(?=.*\d))).*$/g;
+        const enoughRegex = /(?=.{8,}).*/g;
 
         if (strongRegex.test(pwd)) {
             setMessageBox({open: true, severity: 'success', title: 'Strong password.', message: ''});
@@ -84,9 +85,6 @@ export default function ChangePasswordPage() {
             getPasswordStrength(value);
     };
 
-    if (back)
-        return (<Redirect to="/login-form"/>);
-    else
     return (
         redirect === true ? (
             <Redirect to={getProjectDataPath()}/>
@@ -148,15 +146,7 @@ export default function ChangePasswordPage() {
                         </Button>
                     </div>
                     <div className="BackLink">
-                        <Link
-                            component="button"
-                            color="inherit"
-                            onClick={() => {
-                                setBack(true);
-                            }}
-                        >
-                            Back
-                        </Link>
+                        <Link to="/login-form" component={FancyLink}>Back</Link>
                     </div>
                 </Paper>
                 <MessageBox

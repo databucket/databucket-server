@@ -42,22 +42,23 @@ public class UserService implements UserDetailsService {
     // This method is used every time when authorized user want to do something.
     // This method must be as light as possible, so most of the logic is moved into public controller when the user is trying to login
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        Optional<User> userOp = userRepository.findByUsername(username);
 
-        return CustomUserDetails.builder()
-            .username(user.getUsername())
-            .password(user.getPassword())
-            .authorities(getAuthority(user))
-            .enabled(user.getEnabled())
-            .expired(user.isExpired())
-            .superUser(user.isSuperUser())
-            .changePassword(user.isChangePassword())
-            .projects(user.getProjects())
-            .build();
+        return userOp.map(user -> CustomUserDetails.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities(getAuthority(user))
+                .enabled(user.getEnabled())
+                .expired(user.isExpired())
+                .superUser(user.isSuperUser())
+                .changePassword(user.isChangePassword())
+                .projects(user.getProjects())
+                .build())
+            .orElse(null);
     }
 
     public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     public User getCurrentUser() {
@@ -81,14 +82,16 @@ public class UserService implements UserDetailsService {
 
 
     public User modifyUser(UserDtoRequest userDtoRequest) throws SomeItemsNotFoundException {
-        User user = userRepository.findByUsername(userDtoRequest.getUsername());
+        Optional<User> userOp = userRepository.findByUsername(userDtoRequest.getUsername());
 
-        if (userDtoRequest.getTeamsIds() != null) {
-            List<Team> teams = teamRepository.findAllByDeletedAndIdIn(false, userDtoRequest.getTeamsIds());
-            user.setTeams(new HashSet<>(teams));
-        }
-
-        return userRepository.save(user);
+        return Optional.ofNullable(userDtoRequest.getTeamsIds())
+            .flatMap(teamIds -> {
+                List<Team> teams = teamRepository.findAllByDeletedAndIdIn(false, teamIds);
+                return userOp.map(user -> {
+                    user.setTeams(new HashSet<>(teams));
+                    return userRepository.save(user);
+                });
+            }).orElse(null);
     }
 
     public void changePassword(ChangePasswordDtoRequest changePasswordDtoRequest) {
@@ -96,26 +99,23 @@ public class UserService implements UserDetailsService {
 
         // can not change password of another user except ROBOT
         if (!name.equals(changePasswordDtoRequest.getUsername())) {
-            User user = userRepository.findByUsername(changePasswordDtoRequest.getUsername());
-            if (user.getRoles().size() == 1 && user.getRoles().stream()
+            Optional<User> userOp = userRepository.findByUsername(changePasswordDtoRequest.getUsername());
+            if (userOp.isPresent() && userOp.get().getRoles().size() == 1 && userOp.get().getRoles().stream()
                 .noneMatch(role -> role.getName().equals(Constants.ROLE_ROBOT))) {
                 throw new IllegalArgumentException("You cannot change the password of this user!");
             }
         }
 
-        User user = userRepository.findByUsername(changePasswordDtoRequest.getUsername());
-        if (user != null) {
-            // check the current password is correct
-            if (!bcryptEncoder.matches(changePasswordDtoRequest.getPassword(), user.getPassword())) {
-                throw new IllegalArgumentException("Bad credentials");
-            }
+        userRepository.findByUsername(changePasswordDtoRequest.getUsername())
+            .map(user -> {
+                if (!bcryptEncoder.matches(changePasswordDtoRequest.getPassword(), user.getPassword())) {
+                    throw new IllegalArgumentException("Bad credentials");
+                }
 
-            user.setPassword(bcryptEncoder.encode(changePasswordDtoRequest.getNewPassword()));
-            user.setChangePassword(false);
-            userRepository.save(user);
-        } else {
-            throw new IllegalArgumentException("The given user does not exist.");
-        }
+                user.setPassword(bcryptEncoder.encode(changePasswordDtoRequest.getNewPassword()));
+                user.setChangePassword(false);
+                return userRepository.save(user);
+            }).orElseThrow(() -> new IllegalArgumentException("The given user does not exist."));
     }
 
 }
