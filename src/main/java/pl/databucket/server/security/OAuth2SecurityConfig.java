@@ -60,6 +60,8 @@ public class OAuth2SecurityConfig {
             .antMatchers(HttpMethod.GET,
                 "/", "/login**", "/index*", "/static/**", "/*.js", "/*.json", "/*.ico", "/api/auth/auth-options")
             .permitAll()
+            .anyRequest()
+            .authenticated()
             .and()
             .formLogin()
             .loginPage("/login-form")
@@ -68,7 +70,6 @@ public class OAuth2SecurityConfig {
             .permitAll()
             .and()
             .oauth2Login()
-            .defaultSuccessUrl("/login-callback")
             .successHandler(oAuth2SuccessHandler)
             .failureHandler(failureHandler)
             .and()

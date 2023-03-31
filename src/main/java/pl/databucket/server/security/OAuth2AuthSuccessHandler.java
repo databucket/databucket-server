@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
@@ -46,7 +45,7 @@ public class OAuth2AuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
-        HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        HttpServletResponse response, Authentication authentication) throws IOException {
         String projectid = request.getParameter("projectid");
         AuthRespDTO authResponse = buildAuthResponse(authentication, projectid);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
@@ -57,18 +56,8 @@ public class OAuth2AuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
             .queryParam("token", authResponse.getToken())
             .build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUri);
-//        super.onAuthenticationSuccess(request, responseWrapper, authentication);
     }
 
-//    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-//        String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
-//
-//        OAuth2AccessToken accessToken = tokenProvider.createAccessToken(authentication);
-//
-//        return UriComponentsBuilder.fromUriString(targetUrl)
-//            .queryParam("token", accessToken.getValue())
-//            .build().toUriString();
-//    }
 
     protected AuthRespDTO buildAuthResponse(Authentication authentication, String projectid) {
         if (authentication instanceof OAuth2AuthenticationToken token) {

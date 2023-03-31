@@ -53,11 +53,16 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
 //    testImplementation('org.springframework.boot:spring-boot-starter-test:2.5.4') {exclude group: 'junit', module: 'junit'}
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-core:4.+'
+    testImplementation 'com.h2database:h2'
 
     // JUnit dependencies
 //    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
 //    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.7.2'
 //    testRuntimeOnly 'org.junit.platform:junit-platform-commons:1.7.2'
+
 
     // Spock - Mandatory dependencies
 //    testImplementation 'org.codehaus.groovy:groovy-all:3.0.8'
@@ -66,7 +71,7 @@ dependencies {
 }
 
 test {
-//    useJUnitPlatform()
+    useJUnitPlatform()
     afterSuite { desc, result ->
         if (!desc.parent) {
             println("${result.resultType} " +
@@ -87,6 +92,7 @@ tasks.register('deleteStatic') {
 }
 
 tasks.register('buildFrontend') {
+    inputs.dir("frontend")
     doLast {
         String npm = 'npm'
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {

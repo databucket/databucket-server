@@ -1,6 +1,9 @@
 package pl.databucket.server.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.databucket.server.dto.DataFilterDto;
 import pl.databucket.server.entity.DataClass;
@@ -15,26 +18,15 @@ import pl.databucket.server.repository.DataFilterRepository;
 import pl.databucket.server.repository.TaskRepository;
 import pl.databucket.server.repository.ViewRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 
 @Service
+@RequiredArgsConstructor
 public class DataFilterService {
 
-    @Autowired
-    private DataFilterRepository filterRepository;
-
-    @Autowired
-    private DataClassRepository dataClassRepository;
-
-    @Autowired
-    private ViewRepository viewRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
+    private final DataFilterRepository filterRepository;
+    private final DataClassRepository dataClassRepository;
+    private final ViewRepository viewRepository;
+    private final TaskRepository taskRepository;
 
 
     public DataFilter createFilter(DataFilterDto dataFilterDto) throws ItemNotFoundException {
@@ -45,10 +37,11 @@ public class DataFilterService {
 
         if (dataFilterDto.getClassId() != null) {
             DataClass dataClass = dataClassRepository.findByIdAndDeleted(dataFilterDto.getClassId(), false);
-            if (dataClass != null)
+            if (dataClass != null) {
                 dataFilter.setDataClass(dataClass);
-            else
+            } else {
                 throw new ItemNotFoundException(DataClass.class, dataFilterDto.getClassId());
+            }
         }
 
         return filterRepository.save(dataFilter);
@@ -62,14 +55,17 @@ public class DataFilterService {
         return filterRepository.findAllByDeletedAndIdIn(false, ids);
     }
 
-    public DataFilter modifyFilter(DataFilterDto dataFilterDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
-        if (dataFilterDto.getId() == null)
+    public DataFilter modifyFilter(DataFilterDto dataFilterDto)
+        throws ItemNotFoundException, ModifyByNullEntityIdException {
+        if (dataFilterDto.getId() == null) {
             throw new ModifyByNullEntityIdException(DataFilter.class);
+        }
 
         DataFilter dataFilter = filterRepository.findByIdAndDeleted(dataFilterDto.getId(), false);
 
-        if (dataFilter == null)
+        if (dataFilter == null) {
             throw new ItemNotFoundException(DataFilter.class, dataFilterDto.getId());
+        }
 
         dataFilter.setName(dataFilterDto.getName());
         dataFilter.setDescription(dataFilterDto.getDescription());
@@ -78,8 +74,9 @@ public class DataFilterService {
         if (dataFilterDto.getClassId() != null) {
             DataClass dataClass = dataClassRepository.findByIdAndDeleted(dataFilterDto.getClassId(), false);
             dataFilter.setDataClass(dataClass);
-        } else
+        } else {
             dataFilter.setDataClass(null);
+        }
 
         return filterRepository.save(dataFilter);
     }
@@ -87,21 +84,25 @@ public class DataFilterService {
     public void deleteFilter(long filterId) throws ItemNotFoundException, ItemAlreadyUsedException {
         DataFilter dataFilter = filterRepository.findByIdAndDeleted(filterId, false);
 
-        if (dataFilter == null)
+        if (dataFilter == null) {
             throw new ItemNotFoundException(DataFilter.class, filterId);
+        }
 
         Map<String, List<String>> usedByItems = new HashMap<>();
 
         List<Task> tasks = taskRepository.findAllByDeletedAndDataFilter(false, dataFilter);
-        if (tasks.size() > 0)
-            usedByItems.put("tasks", tasks.stream().map(Task::getName).collect(Collectors.toList()));
+        if (!tasks.isEmpty()) {
+            usedByItems.put("tasks", tasks.stream().map(Task::getName).toList());
+        }
 
         List<View> views = viewRepository.findAllByDeletedAndDataFilter(false, dataFilter);
-        if (views.size() > 0)
-            usedByItems.put("views", views.stream().map(View::getName).collect(Collectors.toList()));
+        if (!views.isEmpty()) {
+            usedByItems.put("views", views.stream().map(View::getName).toList());
+        }
 
-        if (usedByItems.size() > 0)
+        if (usedByItems.size() > 0) {
             throw new ItemAlreadyUsedException("Filter", dataFilter.getName(), usedByItems.toString());
+        }
 
         dataFilter.setDeleted(true);
         filterRepository.save(dataFilter);
