@@ -638,28 +638,22 @@ export default function BucketDataTable() {
         let actions = [];
         actions.push(refreshAction);
         if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) {
-            actions.push(
-                tasksAction);
+            actions.push(tasksAction);
         }
         if (isFeatureEnabled(FEATURE_FILTER, state.activeView)) {
-            actions.push(
-                filterAction);
+            actions.push(filterAction);
         }
-        if (isFeatureEnabled(FEATURE_RICH_FILTER,
-            state.activeView)) {
+        if (isFeatureEnabled(FEATURE_RICH_FILTER, state.activeView)) {
             actions.push(richFilterAction);
         }
         if (isFeatureEnabled(FEATURE_DETAILS, state.activeView)) {
-            actions.push(
-                detailsAction);
+            actions.push(detailsAction);
         }
         if (isFeatureEnabled(FEATURE_HISTORY, state.activeView)) {
-            actions.push(
-                historyAction);
+            actions.push(historyAction);
         }
         if (isFeatureEnabled(FEATURE_DUPLICATE, state.activeView)) {
-            actions.push(
-                duplicateAction);
+            actions.push(duplicateAction);
         }
         return actions;
     }
@@ -876,7 +870,7 @@ export default function BucketDataTable() {
                         padding: 'dense',
                         search: isFeatureEnabled(FEATURE_SEARCH,
                             state.activeView),
-                        searchFieldStyle: {width: 500},
+                        searchFieldStyle: {width: 350},
                         maxBodyHeight: getTableHeight(),
                         minBodyHeight: getTableHeight(),
                         headerStyle: {
