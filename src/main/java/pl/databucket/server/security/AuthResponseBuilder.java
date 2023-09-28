@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import pl.databucket.server.dto.AuthProjectDTO;
@@ -71,12 +69,17 @@ public class AuthResponseBuilder {
 
                 // The user is not assigned to requested project
             } else {
-                responseBuilder.message("The user is not assigned to given project!");
-                throw new AuthForbiddenException(responseBuilder.build());
+                List<String> roles = user.getAuthorities().stream()
+                    .map(item -> modelMapper.map(item.getAuthority(), String.class)).toList();
+                responseBuilder
+                    .message("The user is not assigned to given project!")
+                    .token(tokenUtils.generateToken(authentication, 0))
+                    .projects(List.of())
+                    .roles(roles);
             }
 
             // We haven't got the projectId but the user is assigned to one project.
-        } else if (user.getProjects().size() == 1) {
+        } else if (Optional.ofNullable(user.getProjects()).map(Set::size).orElse(0) == 1) {
             Project project = user.getProjects().iterator().next();
 
             // The project is disabled
@@ -88,7 +91,6 @@ public class AuthResponseBuilder {
             } else if (project.isExpired()) {
                 responseBuilder.message("The project expired!");
                 throw new AuthForbiddenException(responseBuilder.build());
-
                 // The project is enabled and not expired
             } else {
                 List<AuthProjectDTO> projects = user.getProjects().stream()
@@ -104,7 +106,7 @@ public class AuthResponseBuilder {
             }
 
             // We haven't got the projectId, and the user is assigned to more then one project. We return all projects to which the user is assigned.
-        } else if (user.getProjects().size() > 1) {
+        } else if (Optional.ofNullable(user.getProjects()).map(Set::size).orElse(0) > 1) {
             List<AuthProjectDTO> projects = user.getProjects().stream()
                 .map(item -> modelMapper.map(item, AuthProjectDTO.class))
                 .sorted(Comparator.comparing(AuthProjectDTO::getId))
@@ -133,8 +135,13 @@ public class AuthResponseBuilder {
 
             // We haven't got the projectId, and the user is not assigned to any project and this user is not SUPER user.
         } else {
-            responseBuilder.message("The user is not assigned to any project!");
-            throw new AuthForbiddenException(responseBuilder.build());
+            List<String> roles = user.getAuthorities().stream()
+                .map(item -> modelMapper.map(item.getAuthority(), String.class)).toList();
+            responseBuilder
+                .message("The user is not assigned to any project!")
+                .token(tokenUtils.generateToken(authentication, 0))
+                .project(new AuthProjectDTO())
+                .roles(roles);
         }
         return responseBuilder.build();
     }

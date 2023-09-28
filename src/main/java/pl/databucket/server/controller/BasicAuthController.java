@@ -44,7 +44,6 @@ import pl.databucket.server.dto.AuthRespDTO;
 import pl.databucket.server.dto.ForgotPasswordReqDTO;
 import pl.databucket.server.dto.ReCaptchaSiteVerifyResponseDTO;
 import pl.databucket.server.dto.SignUpDtoRequest;
-import pl.databucket.server.exception.AuthForbiddenException;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ForbiddenRepetitionException;
 import pl.databucket.server.repository.UserRepository;
@@ -176,28 +175,5 @@ public class BasicAuthController {
                 .build());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleError(Exception ex) {
-        return exceptionFormatter.defaultException(ex);
-    }
 
-    @ExceptionHandler(AuthForbiddenException.class)
-    public ResponseEntity<AuthRespDTO> handleError(AuthForbiddenException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getResponse());
-    }
-
-    @ExceptionHandler({ForbiddenRepetitionException.class})
-    public ResponseEntity<Map<String, Object>> handleError(ForbiddenRepetitionException ex) {
-        return exceptionFormatter.customPublicException(ex.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler({MessagingException.class, MailSendException.class})
-    public ResponseEntity<Map<String, Object>> handleMailError() {
-        return exceptionFormatter.customPublicException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Map<String, Object>> handleError(AuthenticationException e) {
-        return exceptionFormatter.customException(e, HttpStatus.UNAUTHORIZED);
-    }
 }

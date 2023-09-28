@@ -64,7 +64,7 @@ export default function SelectProjectsPage(props) {
             <Grid className="TitleGrid"
                   container
                   direction="row"
-                  justify="center"
+                  justifyContent="center"
                   alignItems="center"
                   spacing={1}>
                 <Grid item>

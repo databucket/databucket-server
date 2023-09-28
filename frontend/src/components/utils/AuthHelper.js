@@ -46,7 +46,7 @@ export const handleSuccessfulLogin = (data, state) => {
             setActiveProjectId(data.project.id);
             // ReactGA.initialize('UA-86983600-1');
             // ReactGA.pageview("login-to-project");
-            return {...state, projects: null, changePassword: false};
+            return {...state, projects: null, changePassword: false, projectId: data.project.id};
         } else if (hasSuperRole()) {
             return {...state, projects: null, changePassword: false};
         } else

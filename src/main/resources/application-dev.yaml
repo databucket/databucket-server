@@ -28,7 +28,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://auth.test.local/auth/realms/databucket
+          issuer-uri: http://auth.localhost/auth/realms/databucket
       client:
         registration:
           dopauth:
@@ -39,7 +39,7 @@ spring:
             scope: openid
         provider:
           dopauth:
-            issuer-uri: http://auth.test.local/auth/realms/databucket
+            issuer-uri: http://auth.localhost/auth/realms/databucket
 #            authorization-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/auth
 #            token-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/token
 #            user-info-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/userinfo

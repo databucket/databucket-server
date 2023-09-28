@@ -18,29 +18,36 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.UriComponentsBuilder;
+import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.AuthRespDTO;
 import pl.databucket.server.dto.ManageUserDtoRequest;
+import pl.databucket.server.entity.Role;
 import pl.databucket.server.entity.User;
+import pl.databucket.server.exception.AuthForbiddenException;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.repository.RoleRepository;
 import pl.databucket.server.service.ManageUserService;
 import pl.databucket.server.service.UserService;
 
 @Log4j2
 public class OAuth2AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
-    private final ManageUserService manageUserService;
-    private final UserService userService;
     private final AuthResponseBuilder authResponseBuilder;
+    private final ManageUserService manageUserService;
+    private final RoleRepository roleRepository;
+    private final UserService userService;
     private static final ObjectMapper mapper = new JsonMapper();
 
     public OAuth2AuthSuccessHandler(AuthResponseBuilder authResponseBuilder,
         ManageUserService manageUserService,
+        RoleRepository roleRepository,
         UserService userService) {
         super.setDefaultTargetUrl("/login-callback");
         this.manageUserService = manageUserService;
         this.userService = userService;
         this.authResponseBuilder = authResponseBuilder;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -65,9 +72,13 @@ public class OAuth2AuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
             CustomUserDetails user = Optional.ofNullable(userDetails)
                 .map(CustomUserDetails.class::cast)
                 .orElseGet(() -> createNewOauthUser(token));
-            return authResponseBuilder.buildAuthResponse(
-                new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities()),
-                projectid);
+            try {
+                return authResponseBuilder.buildAuthResponse(
+                    new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities()),
+                    projectid);
+            } catch (AuthForbiddenException exc) {
+                return exc.getResponse();
+            }
         } else if (authentication instanceof UsernamePasswordAuthenticationToken token) {
             return authResponseBuilder.buildAuthResponse(token, projectid);
         }
@@ -76,10 +87,12 @@ public class OAuth2AuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
 
     private CustomUserDetails createNewOauthUser(OAuth2AuthenticationToken auth) {
         try {
+            Role memberRole = roleRepository.findByName(Constants.ROLE_MEMBER);
             ManageUserDtoRequest newUserRequest = ManageUserDtoRequest.builder()
                 .username(auth.getPrincipal().getName())
                 .email(auth.getPrincipal().getAttributes().getOrDefault("email", "").toString())
                 .enabled(true)
+                .rolesIds(Set.of(memberRole.getId()))
                 .build();
             User user = manageUserService.createUser(newUserRequest);
             return CustomUserDetails.builder()

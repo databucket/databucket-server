@@ -3,11 +3,11 @@
   auto_https off
 }
 
-http://databucket.test.local {
+http://databucket.localhost {
   reverse_proxy databucket:8080
 }
 
-http://auth.test.local {
+http://auth.localhost {
   reverse_proxy auth:8080
 }
 

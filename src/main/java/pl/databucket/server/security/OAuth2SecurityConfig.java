@@ -12,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import pl.databucket.server.dto.AuthRespDTO;
+import pl.databucket.server.repository.RoleRepository;
 import pl.databucket.server.service.ManageUserService;
 import pl.databucket.server.service.UserService;
 
@@ -58,7 +59,13 @@ public class OAuth2SecurityConfig {
 //                "/**/*.js"
 //            ).permitAll()
             .antMatchers(HttpMethod.GET,
-                "/", "/login**", "/index*", "/static/**", "/*.js", "/*.json", "/*.ico", "/api/auth/auth-options")
+                "/", "/login**", "/sign-up",
+                "/index*", "/**/static/**", "/*.js", "/*.json", "/*.ico",
+                "/api/auth/**")
+            .permitAll()
+            .antMatchers(HttpMethod.POST,
+                "/api/auth/sign-up", "/api/auth/forgot-password"
+            )
             .permitAll()
             .anyRequest()
             .authenticated()
@@ -100,7 +107,8 @@ public class OAuth2SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler oAuth2SuccessHandler(
-        AuthResponseBuilder authResponseBuilder, ManageUserService manageUserService, UserService userService) {
-        return new OAuth2AuthSuccessHandler(authResponseBuilder, manageUserService, userService);
+        AuthResponseBuilder authResponseBuilder, ManageUserService manageUserService, RoleRepository roleRepository,
+        UserService userService) {
+        return new OAuth2AuthSuccessHandler(authResponseBuilder, manageUserService, roleRepository, userService);
     }
 }
