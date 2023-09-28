@@ -1,0 +1,13 @@
+{
+  debug
+  auto_https off
+}
+
+http://databucket.localhost {
+  reverse_proxy databucket:8080
+}
+
+http://auth.localhost {
+  reverse_proxy auth:8080
+}
+

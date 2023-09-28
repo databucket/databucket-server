@@ -75,10 +75,11 @@ export default function ProjectData() {
 
     useEffect(() => {
         fetchSessionUsers();
-    }, []);
-
-    useEffect(() => {
         fetchAccessTree();
+        fetchSessionClasses();
+        fetchSessionTags();
+        fetchSessionSvgs();
+        fetchSessionEnums();
     }, []);
 
     useEffect(() => {
@@ -90,22 +91,6 @@ export default function ProjectData() {
         if (views != null && tasks != null && filters == null)
             fetchSessionFilters();
     }, [views, tasks]);
-
-    useEffect(() => {
-        fetchSessionClasses();
-    }, []);
-
-    useEffect(() => {
-        fetchSessionTags();
-    }, []);
-
-    useEffect(() => {
-        fetchSessionSvgs();
-    }, []);
-
-    useEffect(() => {
-        fetchSessionEnums();
-    }, []);
 
     useEffect(() => {
         if (views != null && tasks == null)
@@ -142,7 +127,7 @@ export default function ProjectData() {
     };
 
     if (!logged)
-        return (<Redirect to="/login"/>);
+        return (<Redirect to="/login-form"/>);
 
     if (projects == null || enums == null || columns == null || filters == null || tasks == null)
         return (<CenteredWaitingCircularProgress />);

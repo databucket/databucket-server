@@ -1,6 +1,10 @@
 package pl.databucket.server.entity;
 
+import java.io.Serial;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
@@ -15,8 +19,12 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Table(name = "users")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User extends Auditable<String> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -62,7 +70,7 @@ public class User extends Auditable<String> implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> roles;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_projects",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "project_id")})
@@ -75,35 +83,35 @@ public class User extends Auditable<String> implements Serializable {
     private Set<Team> teams;
 
     public Set<Short> getRolesIds() {
-        if (roles != null && roles.size() > 0)
+        if (roles != null && !roles.isEmpty())
             return roles.stream().map(Role::getId).collect(Collectors.toSet());
         else
             return null;
     }
 
     public Set<Integer> getProjectsIds() {
-        if (projects != null && projects.size() > 0)
+        if (projects != null && !projects.isEmpty())
             return projects.stream().map(Project::getId).collect(Collectors.toSet());
         else
             return null;
     }
 
     public Set<Short> getTeamsIds() {
-        if (teams != null && teams.size() > 0)
+        if (teams != null && !teams.isEmpty())
             return teams.stream().map(Team::getId).collect(Collectors.toSet());
         else
             return null;
     }
 
     public boolean isSuperUser() {
-        if (roles != null && roles.size() > 0)
+        if (roles != null && !roles.isEmpty())
             return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_SUPER));
         else
             return false;
     }
 
     public boolean isAdminUser() {
-        if (roles != null && roles.size() > 0)
+        if (roles != null && !roles.isEmpty())
             return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_ADMIN));
         else
             return false;

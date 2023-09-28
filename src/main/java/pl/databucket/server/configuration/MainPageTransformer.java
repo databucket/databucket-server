@@ -1,15 +1,13 @@
 package pl.databucket.server.configuration;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceTransformerChain;
 import org.springframework.web.servlet.resource.TransformedResource;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.io.IOUtils;
 
 public class MainPageTransformer implements ResourceTransformer {
 
@@ -20,14 +18,16 @@ public class MainPageTransformer implements ResourceTransformer {
     }
 
     @Override
-    public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain) throws IOException {
-        if (resource.getFilename().equals("index.html")) {
+    public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain)
+        throws IOException {
+        if (Objects.equals(resource.getFilename(), "index.html")) {
             String info = "<span id=\"context-path\" hidden>" + contextPath + "</span>";
 
-            String html = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
+            String html = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             html = html.replace("<body>", "<body>" + info);
             return new TransformedResource(resource, html.getBytes());
-        } else
+        } else {
             return resource;
+        }
     }
 }

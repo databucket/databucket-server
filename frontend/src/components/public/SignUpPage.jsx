@@ -25,7 +25,7 @@ export default function SignUpPage() {
 
     useEffect(() => {
         if (recaptcha.enabled === true && recaptcha.siteKey == null) {
-            fetch(getBaseUrl('public/recaptcha-site-key'), {
+            fetch(getBaseUrl('auth/recaptcha-site-key'), {
                 method: 'GET',
                 headers: {'Content-Type': 'application/json'}
             })
@@ -92,7 +92,7 @@ export default function SignUpPage() {
             recaptchaToken: token
         }
 
-        fetch(getBaseUrl('public/sign-up'), {
+        fetch(getBaseUrl('auth/sign-up'), {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: {'Content-Type': 'application/json'}
@@ -173,7 +173,7 @@ export default function SignUpPage() {
     };
 
     if (back)
-        return (<Redirect to="/login"/>);
+        return (<Redirect to="/login-form"/>);
     else
         return (
             <div className="ContainerClassSingUp">

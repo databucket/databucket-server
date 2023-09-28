@@ -6,7 +6,7 @@ import UserReducer from "./UsersReducer";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getUserMapper} from "../../utils/NullValueMappers";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-
+import {clearActiveProjectId} from "../../utils/ConfigurationStorage";
 
 const UsersProvider = props => {
     const initialState = {
@@ -17,12 +17,19 @@ const UsersProvider = props => {
 
     const fetchUsers = () => {
         fetch(getBaseUrl('users'), getGetOptions())
-            .then(handleErrors)
-            .then(users => dispatch({
-                type: "FETCH_USERS",
-                payload: convertNullValuesInCollection(users, getUserMapper())
-            }))
-            .catch(err => console.log(err));
+        .then(handleErrors)
+        .then(users => dispatch({
+            type: "FETCH_USERS",
+            payload: convertNullValuesInCollection(users, getUserMapper())
+        }))
+        .catch(err => {
+            if (/Entity 'Project' with the given id '\d' doesn't exist!/.test(
+                err)) {
+                clearActiveProjectId();
+            } else {
+                console.warn(err);
+            }
+        });
     }
 
     const editUser = (user) => {
@@ -40,17 +47,23 @@ const UsersProvider = props => {
                 itemsTargetFieldName = "teamsIds";
                 break;
             default:
-                console.log("UsersProvider - Undefined notification source! " + sourceName);
+                console.log("UsersProvider - Undefined notification source! "
+                    + sourceName);
                 return;
         }
         dispatch({
             type: "NOTIFY_USERS",
-            payload: {itemsTargetFieldName: itemsTargetFieldName, sourceObjectId: sourceObjectId, sourceObjectItemsIds: sourceObjectItemsIds}
+            payload: {
+                itemsTargetFieldName: itemsTargetFieldName,
+                sourceObjectId: sourceObjectId,
+                sourceObjectItemsIds: sourceObjectItemsIds
+            }
         });
     }
 
     return (
-        <UsersContext.Provider value={{users: state.users, fetchUsers, editUser, notifyUsers}}>
+        <UsersContext.Provider
+            value={{users: state.users, fetchUsers, editUser, notifyUsers}}>
             {props.children}
         </UsersContext.Provider>
     );

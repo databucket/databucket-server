@@ -1,6 +1,15 @@
 package pl.databucket.server.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import javax.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,76 +32,67 @@ import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.mail.MailSenderService;
 
-import javax.mail.MessagingException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-
 
 @Service(value = "manageUserService")
+@RequiredArgsConstructor
 public class ManageUserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final ProjectRepository projectRepository;
+    private final BCryptPasswordEncoder bcryptEncoder;
+    private final TokenProvider jwtTokenUtil;
+    private final MailSenderService mailSenderService;
+    private final AppProperties appProperties;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder bcryptEncoder;
-
-    @Autowired
-    private TokenProvider jwtTokenUtil;
-
-    @Autowired
-    private MailSenderService mailSenderService;
-
-    @Autowired
-    private AppProperties appProperties;
 
     public List<User> getUsers() {
         return userRepository.findAllByOrderById();
     }
 
-    public User createUser(ManageUserDtoRequest manageUserDtoRequest) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
-        if (userRepository.existsByUsername(manageUserDtoRequest.getUsername()))
+    public User createUser(ManageUserDtoRequest manageUserDtoRequest)
+        throws ItemAlreadyExistsException, SomeItemsNotFoundException {
+        if (userRepository.existsByUsername(manageUserDtoRequest.getUsername())) {
             throw new ItemAlreadyExistsException(User.class, manageUserDtoRequest.getUsername());
-
-        User newUser = new User();
-        newUser.setUsername(manageUserDtoRequest.getUsername());
-        newUser.setEmail(manageUserDtoRequest.getEmail());
-        newUser.setDescription(manageUserDtoRequest.getDescription());
-        newUser.setEnabled(manageUserDtoRequest.isEnabled());
-        newUser.setExpirationDate(manageUserDtoRequest.getExpirationDate());
-
-        if (manageUserDtoRequest.getRolesIds() != null)
-            newUser.setRoles(new HashSet<>(roleRepository.findAllById(manageUserDtoRequest.getRolesIds())));
-
-        if (manageUserDtoRequest.getProjectsIds() != null) {
-            List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false, manageUserDtoRequest.getProjectsIds());
-            newUser.setProjects(new HashSet<>(projects));
         }
 
-        return userRepository.save(newUser);
+        User.UserBuilder newUser = User.builder()
+            .username(manageUserDtoRequest.getUsername())
+            .email(manageUserDtoRequest.getEmail())
+            .description(manageUserDtoRequest.getDescription())
+            .enabled(manageUserDtoRequest.isEnabled())
+            .expirationDate(manageUserDtoRequest.getExpirationDate());
+
+        if (manageUserDtoRequest.getRolesIds() != null) {
+            newUser.roles(new HashSet<>(roleRepository.findAllById(manageUserDtoRequest.getRolesIds())));
+        }
+
+        if (manageUserDtoRequest.getProjectsIds() != null) {
+            List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false,
+                manageUserDtoRequest.getProjectsIds());
+            newUser.projects(new HashSet<>(projects));
+        }
+
+        return userRepository.save(newUser.build());
     }
 
     public void signUpUser(SignUpDtoRequest signUpDtoRequest) throws MessagingException {
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepository.findByName(Constants.ROLE_MEMBER));
 
-        User newUser = new User();
-        newUser.setUsername(signUpDtoRequest.getUsername());
-        newUser.setEmail(signUpDtoRequest.getEmail());
-        newUser.setPassword(bcryptEncoder.encode(signUpDtoRequest.getPassword()));
-        newUser.setEnabled(false);
-        newUser.setChangePassword(false);
-        newUser.setRoles(roles);
+        User newUser = User.builder()
+            .username(signUpDtoRequest.getUsername())
+            .email(signUpDtoRequest.getEmail())
+            .password(bcryptEncoder.encode(signUpDtoRequest.getPassword()))
+            .enabled(false)
+            .changePassword(false)
+            .roles(roles)
+            .build();
         newUser = userRepository.save(newUser);
 
-        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()), appProperties.getMailFrom());
+        mailSenderService.sendConfirmationLink(newUser,
+            signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()),
+            appProperties.getMailFrom());
     }
 
     public void signUpUserConfirmation(String jwts) throws ForbiddenRepetitionException, MessagingException {
@@ -100,20 +100,25 @@ public class ManageUserService {
             String email = jwtTokenUtil.unpackFromJwts(jwts);
             User user = userRepository.findByEmail(email);
 
-            if (user.getEnabled())
+            if (user.getEnabled()) {
                 throw new ForbiddenRepetitionException("The user has been already activated");
+            }
 
             user.setEnabled(true);
             userRepository.save(user);
 
             mailSenderService.sendRegistrationConfirmation(user, appProperties.getMailFrom());
-        } else
+        } else {
             throw new AccountExpiredException("The confirmation link is expired!");
+        }
     }
 
-    public void forgotPasswordMessage(ForgotPasswordReqDTO forgotPasswordReqDTO) throws ForbiddenRepetitionException, MessagingException, UsernameNotFoundException {
-        if (!userRepository.existsByEmail(forgotPasswordReqDTO.getEmail()))
-            throw new UsernameNotFoundException("User not found! Make sure you have entered the correct email address.");
+    public void forgotPasswordMessage(ForgotPasswordReqDTO forgotPasswordReqDTO)
+        throws ForbiddenRepetitionException, MessagingException, UsernameNotFoundException {
+        if (!userRepository.existsByEmail(forgotPasswordReqDTO.getEmail())) {
+            throw new UsernameNotFoundException(
+                "User not found! Make sure you have entered the correct email address.");
+        }
 
         User user = userRepository.findByEmail(forgotPasswordReqDTO.getEmail());
 
@@ -121,50 +126,54 @@ public class ManageUserService {
             Instant lastSendEmailTime = user.getLastSendEmailForgotPasswordLinkDate().toInstant();
             Instant currentTime = Instant.now();
 
-            if (ChronoUnit.HOURS.between(lastSendEmailTime, currentTime) < 48)
-                throw new ForbiddenRepetitionException("The confirmation link has been send within last 48 hours. Search it in your email inbox.");
+            if (ChronoUnit.HOURS.between(lastSendEmailTime, currentTime) < 48) {
+                throw new ForbiddenRepetitionException(
+                    "The confirmation link has been send within last 48 hours. Search it in your email inbox.");
+            }
         }
 
-        mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()), appProperties.getMailFrom());
+        mailSenderService.sendForgotPasswordLink(user,
+            forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()),
+            appProperties.getMailFrom());
         user.setLastSendEmailForgotPasswordLinkDate(new Date());
         userRepository.save(user);
     }
 
     public User modifyUser(ManageUserDtoRequest manageUserDtoRequest) {
-        User user = userRepository.findByUsername(manageUserDtoRequest.getUsername());
+        return userRepository.findByUsername(manageUserDtoRequest.getUsername()).map(user -> {
+            // clear last send email dates when changed email address
+            if (user.getEmail() != null && !user.getEmail().equals(manageUserDtoRequest.getEmail())) {
+                user.setLastSendEmailForgotPasswordLinkDate(null);
+                user.setLastSendEmailTempPasswordDate(null);
+            }
 
-        // clear last send email dates when changed email address
-        if (user.getEmail() != null && !user.getEmail().equals(manageUserDtoRequest.getEmail())) {
-            user.setLastSendEmailForgotPasswordLinkDate(null);
-            user.setLastSendEmailTempPasswordDate(null);
-        }
+            user.setEmail(manageUserDtoRequest.getEmail());
+            user.setDescription(manageUserDtoRequest.getDescription());
+            user.setEnabled(manageUserDtoRequest.isEnabled());
+            user.setExpirationDate(manageUserDtoRequest.getExpirationDate());
 
-        user.setEmail(manageUserDtoRequest.getEmail());
-        user.setDescription(manageUserDtoRequest.getDescription());
-        user.setEnabled(manageUserDtoRequest.isEnabled());
-        user.setExpirationDate(manageUserDtoRequest.getExpirationDate());
+            if (manageUserDtoRequest.getRolesIds() != null) {
+                user.setRoles(new HashSet<>(roleRepository.findAllById(manageUserDtoRequest.getRolesIds())));
+            } else {
+                user.setRoles(null);
+            }
 
-        if (manageUserDtoRequest.getRolesIds() != null)
-            user.setRoles(new HashSet<>(roleRepository.findAllById(manageUserDtoRequest.getRolesIds())));
-        else
-            user.setRoles(null);
+            if (manageUserDtoRequest.getProjectsIds() != null) {
+                List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false,
+                    manageUserDtoRequest.getProjectsIds());
+                user.setProjects(new HashSet<>(projects));
+            }
 
-        if (manageUserDtoRequest.getProjectsIds() != null) {
-            List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false, manageUserDtoRequest.getProjectsIds());
-            user.setProjects(new HashSet<>(projects));
-        }
-
-        return userRepository.save(user);
+            return userRepository.save(user);
+        }).orElse(null);
     }
 
     public void resetAndSendPassword(AuthReqDTO userDto) {
-        User user = userRepository.findByUsername(userDto.getUsername());
-        if (user != null) {
-            user.setPassword(bcryptEncoder.encode(userDto.getPassword()));
-            user.setChangePassword(true);
-            userRepository.save(user);
-        } else
-            throw new IllegalArgumentException("The given user does not exist.");
+        User user = userRepository.findByUsername(userDto.getUsername())
+            .orElseThrow(() -> new IllegalArgumentException("The given user does not exist."));
+        user.setPassword(bcryptEncoder.encode(userDto.getPassword()));
+        user.setChangePassword(true);
+        userRepository.save(user);
     }
 
     public void resetAndSendPassword(String jwts) throws ForbiddenRepetitionException, MessagingException {
@@ -176,8 +185,10 @@ public class ManageUserService {
                 Instant lastSendEmailTime = user.getLastSendEmailTempPasswordDate().toInstant();
                 Instant currentTime = Instant.now();
 
-                if (ChronoUnit.HOURS.between(lastSendEmailTime, currentTime) < 48)
-                    throw new ForbiddenRepetitionException("The temporary password has been send within last 48 hours. Search it in your email inbox.");
+                if (ChronoUnit.HOURS.between(lastSendEmailTime, currentTime) < 48) {
+                    throw new ForbiddenRepetitionException(
+                        "The temporary password has been send within last 48 hours. Search it in your email inbox.");
+                }
             }
 
             int length = 11;
@@ -187,8 +198,9 @@ public class ManageUserService {
             String finalString = small_letter + numbers;
             Random random = new Random();
             char[] password = new char[length];
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++) {
                 password[i] = finalString.charAt(random.nextInt(finalString.length()));
+            }
 
             String newPassword = new String(password);
 
@@ -198,7 +210,8 @@ public class ManageUserService {
             user.setChangePassword(true);
             user.setLastSendEmailTempPasswordDate(new Date());
             userRepository.save(user);
-        } else
+        } else {
             throw new AccountExpiredException("The confirmation link is expired!");
+        }
     }
 }

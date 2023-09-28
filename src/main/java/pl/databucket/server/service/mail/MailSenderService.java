@@ -23,8 +23,9 @@ public class MailSenderService {
         htmlContent += "<p>If you didn't request a registration, don't worry. You can safely ignore this email.</p><br/><br/>";
 
         MailSenderHandler mailHandler = new MailSenderHandler(sender);
-        if (from != null)
+        if (from != null) {
             mailHandler.setFrom(from);
+        }
         mailHandler.setTo(user.getEmail());
         mailHandler.setSubject("Databucket account - registration");
         mailHandler.setText(htmlContent, true);
@@ -38,8 +39,9 @@ public class MailSenderService {
         htmlContent += "<p>Log in to the application and request to be assigned to the project.</p>";
 
         MailSenderHandler mailHandler = new MailSenderHandler(sender);
-        if (from != null)
+        if (from != null) {
             mailHandler.setFrom(from);
+        }
         mailHandler.setTo(user.getEmail());
         mailHandler.setSubject("Databucket account - activated");
         mailHandler.setText(htmlContent, true);
@@ -58,8 +60,9 @@ public class MailSenderService {
         htmlContent += "<p>If you didn't request a reset, don't worry. You can safely ignore this email.</p><br/><br/>";
 
         MailSenderHandler mailHandler = new MailSenderHandler(sender);
-        if (from != null)
+        if (from != null) {
             mailHandler.setFrom(from);
+        }
         mailHandler.setTo(user.getEmail());
         mailHandler.setSubject("Databucket account - forgot your password?");
         mailHandler.setText(htmlContent, true);
@@ -73,8 +76,9 @@ public class MailSenderService {
         htmlContent += "<h2>" + password + "</h2>";
 
         MailSenderHandler mailHandler = new MailSenderHandler(sender);
-        if (from != null)
+        if (from != null) {
             mailHandler.setFrom(from);
+        }
         mailHandler.setTo(user.getEmail());
         mailHandler.setSubject("Databucket account - temporary password");
         mailHandler.setText(htmlContent, true);

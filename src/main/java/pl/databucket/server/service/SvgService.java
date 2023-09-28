@@ -1,52 +1,61 @@
 package pl.databucket.server.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import pl.databucket.server.dto.SvgDto;
 import pl.databucket.server.entity.Svg;
-import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.repository.SvgRepository;
 
-import java.util.List;
-import java.util.Optional;
-
 
 @Service
+@RequiredArgsConstructor
 public class SvgService {
 
-    @Autowired
-    private SvgRepository svgRepository;
+    private final SvgRepository svgRepository;
+    private final ModelMapper modelMapper;
 
-    public Svg createSvg(SvgDto svgDto) throws ItemAlreadyExistsException {
+    public SvgDto createSvg(SvgDto svgDto) {
         Svg svg = new Svg();
-        svg.setName(svgDto.getName());
-        svg.setStructure(svgDto.getStructure());
-        return svgRepository.save(svg);
+        modelMapper.map(svgDto, svg);
+        Svg saved = svgRepository.save(svg);
+        modelMapper.map(saved, svgDto);
+        return svgDto;
     }
 
-    public Svg modifySvg(SvgDto svgDto) throws ModifyByNullEntityIdException {
-        if (svgDto.getId() == null)
+    public SvgDto modifySvg(SvgDto svgDto) throws ModifyByNullEntityIdException {
+        if (svgDto.getId() == null) {
             throw new ModifyByNullEntityIdException(Svg.class);
+        }
 
-        Svg svg = svgRepository.getById(svgDto.getId());
-        svg.setName(svgDto.getName());
-        svg.setStructure(svgDto.getStructure());
-
-        return svgRepository.save(svg);
+        return svgRepository.findById(svgDto.getId())
+            .map(svg -> {
+                modelMapper.map(svgDto, svg);
+                Svg saved = svgRepository.save(svg);
+                modelMapper.map(saved, svgDto);
+                return svgDto;
+            })
+            .orElse(svgDto);
     }
 
-    public List<Svg> getSvgList() {
-        return svgRepository.findAll();
+    public List<SvgDto> getSvgList() {
+        return svgRepository.findAll().stream()
+            .map(svg -> modelMapper.map(svg, SvgDto.class))
+            .toList();
     }
 
     public void deleteSvg(long svgId) throws ItemNotFoundException {
         Optional<Svg> svgOptional = svgRepository.findById(svgId);
 
-        if (!svgOptional.isPresent())
+        if (!svgOptional.isPresent()) {
             throw new ItemNotFoundException(Svg.class, svgId);
+        }
 
         svgRepository.delete(svgOptional.get());
     }
+
 }

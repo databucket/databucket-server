@@ -1,0 +1,76 @@
+version: '3.3'
+services:
+  postgres:
+    image: postgres:12.2-alpine
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+    network_mode: host
+    environment:
+      POSTGRES_USER: databucket_user
+      POSTGRES_PASSWORD: databucket_user
+      POSTGRES_DB: databucket
+#    networks:
+#      - server
+
+  databucket:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.build
+    container_name: databucket
+    hostname: databucket.localhost
+#    ports:
+#      - "8080:8080"
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+    network_mode: host
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/databucket
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/databucket
+      SPRING_DATASOURCE_USERNAME: databucket_user
+      SPRING_DATASOURCE_PASSWORD: databucket_user
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: username
+      SPRING_MAIL_PASSWORD: password
+      SPRING_MAIL_FROM: admin@email.io
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_DOPAUTH_ISSUER-URI: http://auth.localhost/auth/realms/databucket
+#    networks:
+#      - server
+
+  auth:
+    image: quay.io/keycloak/keycloak:12.0.4
+    expose:
+      - "8080"
+    hostname: auth.localhost
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KC_HOSTNAME: auth.localhost
+      DB_VENDOR: h2
+    networks:
+      - auth
+
+  reverse-proxy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    #      - "2015:2015"
+    #      - "2019:2019"
+    volumes:
+      - "./Caddyfile:/etc/caddy/Caddyfile"
+    networks:
+      - auth
+#      - server
+      - default
+
+networks:
+  auth:
+    internal: true
+#  server:
+#    internal: true

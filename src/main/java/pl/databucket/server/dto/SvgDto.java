@@ -1,23 +1,23 @@
 package pl.databucket.server.dto;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.Date;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-@EqualsAndHashCode
-@Getter
-@Setter
+@Data
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SvgDto {
 
-    private Long id;
-    private String name;
-    private String structure;
+    Long id;
+    String name;
+    String structure;
 
-    private String createdBy;
-    private Date createdAt;
-    private String modifiedBy;
-    private Date modifiedAt;
+    String createdBy;
+    Date createdAt;
+    String modifiedBy;
+    Date modifiedAt;
 
 }

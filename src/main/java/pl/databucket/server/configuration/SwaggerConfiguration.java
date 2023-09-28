@@ -18,8 +18,8 @@ import static io.swagger.v3.oas.annotations.enums.SecuritySchemeIn.HEADER;
 import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
-@Configuration
-@EnableSwagger2
+//@Configuration
+//@EnableSwagger2
 public class SwaggerConfiguration {
 
     @Bean
