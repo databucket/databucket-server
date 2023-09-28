@@ -20,12 +20,12 @@ import {
     Paper,
     Tooltip,
     Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import {
     EventBusy as ExpiredProjectIcon,
     FolderSpecial as ActiveProjectIcon,
     NotInterested as DisabledProjectIcon
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import "./SelectProjectPage.css"
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import {fetchHelper, handleErrors} from "../../utils/FetchHelper";

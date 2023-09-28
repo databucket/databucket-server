@@ -1,4 +1,3 @@
-import {getBaseUrl} from "../../utils/UrlBuilder";
 import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
     hasAdminRole,
@@ -10,7 +9,6 @@ import {
     setToken,
     setUsername
 } from "../../utils/ConfigurationStorage";
-import {sortByKey} from "../../utils/JsonHelper";
 
 export const signIn = (formData, state) => {
     return fetch("/login-form", {

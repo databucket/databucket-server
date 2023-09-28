@@ -1,7 +1,15 @@
 import React, {forwardRef, useState} from "react";
 import "./ForgotPasswordPage.css";
 import Logo from "../../images/databucket-logo.png";
-import {Button, FormControl, Input, InputLabel, Link as MaterialLink, Paper, Typography} from "@material-ui/core";
+import {
+    Button,
+    FormControl,
+    Input,
+    InputLabel,
+    Link as MaterialLink,
+    Paper,
+    Typography
+} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
 import {Link} from "react-router-dom";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
@@ -21,7 +29,8 @@ const FancyLink = forwardRef(({navigate, ...props}, ref) => {
 export default function ForgotPasswordPage() {
 
     const [email, setEmail] = useState("");
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
 
     const onChange = e => {
         setEmail(e.target.value);
@@ -32,14 +41,20 @@ export default function ForgotPasswordPage() {
             method: 'POST',
             body: JSON.stringify({
                 email: email,
-                url: window.location.origin + getContextPath() + "/confirmation/forgot-password/"
+                url: window.location.origin + getContextPath()
+                    + "/confirmation/forgot-password/"
             }),
             headers: {'Content-Type': 'application/json'}
         })
-            .then(handleLoginErrors)
-            .then(response => {
-                setMessageBox({open: true, severity: 'info', title: 'Send confirmation email', message: null});
-            }).catch(error => {
+        .then(handleLoginErrors)
+        .then(response => {
+            setMessageBox({
+                open: true,
+                severity: 'info',
+                title: 'Send confirmation email',
+                message: null
+            });
+        }).catch(error => {
                 setMessageBox({
                     open: true,
                     severity: 'error',
@@ -51,8 +66,9 @@ export default function ForgotPasswordPage() {
     }
 
     const handleKeypress = e => {
-        if (e.key === 'Enter')
+        if (e.key === 'Enter') {
             handleReset();
+        }
     };
 
     return (
@@ -69,7 +85,8 @@ export default function ForgotPasswordPage() {
                     you will be able to choose a new password for your account.
                 </Typography>
                 <FormControl className="EmailInputText">
-                    <InputLabel htmlFor="standard-adornment-email">Email</InputLabel>
+                    <InputLabel
+                        htmlFor="standard-adornment-email">Email</InputLabel>
                     <Input
                         id="standard-adornment-email"
                         name="email"

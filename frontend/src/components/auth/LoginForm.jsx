@@ -10,8 +10,8 @@ import {
     Link as MaterialLink,
     TextField,
     Typography
-} from "@material-ui/core";
-import {Visibility, VisibilityOff} from "@material-ui/icons";
+} from "@mui/material";
+import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {getActiveProjectId} from "../../utils/ConfigurationStorage";
 import {handleSuccessfulLogin} from "../utils/AuthHelper";
 import {handleLoginErrors} from "../../utils/FetchHelper";

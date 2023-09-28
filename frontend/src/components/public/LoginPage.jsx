@@ -1,17 +1,31 @@
 import React, {useState} from "react";
 import "./LoginPage.css";
-import Button from "@mui/material/Button";
 import Logo from "../../images/databucket-logo.png";
-import {Input, InputAdornment, InputLabel, Paper} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
-import {getPathname, hasProject, hasSuperRole, hasToken, setPathname} from '../../utils/ConfigurationStorage';
+import {
+    Button,
+    FormControl,
+    IconButton,
+    Input,
+    InputAdornment,
+    InputLabel,
+    Link as MaterialLink,
+    Paper,
+    Typography
+} from "@mui/material";
+import {
+    getPathname,
+    hasProject,
+    hasSuperRole,
+    hasToken,
+    setPathname
+} from '../../utils/ConfigurationStorage';
 import {Redirect} from 'react-router-dom';
-import FormControl from "@material-ui/core/FormControl";
-import IconButton from "@material-ui/core/IconButton";
-import {Visibility, VisibilityOff} from "@material-ui/icons";
+import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {MessageBox} from "../utils/MessageBox";
-import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRouter";
-import MaterialLink from "@material-ui/core/Link";
+import {
+    getManagementProjectsPath,
+    getProjectDataPath
+} from "../../route/AppRouter";
 import {signIn} from "../utils/AuthHelper";
 
 const initialState = {
@@ -36,7 +50,8 @@ export default function LoginPage() {
         register,
         showPassword
     } = state;
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
 
     const onChange = e => {
         const {name, value} = e.target;
@@ -53,24 +68,34 @@ export default function LoginPage() {
 
     const handleSignIn = () => {
         signIn(username, password, null)
-            .then(value => setState(prevState => ({...prevState, ...value})))
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Login failed', message: error.message});
+        .then(value => setState(prevState => ({...prevState, ...value})))
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Login failed',
+                message: error.message
             });
+        });
     }
 
     const handleKeypress = e => {
-        if (e.key === 'Enter')
+        if (e.key === 'Enter') {
             handleSignIn();
+        }
     };
-
 
     const selectProject = (id) => {
         signIn({username, password, projectId: id, ...state})
-            .then(value => setState(prevState => ({...prevState, ...value})))
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Login failed', message: error.message});
+        .then(value => setState(prevState => ({...prevState, ...value})))
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Login failed',
+                message: error.message
             });
+        });
     }
 
     const getLoginPaper = () => {
@@ -80,7 +105,8 @@ export default function LoginPage() {
                     Login
                 </Typography>
                 <FormControl className="LoginInputText">
-                    <InputLabel htmlFor="standard-adornment-username">Username</InputLabel>
+                    <InputLabel
+                        htmlFor="standard-adornment-username">Username</InputLabel>
                     <Input
                         id="standard-adornment-username"
                         name="username"
@@ -91,7 +117,8 @@ export default function LoginPage() {
                     />
                 </FormControl>
                 <FormControl className="LoginInputText">
-                    <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
+                    <InputLabel
+                        htmlFor="standard-adornment-password">Password</InputLabel>
                     <Input
                         id="standard-adornment-password"
                         name="password"
@@ -107,7 +134,8 @@ export default function LoginPage() {
                                     onClick={handleClickShowPassword}
                                     onMouseDown={handleMouseDownPassword}
                                     size="large">
-                                    {showPassword ? <Visibility/> : <VisibilityOff/>}
+                                    {showPassword ? <Visibility/> :
+                                        <VisibilityOff/>}
                                 </IconButton>
                             </InputAdornment>
                         }
@@ -118,7 +146,8 @@ export default function LoginPage() {
                     variant="caption"
                     color="inherit"
                     onClick={() => {
-                        setState(prevState => ({...prevState, resetPassword: true}));
+                        setState(
+                            prevState => ({...prevState, resetPassword: true}));
                     }}
                 >
                     Forgot your password?
@@ -142,7 +171,8 @@ export default function LoginPage() {
                         component="button"
                         color="inherit"
                         onClick={() => {
-                            setState(prevState => ({...prevState, register: true}));
+                            setState(
+                                prevState => ({...prevState, register: true}));
                         }}
                     >
                         Don't have an account?
@@ -184,10 +214,10 @@ export default function LoginPage() {
                 return redirectTo("/change-password");
             case 3:
                 return (<Redirect
-                        to={{
-                            pathname: "/select-project",
-                            state: {projects}
-                        }}/>);
+                    to={{
+                        pathname: "/select-project",
+                        state: {projects}
+                    }}/>);
             // SelectProjectsPage({projects, selectProject})
             case 2:
                 const pathname = getPathname();

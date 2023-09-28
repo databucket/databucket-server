@@ -1,15 +1,16 @@
 import React, {useContext} from 'react';
 import PropTypes from "prop-types";
-import ListItem from "@mui/material/ListItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
+import {
+    Divider,
+    List,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem
+} from "@mui/material";
 import ShowGroupsIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
-import ListItemText from "@mui/material/ListItemText";
-import List from "@mui/material/List";
-import MenuItem from "@mui/material/MenuItem";
-import Menu from "@mui/material/Menu";
-import Divider from "@mui/material/Divider";
 import AccessContext from "../../context/access/AccessContext";
-import {ListItemButton} from "@mui/material";
 
 GroupMenuSelector.propTypes = {
     open: PropTypes.bool.isRequired // is the left list of buckets open?
@@ -36,26 +37,33 @@ export default function GroupMenuSelector(props) {
 
     const getSelectedName = () => {
         if (groups != null && groups.length > 0) {
-            if (props.open && activeGroup.name != null)
-                return activeGroup.name.length > 17 ? activeGroup.name.substring(0, 15) + "..." : activeGroup.name;
-            else
+            if (props.open && activeGroup.name != null) {
+                return activeGroup.name.length > 17
+                    ? activeGroup.name.substring(0, 15) + "..."
+                    : activeGroup.name;
+            } else {
                 return activeGroup.shortName;
+            }
         }
     }
 
     const getItemName = (name, shortName) => {
         if (name != null) {
             return `${shortName} - ${name}`;
-        } else
+        } else {
             return shortName;
+        }
     }
 
-    if (groups != null && groups.length > 0)
+    if (groups != null && groups.length > 0) {
         return (
             <div>
                 <List>
-                    <ListItemButton key={'key'} aria-controls="groups-menu" aria-haspopup="true" onClick={handleClick}>
-                        {props.open === true ? (<ListItemIcon><ShowGroupsIcon/></ListItemIcon>) : (<div/>)}
+                    <ListItemButton key={'key'} aria-controls="groups-menu"
+                                    aria-haspopup="true" onClick={handleClick}>
+                        {props.open === true ? (
+                            <ListItemIcon><ShowGroupsIcon/></ListItemIcon>) : (
+                            <div/>)}
                         <ListItemText primary={getSelectedName()}/>
                     </ListItemButton>
                 </List>
@@ -69,8 +77,8 @@ export default function GroupMenuSelector(props) {
                     PaperProps={{style: {minWidth: 100}}}
                 >
                     {groups.sort((a, b) => {
-                            return a.shortName > b.shortName ? 1 : -1
-                        }).map((group) => (
+                        return a.shortName > b.shortName ? 1 : -1
+                    }).map((group) => (
                         <MenuItem
                             key={group.id}
                             selected={group.id === activeGroup.id}
@@ -82,6 +90,7 @@ export default function GroupMenuSelector(props) {
                 </Menu>
             </div>
         );
-    else
+    } else {
         return (<div/>);
+    }
 }
