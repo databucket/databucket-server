@@ -10,7 +10,10 @@ import {
     getTableRowBackgroundColor,
     getUserIcon
 } from "../../utils/MaterialTableHelper";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
     convertNullValuesInObject,
@@ -20,12 +23,14 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import ResetPasswordIcon from "@mui/icons-material/VpnKey";
+import {
+    FilterList,
+    Refresh,
+    VpnKey as ResetPasswordIcon
+} from "@mui/icons-material";
 import SelectMultiRolesLookup from "../lookup/SelectMultiRolesLookup";
 import SelectProjectsDialog from "../dialogs/SelectProjectsDialog";
-import {useTheme} from "@mui/material/styles";
+import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import ResetPasswordDialog from "./ResetPasswordDialog";
 import RolesContext from "../../context/roles/RolesContext";
@@ -43,7 +48,6 @@ import {
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-
 
 const editRolesComponent = (roles) => props =>
     <SelectMultiRolesLookup rowData={props.rowData} roles={roles}

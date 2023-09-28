@@ -1,10 +1,7 @@
 import React, {useContext} from 'react';
-import {styled} from '@mui/material/styles';
-import IconButton from "@mui/material/IconButton";
+import {IconButton, styled, Tabs, Tooltip} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import Tabs from "@mui/material/Tabs";
 import AccessContext from "../../context/access/AccessContext";
-import {Tooltip} from "@mui/material";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 import StyledIcon from "../utils/StyledIcon";
 import {CustomTab} from "../common/CustomAppBar";

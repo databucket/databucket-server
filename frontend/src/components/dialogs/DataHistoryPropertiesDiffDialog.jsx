@@ -1,12 +1,17 @@
 import React, {useEffect, useState} from 'react'
-import {styled, useTheme} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import CloseIcon from '@mui/icons-material/Close';
-import CompareIcon from '@mui/icons-material/YoutubeSearchedFor';
+import {
+    Dialog,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    useTheme
+} from '@mui/material';
+import {
+    Close as CloseIcon,
+    YoutubeSearchedFor as CompareIcon
+} from '@mui/icons-material';
 import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -52,7 +57,8 @@ const DialogContent = MuiDialogContent;
 export default function DataHistoryPropertiesDiffDialog(props) {
 
     const theme = useTheme();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [state, setState] = useState({
         bucket: null,
         dataRowId: null,
@@ -79,40 +85,50 @@ export default function DataHistoryPropertiesDiffDialog(props) {
         const previousId = getPreviousId(state.history, state.selectedRow);
 
         let resultOk = true;
-        fetch(getDataHistoryPropertiesUrl(state.bucket, state.dataRowId, previousId, state.selectedRow.id), getGetOptions())
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(result => {
-                if (resultOk) {
-                    if (previousId > 0) {
-                        oValue = result.filter(d => (d.id === previousId))[0].properties;
-                        oValue = JSON.stringify(oValue, null, 2);
-                    }
-
-                    nValue = result.filter(d => (d.id === state.selectedRow.id))[0].properties;
-                    nValue = JSON.stringify(nValue, null, 2);
-                    setState({
-                        ...state,
-                        oldValue: oValue,
-                        newValue: nValue,
-                        open: true,
-                    });
-                }
+        fetch(getDataHistoryPropertiesUrl(state.bucket, state.dataRowId,
+            previousId, state.selectedRow.id), getGetOptions())
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(result => {
+            if (resultOk) {
+                if (previousId > 0) {
+                    oValue = result.filter(
+                        d => (d.id === previousId))[0].properties;
+                    oValue = JSON.stringify(oValue, null, 2);
+                }
+
+                nValue = result.filter(
+                    d => (d.id === state.selectedRow.id))[0].properties;
+                nValue = JSON.stringify(nValue, null, 2);
+                setState({
+                    ...state,
+                    oldValue: oValue,
+                    newValue: nValue,
+                    open: true,
+                });
+            }
+        });
     };
 
     const getPreviousId = (history, row) => {
         let result = -1;
         for (const element of history) {
             let obj = element;
-            if (obj.hasOwnProperty('properties') && obj.properties === true && obj.id !== row.id) {
+            if (obj.hasOwnProperty('properties') && obj.properties === true
+                && obj.id !== row.id) {
                 result = obj.id;
             }
-            if (obj.id === row.id)
+            if (obj.id === row.id) {
                 return result;
+            }
         }
     }
 

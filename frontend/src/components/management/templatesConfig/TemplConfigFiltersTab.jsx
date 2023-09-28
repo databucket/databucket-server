@@ -1,14 +1,19 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     getTemplatePageSizeOptions,
     getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
-import {getClassByUid, getObjectLengthStr, isItemChanged, validateItem} from "../../../utils/JsonHelper";
+import {
+    getClassByUid,
+    getObjectLengthStr,
+    isItemChanged,
+    validateItem
+} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnClass,
@@ -21,7 +26,8 @@ import {
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 import PropTypes from "prop-types";
 import {getClassesLookup} from "../../../utils/LookupHelper";
-import EditTemplateFilterRulesDialog from "../../dialogs/EditTemplateFilterRulesDialog";
+import EditTemplateFilterRulesDialog
+    from "../../dialogs/EditTemplateFilterRulesDialog";
 import {
     getTemplatesArtefacts,
     getTemplatesArtefactsEditable,

@@ -1,11 +1,16 @@
 import React from 'react';
-import {styled} from '@mui/material/styles';
+import {IconButton, styled, Tab, Tabs} from '@mui/material';
 import {Link, Route, Switch} from "react-router-dom";
-import {Tab, Tabs} from "@mui/material";
-import {getProjectDataPath, getProjectSettingsPath} from "../../route/AppRouter";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Cancel";
-import {getLastSettingsPageName, setLastSettingsPageName, setPathname} from "../../utils/ConfigurationStorage";
+import {
+    getProjectDataPath,
+    getProjectSettingsPath
+} from "../../route/AppRouter";
+import {Close as CloseIcon} from "@mui/icons-material";
+import {
+    getLastSettingsPageName,
+    setLastSettingsPageName,
+    setPathname
+} from "../../utils/ConfigurationStorage";
 import ProjectRoute from "../../route/ProjectRoute";
 import NotFoundPage from "../NotFoundPage";
 import GroupsTab from "./GroupsTab";
@@ -17,7 +22,10 @@ import EnumsTab from "./EnumsTab";
 import FiltersTab from "./FiltersTab";
 import ViewsTab from "./ViewsTab";
 import TasksTab from "./TasksTab";
-import {getSettingsTabsBackgroundColor, getSettingsTabsColor} from "../../utils/MaterialTableHelper";
+import {
+    getSettingsTabsBackgroundColor,
+    getSettingsTabsColor
+} from "../../utils/MaterialTableHelper";
 import TemplatesTab from "../settings/TemplatesTab";
 import SvgTab from "./SvgTab";
 import RolesProvider from "../../context/roles/RolesProvider";

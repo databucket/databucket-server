@@ -1,9 +1,8 @@
 import React, {useMemo, useState} from "react";
 import {getThemeName, saveThemeName} from "../../utils/ConfigurationStorage";
 import CustomThemeContext from "./CustomThemeContext";
-import {createTheme, ThemeProvider} from "@mui/material/styles";
+import {createTheme, ThemeProvider} from "@mui/material";
 import {getTheme} from "../../utils/Themes";
-
 
 const CustomThemeProvider = props => {
     const [mode, setMode] = useState(getThemeName());

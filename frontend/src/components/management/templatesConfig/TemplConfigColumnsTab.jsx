@@ -1,14 +1,19 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     getTemplatePageSizeOptions,
     getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
-import {getArrayLengthStr, getClassByUid, isItemChanged, validateItem} from "../../../utils/JsonHelper";
+import {
+    getArrayLengthStr,
+    getClassByUid,
+    isItemChanged,
+    validateItem
+} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnClass,

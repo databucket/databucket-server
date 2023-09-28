@@ -1,14 +1,18 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     getTemplatePageSizeOptions,
     getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
-import {getClassByUid, isItemChanged, validateItem} from "../../../utils/JsonHelper";
+import {
+    getClassByUid,
+    isItemChanged,
+    validateItem
+} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnBuckets,
@@ -31,7 +35,8 @@ import {
     templateArtefactModifyingEnrichment
 } from "./_TemplUtils";
 import {getClassesLookup} from "../../../utils/LookupHelper";
-import TaskEditConfigDialogTemplate from "../../dialogs/TaskEditConfigDialogTemplate";
+import TaskEditConfigDialogTemplate
+    from "../../dialogs/TaskEditConfigDialogTemplate";
 
 TemplConfigTasksTab.propTypes = {
     template: PropTypes.object.isRequired,

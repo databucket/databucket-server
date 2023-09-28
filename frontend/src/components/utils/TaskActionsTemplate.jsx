@@ -1,13 +1,15 @@
 import React from "react";
-import { styled } from '@mui/material/styles';
-import FormControl from "@mui/material/FormControl";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
-import FormGroup from "@mui/material/FormGroup";
-import Checkbox from "@mui/material/Checkbox";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+import {
+    Checkbox,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
+    styled
+} from '@mui/material';
 import PropTypes from "prop-types";
 import ActionPropertiesTableTemplate from "./ActionPropertiesTableTemplate";
 
@@ -41,7 +43,6 @@ TaskActionsTemplate.propTypes = {
 
 export default function TaskActionsTemplate(props) {
 
-
     const actionsPropertiesContentRef = React.useRef(null);
 
     const handleActionTypeChange = (event) => {
@@ -49,18 +50,29 @@ export default function TaskActionsTemplate(props) {
     }
 
     const handleActionSetTag = (event) => {
-        props.onChange({...props.actions, setTag: event.target.checked, tagId: props.tags[0].id});
+        props.onChange({
+            ...props.actions,
+            setTag: event.target.checked,
+            tagId: props.tags[0].id
+        });
     }
 
     const handleActionSetReserved = (event) => {
-        if (event.target.checked === true && props.actions.reserved == null)
-            props.onChange({...props.actions, setReserved: event.target.checked, reserved: true});
-        else
-            props.onChange({...props.actions, setReserved: event.target.checked});
+        if (event.target.checked === true && props.actions.reserved == null) {
+            props.onChange({
+                ...props.actions,
+                setReserved: event.target.checked,
+                reserved: true
+            });
+        } else {
+            props.onChange(
+                {...props.actions, setReserved: event.target.checked});
+        }
     }
 
     const handleActionReserveChange = (event) => {
-        props.onChange({...props.actions, reserved: (event.target.value === 'true')});
+        props.onChange(
+            {...props.actions, reserved: (event.target.value === 'true')});
     }
 
     const handleTagChange = (event) => {
@@ -75,7 +87,8 @@ export default function TaskActionsTemplate(props) {
         <Root style={{height: '95%'}}>
             <div className={classes.settingsContainer}>
                 <FormControl component="fieldset">
-                    <RadioGroup row value={props.actions.type || ''} onChange={handleActionTypeChange}>
+                    <RadioGroup row value={props.actions.type || ''}
+                                onChange={handleActionTypeChange}>
                         <FormControlLabel
                             value="remove"
                             control={<Radio/>}
@@ -88,69 +101,80 @@ export default function TaskActionsTemplate(props) {
                         />
                     </RadioGroup>
                     {props.actions.type === 'modify' &&
-                    <div>
-                        {props.tags != null && props.tags.length > 0 &&
-                        <FormGroup row>
-                            <FormControlLabel
-                                label="Set tag"
-                                control={<Checkbox checked={props.actions.setTag || false} onChange={handleActionSetTag}/>}
-                            />
-                            {props.actions.setTag === true &&
-                            <FormControlLabel
-                                label=''
-                                labelPlacement="start"
-                                control={
-                                    <Select
-                                        id="tag-select"
-                                        onChange={handleTagChange}
-                                        value={props.actions.tagId}
-                                    >
-                                        {props.tags.map(tag => (
-                                            <MenuItem key={tag.id} value={tag.id}>
-                                                {tag.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
+                        <div>
+                            {props.tags != null && props.tags.length > 0 &&
+                                <FormGroup row>
+                                    <FormControlLabel
+                                        label="Set tag"
+                                        control={<Checkbox
+                                            checked={props.actions.setTag
+                                                || false}
+                                            onChange={handleActionSetTag}/>}
+                                    />
+                                    {props.actions.setTag === true &&
+                                        <FormControlLabel
+                                            label=''
+                                            labelPlacement="start"
+                                            control={
+                                                <Select
+                                                    id="tag-select"
+                                                    onChange={handleTagChange}
+                                                    value={props.actions.tagId}
+                                                >
+                                                    {props.tags.map(tag => (
+                                                        <MenuItem key={tag.id}
+                                                                  value={tag.id}>
+                                                            {tag.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            }
+                                        />
+                                    }
+                                </FormGroup>
+                            }
+                            <FormGroup row>
+                                <FormControlLabel
+                                    label="Set reserved"
+                                    control={<Checkbox
+                                        checked={props.actions.setReserved
+                                            || false}
+                                        onChange={handleActionSetReserved}/>}
+                                />
+                                {props.actions.setReserved === true &&
+                                    <RadioGroup row
+                                                value={props.actions.reserved
+                                                    || false}
+                                                onChange={handleActionReserveChange}>
+                                        <FormControlLabel
+                                            value={true}
+                                            control={<Radio/>}
+                                            label="True"
+                                        />
+                                        <FormControlLabel
+                                            value={false}
+                                            control={<Radio/>}
+                                            label="False"
+                                        />
+                                    </RadioGroup>
                                 }
-                            />
-                            }
-                        </FormGroup>
-                        }
-                        <FormGroup row>
-                            <FormControlLabel
-                                label="Set reserved"
-                                control={<Checkbox checked={props.actions.setReserved || false} onChange={handleActionSetReserved}/>}
-                            />
-                            {props.actions.setReserved === true &&
-                            <RadioGroup row value={props.actions.reserved || false} onChange={handleActionReserveChange}>
-                                <FormControlLabel
-                                    value={true}
-                                    control={<Radio/>}
-                                    label="True"
-                                />
-                                <FormControlLabel
-                                    value={false}
-                                    control={<Radio/>}
-                                    label="False"
-                                />
-                            </RadioGroup>
-                            }
-                        </FormGroup>
-                    </div>
+                            </FormGroup>
+                        </div>
                     }
                 </FormControl>
             </div>
             {props.actions.type === 'modify' &&
-            <div ref={actionsPropertiesContentRef} className={classes.propertiesContainer}>
-                <ActionPropertiesTableTemplate
-                    data={props.actions.properties}
-                    properties={props.properties}
-                    onChange={onActionPropertiesChange}
-                    pageSize={props.pageSize}
-                    parentContentRef={actionsPropertiesContentRef}
-                    enums={props.enums}
-                />
-            </div>
+                <div ref={actionsPropertiesContentRef}
+                     className={classes.propertiesContainer}>
+                    <ActionPropertiesTableTemplate
+                        data={props.actions.properties}
+                        properties={props.properties}
+                        onChange={onActionPropertiesChange}
+                        pageSize={props.pageSize}
+                        parentContentRef={actionsPropertiesContentRef}
+                        enums={props.enums}
+                    />
+                </div>
             }
         </Root>
     );

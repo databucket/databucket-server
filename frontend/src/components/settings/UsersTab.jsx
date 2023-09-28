@@ -9,7 +9,10 @@ import {
     getTableRowBackgroundColor,
     getUserIcon
 } from "../../utils/MaterialTableHelper";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
     convertNullValuesInObject,
@@ -19,9 +22,8 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import RolesContext from "../../context/roles/RolesContext";
 import UsersContext from "../../context/users/UsersContext";

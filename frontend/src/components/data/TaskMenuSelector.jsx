@@ -1,8 +1,6 @@
 import React, {useState} from 'react';
-import {styled} from '@mui/material/styles';
 import PropTypes from "prop-types";
-import MenuItem from "@mui/material/MenuItem";
-import {IconButton, Menu, Tooltip} from "@mui/material";
+import {IconButton, Menu, MenuItem, styled, Tooltip} from "@mui/material";
 
 const PREFIX = 'TaskMenuSelector';
 

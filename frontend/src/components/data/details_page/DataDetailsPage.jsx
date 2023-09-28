@@ -8,12 +8,16 @@ import {
     getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
-import {useTheme} from "@mui/material/styles";
 import TagsContext from "../../../context/tags/TagsContext";
-import {Divider, TextField, Tooltip} from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
+import {
+    Button,
+    Divider,
+    Grid,
+    IconButton,
+    TextField,
+    Tooltip,
+    useTheme
+} from "@mui/material";
 import {debounce} from "../../utils/Debouncer";
 import {Link, useParams} from "react-router-dom";
 import {getDataByIdUrl2} from "../../../utils/UrlBuilder";
@@ -26,7 +30,7 @@ import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
 import "brace/theme/monokai";
-import CloseIcon from "@mui/icons-material/Cancel";
+import {Close as CloseIcon} from "@mui/icons-material";
 import {setPathname} from "../../../utils/ConfigurationStorage";
 // import "brace/theme/eclipse";
 

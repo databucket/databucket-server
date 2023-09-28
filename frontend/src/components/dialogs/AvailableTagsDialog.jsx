@@ -1,9 +1,14 @@
 import React, {useState} from 'react';
-import {styled} from '@mui/material/styles';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import {ListItem, ListItemText, ListSubheader, Tooltip} from "@mui/material";
-import List from "@mui/material/List";
+import {
+    IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    ListSubheader,
+    Menu,
+    styled,
+    Tooltip
+} from '@mui/material';
 
 const PREFIX = 'AvailableTagsDialog';
 

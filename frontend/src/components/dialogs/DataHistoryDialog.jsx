@@ -1,20 +1,28 @@
 import React, {createRef, useEffect, useState} from 'react';
-import {styled, useTheme} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import MuiDialogActions from '@mui/material/DialogActions';
-import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
+import {
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
+import {
+    Close as CloseIcon,
+    Lock as LockedIcon,
+    LockOpen as UnlockedIcon
+} from '@mui/icons-material';
 import MaterialTable from 'material-table';
-import LockedIcon from '@mui/icons-material/Lock';
-import UnlockedIcon from '@mui/icons-material/LockOpen';
 import DataHistoryPropertiesDiffDialog from './DataHistoryPropertiesDiffDialog';
 import PropTypes from "prop-types";
 import {createTagLookup} from "../../utils/JsonHelper";
-import {getDeleteOptions, getTableHeaderBackgroundColor} from "../../utils/MaterialTableHelper";
-import {Tooltip} from "@mui/material";
+import {
+    getDeleteOptions,
+    getTableHeaderBackgroundColor
+} from "../../utils/MaterialTableHelper";
 import {getClearDataHistoryByIdUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";

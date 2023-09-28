@@ -1,10 +1,7 @@
 import React, {useContext, useState} from 'react';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import MenuItem from "@mui/material/MenuItem";
+import {IconButton, Menu, MenuItem, Tooltip} from '@mui/material';
 import AccessContext from "../../context/access/AccessContext";
 import {getActiveProjectId} from "../../utils/ConfigurationStorage";
-import {Tooltip} from "@mui/material";
 import {Link} from "react-router-dom";
 import {getGivenProjectDataPath} from "../../route/AppRouter";
 

@@ -1,31 +1,49 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {styled} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import MuiDialogActions from '@mui/material/DialogActions';
-import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
+import {
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    Grid,
+    IconButton,
+    styled,
+    Tab,
+    Tabs,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon} from '@mui/icons-material';
 import PropTypes from "prop-types";
-import {CircularProgress, Tabs} from "@mui/material";
-import {getDeleteOptions, getPostOptions, getPutOptions} from "../../utils/MaterialTableHelper";
-import Tab from "@mui/material/Tab";
+import {
+    getDeleteOptions,
+    getPostOptions,
+    getPutOptions
+} from "../../utils/MaterialTableHelper";
 import {MessageBox} from "../utils/MessageBox";
 import TaskActions from "../utils/TaskActions";
 import PropertiesTable from "../utils/PropertiesTable";
 import {getBucketTags, getBucketTasks} from "../data/BucketDataTableHelper";
 import EnumsProvider from "../../context/enums/EnumsProvider";
-import Button from "@mui/material/Button";
 import TaskMenuSelector from "../data/TaskMenuSelector";
 import {handleErrors} from "../../utils/FetchHelper";
-import {getClearDataHistoryByRulesUrl, getDataUrl} from "../../utils/UrlBuilder";
+import {
+    getClearDataHistoryByRulesUrl,
+    getDataUrl
+} from "../../utils/UrlBuilder";
 import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
 import {Query, Utils as QbUtils} from "@react-awesome-query-builder/mui";
-import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
+import {
+    createConfig,
+    getInitialTree,
+    renderBuilder,
+    renderResult
+} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
-import {getTaskExecutionDialogSize, setTaskExecutionDialogSize} from "../../utils/ConfigurationStorage";
-import Grid from "@mui/material/Grid";
+import {
+    getTaskExecutionDialogSize,
+    setTaskExecutionDialogSize
+} from "../../utils/ConfigurationStorage";
 import {debounce} from "../utils/Debouncer";
 
 const PREFIX = 'TaskExecutionDialog';

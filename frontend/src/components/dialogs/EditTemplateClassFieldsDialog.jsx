@@ -1,17 +1,18 @@
 import React, {useContext, useEffect, useState} from 'react';
-import { styled } from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Tooltip from "@mui/material/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import Button from "@mui/material/Button";
 import PropertiesTable from "../utils/PropertiesTable";
-import MuiDialogActions from "@mui/material/DialogActions";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import {getTemplatesArtefacts} from "../management/templatesConfig/_TemplUtils";
 

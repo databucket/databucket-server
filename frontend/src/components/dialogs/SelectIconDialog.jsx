@@ -1,22 +1,30 @@
-import React, {forwardRef, useContext, useEffect, useRef, useState} from 'react';
+import React, {
+    forwardRef,
+    useContext,
+    useEffect,
+    useRef,
+    useState
+} from 'react';
 import PropTypes from 'prop-types';
-import Dialog from '@mui/material/Dialog';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
+import {
+    Button,
+    Dialog,
+    Divider,
+    Grid,
+    IconButton,
+    Link,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
 import {iconsNames} from "../utils/AvailableIcons";
-import {TextField} from "@mui/material";
-import Grid from "@mui/material/Grid";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
-import Link from "@mui/material/Link";
 import StyledIconButton from "../utils/StyledIconButton";
 import {getButtonColor} from "../../utils/MaterialTableHelper";
-import {useTheme} from "@mui/material/styles";
 import SvgContext from "../../context/svgs/SvgContext";
 import {MessageBox} from "../utils/MessageBox";
 import {parseCustomSvg} from "../utils/SvgHelper";
 import {MuiColorInput} from 'mui-color-input'
-import Typography from "@mui/material/Typography";
 import {DarkTheme, LightTheme} from "../../utils/Themes";
 import StyledIcon from "../utils/StyledIcon";
 

@@ -1,22 +1,23 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {styled} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Tooltip from "@mui/material/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tab,
+    Tabs,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import Button from "@mui/material/Button";
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getColumnMapper} from "../../utils/NullValueMappers";
-import {Tabs} from "@mui/material";
-import Tab from "@mui/material/Tab";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
 import ColumnsTable from "../utils/ColumnsTable";
-import MuiDialogActions from "@mui/material/DialogActions";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import {getTemplatesArtefacts} from "../management/templatesConfig/_TemplUtils";
 

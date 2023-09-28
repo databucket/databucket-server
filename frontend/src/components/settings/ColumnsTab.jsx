@@ -1,9 +1,11 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -42,27 +44,37 @@ export default function ColumnsTab() {
 
     const theme = useTheme();
     const tableRef = React.createRef();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
     const classesContext = useContext(ClassesContext);
     const {classes, fetchClasses, classesLookup} = classesContext;
     const columnsContext = useContext(ColumnsContext);
-    const {columns, fetchColumns, addColumns, editColumns, removeColumns} = columnsContext;
-    const changeableFields = ['name', 'description', 'configuration', 'classId'];
+    const {
+        columns,
+        fetchColumns,
+        addColumns,
+        editColumns,
+        removeColumns
+    } = columnsContext;
+    const changeableFields = ['name', 'description', 'configuration',
+        'classId'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
     useEffect(() => {
-        if (classes == null)
+        if (classes == null) {
             fetchClasses();
+        }
     }, [classes, fetchClasses]);
 
     useEffect(() => {
-        if (columns == null)
+        if (columns == null) {
             fetchColumns();
+        }
     }, [columns, fetchColumns]);
 
     const onChangeRowsPerPage = (pageSize) => {
@@ -72,15 +84,21 @@ export default function ColumnsTab() {
 
     const cloneItem = (rowData) => {
         fetch(getBaseUrl('columns'), getPostOptions(rowData))
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-            })
-            .then((columns) => {
-                if (columns != null) {
-                    addColumns(convertNullValuesInObject(columns, getColumnsMapper()));
-                }
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+        })
+        .then((columns) => {
+            if (columns != null) {
+                addColumns(
+                    convertNullValuesInObject(columns, getColumnsMapper()));
+            }
+        });
     }
 
     return (
@@ -100,15 +118,19 @@ export default function ColumnsTab() {
                         searchable: false,
                         sorting: false,
                         initialEditValue: {fields: [], columns: []},
-                        render: rowData => getArrayLengthStr(rowData['configuration']['columns']),
+                        render: rowData => getArrayLengthStr(
+                            rowData['configuration']['columns']),
                         editComponent: props => (
                             <EditColumnsDialog
-                                configuration={props.rowData.configuration != null ? props.rowData.configuration : {
+                                configuration={props.rowData.configuration
+                                != null ? props.rowData.configuration : {
                                     fields: [],
                                     columns: []
                                 }}
-                                dataClass={getClassById(classes, props.rowData.classId)}
-                                name={props.rowData.name != null ? props.rowData.name : ''}
+                                dataClass={getClassById(classes,
+                                    props.rowData.classId)}
+                                name={props.rowData.name != null
+                                    ? props.rowData.name : ''}
                                 onChange={props.onChange}
                             />
                         )
@@ -130,10 +152,15 @@ export default function ColumnsTab() {
                     filtering: filtering,
                     debounceInterval: 700,
                     padding: 'dense',
-                    headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    headerStyle: {
+                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                    },
                     maxBodyHeight: getSettingsTableHeight(),
                     minBodyHeight: getSettingsTableHeight(),
-                    rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                    rowStyle: rowData => ({
+                        backgroundColor: getTableRowBackgroundColor(rowData,
+                            theme)
+                    })
                 }}
                 components={{
                     Container: props => <div {...props} />
@@ -160,7 +187,8 @@ export default function ColumnsTab() {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let message = validateItem(newData, fieldsSpecification);
+                            let message = validateItem(newData,
+                                fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -172,23 +200,32 @@ export default function ColumnsTab() {
                                 return;
                             }
 
-                            fetch(getBaseUrl('columns'), getPostOptions(newData))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    reject();
-                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                })
-                                .then((columns) => {
-                                    if (columns != null) {
-                                        addColumns(convertNullValuesInObject(columns, getColumnsMapper()));
-                                        resolve();
-                                    }
+                            fetch(getBaseUrl('columns'),
+                                getPostOptions(newData))
+                            .then(handleErrors)
+                            .catch(error => {
+                                reject();
+                                setMessageBox({
+                                    open: true,
+                                    severity: 'error',
+                                    title: 'Error',
+                                    message: error
                                 });
+                            })
+                            .then((columns) => {
+                                if (columns != null) {
+                                    addColumns(
+                                        convertNullValuesInObject(columns,
+                                            getColumnsMapper()));
+                                    resolve();
+                                }
+                            });
                         }),
 
                     onRowUpdate: (newData, oldData) =>
                         new Promise((resolve, reject) => {
-                            if (!isItemChanged(oldData, newData, changeableFields)) {
+                            if (!isItemChanged(oldData, newData,
+                                changeableFields)) {
                                 setMessageBox({
                                     open: true,
                                     severity: 'info',
@@ -199,7 +236,8 @@ export default function ColumnsTab() {
                                 return;
                             }
 
-                            let message = validateItem(newData, fieldsSpecification);
+                            let message = validateItem(newData,
+                                fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -212,49 +250,59 @@ export default function ColumnsTab() {
                             }
 
                             fetch(getBaseUrl('columns'), getPutOptions(newData))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                    reject();
-                                })
-                                .then((columns) => {
-                                    if (columns != null) {
-                                        editColumns(convertNullValuesInObject(columns, getColumnsMapper()));
-                                        resolve();
-                                    }
+                            .then(handleErrors)
+                            .catch(error => {
+                                setMessageBox({
+                                    open: true,
+                                    severity: 'error',
+                                    title: 'Error',
+                                    message: error
                                 });
+                                reject();
+                            })
+                            .then((columns) => {
+                                if (columns != null) {
+                                    editColumns(
+                                        convertNullValuesInObject(columns,
+                                            getColumnsMapper()));
+                                    resolve();
+                                }
+                            });
                         }),
 
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
                                 let e = false;
-                                fetch(getBaseUrl(`columns/${oldData.id}`), getDeleteOptions())
-                                    .then(handleErrors)
-                                    .catch(error => {
-                                        e = true;
-                                        if (error.includes('already used by items'))
-                                            setMessageBox({
-                                                open: true,
-                                                severity: 'warning',
-                                                title: 'Item can not be removed',
-                                                message: error
-                                            });
-                                        else
-                                            setMessageBox({
-                                                open: true,
-                                                severity: 'error',
-                                                title: 'Error',
-                                                message: error
-                                            });
-                                        reject();
-                                    })
-                                    .then(() => {
-                                        if (!e) {
-                                            removeColumns(oldData.id);
-                                            resolve();
-                                        }
-                                    });
+                                fetch(getBaseUrl(`columns/${oldData.id}`),
+                                    getDeleteOptions())
+                                .then(handleErrors)
+                                .catch(error => {
+                                    e = true;
+                                    if (error.includes(
+                                        'already used by items')) {
+                                        setMessageBox({
+                                            open: true,
+                                            severity: 'warning',
+                                            title: 'Item can not be removed',
+                                            message: error
+                                        });
+                                    } else {
+                                        setMessageBox({
+                                            open: true,
+                                            severity: 'error',
+                                            title: 'Error',
+                                            message: error
+                                        });
+                                    }
+                                    reject();
+                                })
+                                .then(() => {
+                                    if (!e) {
+                                        removeColumns(oldData.id);
+                                        resolve();
+                                    }
+                                });
 
                             }, 100);
                         }),

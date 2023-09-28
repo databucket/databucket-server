@@ -16,7 +16,7 @@ import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable, {MTableEditField} from "material-table";
 import React, {useState} from "react";
-import {useTheme} from "@mui/material/styles";
+import {useTheme} from "@mui/material";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
 import moment from 'moment';
@@ -34,7 +34,8 @@ export default function ActionPropertiesTableTemplate(props) {
 
     const theme = useTheme();
     const tableRef = React.createRef();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const data = convertPropertiesDates(props.data, props.properties);
     const properties = props.properties;
     const changeableFields = ['uuid', 'action', 'title', 'value'];
@@ -53,8 +54,9 @@ export default function ActionPropertiesTableTemplate(props) {
     const getInitialProperty = () => {
         if (properties.length > 0) {
             return properties[0].uuid;
-        } else
+        } else {
             return 'none';
+        }
     }
 
     const isEnumValue = (value, property) => {
@@ -64,34 +66,43 @@ export default function ActionPropertiesTableTemplate(props) {
     }
 
     const getInitialValue = (value, property) => {
-        if (['date', 'datetime', 'time'].includes(property.type) && !(value instanceof Date)) {
+        if (['date', 'datetime', 'time'].includes(property.type) && !(value
+            instanceof Date)) {
             return new Date();
         } else if (property.type === 'numeric' && !Number.isFinite(value)) {
             return null;
-        } else if (property.type === 'boolean' && !(value === true || value === false)) {
+        } else if (property.type === 'boolean' && !(value === true || value
+            === false)) {
             return false;
-        } else if (property.type === 'string' && !(typeof value === 'string' || value instanceof String)) {
+        } else if (property.type === 'string' && !(typeof value === 'string'
+            || value instanceof String)) {
             return '';
-        } else if (property.type === 'select' && (value == null || !isEnumValue(value, property))) {
+        } else if (property.type === 'select' && (value == null || !isEnumValue(
+            value, property))) {
             const enumDef = getEnumDef(property);
             return enumDef.items[0].value;
-        } else
+        } else {
             return value;
+        }
     }
 
     const getPropertiesLookup = (properties) => {
-        if (properties.length > 0)
-            return properties.reduce((obj, item) => ({...obj, [item['uuid']]: item.title}), {});
-        else
+        if (properties.length > 0) {
+            return properties.reduce(
+                (obj, item) => ({...obj, [item['uuid']]: item.title}), {});
+        } else {
             return {none: '- none -'};
+        }
     }
 
     const getEnumLookup = (property) => {
         if (property.type === 'select') {
             const enumDef = getEnumDef(property);
-            return enumDef.items.reduce((obj, item) => ({...obj, [item['value']]: item.text}), {});
-        } else
+            return enumDef.items.reduce(
+                (obj, item) => ({...obj, [item['value']]: item.text}), {});
+        } else {
             return null;
+        }
     }
 
     const getEnumDef = (property) => {
@@ -106,33 +117,37 @@ export default function ActionPropertiesTableTemplate(props) {
             return moment(value).format('DD.MM.yyyy');
         } else if (property.type === 'time') {
             return moment(value).format('HH:mm:ss');
-        } else
+        } else {
             return value.toString();
+        }
     }
 
     const validateValue = (newData) => {
         if (newData.action === 'setValue' && newData.value == null) {
             return `Incorrect value! `;
-        } else
+        } else {
             return null;
+        }
     }
 
     const validatePropertyDuplicates = (newData) => {
         if (data.map(item => item.uuid).includes(newData.uuid)) {
             return `Property can not be duplicated! `;
-        } else
+        } else {
             return null;
+        }
     }
 
     const getEditable = () => {
         let editable = {};
 
-        if (properties.length > 0)
+        if (properties.length > 0) {
             editable = {
                 ...editable,
                 onRowAdd: newData =>
                     new Promise((resolve, reject) => {
-                        let message = validateItem(newData, fieldsSpecification);
+                        let message = validateItem(newData,
+                            fieldsSpecification);
                         let message2 = validateValue(newData);
                         let message3 = validatePropertyDuplicates(newData);
 
@@ -151,6 +166,7 @@ export default function ActionPropertiesTableTemplate(props) {
                         resolve();
                     })
             };
+        }
 
         editable = {
             ...editable,
@@ -182,8 +198,9 @@ export default function ActionPropertiesTableTemplate(props) {
                     }
 
                     const updated = data.map(column => {
-                        if (column.tableData.id === oldData.tableData.id)
+                        if (column.tableData.id === oldData.tableData.id) {
                             return newData;
+                        }
                         return column;
                     });
                     setData(updated);
@@ -195,7 +212,8 @@ export default function ActionPropertiesTableTemplate(props) {
             ...editable,
             onRowDelete: oldData =>
                 new Promise((resolve) => {
-                    setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
+                    setData(data.filter(column => column.tableData.id
+                        !== oldData.tableData.id));
                     resolve();
                 })
         };
@@ -212,7 +230,8 @@ export default function ActionPropertiesTableTemplate(props) {
                     {
                         title: '#',
                         cellStyle: {width: '1%'},
-                        render: (rowData) => rowData ? rowData.tableData.id + 1 : ''
+                        render: (rowData) => rowData ? rowData.tableData.id + 1
+                            : ''
                     },
                     {
                         title: 'Property',
@@ -220,12 +239,17 @@ export default function ActionPropertiesTableTemplate(props) {
                         type: 'string',
                         initialEditValue: getInitialProperty(properties),
                         lookup: getPropertiesLookup(properties),
-                        render: rowData => getPropertyTitle(properties, rowData.uuid)
+                        render: rowData => getPropertyTitle(properties,
+                            rowData.uuid)
                     },
                     {
                         title: 'Action',
                         field: 'action',
-                        lookup: {'remove': 'Remove', 'setValue': 'Set value', 'setNull': 'Set null'},
+                        lookup: {
+                            'remove': 'Remove',
+                            'setValue': 'Set value',
+                            'setNull': 'Set null'
+                        },
                         initialEditValue: 'setValue'
                     },
                     {
@@ -233,15 +257,20 @@ export default function ActionPropertiesTableTemplate(props) {
                         field: 'value',
                         type: 'string',
                         render: rowData => {
-                            if (rowData.action === 'setValue')
-                                return renderValue(getPropertyByUuid(properties, rowData.uuid), rowData.value)
-                            else
+                            if (rowData.action === 'setValue') {
+                                return renderValue(
+                                    getPropertyByUuid(properties, rowData.uuid),
+                                    rowData.value)
+                            } else {
                                 return '';
+                            }
                         },
                         editComponent: props => {
                             if (props.rowData.action === 'setValue') {
-                                const property = getPropertyByUuid(properties, props.rowData.uuid);
-                                props.rowData.value = getInitialValue(props.rowData.value, property);
+                                const property = getPropertyByUuid(properties,
+                                    props.rowData.uuid);
+                                props.rowData.value = getInitialValue(
+                                    props.rowData.value, property);
                                 return (
                                     <MTableEditField
                                         value={props.rowData.value}
@@ -254,8 +283,9 @@ export default function ActionPropertiesTableTemplate(props) {
                                         onChange={props.onChange}
                                     />
                                 )
-                            } else
+                            } else {
                                 return (<div/>);
+                            }
                         }
                     }
                 ]}
@@ -270,8 +300,15 @@ export default function ActionPropertiesTableTemplate(props) {
                     padding: 'dense',
                     minBodyHeight: getBodyHeight(),
                     maxBodyHeight: getBodyHeight(),
-                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                    headerStyle: {
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                    },
+                    rowStyle: rowData => ({
+                        backgroundColor: getTableRowBackgroundColor(rowData,
+                            theme)
+                    })
                 }}
                 components={{
                     Container: props => <div {...props} />
@@ -281,13 +318,15 @@ export default function ActionPropertiesTableTemplate(props) {
                     rowData => ({
                         icon: ArrowDropDown,
                         tooltip: 'Move down',
-                        onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(
+                            moveDown(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === data.length - 1)
                     }),
                     rowData => ({
                         icon: ArrowDropUp,
                         tooltip: 'Move up',
-                        onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(
+                            moveUp(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === 0)
                     })
                 ]}

@@ -1,15 +1,18 @@
 import React from "react";
-import { styled } from '@mui/material/styles';
-import FormControl from "@mui/material/FormControl";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
-import FormGroup from "@mui/material/FormGroup";
-import Checkbox from "@mui/material/Checkbox";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+import {
+    Checkbox,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
+    styled
+} from '@mui/material';
 import PropTypes from "prop-types";
 import ActionPropertiesTable from "./ActionPropertiesTable";
+
 const PREFIX = 'TaskActions';
 
 const classes = {

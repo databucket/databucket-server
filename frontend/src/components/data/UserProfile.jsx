@@ -1,17 +1,20 @@
 import React, {useContext, useState} from 'react';
-import IconButton from '@mui/material/IconButton';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import Menu from '@mui/material/Menu';
-import Typography from "@mui/material/Typography";
-import SetLightTheme from "@mui/icons-material/Brightness7";
-import SetDarkTheme from "@mui/icons-material/Brightness4";
+import {
+    AccountCircle,
+    Brightness4 as SetDarkTheme,
+    Brightness7 as SetLightTheme
+} from '@mui/icons-material';
 import {getUsername} from "../../utils/ConfigurationStorage";
-import Button from "@mui/material/Button";
-import {Tooltip} from "@mui/material";
-import MenuItem from "@mui/material/MenuItem";
+import {
+    Button,
+    IconButton,
+    Menu,
+    MenuItem,
+    Tooltip,
+    Typography,
+    useTheme
+} from "@mui/material";
 import CustomThemeContext from "../../context/theme/CustomThemeContext";
-import {useTheme} from "@mui/material/styles";
-
 
 export default function UserProfile(props) {
     let currentMode = useTheme().palette.mode;

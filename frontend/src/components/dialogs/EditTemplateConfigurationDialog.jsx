@@ -1,15 +1,16 @@
 import React, {useEffect, useState} from 'react';
-import { styled } from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Tooltip from "@mui/material/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import Button from "@mui/material/Button";
 import TemplateTabs from "../management/templatesConfig/_TemplConfigTabs";
 
 const PREFIX = 'EditTemplateConfigurationDialog';
@@ -39,7 +40,7 @@ const Root = styled('div')((
 }));
 
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const {children, onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
@@ -57,7 +58,6 @@ const DialogTitle = ((props) => {
 });
 
 const DialogContent = MuiDialogContent;
-
 
 EditTemplateConfigurationDialog.propTypes = {
     name: PropTypes.string.isRequired,

@@ -1,9 +1,15 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {
+    FilterList,
+    Refresh,
+    ViewStream as CloneIcon
+} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -14,7 +20,12 @@ import {
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {convertNullValuesInObject, getClassById, isItemChanged, validateItem} from "../../utils/JsonHelper";
+import {
+    convertNullValuesInObject,
+    getClassById,
+    isItemChanged,
+    validateItem
+} from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnBuckets,
@@ -31,10 +42,11 @@ import TasksContext from "../../context/tasks/TasksContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import ClassesContext from "../../context/classes/ClassesContext";
-import TaskEditConfigDialog, {getActionsType} from "../dialogs/TaskEditConfigDialog";
+import TaskEditConfigDialog, {
+    getActionsType
+} from "../dialogs/TaskEditConfigDialog";
 import FiltersContext from "../../context/filters/FiltersContext";
 import TagsContext from "../../context/tags/TagsContext";
-import CloneIcon from "@mui/icons-material/ViewStream";
 
 export default function TasksTab() {
 

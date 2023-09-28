@@ -1,15 +1,22 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {styled, useTheme} from '@mui/material/styles';
-import MuiDrawer from '@mui/material/Drawer';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import {
+    Box,
+    Divider,
+    Drawer as MuiDrawer,
+    IconButton,
+    List,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    styled,
+    Toolbar,
+    useTheme
+} from '@mui/material';
+import {
+    ChevronLeft as ChevronLeftIcon,
+    ChevronRight as ChevronRightIcon,
+    Menu as MenuIcon
+} from '@mui/icons-material';
 import UserProfile from "./UserProfile";
 import {
     getLastManagementPageName,
@@ -39,9 +46,14 @@ import {handleErrors} from "../../utils/FetchHelper";
 import {getButtonColor, getPostOptions} from "../../utils/MaterialTableHelper";
 import {getBaseUrl, getSwaggerDocPath} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
-import {CenteredWaitingCircularProgress} from "../utils/CenteredWaitingCircularProgress";
-import {CustomAppBar, drawerWidth} from "../common/CustomAppBar";
-import {Box, ListItemButton} from "@mui/material";
+import {
+    CenteredWaitingCircularProgress
+} from "../utils/CenteredWaitingCircularProgress";
+import {
+    CustomAppBar,
+    drawerClosedWidth,
+    drawerWidth
+} from "../common/CustomAppBar";
 
 const openedMixin = (theme) => ({
     width: drawerWidth,
@@ -70,7 +82,9 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
             duration: theme.transitions.duration.leavingScreen,
         }),
         marginLeft: 0,
+        maxWidth: `calc(100% - ${drawerClosedWidth}px)`,
         ...(open && {
+            maxWidth: `calc(100% - ${drawerWidth}px)`,
             transition: theme.transitions.create('margin', {
                 easing: theme.transitions.easing.easeOut,
                 duration: theme.transitions.duration.enteringScreen,
@@ -229,7 +243,7 @@ export default function ProjectData() {
                     </DrawerHeader>
                     <Divider/>
                     <GroupMenuSelector open={open}/>
-                    <BucketListSelector/>
+                    <BucketListSelector open={open}/>
                     <Divider/>
                     <List sx={{marginTop: "auto"}}>
                         {

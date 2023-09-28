@@ -1,9 +1,15 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {
+    FilterList,
+    Refresh,
+    ViewStream as CloneIcon
+} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -34,7 +40,6 @@ import {
 import {getFiltersMapper} from "../../utils/NullValueMappers";
 import FiltersContext from "../../context/filters/FiltersContext";
 import EditFilterRulesDialog from "../dialogs/EditFilterRulesDialog";
-import CloneIcon from '@mui/icons-material/ViewStream'
 import ClassesContext from "../../context/classes/ClassesContext";
 import TagsContext from "../../context/tags/TagsContext";
 import UsersContext from "../../context/users/UsersContext";

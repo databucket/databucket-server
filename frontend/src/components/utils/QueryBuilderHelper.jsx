@@ -1,7 +1,10 @@
-import {Builder, MuiConfig, Utils as QbUtils} from '@react-awesome-query-builder/mui';
-import Typography from "@mui/material/Typography";
+import {
+    Builder,
+    MuiConfig,
+    Utils as QbUtils
+} from '@react-awesome-query-builder/mui';
 import React from "react";
-import {styled} from "@mui/material/styles";
+import {styled, Typography} from "@mui/material";
 
 export const getInitialTree = (loadedInitLogic, tree, config) => {
     if (tree && Object.keys(tree).length > 0) {

@@ -1,12 +1,20 @@
 import React, {createRef, useState} from 'react';
-import {styled, useTheme} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Done';
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Tooltip from "@mui/material/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    useTheme
+} from '@mui/material';
+import {
+    ArrowDropDown,
+    ArrowDropUp,
+    Close as CloseIcon,
+    MoreHoriz
+} from '@mui/icons-material';
 import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
@@ -17,10 +25,7 @@ import {
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
 import PropTypes from 'prop-types';
-import Button from "@mui/material/Button";
 import EditIconDialog from "./SelectIconDialog";
-import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import {MessageBox} from "../utils/MessageBox";
 import StyledIcon from "../utils/StyledIcon";
 
@@ -34,7 +39,6 @@ const Root = styled('div')(({theme}) => ({
     margin: 0,
     padding: theme.spacing(2)
 }));
-
 
 const DialogTitle = ((props) => {
     const {children, onClose, ...other} = props;
@@ -61,7 +65,8 @@ const DialogTitle = ((props) => {
 
 const DialogContent = MuiDialogContent;
 
-const EditComponent = props => <EditIconDialog icon={props.value} onChange={props.onChange}/>
+const EditComponent = props => <EditIconDialog icon={props.value}
+                                               onChange={props.onChange}/>
 
 EditEnumDialog.propTypes = {
     name: PropTypes.string.isRequired,
@@ -74,7 +79,8 @@ export default function EditEnumDialog(props) {
 
     const theme = useTheme();
     const tableRef = createRef();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(props.items != null ? props.items : []);
 
@@ -87,7 +93,7 @@ export default function EditEnumDialog(props) {
         });
         columnsArray.push({title: 'Value', field: 'value'});
         columnsArray.push({title: 'Text', field: 'text'});
-        if (props.iconsEnabled)
+        if (props.iconsEnabled) {
             columnsArray.push({
                 title: 'Icon',
                 field: 'icon',
@@ -97,6 +103,7 @@ export default function EditEnumDialog(props) {
                                                iconSvg={rowData.icon.svg}/>,
                 editComponent: EditComponent
             });
+        }
         return columnsArray;
     }
 
@@ -105,20 +112,27 @@ export default function EditEnumDialog(props) {
     };
 
     const handleSave = () => {
-        props.onChange(data.map(({value, text, icon}) => ({value, text, icon})));
+        props.onChange(
+            data.map(({value, text, icon}) => ({value, text, icon})));
         setOpen(false);
     }
 
     const isValid = (dataItem) => {
         let message = '';
-        if (dataItem.value == null || dataItem.value.length === 0)
+        if (dataItem.value == null || dataItem.value.length === 0) {
             message = "The value must not be empty"
-
-        else if (dataItem.text == null || dataItem.text.length === 0)
+        } else if (dataItem.text == null || dataItem.text.length === 0) {
             message = "The text must not be empty"
+        }
 
-        if (message.length > 0)
-            setMessageBox({open: true, severity: 'error', title: 'Error', message: message});
+        if (message.length > 0) {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: message
+            });
+        }
 
         return message.length === 0;
     }
@@ -163,10 +177,16 @@ export default function EditEnumDialog(props) {
                             selection: false,
                             filtering: false,
                             padding: 'dense',
-                            headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                            headerStyle: {
+                                backgroundColor: getTableHeaderBackgroundColor(
+                                    theme)
+                            },
                             maxBodyHeight: getDialogTableHeight(30),
                             minBodyHeight: getDialogTableHeight(30),
-                            rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                            rowStyle: rowData => ({
+                                backgroundColor: getTableRowBackgroundColor(
+                                    rowData, theme)
+                            })
                         }}
                         components={{
                             Container: props => <div {...props} />
@@ -177,25 +197,31 @@ export default function EditEnumDialog(props) {
                                     if (isValid(newData)) {
                                         setData([...data, newData]);
                                         resolve();
-                                    } else
+                                    } else {
                                         reject();
+                                    }
                                 }),
                             onRowUpdate: (newData, oldData) =>
                                 new Promise((resolve, reject) => {
                                     if (isValid(newData)) {
                                         const updated = data.map(item => {
-                                            if (item.tableData.id === oldData.tableData.id)
+                                            if (item.tableData.id
+                                                === oldData.tableData.id) {
                                                 return newData;
+                                            }
                                             return item;
                                         });
                                         setData(updated);
                                         resolve();
-                                    } else
+                                    } else {
                                         reject();
+                                    }
                                 }),
                             onRowDelete: oldData =>
                                 new Promise((resolve) => {
-                                    setData(data.filter(item => item.tableData.id !== oldData.tableData.id));
+                                    setData(data.filter(
+                                        item => item.tableData.id
+                                            !== oldData.tableData.id));
                                     resolve();
                                 }),
                         }}
@@ -203,13 +229,16 @@ export default function EditEnumDialog(props) {
                             rowData => ({
                                 icon: () => <ArrowDropDown/>,
                                 tooltip: 'Move down',
-                                onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
-                                disabled: (rowData.tableData.id === data.length - 1)
+                                onClick: (event, rowData) => setData(
+                                    moveDown(data, rowData.tableData.id)),
+                                disabled: (rowData.tableData.id === data.length
+                                    - 1)
                             }),
                             rowData => ({
                                 icon: () => <ArrowDropUp/>,
                                 tooltip: 'Move up',
-                                onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
+                                onClick: (event, rowData) => setData(
+                                    moveUp(data, rowData.tableData.id)),
                                 disabled: (rowData.tableData.id === 0)
                             })
                         ]}

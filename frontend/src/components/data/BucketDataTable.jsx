@@ -11,7 +11,6 @@ import {
     getTableRowBackgroundColor,
     getTableToolbarBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import {useTheme} from "@mui/material/styles";
 import {
     getLastActiveView,
     getLastBucketOrder,
@@ -23,7 +22,7 @@ import {
     setLastBucketSearchedText,
     setLastPageSize
 } from "../../utils/ConfigurationStorage";
-import {Grid, Icon} from "@mui/material";
+import {Grid, Icon, useTheme} from "@mui/material";
 import ViewMenuSelector from "./ViewMenuSelector";
 import AccessContext from "../../context/access/AccessContext";
 import MissingBucketTable from "./MissingBucketTable";
@@ -58,7 +57,12 @@ import RateReviewOutlined from "@mui/icons-material/RateReviewOutlined";
 import History from "@mui/icons-material/History";
 import FilterList from "@mui/icons-material/FilterList";
 import DuplicateIcon from '@mui/icons-material/ViewStream'
-import {getDataByIdUrl, getDataHistoryUrl, getDataReserveUrl, getDataUrl} from "../../utils/UrlBuilder";
+import {
+    getDataByIdUrl,
+    getDataHistoryUrl,
+    getDataReserveUrl,
+    getDataUrl
+} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
 import DataDetailsDialog from "../dialogs/DataDetailsDialog";
@@ -72,27 +76,33 @@ import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 const tableRef = createRef();
 
 const richFilterIcon = (activeLogic) => () => activeLogic != null ?
-    <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon> :
+    <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon>
+    :
     <span className="material-icons">filter_alt</span>;
 
 const taskActionIcon = () => <span className="material-icons">edit_note</span>;
-const filterIcon = (filtering) => () => filtering && tableRef.current.state.query.filters.length > 0 ?
+const filterIcon = (filtering) => () => filtering
+&& tableRef.current.state.query.filters.length > 0 ?
     <FilterList color={'secondary'}/> :
     <FilterList/>;
 
-const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange, theme) => (props) => {
+const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange,
+    theme) => (props) => {
     return (
         <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
             <Grid container direction="row">
                 <Grid container item direction="row" xs={3} alignItems="center">
-                    <Grid item>
-                        {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
-                            <ReserveDataDialog onReserve={onDataReserve}/>}
-                    </Grid>
-                    <Grid item>
-                        {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView) &&
-                            <AvailableTagsDialog bucketTags={state.bucketTags}/>}
-                    </Grid>
+                    {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
+                        <Grid item>
+                            <ReserveDataDialog onReserve={onDataReserve}/>
+                        </Grid>
+                    }
+                    {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView)
+                        && <Grid item>
+                            <AvailableTagsDialog
+                                bucketTags={state.bucketTags}/>
+                        </Grid>
+                    }
                     <Grid item>
                         <ViewMenuSelector
                             views={state.bucketViews}
@@ -119,10 +129,21 @@ export default function BucketDataTable() {
 
     const theme = useTheme();
     const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
-    const {buckets, activeBucket, views, columns, filters, tags, tasks, enums, users} = accessContext;
+    const {
+        buckets,
+        activeBucket,
+        views,
+        columns,
+        filters,
+        tags,
+        tasks,
+        enums,
+        users
+    } = accessContext;
     const [detailsState, setDetailsState] = useState({
         open: false,
         dataRow: null
@@ -148,7 +169,8 @@ export default function BucketDataTable() {
         tableColumns: [],   // columns prepared for material table,
         resetPage: false
     });
-    let searchText = activeBucket != null ? getLastBucketSearchedText(activeBucket.id) : "";
+    let searchText = activeBucket != null ? getLastBucketSearchedText(
+        activeBucket.id) : "";
     const [changedBucket, setChangedBucket] = useState(false);
 
     // active bucket has been changed
@@ -157,7 +179,8 @@ export default function BucketDataTable() {
         setChangedBucket(true);
         setFiltering(false);
         const bucketViews = getBucketViews(activeBucket, views);
-        if (bucketViews.length > 0 && tags != null && enums != null && views != null && columns != null) {
+        if (bucketViews.length > 0 && tags != null && enums != null && views
+            != null && columns != null) {
             // console.log(">> 1");
             const orderBy = getLastBucketOrder(activeBucket.id);
             // console.log("lastBucketOrder: " + orderBy);
@@ -167,17 +190,22 @@ export default function BucketDataTable() {
                 tableRef.current.dataManager.orderBy = -1;
                 tableRef.current.dataManager.orderDirection = "";
                 tableRef.current.setState({searchText: searchText});
-                tableRef.current.setState(tableRef.current.dataManager.getRenderState());
+                tableRef.current.setState(
+                    tableRef.current.dataManager.getRenderState());
             }
 
             const bucketTags = getBucketTags(activeBucket, tags);
             const bucketTasks = getBucketTasks(activeBucket, tasks);
             const lastActiveViewId = getLastActiveView(activeBucket.id);
             const activeView = getActiveView(bucketViews, lastActiveViewId);
-            const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
-            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, users, orderBy);
-            const filteredFilters = filters.filter(f => f.id === activeView.filterId);
-            const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
+            const columnsDef = columns.filter(
+                c => c.id === activeView.columnsId)[0];
+            const tableColumns = prepareTableColumns(columnsDef, bucketTags,
+                enums, users, orderBy);
+            const filteredFilters = filters.filter(
+                f => f.id === activeView.filterId);
+            const activeLogic = filteredFilters.length > 0
+                ? filteredFilters[0].configuration.logic : null;
 
             setState({
                 ...state,
@@ -191,7 +219,7 @@ export default function BucketDataTable() {
                 resetPage: true
             });
             reloadData();
-        } else
+        } else {
             setState({
                 ...state,
                 bucketViews: [],
@@ -203,6 +231,7 @@ export default function BucketDataTable() {
                 tableColumns: [],
                 resetPage: true
             });
+        }
 
     }, [activeBucket, enums, tags, views, columns, filters]);
 
@@ -227,8 +256,10 @@ export default function BucketDataTable() {
         setLastActiveView(activeBucket.id, view.id);
         const columnsDef = columns.filter(col => col.id === view.columnsId)[0];
         const filteredFilters = filters.filter(f => f.id === view.filterId);
-        const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
-        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, users, getLastBucketOrder(activeBucket.id));
+        const activeLogic = filteredFilters.length > 0
+            ? filteredFilters[0].configuration.logic : null;
+        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags,
+            enums, users, getLastBucketOrder(activeBucket.id));
 
         setState({
             ...state,
@@ -263,86 +294,115 @@ export default function BucketDataTable() {
 
     const onOpenDataDetailsDialog = (rowData) => {
         let resultOk = true;
-        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)), getGetOptions())
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(dataRow => {
-                if (resultOk) {
-                    setDetailsState({
-                        dataRow: dataRow,
-                        open: true
-                    });
-                }
+        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)),
+            getGetOptions())
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(dataRow => {
+            if (resultOk) {
+                setDetailsState({
+                    dataRow: dataRow,
+                    open: true
+                });
+            }
+        });
     }
 
     const onCloseDataDetailsDialog = (dataRow, changed) => {
         if (changed) {
             let resultOk = true;
-            fetch(getDataByIdUrl(activeBucket, dataRow.id), getPutOptions({properties: dataRow.properties}))
-                .then(handleErrors)
-                .catch(error => {
-                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                    resultOk = false;
-                })
-                .then(() => {
-                    resultOk && reloadData();
+            fetch(getDataByIdUrl(activeBucket, dataRow.id),
+                getPutOptions({properties: dataRow.properties}))
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: error
                 });
+                resultOk = false;
+            })
+            .then(() => {
+                resultOk && reloadData();
+            });
         }
         setDetailsState({...detailsState, open: false});
     }
 
     const onOpenDataHistoryDialog = (rowData) => {
         let resultOk = true;
-        fetch(getDataHistoryUrl(activeBucket, getRowDataId(rowData)), getGetOptions())
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(resultHistory => {
-                if (resultOk) {
-                    setHistoryState({
-                        ...historyState,
-                        dataRowId: getRowDataId(rowData),
-                        history: resultHistory,
-                        open: true
-                    });
-                }
+        fetch(getDataHistoryUrl(activeBucket, getRowDataId(rowData)),
+            getGetOptions())
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(resultHistory => {
+            if (resultOk) {
+                setHistoryState({
+                    ...historyState,
+                    dataRowId: getRowDataId(rowData),
+                    history: resultHistory,
+                    open: true
+                });
+            }
+        });
     }
 
     const onDuplicateData = (rowData) => {
         let resultOk = true;
-        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)), getGetOptions())
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(dataRow => {
-                if (resultOk) {
-                    const duplicatedData = {
-                        tagId: dataRow.tagId,
-                        reserved: dataRow.reserved,
-                        properties: dataRow.properties
-                    };
-                    fetch(getDataUrl(activeBucket), getPostOptions(duplicatedData))
-                        .then(handleErrors)
-                        .catch(error => {
-                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                            resultOk = false;
-                        })
-                        .then(() => {
-                            if (resultOk) {
-                                reloadData();
-                            }
-                        });
-                }
+        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)),
+            getGetOptions())
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(dataRow => {
+            if (resultOk) {
+                const duplicatedData = {
+                    tagId: dataRow.tagId,
+                    reserved: dataRow.reserved,
+                    properties: dataRow.properties
+                };
+                fetch(getDataUrl(activeBucket), getPostOptions(duplicatedData))
+                .then(handleErrors)
+                .catch(error => {
+                    setMessageBox({
+                        open: true,
+                        severity: 'error',
+                        title: 'Error',
+                        message: error
+                    });
+                    resultOk = false;
+                })
+                .then(() => {
+                    if (resultOk) {
+                        reloadData();
+                    }
+                });
+            }
+        });
     }
 
     const onCloseDataHistoryDialog = () => {
@@ -358,24 +418,37 @@ export default function BucketDataTable() {
         };
 
         let resultOk = true;
-        fetch(getDataReserveUrl(activeBucket, number, random), getPostOptions(payload))
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then((response) => {
-                if (resultOk)
-                    if (response.hasOwnProperty("message"))
-                        setMessageBox({open: true, severity: 'info', title: 'Info', message: response.message});
-                    else
-                        reloadData();
+        fetch(getDataReserveUrl(activeBucket, number, random),
+            getPostOptions(payload))
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then((response) => {
+            if (resultOk) {
+                if (response.hasOwnProperty("message")) {
+                    setMessageBox({
+                        open: true,
+                        severity: 'info',
+                        title: 'Info',
+                        message: response.message
+                    });
+                } else {
+                    reloadData();
+                }
+            }
+        });
     }
 
     const consolidateAllConditions = (tableSearch, tableFilters) => {
         let allConditions = [];
-        if (tableSearch != null && tableSearch.length > 0)
+        if (tableSearch != null && tableSearch.length > 0) {
             allConditions.push({
                 left_source: 'field',
                 left_value: 'properties',
@@ -383,15 +456,17 @@ export default function BucketDataTable() {
                 right_source: 'const',
                 right_value: '%' + tableSearch + '%'
             });
+        }
 
         if (filtering && tableFilters.length > 0) {
             for (const filter of tableFilters) {
                 if (filter.column.source.startsWith('$')) {
-                    const leftSource = filter.column.source.endsWith('()') ? 'function' : 'property';
+                    const leftSource = filter.column.source.endsWith('()')
+                        ? 'function' : 'property';
 
-                    if (filter.column.type === 'numeric')
+                    if (filter.column.type === 'numeric') {
                         if (Array.isArray(filter.value)) {
-                            if (filter.value.length > 0)
+                            if (filter.value.length > 0) {
                                 allConditions.push({
                                     left_source: leftSource,
                                     left_value: filter.column.source,
@@ -399,7 +474,8 @@ export default function BucketDataTable() {
                                     right_source: 'const',
                                     right_value: filter.value
                                 });
-                        } else
+                            }
+                        } else {
                             allConditions.push({
                                 left_source: leftSource,
                                 left_value: filter.column.source,
@@ -407,7 +483,8 @@ export default function BucketDataTable() {
                                 right_source: 'const',
                                 right_value: parseFloat(filter.value)
                             });
-                    else if (filter.column.type === 'boolean')
+                        }
+                    } else if (filter.column.type === 'boolean') {
                         allConditions.push({
                             left_source: leftSource,
                             left_value: filter.column.source,
@@ -415,7 +492,9 @@ export default function BucketDataTable() {
                             right_source: 'const',
                             right_value: (filter.value === 'checked')
                         });
-                    else if (Array.isArray(filter.value) && filter.value.length > 0)
+                    } else if (Array.isArray(filter.value)
+                        && filter.value.length
+                        > 0) {
                         allConditions.push({
                             left_source: leftSource,
                             left_value: filter.column.source,
@@ -423,7 +502,7 @@ export default function BucketDataTable() {
                             right_source: 'const',
                             right_value: filter.value
                         });
-                    else if (filter.value.length > 0)
+                    } else if (filter.value.length > 0) {
                         allConditions.push({
                             left_source: leftSource,
                             left_value: filter.column.source,
@@ -431,12 +510,14 @@ export default function BucketDataTable() {
                             right_source: 'const',
                             right_value: '%' + filter.value + '%'
                         });
+                    }
 
                 } else {
-                    if (filter.column.type === 'numeric')
+                    if (filter.column.type === 'numeric') {
                         if (Array.isArray(filter.value)) {
                             if (filter.value.length > 0) {
-                                const numericList = filter.value.map(value => parseFloat(value));
+                                const numericList = filter.value.map(
+                                    value => parseFloat(value));
                                 allConditions.push({
                                     left_source: 'field',
                                     left_value: filter.column.source,
@@ -445,7 +526,7 @@ export default function BucketDataTable() {
                                     right_value: numericList
                                 });
                             }
-                        } else
+                        } else {
                             allConditions.push({
                                 left_source: 'field',
                                 left_value: filter.column.source,
@@ -453,7 +534,8 @@ export default function BucketDataTable() {
                                 right_source: 'const',
                                 right_value: parseFloat(filter.value)
                             });
-                    else if (filter.column.type === 'boolean')
+                        }
+                    } else if (filter.column.type === 'boolean') {
                         allConditions.push({
                             left_source: 'field',
                             left_value: filter.column.source,
@@ -461,7 +543,9 @@ export default function BucketDataTable() {
                             right_source: 'const',
                             right_value: (filter.value === 'checked')
                         });
-                    else if (Array.isArray(filter.value) && filter.value.length > 0)
+                    } else if (Array.isArray(filter.value)
+                        && filter.value.length
+                        > 0) {
                         allConditions.push({
                             left_source: 'field',
                             left_value: filter.column.source,
@@ -469,8 +553,9 @@ export default function BucketDataTable() {
                             right_source: 'const',
                             right_value: filter.value
                         });
-                    else if (filter.value.length > 0) {
-                        const filterValue = (filter.value === '@currentUser') ? getUsername() : '%' + filter.value + '%';
+                    } else if (filter.value.length > 0) {
+                        const filterValue = (filter.value === '@currentUser')
+                            ? getUsername() : '%' + filter.value + '%';
                         allConditions.push({
                             left_source: 'field',
                             left_value: filter.column.source,
@@ -552,87 +637,138 @@ export default function BucketDataTable() {
     const getActions = () => {
         let actions = [];
         actions.push(refreshAction);
-        if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) actions.push(tasksAction);
-        if (isFeatureEnabled(FEATURE_FILTER, state.activeView)) actions.push(filterAction);
-        if (isFeatureEnabled(FEATURE_RICH_FILTER, state.activeView)) actions.push(richFilterAction);
-        if (isFeatureEnabled(FEATURE_DETAILS, state.activeView)) actions.push(detailsAction);
-        if (isFeatureEnabled(FEATURE_HISTORY, state.activeView)) actions.push(historyAction);
-        if (isFeatureEnabled(FEATURE_DUPLICATE, state.activeView)) actions.push(duplicateAction);
+        if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) {
+            actions.push(
+                tasksAction);
+        }
+        if (isFeatureEnabled(FEATURE_FILTER, state.activeView)) {
+            actions.push(
+                filterAction);
+        }
+        if (isFeatureEnabled(FEATURE_RICH_FILTER,
+            state.activeView)) {
+            actions.push(richFilterAction);
+        }
+        if (isFeatureEnabled(FEATURE_DETAILS, state.activeView)) {
+            actions.push(
+                detailsAction);
+        }
+        if (isFeatureEnabled(FEATURE_HISTORY, state.activeView)) {
+            actions.push(
+                historyAction);
+        }
+        if (isFeatureEnabled(FEATURE_DUPLICATE, state.activeView)) {
+            actions.push(
+                duplicateAction);
+        }
         return actions;
     }
 
     const onRowAddAction = (newData) => new Promise((resolve, reject) => {
         let resultOk = true;
-        fetch(getDataUrl(activeBucket), getPostOptions(convertDataBeforeAdd(state.tableColumns, newData)))
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(() => {
-                resultOk ? resolve() : reject();
+        fetch(getDataUrl(activeBucket),
+            getPostOptions(convertDataBeforeAdd(state.tableColumns, newData)))
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(() => {
+            resultOk ? resolve() : reject();
+        });
     });
 
-    const onRowUpdateAction = (newData, oldData) => new Promise((resolve, reject) => {
-        let payload = convertDataBeforeModify(state.tableColumns, newData, oldData);
-        let resultOk = true;
-        if (Object.keys(payload).length > 0) {
-            fetch(getDataByIdUrl(activeBucket, getRowDataId(newData)), getPutOptions(payload))
+    const onRowUpdateAction = (newData, oldData) => new Promise(
+        (resolve, reject) => {
+            let payload = convertDataBeforeModify(state.tableColumns, newData,
+                oldData);
+            let resultOk = true;
+            if (Object.keys(payload).length > 0) {
+                fetch(getDataByIdUrl(activeBucket, getRowDataId(newData)),
+                    getPutOptions(payload))
                 .then(handleErrors)
                 .catch(error => {
-                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                    setMessageBox({
+                        open: true,
+                        severity: 'error',
+                        title: 'Error',
+                        message: error
+                    });
                     resultOk = false;
                 })
                 .then(() => {
                     resultOk ? resolve() : reject();
                 });
-        } else {
-            setMessageBox({
-                open: true,
-                severity: 'info',
-                title: 'Nothing changed',
-                message: ''
-            });
-            reject();
-        }
-    });
+            } else {
+                setMessageBox({
+                    open: true,
+                    severity: 'info',
+                    title: 'Nothing changed',
+                    message: ''
+                });
+                reject();
+            }
+        });
 
     const onRowDeleteAction = (oldData) => new Promise((resolve, reject) => {
         let resultOk = true;
-        fetch(getDataByIdUrl(activeBucket, getRowDataId(oldData)), getDeleteOptions())
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(() => {
-                resultOk ? resolve() : reject();
+        fetch(getDataByIdUrl(activeBucket, getRowDataId(oldData)),
+            getDeleteOptions())
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(() => {
+            resultOk ? resolve() : reject();
+        });
     });
 
     const getEditable = () => {
         let editable = {};
 
-        if (isFeatureEnabled(FEATURE_CREATION, state.activeView))
-            editable = {...editable, onRowAdd: (newData) => onRowAddAction(newData)};
+        if (isFeatureEnabled(FEATURE_CREATION, state.activeView)) {
+            editable = {
+                ...editable,
+                onRowAdd: (newData) => onRowAddAction(newData)
+            };
+        }
 
-        if (isFeatureEnabled(FEATURE_MODIFYING, state.activeView))
-            editable = {...editable, onRowUpdate: (newData, oldData) => onRowUpdateAction(newData, oldData)};
+        if (isFeatureEnabled(FEATURE_MODIFYING, state.activeView)) {
+            editable = {
+                ...editable,
+                onRowUpdate: (newData, oldData) => onRowUpdateAction(newData,
+                    oldData)
+            };
+        }
 
-        if (isFeatureEnabled(FEATURE_REMOVAL, state.activeView))
-            editable = {...editable, onRowDelete: oldData => onRowDeleteAction(oldData)};
+        if (isFeatureEnabled(FEATURE_REMOVAL, state.activeView)) {
+            editable = {
+                ...editable,
+                onRowDelete: oldData => onRowDeleteAction(oldData)
+            };
+        }
 
         return editable;
     }
 
-    if (activeBucket == null && buckets.length === 0)
+    if (activeBucket == null && buckets.length === 0) {
         return <MissingBucketTable/>
-    else if (activeBucket == null && buckets.length > 0)
+    } else if (activeBucket == null && buckets.length > 0) {
         return <div/>
-    else if (state.activeView == null)
+    } else if (state.activeView == null) {
         return <MissingActiveView/>
-    else {
+    } else {
         return (
             <React.StrictMode>
                 <MaterialTable
@@ -651,56 +787,78 @@ export default function BucketDataTable() {
                                 if (state.resetPage) {
                                     url += '&page=1';
                                     setState({...state, resetPage: false});
-                                } else
+                                } else {
                                     url += '&page=' + (query.page + 1);
+                                }
 
                                 // take sorting from parameter
                                 if (changedBucket === true) {
                                     setChangedBucket(false);
-                                    const orderBy = getLastBucketOrder(activeBucket.id);
-                                    if (orderBy != null && state.tableColumns.length > 0) {
+                                    const orderBy = getLastBucketOrder(
+                                        activeBucket.id);
+                                    if (orderBy != null
+                                        && state.tableColumns.length > 0) {
                                         let source = state.tableColumns[0].source;
-                                        if (state.tableColumns.length > orderBy.colId)
+                                        if (state.tableColumns.length
+                                            > orderBy.colId) {
                                             source = state.tableColumns[orderBy.colId].source;
-                                        if (orderBy.ord === 'desc')
+                                        }
+                                        if (orderBy.ord === 'desc') {
                                             url += '&sort=desc(' + source + ')';
-                                        else
+                                        } else {
                                             url += '&sort=' + source;
+                                        }
                                     }
                                 } else {
                                     if (query.orderBy != null) {
-                                        if (query.orderDirection === 'desc')
-                                            url += '&sort=desc(' + query.orderBy.source + ')';
-                                        else
-                                            url += '&sort=' + query.orderBy.source;
+                                        if (query.orderDirection === 'desc') {
+                                            url += '&sort=desc('
+                                                + query.orderBy.source + ')';
+                                        } else {
+                                            url += '&sort='
+                                                + query.orderBy.source;
+                                        }
                                     }
                                 }
 
                                 let payload = {
-                                    columns: getFetchColumns(state.tableColumns),
-                                    conditions: consolidateAllConditions(searchText, query.filters),
+                                    columns: getFetchColumns(
+                                        state.tableColumns),
+                                    conditions: consolidateAllConditions(
+                                        searchText, query.filters),
                                     logic: state.activeLogic
                                 }
 
                                 let resultOk = true;
                                 fetch(url, getPostOptions(payload))
-                                    .then(handleErrors)
-                                    .catch(error => {
-                                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                        resultOk = false;
-                                    })
-                                    .then(result => {
-                                        if (resultOk)
-                                            resolve({
-                                                data: result.customData,
-                                                page: result.page - 1,
-                                                totalCount: result.total,
-                                            })
-                                        else
-                                            resolve({data: []});
+                                .then(handleErrors)
+                                .catch(error => {
+                                    setMessageBox({
+                                        open: true,
+                                        severity: 'error',
+                                        title: 'Error',
+                                        message: error
                                     });
+                                    resultOk = false;
+                                })
+                                .then(result => {
+                                    if (resultOk) {
+                                        resolve({
+                                            data: result.customData,
+                                            page: result.page - 1,
+                                            totalCount: result.total,
+                                        })
+                                    } else {
+                                        resolve({data: []});
+                                    }
+                                });
                             } catch (error) {
-                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                setMessageBox({
+                                    open: true,
+                                    severity: 'error',
+                                    title: 'Error',
+                                    message: error
+                                });
                             }
                         })
                     }
@@ -713,19 +871,25 @@ export default function BucketDataTable() {
                         sorting: true,
                         selection: false,
                         filtering: filtering,
-                        exportButton: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
+                        exportButton: isFeatureEnabled(FEATURE_EXPORT,
+                            state.activeView),
                         padding: 'dense',
-                        search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
+                        search: isFeatureEnabled(FEATURE_SEARCH,
+                            state.activeView),
                         searchFieldStyle: {width: 500},
                         maxBodyHeight: getTableHeight(),
                         minBodyHeight: getTableHeight(),
                         headerStyle: {
                             position: 'sticky',
                             top: 0,
-                            backgroundColor: getTableHeaderBackgroundColor(theme)
+                            backgroundColor: getTableHeaderBackgroundColor(
+                                theme)
                         },
                         cellStyle: {whiteSpace: 'nowrap'},
-                        rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                        rowStyle: rowData => ({
+                            backgroundColor: getTableRowBackgroundColor(rowData,
+                                theme)
+                        })
                     }}
                     localization={{
                         body: {
@@ -737,7 +901,8 @@ export default function BucketDataTable() {
                         }
                     }}
                     components={{
-                        Toolbar: tableToolbar(state, onViewSelected, onDataReserve, handleSearchChange, theme)
+                        Toolbar: tableToolbar(state, onViewSelected,
+                            onDataReserve, handleSearchChange, theme)
                     }}
                     onOrderChange={(colId, ord) => {
                         let order = (colId >= 0) ? {colId, ord} : null;
@@ -757,7 +922,8 @@ export default function BucketDataTable() {
                     open={detailsState.open}
                     dataRow={detailsState.dataRow}
                     tags={tags}
-                    onChange={(dataRow, changed) => onCloseDataDetailsDialog(dataRow, changed)}
+                    onChange={(dataRow, changed) => onCloseDataDetailsDialog(
+                        dataRow, changed)}
                 />
 
                 <DataHistoryDialog

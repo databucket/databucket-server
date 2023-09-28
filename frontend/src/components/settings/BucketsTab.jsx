@@ -1,9 +1,11 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -14,7 +16,12 @@ import {
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
-import {arraysEquals, convertNullValuesInObject, isItemChanged, validateItem} from "../../utils/JsonHelper";
+import {
+    arraysEquals,
+    convertNullValuesInObject,
+    isItemChanged,
+    validateItem
+} from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnClass,

@@ -1,20 +1,30 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
-import { styled } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
+import {
+    Button,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    Divider,
+    IconButton,
+    styled,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
 import PropTypes from 'prop-types';
 import MaterialTable from 'material-table';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import MuiDialogActions from '@mui/material/DialogActions';
-import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
-import {Divider, TextField, Tooltip} from '@mui/material';
+import {Close as CloseIcon} from '@mui/icons-material';
 import {createTagLookup} from "../../utils/JsonHelper";
-import {getTableHeaderBackgroundColor, getTableRowBackgroundColor} from "../../utils/MaterialTableHelper";
-import {getDataDetailsDialogSize, setDataDetailsDialogSize} from "../../utils/ConfigurationStorage";
+import {
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
+} from "../../utils/MaterialTableHelper";
+import {
+    getDataDetailsDialogSize,
+    setDataDetailsDialogSize
+} from "../../utils/ConfigurationStorage";
 import {MessageBox} from "../utils/MessageBox";
 import jp from "jsonpath";
 import {getDirectDataPath} from "../../route/AppRouter";
@@ -24,6 +34,7 @@ import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
 import "brace/theme/monokai";
+
 const PREFIX = 'DataDetailsDialog';
 
 const classes = {
@@ -52,7 +63,14 @@ const jsonThemeLight = null; //"ace/theme/eclipse";
 const jsonThemeDark = "ace/theme/monokai";
 
 const DialogTitle = (props => {
-    const {children,  onClose, onMakeDialogSmaller, onMakeDialogLarger, onCopyDataLink, onOpenDataLink} = props;
+    const {
+        children,
+        onClose,
+        onMakeDialogSmaller,
+        onMakeDialogLarger,
+        onCopyDataLink,
+        onOpenDataLink
+    } = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
@@ -128,8 +146,10 @@ export default function DataDetailsDialog(props) {
 
     const tableRef = createRef();
     const jsonEditorRef = useRef(null);
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [state, setState] = useState({open: false, changed: false, changedProperties: null});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
+    const [state, setState] = useState(
+        {open: false, changed: false, changedProperties: null});
     const tagsLookup = createTagLookup(props.tags);
     const [dialogSize, setDialogSize] = useState('lg');
     const [jsonPath, setJsonPath] = useState(null);
@@ -145,12 +165,17 @@ export default function DataDetailsDialog(props) {
     const handleChange = json => {
         const initial = JSON.stringify(props.dataRow.properties);
         const current = JSON.stringify(json);
-        setState({...state, changed: initial.localeCompare(current) !== 0, changedProperties: json});
+        setState({
+            ...state,
+            changed: initial.localeCompare(current) !== 0,
+            changedProperties: json
+        });
     };
 
     const handleSave = () => {
         setState({...state, open: false, changed: false});
-        props.onChange({...props.dataRow, properties: state.changedProperties}, true);
+        props.onChange({...props.dataRow, properties: state.changedProperties},
+            true);
     };
 
     const handleClose = () => {
@@ -165,25 +190,38 @@ export default function DataDetailsDialog(props) {
                 await navigator.clipboard.writeText(jsonEditor.getText());
             }
         } catch (err) {
-            setMessageBox({open: true, severity: 'error', title: 'Error', message: 'Copying has failed!'});
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: 'Copying has failed!'
+            });
         }
     }
 
     const copyDataLink = async () => {
         try {
-            let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
-            if (jsonPath != null)
+            let dataLink = getDirectDataPath(props.bucket.name,
+                props.dataRow.id);
+            if (jsonPath != null) {
                 dataLink += "/" + jsonPath;
+            }
             await navigator.clipboard.writeText(dataLink);
         } catch (err) {
-            setMessageBox({open: true, severity: 'error', title: 'Error', message: 'Copying has failed!'});
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: 'Copying has failed!'
+            });
         }
     }
 
     const openDataLink = async () => {
         let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
-        if (jsonPath != null)
+        if (jsonPath != null) {
             dataLink += "/" + jsonPath;
+        }
         window.open(dataLink, "_blank");
     }
 
@@ -213,7 +251,8 @@ export default function DataDetailsDialog(props) {
         }
     }
 
-    const debouncedSave = useRef(debounce(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
+    const debouncedSave = useRef(
+        debounce(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
 
     const handleChangedJsonPath = (event) => {
         debouncedSave(event.target.value);
@@ -223,16 +262,19 @@ export default function DataDetailsDialog(props) {
         if (props.dataRow != null && jsonEditorRef.current !== null) {
             const jsonEditor = jsonEditorRef.current.jsonEditor;
             if (jsonPath != null && jsonPath.length > 0) {
-                const fullJson = state.changedProperties != null ? state.changedProperties : props.dataRow.properties;
+                const fullJson = state.changedProperties != null
+                    ? state.changedProperties : props.dataRow.properties;
                 let filtered = [];
                 try {
                     filtered = jp.query(fullJson, jsonPath);
-                } catch (err) {}
+                } catch (err) {
+                }
                 jsonEditor.aceEditor.setReadOnly(true);
                 jsonEditor.set(filtered);
             } else {
                 jsonEditor.aceEditor.setReadOnly(false);
-                jsonEditor.set(state.changed ? state.changedProperties : props.dataRow.properties);
+                jsonEditor.set(state.changed ? state.changedProperties
+                    : props.dataRow.properties);
             }
         }
     }, [jsonPath]);
@@ -244,13 +286,16 @@ export default function DataDetailsDialog(props) {
             classes={{paper: classes.dialogPaper}}
             open={state.open}
             fullWidth={true}
-            maxWidth={dialogSize === 'true' ? true : dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth={dialogSize === 'true' ? true
+                : dialogSize}  //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
         >
             <DialogTitle
                 id="customized-dialog-title"
                 onClose={handleClose}
-                onMakeDialogSmaller={dialogSize !== 'md' ? onMakeDialogSmaller : null}
-                onMakeDialogLarger={dialogSize !== 'true' ? onMakeDialogLarger : null}
+                onMakeDialogSmaller={dialogSize !== 'md' ? onMakeDialogSmaller
+                    : null}
+                onMakeDialogLarger={dialogSize !== 'true' ? onMakeDialogLarger
+                    : null}
                 onCopyDataLink={copyDataLink}
                 onOpenDataLink={openDataLink}
             >
@@ -261,13 +306,22 @@ export default function DataDetailsDialog(props) {
                 tableRef={tableRef}
                 columns={[
                     {title: 'Id', field: 'id', type: 'numeric'},
-                    {title: 'Tag name', field: 'tagId', type: 'numeric', lookup: tagsLookup},
+                    {
+                        title: 'Tag name',
+                        field: 'tagId',
+                        type: 'numeric',
+                        lookup: tagsLookup
+                    },
                     {title: 'Tag id', field: 'tagId', type: 'numeric'},
                     {title: 'Reserved', field: 'reserved', type: 'boolean'},
                     {title: 'Owner', field: 'owner', type: 'string'},
                     {title: 'Created at', field: 'createdAt', type: 'datetime'},
                     {title: 'Created by', field: 'createdBy', type: 'string'},
-                    {title: 'Modified at', field: 'modifiedAt', type: 'datetime'},
+                    {
+                        title: 'Modified at',
+                        field: 'modifiedAt',
+                        type: 'datetime'
+                    },
                     {title: 'Modified by', field: 'modifiedBy', type: 'string'}
                 ]}
                 data={[props.dataRow]}
@@ -279,8 +333,15 @@ export default function DataDetailsDialog(props) {
                     search: false,
                     filtering: false,
                     padding: 'dense',
-                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                    headerStyle: {
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                    },
+                    rowStyle: rowData => ({
+                        backgroundColor: getTableRowBackgroundColor(rowData,
+                            theme)
+                    })
                 }}
                 components={{
                     Container: props => <div {...props} />
@@ -293,12 +354,14 @@ export default function DataDetailsDialog(props) {
                 }}>
                 <Editor
                     ref={jsonEditorRef}
-                    value={props.dataRow != null ? props.dataRow.properties : {}}
+                    value={props.dataRow != null ? props.dataRow.properties
+                        : {}}
                     ajv={ajv}
                     mode="code"
                     ace={ace}
                     onChange={handleChange}
-                    theme={theme.palette.mode === 'light' ? jsonThemeLight : jsonThemeDark}
+                    theme={theme.palette.mode === 'light' ? jsonThemeLight
+                        : jsonThemeDark}
                     statusBar={false}
                     htmlElementProps={{style: {height: "100%"}}}
                 />
@@ -309,7 +372,8 @@ export default function DataDetailsDialog(props) {
                     root: classes.root2
                 }}>
                 <Tooltip id="copy-content-tooltip" title="Copy content">
-                    <IconButton color={"inherit"} onClick={copyContent} size="large">
+                    <IconButton color={"inherit"} onClick={copyContent}
+                                size="large">
                         <span className="material-icons">content_copy</span>
                     </IconButton>
                 </Tooltip>
@@ -323,7 +387,8 @@ export default function DataDetailsDialog(props) {
                     onChange={handleChangedJsonPath}
                 />
                 <div style={{width: '100px'}}/>
-                <Button id="saveButton" onClick={handleSave} disabled={!state.changed} color="primary">
+                <Button id="saveButton" onClick={handleSave}
+                        disabled={!state.changed} color="primary">
                     Save
                 </Button>
             </DialogActions>

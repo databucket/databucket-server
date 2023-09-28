@@ -1,12 +1,14 @@
 import React, {useState} from 'react';
-import { styled } from '@mui/material/styles';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import IconButton from '@mui/material/IconButton';
+import {
+    IconButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    styled,
+    Typography
+} from '@mui/material';
 import DynamicIcon from '../utils/DynamicIcon';
-import {Typography} from "@mui/material";
 
 const PREFIX = 'FieldSelectEnum';
 
@@ -71,7 +73,8 @@ export default function FieldSelectEnum(props) {
         <Root>
             {iconsEnabled ?
                 <IconButton onClick={handleClick} color="default" size="large">
-                    <DynamicIcon iconName={items.filter(item => item.value === props.value)[0].icon}/>
+                    <DynamicIcon iconName={items.filter(
+                        item => item.value === props.value)[0].icon}/>
                 </IconButton>
                 :
                 <Typography>{props.value}</Typography>
@@ -93,7 +96,8 @@ export default function FieldSelectEnum(props) {
                         classes={{
                             root: classes.root
                         }}>
-                        {iconsEnabled && <ListItemIcon> <DynamicIcon iconName={item.icon}/> </ListItemIcon>}
+                        {iconsEnabled && <ListItemIcon> <DynamicIcon
+                            iconName={item.icon}/> </ListItemIcon>}
                         <ListItemText primary={item.text}/>
                     </StyledMenuItem>
                 ))}

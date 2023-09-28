@@ -84,6 +84,7 @@ export default function LoginFormComponent() {
                     Login
                 </Typography>
                 <TextField className="LoginInputText"
+                           variant="standard"
                            id="standard-adornment-username"
                            name="username"
                            type='text'

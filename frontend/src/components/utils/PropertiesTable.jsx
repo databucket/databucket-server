@@ -8,12 +8,14 @@ import {
 } from "../../utils/MaterialTableHelper";
 import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
-import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
+import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 import MaterialTable from "material-table";
 import React, {useEffect, useState} from "react";
-import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
-import {useTheme} from "@mui/material/styles";
+import {
+    getLastPageSizeOnDialog,
+    setLastPageSizeOnDialog
+} from "../../utils/ConfigurationStorage";
+import {useTheme} from "@mui/material";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
 
@@ -30,7 +32,8 @@ export default function PropertiesTable(props) {
 
     const theme = useTheme();
     const tableRef = React.createRef();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const data = props.data;
     const enums = props.enums;
@@ -67,8 +70,9 @@ export default function PropertiesTable(props) {
     const getEnumName = (rowData) => {
         if (allowEnum(rowData)) {
             const found = props.enums.find(en => en.id === rowData['enumId']);
-            if (found)
+            if (found) {
                 return found.name;
+            }
         }
         return '';
     }
@@ -82,10 +86,23 @@ export default function PropertiesTable(props) {
                     {
                         title: '#',
                         cellStyle: {width: '1%'},
-                        render: (rowData) => rowData ? rowData.tableData.id + 1 : ''
+                        render: (rowData) => rowData ? rowData.tableData.id + 1
+                            : ''
                     },
-                    {title: 'Title', field: 'title', type: 'string', emptyValue: '', initialEditValue: ''},
-                    {title: 'Path', field: 'path', type: 'string', emptyValue: '', initialEditValue: ''},
+                    {
+                        title: 'Title',
+                        field: 'title',
+                        type: 'string',
+                        emptyValue: '',
+                        initialEditValue: ''
+                    },
+                    {
+                        title: 'Path',
+                        field: 'path',
+                        type: 'string',
+                        emptyValue: '',
+                        initialEditValue: ''
+                    },
                     {
                         title: 'Type',
                         field: 'type',
@@ -118,7 +135,8 @@ export default function PropertiesTable(props) {
                 onChangeRowsPerPage={onChangeRowsPerPage}
                 options={{
                     paging: props.pageSize != null,
-                    pageSize: props.pageSize != null ? props.pageSize : pageSize,
+                    pageSize: props.pageSize != null ? props.pageSize
+                        : pageSize,
                     paginationType: 'stepped',
                     pageSizeOptions: getPageSizeOptionsOnDialog(),
                     actionsColumnIndex: -1,
@@ -126,10 +144,17 @@ export default function PropertiesTable(props) {
                     selection: false,
                     filtering: false,
                     padding: 'dense',
-                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    headerStyle: {
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                    },
                     minBodyHeight: getBodyHeight(),
                     maxBodyHeight: getBodyHeight(),
-                    rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                    rowStyle: rowData => ({
+                        backgroundColor: getTableRowBackgroundColor(rowData,
+                            theme)
+                    })
                 }}
                 components={{
                     Container: props => <div {...props} />
@@ -137,7 +162,8 @@ export default function PropertiesTable(props) {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let message = validateItem(newData, fieldsSpecification);
+                            let message = validateItem(newData,
+                                fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -156,7 +182,8 @@ export default function PropertiesTable(props) {
                         }),
                     onRowUpdate: (newData, oldData) =>
                         new Promise((resolve, reject) => {
-                            if (!isItemChanged(oldData, newData, changeableFields)) {
+                            if (!isItemChanged(oldData, newData,
+                                changeableFields)) {
                                 setMessageBox({
                                     open: true,
                                     severity: 'info',
@@ -167,7 +194,8 @@ export default function PropertiesTable(props) {
                                 return;
                             }
 
-                            let message = validateItem(newData, fieldsSpecification);
+                            let message = validateItem(newData,
+                                fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -180,8 +208,10 @@ export default function PropertiesTable(props) {
                             }
 
                             const updated = data.map(column => {
-                                if (column.tableData.id === oldData.tableData.id)
+                                if (column.tableData.id
+                                    === oldData.tableData.id) {
                                     return newData;
+                                }
                                 return column;
                             });
                             setData(updated);
@@ -189,7 +219,8 @@ export default function PropertiesTable(props) {
                         }),
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
-                            if (props.used != null && props.used.includes(oldData.uuid)) {
+                            if (props.used != null && props.used.includes(
+                                oldData.uuid)) {
                                 setMessageBox({
                                     open: true,
                                     severity: 'error',
@@ -198,7 +229,9 @@ export default function PropertiesTable(props) {
                                 });
                                 reject();
                             } else {
-                                setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
+                                setData(data.filter(
+                                    column => column.tableData.id
+                                        !== oldData.tableData.id));
                                 resolve();
                             }
                         }),
@@ -207,13 +240,15 @@ export default function PropertiesTable(props) {
                     rowData => ({
                         icon: () => <ArrowDropDown/>,
                         tooltip: 'Move down',
-                        onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(
+                            moveDown(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === data.length - 1)
                     }),
                     rowData => ({
                         icon: () => <ArrowDropUp/>,
                         tooltip: 'Move up',
-                        onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(
+                            moveUp(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === 0)
                     })
                 ]}

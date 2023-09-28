@@ -1,9 +1,11 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useRef, useState} from "react";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {IconButton, useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getButtonColor,
     getDeleteOptions,
@@ -26,7 +28,6 @@ import {
 } from "../utils/StandardColumns";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
-import IconButton from "@mui/material/IconButton";
 import parse from "html-react-parser";
 import {parseCustomSvg} from "../utils/SvgHelper";
 

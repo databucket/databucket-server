@@ -1,6 +1,5 @@
 import React from "react";
-import Grid from "@mui/material/Grid";
-import {CircularProgress} from "@mui/material";
+import {CircularProgress, Grid} from "@mui/material";
 
 export const CenteredWaitingCircularProgress = () => {
     return (

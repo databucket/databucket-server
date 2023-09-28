@@ -1,22 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import {styled} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Tooltip from "@mui/material/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tab,
+    Tabs,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import Button from "@mui/material/Button";
 import {MessageBox} from "../utils/MessageBox";
-import {Tabs} from "@mui/material";
-import Tab from "@mui/material/Tab";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
-import MuiDialogActions from "@mui/material/DialogActions";
 import TaskActionsTemplate from "../utils/TaskActionsTemplate";
-
 
 const PREFIX = 'TaskEditConfigDialogTemplate';
 
@@ -63,7 +63,7 @@ const Root = styled('div')(({theme}) => ({
 }));
 
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const {children, onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             {children}
@@ -96,9 +96,9 @@ TaskEditConfigDialogTemplate.propTypes = {
 
 export default function TaskEditConfigDialogTemplate(props) {
 
-
     const [activeTab, setActiveTab] = useState(0);
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''})
     const [open, setOpen] = useState(false);
     const [actions, setActions] = useState(props.configuration.actions);
     const [properties, setProperties] = useState(null);
@@ -107,14 +107,18 @@ export default function TaskEditConfigDialogTemplate(props) {
 
     useEffect(() => {
         const fTags = props.tags.filter(tag =>
-            (Array.isArray(tag.bucketsIds) && Array.isArray(props.rowData.bucketsIds) && tag.bucketsIds.some(item => props.rowData.bucketsIds.includes(item))) ||
-            (tag.classesIds != null && tag.classesIds.includes(parseInt(props.rowData.classId, 10)))
+            (Array.isArray(tag.bucketsIds) && Array.isArray(
+                props.rowData.bucketsIds) && tag.bucketsIds.some(
+                item => props.rowData.bucketsIds.includes(item))) ||
+            (tag.classesIds != null && tag.classesIds.includes(
+                parseInt(props.rowData.classId, 10)))
         );
         setFilteredTags(fTags);
     }, [props.tags, props.rowData]);
 
     useEffect(() => {
-        setProperties(mergeProperties(props.configuration.properties, props.dataClass));
+        setProperties(
+            mergeProperties(props.configuration.properties, props.dataClass));
     }, [props.configuration.properties, props.dataClass]);
 
     const handleClickOpen = () => {
@@ -155,7 +159,8 @@ export default function TaskEditConfigDialogTemplate(props) {
             >
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     <div className={classes.oneLine}>
-                        <Typography variant="h6">{'Task configuration'}</Typography>
+                        <Typography
+                            variant="h6">{'Task configuration'}</Typography>
                         <Tabs
                             className={classes.tabs}
                             value={activeTab}
@@ -170,36 +175,36 @@ export default function TaskEditConfigDialogTemplate(props) {
                 </DialogTitle>
                 <DialogContent
                     dividers
-                    style={{height:'75vh'}}
-                    ref = {dialogContentRef}
+                    style={{height: '75vh'}}
+                    ref={dialogContentRef}
                     classes={{
                         root: classes.root
                     }}>
                     {open && activeTab === 0 &&
-                    <TaskActionsTemplate
-                        actions={actions}
-                        properties={properties}
-                        tags={filteredTags}
-                        onChange={setActions}
-                        pageSize={null}
-                        customHeight={20}
-                        enums={props.enums}
-                    />}
+                        <TaskActionsTemplate
+                            actions={actions}
+                            properties={properties}
+                            tags={filteredTags}
+                            onChange={setActions}
+                            pageSize={null}
+                            customHeight={20}
+                            enums={props.enums}
+                        />}
                     {open && activeTab === 1 &&
-                    <PropertiesTable
-                        used={getUsedUuids()}
-                        data={properties}
-                        enums={props.enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        pageSize={null}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={getUsedUuids()}
+                            data={properties}
+                            enums={props.enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            pageSize={null}
+                            parentContentRef={dialogContentRef}
+                        />}
                 </DialogContent>
                 <DialogActions
                     classes={{
                         root: classes.root2
-                    }} />
+                    }}/>
             </Dialog>
             <MessageBox
                 config={messageBox}
@@ -212,8 +217,9 @@ export default function TaskEditConfigDialogTemplate(props) {
 const StyledTab = Tab
 
 export const getActionsType = (actions) => {
-    if (actions.type != null)
+    if (actions.type != null) {
         return actions.type;
-    else
+    } else {
         return '- none -';
+    }
 }

@@ -1,7 +1,6 @@
 import React from 'react';
-import { styled } from '@mui/material/styles';
-import Snackbar from '@mui/material/Snackbar';
-import { Alert, AlertTitle } from '@mui/material';
+import {Alert, AlertTitle, Snackbar, styled} from '@mui/material';
+
 const PREFIX = 'MessageBox';
 
 const classes = {
@@ -22,7 +21,6 @@ const Root = styled('div')((
 }));
 
 export const MessageBox = (props) => {
-
 
     return (
         <Root className={classes.root}>

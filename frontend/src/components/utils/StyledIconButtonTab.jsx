@@ -1,6 +1,5 @@
 import React from 'react';
-import {styled, useTheme} from '@mui/material/styles';
-import IconButton from "@mui/material/IconButton";
+import {IconButton, styled, useTheme} from '@mui/material';
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
 

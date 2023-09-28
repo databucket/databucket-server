@@ -1,12 +1,14 @@
 import React, {useState} from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Typography from "@mui/material/Typography";
-import FormControl from "@mui/material/FormControl";
-import {OutlinedInput} from "@mui/material";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    OutlinedInput,
+    Typography
+} from '@mui/material';
 import PropTypes from "prop-types";
 
 ConfirmRemovingDialog.propTypes = {

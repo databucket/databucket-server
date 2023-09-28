@@ -1,9 +1,11 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {FilterList, PlayCircleOutline, Refresh} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getPageSizeOptions,
     getPostOptions,
@@ -13,10 +15,14 @@ import {
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-import {getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../utils/StandardColumns";
+import {
+    getColumnDescription,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
+} from "../utils/StandardColumns";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import TemplatesContext from "../../context/templates/TemplatesContext";
-import {PlayCircleOutline} from "@mui/icons-material";
 
 export default function TemplatesTab() {
 

@@ -1,23 +1,23 @@
 import React, {useState} from 'react';
-import {styled} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Tooltip from "@mui/material/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tab,
+    Tabs,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import Button from "@mui/material/Button";
 import {MessageBox} from "../utils/MessageBox";
 import {Utils as QbUtils} from "@react-awesome-query-builder/mui";
 import {getObjectLengthStr} from "../../utils/JsonHelper";
-import {Tabs} from "@mui/material";
-import Tab from "@mui/material/Tab";
-import MuiDialogActions from "@mui/material/DialogActions";
 import FilterRulesEditorTemplate from "../utils/FilterRulesEditorTemplate";
-
 
 const PREFIX = 'EditTemplateFilterRulesDialog';
 
@@ -98,9 +98,9 @@ EditTemplateFilterRulesDialog.propTypes = {
 
 export default function EditTemplateFilterRulesDialog(props) {
 
-
     const [activeTab, setActiveTab] = useState(0);
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''})
     const [open, setOpen] = useState(false);
     const [configuration, setConfiguration] = useState(null);
     const dialogContentRef = React.useRef(null);
@@ -111,7 +111,8 @@ export default function EditTemplateFilterRulesDialog(props) {
 
     const handleSave = () => {
         if (configuration != null) {
-            const logic = QbUtils.jsonLogicFormat(configuration.tree, configuration.config).logic;
+            const logic = QbUtils.jsonLogicFormat(configuration.tree,
+                configuration.config).logic;
             const properties = configuration.properties;
             const tree = configuration.tree;
             props.onChange({properties, logic, tree});
@@ -148,7 +149,8 @@ export default function EditTemplateFilterRulesDialog(props) {
             >
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     <div className={classes.oneLine}>
-                        <Typography variant="h6">{'Filter configuration'}</Typography>
+                        <Typography
+                            variant="h6">{'Filter configuration'}</Typography>
                         <Tabs
                             className={classes.tabs}
                             value={activeTab}

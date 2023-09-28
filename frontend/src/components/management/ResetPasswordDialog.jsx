@@ -1,17 +1,20 @@
 import React, {useState} from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    InputAdornment,
+    OutlinedInput,
+    Typography
+} from '@mui/material';
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import CopyIcon from "@mui/icons-material/FileCopy";
-import FormControl from "@mui/material/FormControl";
-import {InputAdornment, OutlinedInput} from "@mui/material";
+import {FileCopy as CopyIcon} from "@mui/icons-material";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function ResetPasswordDialog(props) {

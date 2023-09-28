@@ -1,9 +1,14 @@
 import React, {useState} from 'react';
-import {styled} from '@mui/material/styles';
 import PropTypes from "prop-types";
-import MenuItem from "@mui/material/MenuItem";
-import Typography from "@mui/material/Typography";
-import {Grid, IconButton, Menu, Tooltip} from "@mui/material";
+import {
+    Grid,
+    IconButton,
+    Menu,
+    MenuItem,
+    styled,
+    Tooltip,
+    Typography
+} from "@mui/material";
 
 const PREFIX = 'ViewMenuSelector';
 

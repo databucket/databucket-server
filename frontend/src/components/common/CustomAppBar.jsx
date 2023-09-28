@@ -1,7 +1,6 @@
-import {lighten, styled} from "@mui/material/styles";
-import AppBar from "@mui/material/AppBar";
-import Tab from "@mui/material/Tab";
+import {AppBar, lighten, styled, Tab} from "@mui/material";
 
+export const drawerClosedWidth = 73;
 export const drawerWidth = 260;
 
 export const CustomAppBar = styled(AppBar, {

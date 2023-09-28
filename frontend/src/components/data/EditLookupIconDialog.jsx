@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import IconButton from '@mui/material/IconButton';
+import {
+    IconButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem
+} from '@mui/material';
 import TableDynamicIcon from "../utils/TableDynamicIcon";
-
 
 export default function LookupIconDialog(props) {
     const {onChange, items} = props;

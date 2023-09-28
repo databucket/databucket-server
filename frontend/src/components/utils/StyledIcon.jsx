@@ -1,8 +1,7 @@
 import React from 'react';
 import {parseCustomSvg} from "./SvgHelper";
-import {Icon, SvgIcon} from "@mui/material";
+import {Icon, styled, SvgIcon, useTheme} from "@mui/material";
 import {getIconColor} from "../../utils/MaterialTableHelper";
-import {styled, useTheme} from "@mui/material/styles";
 
 const InnerStyledIcon = styled(Icon)(({theme}) => ({
     marginRight: theme.spacing(1)

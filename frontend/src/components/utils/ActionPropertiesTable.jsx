@@ -17,7 +17,7 @@ import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable, {MTableEditField} from "material-table";
 import React, {useContext, useEffect, useState} from "react";
 import EnumsContext from "../../context/enums/EnumsContext";
-import {useTheme} from "@mui/material/styles";
+import {useTheme} from "@mui/material";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
 import moment from 'moment';

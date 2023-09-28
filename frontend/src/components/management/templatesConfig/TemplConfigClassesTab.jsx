@@ -1,14 +1,18 @@
 import MaterialTable from "material-table";
 import React, {useContext, useState} from "react";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     getTemplatePageSizeOptions,
     getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
-import {getArrayLengthStr, isItemChanged, validateItem} from "../../../utils/JsonHelper";
+import {
+    getArrayLengthStr,
+    isItemChanged,
+    validateItem
+} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnCreatedAt,
@@ -18,7 +22,8 @@ import {
     getColumnName
 } from "../../utils/StandardColumns";
 import PropTypes from "prop-types";
-import EditTemplateClassFieldsDialog from "../../dialogs/EditTemplateClassFieldsDialog";
+import EditTemplateClassFieldsDialog
+    from "../../dialogs/EditTemplateClassFieldsDialog";
 import {
     getTemplatesArtefactsEditable,
     templateArtefactCreationEnrichment,

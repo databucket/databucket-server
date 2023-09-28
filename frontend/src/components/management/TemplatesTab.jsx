@@ -10,7 +10,10 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
     convertNullValuesInObject,
@@ -19,10 +22,9 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import Refresh from "@mui/icons-material/Refresh";
-import FilterList from "@mui/icons-material/FilterList";
+import {FilterList, MoreHoriz, Refresh} from "@mui/icons-material";
 import SelectProjectsDialog from "../dialogs/SelectProjectsDialog";
-import {useTheme} from "@mui/material/styles";
+import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import ProjectsContext from "../../context/projects/ProjectsContext";
@@ -36,9 +38,9 @@ import {
 } from "../utils/StandardColumns";
 import {getTemplateMapper} from "../../utils/NullValueMappers";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-import EditTemplateConfigurationDialog from "../dialogs/EditTemplateConfigurationDialog";
+import EditTemplateConfigurationDialog
+    from "../dialogs/EditTemplateConfigurationDialog";
 import SelectTemplatesDialog from "../dialogs/SelectTemplatesDialog";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
 
 export default function TemplatesTab() {
 

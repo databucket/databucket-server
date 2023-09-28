@@ -1,12 +1,20 @@
 import React, {useContext, useState} from 'react';
-import { styled } from '@mui/material/styles';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import {Checkbox, FormControlLabel, InputLabel, MenuItem, Select, Slider, Tooltip} from "@mui/material";
-import Typography from "@mui/material/Typography";
+import {
+    Button,
+    Checkbox,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    Menu,
+    MenuItem,
+    Select,
+    Slider,
+    styled,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import {getUsername, hasAdminRole} from "../../utils/ConfigurationStorage";
-import FormControl from "@mui/material/FormControl";
-import Button from "@mui/material/Button";
 import AccessContext from "../../context/access/AccessContext";
 
 const PREFIX = 'ReserveDataDialog';

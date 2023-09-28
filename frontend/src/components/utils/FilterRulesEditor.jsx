@@ -3,10 +3,14 @@ import React, {useContext, useEffect, useState} from 'react';
 import {Query, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import EnumsContext from "../../context/enums/EnumsContext";
 import PropertiesTable, {mergeProperties} from "./PropertiesTable";
-import {createConfig, getInitialTree, renderBuilder, renderResult} from "./QueryBuilderHelper";
+import {
+    createConfig,
+    getInitialTree,
+    renderBuilder,
+    renderResult
+} from "./QueryBuilderHelper";
 import '@react-awesome-query-builder/mui/css/styles.css';
-import {Box} from "@mui/material";
-import {useTheme} from "@mui/material/styles";
+import {Box, useTheme} from "@mui/material";
 
 FilterRulesEditor.propTypes = {
     activeTab: PropTypes.number.isRequired,
@@ -23,13 +27,17 @@ export default function FilterRulesEditor(props) {
     const theme = useTheme();
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
-    const [properties, setFields] = useState(mergeProperties(props.configuration.properties, props.dataClass));
+    const [properties, setFields] = useState(
+        mergeProperties(props.configuration.properties, props.dataClass));
     const [state, setState] = useState({config: {}, tree: {}});
 
     useEffect(() => {
-        const conf = createConfig(properties, props.tags, props.users, enums, theme);
+        const conf = createConfig(properties, props.tags, props.users, enums,
+            theme);
         if (Object.keys(state.tree).length === 0) {
-            const initialTree = QbUtils.checkTree(getInitialTree(props.configuration.logic, props.configuration.tree, conf), conf);
+            const initialTree = QbUtils.checkTree(
+                getInitialTree(props.configuration.logic,
+                    props.configuration.tree, conf), conf);
             setState({config: conf, tree: initialTree});
         } else {
             setState({config: conf, tree: state.tree});
@@ -37,8 +45,9 @@ export default function FilterRulesEditor(props) {
     }, [properties]);
 
     useEffect(() => {
-        if (enums == null)
+        if (enums == null) {
             fetchEnums();
+        }
     }, [enums, fetchEnums]);
 
     const onChange = (tree, config) => {

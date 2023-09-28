@@ -1,6 +1,5 @@
 import React from 'react';
-import {styled} from '@mui/material/styles';
-import {Typography} from "@mui/material";
+import {styled, Typography} from "@mui/material";
 
 const StyledTypography = styled(Typography)(({theme}) => ({
     padding: theme.spacing(3),

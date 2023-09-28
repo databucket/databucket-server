@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
-import {styled} from '@mui/material/styles';
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
+import {styled, Tab, Tabs} from '@mui/material';
 
-import {getSettingsTabsBackgroundColor, getSettingsTabsColor} from "../../../utils/MaterialTableHelper";
+import {
+    getSettingsTabsBackgroundColor,
+    getSettingsTabsColor
+} from "../../../utils/MaterialTableHelper";
 import TemplConfigTeamsTab from "./TemplConfigTeamsTab";
 import PropTypes from "prop-types";
 import TemplConfigClassesTab from "./TemplConfigClassesTab";

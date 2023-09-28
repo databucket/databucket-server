@@ -1,8 +1,6 @@
 import React, {useState} from 'react';
-import Toolbar from "@mui/material/Toolbar";
-import Tabs from "@mui/material/Tabs";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
+import {IconButton, Tabs, Toolbar} from "@mui/material";
+import {Close as CloseIcon} from "@mui/icons-material";
 import {Link, Redirect, Route, Switch} from "react-router-dom";
 import {
     getManagementProjectsPath,
@@ -28,7 +26,8 @@ import RolesProvider from "../../context/roles/RolesProvider";
 import UserProfile from "../data/UserProfile";
 import TemplatesTab from "./TemplatesTab";
 import TemplatesProvider from "../../context/templates/TemplatesProvider";
-import DataItemsProvider from "../../context/templatesDataItems/DataItemsProvider";
+import DataItemsProvider
+    from "../../context/templatesDataItems/DataItemsProvider";
 import DataProvider from "../../context/templatesData/DataProvider";
 import PublicRoute from "../../route/PublicRoute";
 import {CustomAppBar, CustomTab} from "../common/CustomAppBar";

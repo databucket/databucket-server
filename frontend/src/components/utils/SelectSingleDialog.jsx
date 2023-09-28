@@ -1,13 +1,21 @@
 import React, {createRef, useState} from 'react';
-import {styled, useTheme} from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import MuiDialogTitle from '@mui/material/DialogTitle';
-import MuiDialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Done';
-import Typography from '@mui/material/Typography';
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Tooltip from "@mui/material/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
+import {
+    Close as CloseIcon,
+    MoreHoriz,
+    RadioButtonChecked as RadioChecked,
+    RadioButtonUnchecked as RadioUnchecked
+} from '@mui/icons-material';
 import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
@@ -15,11 +23,11 @@ import {
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from "material-table";
-import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
+import {
+    getLastPageSizeOnDialog,
+    setLastPageSizeOnDialog
+} from "../../utils/ConfigurationStorage";
 import PropTypes from 'prop-types';
-import Button from "@mui/material/Button";
-import RadioChecked from "@mui/icons-material/RadioButtonChecked";
-import RadioUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 
 const PREFIX = 'SelectSingleDialog';
 
@@ -100,10 +108,11 @@ export default function SelectSingleDialog(props) {
     }
 
     const getSelectionName = () => {
-        if (props.id > 0)
+        if (props.id > 0) {
             return data.find(item => item.id === props.id).name;
-        else
+        } else {
             return '';
+        }
     }
 
     const getColumnSelection = () => {
@@ -114,7 +123,8 @@ export default function SelectSingleDialog(props) {
             editable: 'never',
             filtering: false,
             cellStyle: {width: '1%'},
-            render: rowData => (rowData['id'] === props.id ? <RadioChecked color={'secondary'} fontSize={'small'}/> :
+            render: rowData => (rowData['id'] === props.id ? <RadioChecked
+                    color={'secondary'} fontSize={'small'}/> :
                 <RadioUnchecked fontSize={'small'}/>)
         };
     };
@@ -146,12 +156,14 @@ export default function SelectSingleDialog(props) {
                         root: classes.root
                     }}>
                     <MaterialTable
-                        title={props.tableTitle != null ? props.tableTitle : '-'}
+                        title={props.tableTitle != null ? props.tableTitle
+                            : '-'}
                         tableRef={tableRef}
                         columns={[getColumnSelection(), ...props.columns]}
                         data={data}
                         onChangeRowsPerPage={onChangeRowsPerPage}
-                        onRowClick={(event, rowData) => props.onChange(rowData.id !== props.id ? rowData.id : -1)}
+                        onRowClick={(event, rowData) => props.onChange(
+                            rowData.id !== props.id ? rowData.id : -1)}
                         options={{
                             paging: true,
                             pageSize: pageSize,
@@ -162,10 +174,16 @@ export default function SelectSingleDialog(props) {
                             selection: false,
                             filtering: false,
                             padding: 'dense',
-                            headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                            headerStyle: {
+                                backgroundColor: getTableHeaderBackgroundColor(
+                                    theme)
+                            },
                             maxBodyHeight: getDialogTableHeight(30),
                             minBodyHeight: getDialogTableHeight(30),
-                            rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                            rowStyle: rowData => ({
+                                backgroundColor: getTableRowBackgroundColor(
+                                    rowData, theme)
+                            })
                         }}
                         components={{
                             Container: props => <div {...props} />

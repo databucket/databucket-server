@@ -1,7 +1,7 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@mui/icons-material/FilterList";
-import {useTheme} from "@mui/material/styles";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {Divider, Grid, useTheme} from "@mui/material";
 import {
     getDeleteOptions,
     getPostOptions,
@@ -11,7 +11,12 @@ import {
     getTemplatePageSizeOptions,
     getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
-import {convertNullValuesInObject, getSelectedValues, isItemChanged, validateItem} from "../../../utils/JsonHelper";
+import {
+    convertNullValuesInObject,
+    getSelectedValues,
+    isItemChanged,
+    validateItem
+} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
 import {
     getColumnDescription,
@@ -24,11 +29,9 @@ import PropTypes from "prop-types";
 import {getBaseUrl} from "../../../utils/UrlBuilder";
 import {handleErrors} from "../../../utils/FetchHelper";
 import {getManageDataMapper} from "../../../utils/NullValueMappers";
-import Refresh from "@mui/icons-material/Refresh";
-import Grid from "@mui/material/Grid";
-import Divider from "@mui/material/Divider";
 import DataContext from "../../../context/templatesData/DataContext";
-import DataItemsContext from "../../../context/templatesDataItems/DataItemsContext";
+import DataItemsContext
+    from "../../../context/templatesDataItems/DataItemsContext";
 
 TemplConfigDataTab.propTypes = {
     template: PropTypes.object.isRequired,

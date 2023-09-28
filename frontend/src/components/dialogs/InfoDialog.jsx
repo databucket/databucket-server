@@ -1,10 +1,15 @@
 import React, {useState} from 'react';
-import { styled } from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import Typography from '@mui/material/Typography';
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import ListItem from "@mui/material/ListItem";
+import {
+    Dialog,
+    Link,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    styled,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
 import DatabucketLogo from "../../images/databucket-logo.png";
 import SpringBootLogo from "../../images/spring-boot-logo.png";
 import PostgresqlLogo from "../../images/postgresql-logo.png";
@@ -19,11 +24,7 @@ import ReactDiffViewerLogo from "../../images/react-diff-viewer-logo.png";
 import DockerLogo from "../../images/docker-logo.png";
 import TravisLogo from "../../images/travis-ci-logo.png";
 import SwaggerLogo from "../../images/swagger-logo.png";
-import Link from "@mui/material/Link";
-import {useTheme} from "@mui/material/styles";
-import { Tooltip } from "@mui/material";
 import {getButtonColor} from "../../utils/MaterialTableHelper";
-
 
 const PREFIX = 'InfoDialog';
 
