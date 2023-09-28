@@ -1,5 +1,4 @@
 .gradle/*
 .idea/*
-gradle/*
-#frontend/build/*
-#frontend/node_modules/*
+frontend/build/*
+frontend/node_modules/*
