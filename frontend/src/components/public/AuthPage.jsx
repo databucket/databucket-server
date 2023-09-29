@@ -58,7 +58,7 @@ export default function AuthPage() {
                 {authOptions.length > 0 && <OauthLoginComponent
                     authOptions={authOptions}/>}
             </Paper>
-            <Typography variant="caption">3.5.0</Typography>
+            <Typography variant="caption">4.0.0</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'pl.databucket'
-version = '3.5.0'
+version = '4.0.0'
 targetCompatibility = 17
 sourceCompatibility = 17
 

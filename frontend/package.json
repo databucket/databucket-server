@@ -1,7 +1,7 @@
 {
   "homepage": ".",
   "name": "databucket",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "11.11.1",
