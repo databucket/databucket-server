@@ -59,7 +59,7 @@ public class OAuth2SecurityConfig {
 //                "/**/*.js"
 //            ).permitAll()
             .antMatchers(HttpMethod.GET,
-                "/", "/login**", "/sign-up",
+                "/", "/login**", "/sign-up", "/forgot-password", "/change-password",
                 "/index*", "/**/static/**", "/*.js", "/*.json", "/*.ico",
                 "/api/auth/**")
             .permitAll()

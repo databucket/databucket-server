@@ -1,31 +1,13 @@
-import React, {forwardRef, useState} from "react";
+import React, {useState} from "react";
 import "./ForgotPasswordPage.css";
 import Logo from "../../images/databucket-logo.png";
-import {
-    Button,
-    FormControl,
-    Input,
-    InputLabel,
-    Link as MaterialLink,
-    Paper,
-    Typography
-} from "@mui/material";
+import {Button, Link, Paper, Stack, TextField, Typography} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
-import {Link} from "react-router-dom";
+import {Link as RouterLink} from "react-router-dom";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import {handleLoginErrors} from "../../utils/FetchHelper";
 import {validateEmail} from "../../utils/Misc";
 
-const FancyLink = forwardRef(({navigate, ...props}, ref) => {
-    return (
-        <MaterialLink
-            ref={ref}
-            variant="caption"
-            color="inherit"
-            {...props}
-        >{props.children}</MaterialLink>
-    )
-});
 export default function ForgotPasswordPage() {
 
     const [email, setEmail] = useState("");
@@ -72,52 +54,65 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div className="ContainerClass">
+        <Stack direction="column"
+               alignItems="center"
+               spacing={2}
+        >
             {<img src={Logo} alt=''/>}
-            <Paper className="PaperClass" elevation={3}>
-                <Typography className="Title" variant="h5">
-                    Forgot your password?
-                </Typography>
-                <Typography className="Description">
-                    Please enter the email address for your account.
-                    A verification link will be sent to you.
-                    Once you have received the verification link,
-                    you will be able to choose a new password for your account.
-                </Typography>
-                <FormControl className="EmailInputText">
-                    <InputLabel
-                        htmlFor="standard-adornment-email">Email</InputLabel>
-                    <Input
+            <Paper elevation={3}>
+                <Stack direction="column"
+                       spacing={2}
+                       alignItems="center"
+                       component="form"
+                       noValidate
+                       onSubmit={handleReset}
+                       p={3}>
+                    <Typography variant="h5" p={3}>
+                        Forgot your password?
+                    </Typography>
+                    <Typography sx={{maxWidth: "48vh"}}>
+                        Please enter the email address for your account.
+                        A verification link will be sent to you.
+                        Once you have received the verification link,
+                        you will be able to choose a new password for your
+                        account.
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        variant="standard"
                         id="standard-adornment-email"
                         name="email"
-                        type='email'
+                        type="email"
+                        label="Email"
                         value={email}
                         onChange={onChange}
-                        onKeyPress={(event) => handleKeypress(event)}
+                        onKeyDown={handleKeypress}
                     />
-                </FormControl>
-                <div className="Button">
                     <Button
-                        fullWidth={true}
+                        fullWidth
                         variant="contained"
                         color="primary"
                         size={'large'}
                         disabled={!(validateEmail(email))}
-                        onClick={() => {
-                            handleReset();
-                        }}
+                        type="submit"
                     >
                         Submit
                     </Button>
-                </div>
-                <div className="BackLink">
-                    <Link to="/login-form" component={FancyLink}>Back</Link>
-                </div>
+                    <Link
+                        className="BackLink"
+                        component={RouterLink}
+                        to="/login-form"
+                        color="inherit"
+                        underline="hover"
+                    >
+                        Back
+                    </Link>
+                </Stack>
             </Paper>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </div>
+        </Stack>
     );
 }

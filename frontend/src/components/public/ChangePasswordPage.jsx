@@ -19,6 +19,7 @@ const FancyLink = forwardRef(({navigate, ...props}, ref) => {
             ref={ref}
             variant="caption"
             color="inherit"
+            underline="hover"
             {...props}
         >{props.children}</MaterialLink>
     )

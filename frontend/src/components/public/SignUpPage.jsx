@@ -4,17 +4,22 @@ import Logo from "../../images/databucket-logo.png";
 import {
     Button,
     FormControl,
+    IconButton,
     Input,
+    InputAdornment,
     InputLabel,
     Link,
     Paper,
+    Stack,
+    TextField,
     Typography
 } from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
-import {Redirect} from "react-router-dom";
+import {Link as RouterLink, Redirect} from "react-router-dom";
 import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import {handleErrors, handleLoginErrors} from "../../utils/FetchHelper";
+import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 export default function SignUpPage() {
 
@@ -23,6 +28,7 @@ export default function SignUpPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [messageBox, setMessageBox] = useState(
         {open: false, severity: 'error', title: '', message: ''});
     const [recaptcha, setRecaptcha] = useState({enabled: true, siteKey: null});
@@ -249,83 +255,127 @@ export default function SignUpPage() {
         }
     };
 
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword);
+    }
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
     if (back) {
         return (<Redirect to="/login-form"/>);
     } else {
         return (
-            <div className="ContainerClassSingUp">
+            <Stack direction="column"
+                   alignItems="center"
+                   spacing={2}
+            >
                 {<img src={Logo} alt=''/>}
-                <Paper className="PaperClassSingUp" elevation={3}>
-                    <Typography className="TitleSingUp" variant="h5">
-                        Sign up
-                    </Typography>
-                    <Typography className="DescriptionSingUp">
-                        You want to create a new account?
-                        Send required fields and wait for the confirmation link.
-                        Until you confirm your registration, your account will
-                        be inactive.
-                    </Typography>
-                    <FormControl className="UsernameInputTextSingUp">
-                        <InputLabel
-                            htmlFor="standard-adornment-username">Username</InputLabel>
-                        <Input
+                <Paper elevation={3}>
+                    <Stack direction="column"
+                           spacing={2}
+                           alignItems="center"
+                           component="form"
+                           noValidate
+                           onSubmit={handleSubmit}
+                           p={3}
+                    >
+                        <Typography variant="h5" p={3}>
+                            Sign up
+                        </Typography>
+                        <Typography sx={{maxWidth: "48vh"}}>
+                            You want to create a new account?<br/>
+                            Send required fields and wait for the confirmation
+                            link.
+                            Until you confirm your registration, your account
+                            will be inactive.
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            variant="standard"
                             id="standard-adornment-username"
                             name="username"
                             type='text'
+                            label="Username"
                             value={username}
                             onChange={handleSetUsername}
-                            onKeyPress={(event) => handleKeypress(event)}
+                            onKeyDown={handleKeypress}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete',
                                     'off');
                             }}
                         />
-                    </FormControl>
-                    <FormControl className="EmailInputTextSingUp">
-                        <InputLabel
-                            htmlFor="standard-adornment-email">Email</InputLabel>
-                        <Input
+                        <TextField
+                            fullWidth
+                            variant="standard"
                             id="standard-adornment-email"
                             name="email"
                             type="email"
+                            label="Email"
                             value={email}
                             onChange={handleSetEmail}
-                            onKeyPress={(event) => handleKeypress(event)}
+                            onKeyDown={handleKeypress}
                         />
-                    </FormControl>
-                    <FormControl className="PasswordTextSingUp">
-                        <InputLabel
-                            htmlFor="standard-adornment-password">Password</InputLabel>
-                        <Input
-                            id="standard-adornment-password"
-                            name="password"
-                            type={'password'}
-                            value={password}
-                            onChange={handlePassword}
-                            onFocus={(event) => {
-                                event.target.setAttribute('autocomplete',
-                                    'off');
-                            }}
-                        />
-                    </FormControl>
-                    <FormControl className="PasswordTextSingUp">
-                        <InputLabel
-                            htmlFor="standard-adornment-confirm-password">Confirm
-                            password</InputLabel>
-                        <Input
-                            name="passwordConfirmation"
-                            type='password'
-                            value={passwordConfirmation}
-                            onChange={handlePasswordConfirmation}
-                            onFocus={(event) => {
-                                event.target.setAttribute('autocomplete',
-                                    'off');
-                            }}
-                        />
-                    </FormControl>
-                    <div className="ButtonSingUp">
+                        <FormControl variant="standard" fullWidth>
+                            <InputLabel
+                                htmlFor="standard-adornment-password">Password</InputLabel>
+                            <Input
+                                id="standard-adornment-password"
+                                name="password"
+                                autoComplete="current-password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={handlePassword}
+                                onFocus={(event) => {
+                                    event.target.setAttribute('autocomplete',
+                                        'off');
+                                }}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                        >
+                                            {showPassword ? <Visibility/> :
+                                                <VisibilityOff/>}
+                                        </IconButton>
+                                    </InputAdornment>
+                                }
+                            />
+                        </FormControl>
+                        <FormControl variant="standard" fullWidth>
+                            <InputLabel
+                                htmlFor="standard-adornment-confirm-password">Confirm
+                                password</InputLabel>
+                            <Input
+                                id="standard-adornment-password-confirmation"
+                                name="passwordConfirmation"
+                                autoComplete="new-password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={passwordConfirmation}
+                                onChange={handlePasswordConfirmation}
+                                onFocus={(event) => {
+                                    event.target.setAttribute('autocomplete',
+                                        'off');
+                                }}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                        >
+                                            {showPassword ? <Visibility/> :
+                                                <VisibilityOff/>}
+                                        </IconButton>
+                                    </InputAdornment>
+                                }
+                            />
+                        </FormControl>
                         <Button
-                            fullWidth={true}
+                            fullWidth
                             variant="contained"
                             color="primary"
                             size={'large'}
@@ -337,28 +387,25 @@ export default function SignUpPage() {
                                     && password === passwordConfirmation
                                     && !loading
                                 )}
-                            onClick={handleSubmit}
                         >
                             {loading ? 'Processing...' : 'Submit'}
                         </Button>
-                    </div>
-                    <div className="BackLinkSingUp">
                         <Link
-                            component="button"
+                            className="BackLinkSingUp"
+                            component={RouterLink}
                             color="inherit"
-                            onClick={() => {
-                                setBack(true);
-                            }}
+                            to="/login-form"
+                            underline="hover"
                         >
                             Back
                         </Link>
-                    </div>
+                    </Stack>
                 </Paper>
                 <MessageBox
                     config={messageBox}
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
-            </div>
+            </Stack>
         );
     }
 }

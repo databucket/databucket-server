@@ -31,19 +31,15 @@ spring:
           issuer-uri: http://auth.localhost/auth/realms/databucket
       client:
         registration:
-          dopauth:
+          doptools:
             client-id: databucket
 #            client-secret: 69b9a190-407b-4bfd-a347-5b9b75959876
             authorization-grant-type: authorization_code
             redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
             scope: openid
         provider:
-          dopauth:
+          doptools:
             issuer-uri: http://auth.localhost/auth/realms/databucket
-#            authorization-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/auth
-#            token-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/token
-#            user-info-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/userinfo
-#            jwk-set-uri: https://ocasdev.corpnet.pl/auth/realms/corpdev/protocol/openid-connect/certs
             user-name-attribute: preferred_username
 logging:
   level:
