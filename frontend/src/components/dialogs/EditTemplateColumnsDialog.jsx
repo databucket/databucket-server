@@ -1,49 +1,78 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {makeStyles, withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Done';
-import Typography from '@material-ui/core/Typography';
-import MoreHoriz from "@material-ui/icons/MoreHoriz";
-import Tooltip from "@material-ui/core/Tooltip";
-import PropTypes from 'prop-types';
-import Button from "@material-ui/core/Button";
 import {
-    getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor,
-} from "../../utils/MaterialTableHelper";
+    Button,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tab,
+    Tabs,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
+import PropTypes from 'prop-types';
 import {convertNullValuesInCollection} from "../../utils/JsonHelper";
 import {getColumnMapper} from "../../utils/NullValueMappers";
-import {Tabs} from "@material-ui/core";
-import Tab from "@material-ui/core/Tab";
 import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
 import ColumnsTable from "../utils/ColumnsTable";
-import MuiDialogActions from "@material-ui/core/DialogActions";
 import TemplatesContext from "../../context/templates/TemplatesContext";
 import {getTemplatesArtefacts} from "../management/templatesConfig/_TemplUtils";
 
-const styles = (theme) => ({
-    root: {
+const PREFIX = 'EditTemplateColumnsDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    root3: `${PREFIX}-root3`,
+    selected: `${PREFIX}-selected`,
+    oneLine: `${PREFIX}-oneLine`,
+    tabs: `${PREFIX}-tabs`,
+    devGrabSpace: `${PREFIX}-devGrabSpace`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const Root = styled('div')(({theme}) => ({
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+    },
+
+    [`& .${classes.tabs}`]: {
+        flexGrow: 1
+    },
+
+    [`& .${classes.devGrabSpace}`]: {
+        width: '200px'
+    },
+
+    [`& .${classes.root}`]: {
         margin: 0,
         marginLeft: 15,
         padding: theme.spacing(1),
     },
-    closeButton: {
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
     }
-});
+}));
 
-const DialogTitle = withStyles(styles)((props) => {
-    const {children, classes, onClose, ...other} = props;
+const DialogTitle = ((props) => {
+    const {children, onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             {children}
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}
@@ -51,32 +80,9 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
-const useStyles = makeStyles(() => ({
-    oneLine: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-    tabs: {
-        flexGrow: 1
-    },
-    devGrabSpace: {
-        width: '200px'
-    }
-}));
+const DialogActions = MuiDialogActions;
 
 
 EditTemplateColumnsDialog.propTypes = {
@@ -89,7 +95,7 @@ EditTemplateColumnsDialog.propTypes = {
 
 export default function EditTemplateColumnsDialog(props) {
 
-    const classes = useStyles();
+
     const [properties, setProperties] = useState(null);
     const [columns, setColumns] = useState(convertNullValuesInCollection(props.configuration.columns, getColumnMapper()));
     const [open, setOpen] = useState(false);
@@ -130,7 +136,7 @@ export default function EditTemplateColumnsDialog(props) {
     }
 
     return (
-        <div>
+        <Root>
             <Tooltip title={'Define columns'}>
                 <Button
                     endIcon={<MoreHoriz/>}
@@ -162,42 +168,37 @@ export default function EditTemplateColumnsDialog(props) {
                         <div className={classes.devGrabSpace}/>
                     </div>
                 </DialogTitle>
-                <DialogContent dividers style={{height: '75vh'}} ref = {dialogContentRef}>
+                <DialogContent
+                    dividers
+                    style={{height: '75vh'}}
+                    ref={dialogContentRef}
+                    classes={{
+                        root: classes.root
+                    }}>
                     {activeTab === 0 &&
-                    <ColumnsTable
-                        columns={columns}
-                        properties={properties}
-                        onChange={setColumns}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <ColumnsTable
+                            columns={columns}
+                            properties={properties}
+                            onChange={setColumns}
+                            parentContentRef={dialogContentRef}
+                        />}
                     {activeTab === 1 &&
-                    <PropertiesTable
-                        used={getUsedUuids()}
-                        data={properties}
-                        enums={enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={getUsedUuids()}
+                            data={properties}
+                            enums={enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            parentContentRef={dialogContentRef}
+                        />}
                 </DialogContent>
-                <DialogActions/>
+                <DialogActions
+                    classes={{
+                        root: classes.root2
+                    }}/>
             </Dialog>
-        </div>
+        </Root>
     );
-};
+}
 
-const tabsStyles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: getSettingsTabHooverBackgroundColor(theme),
-            opacity: 1
-        },
-        "&$selected": {
-            color: getSettingsTabSelectedColor(theme),
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(tabsStyles)(Tab)
+const StyledTab = Tab

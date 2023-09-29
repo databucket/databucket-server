@@ -1,13 +1,19 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
@@ -20,21 +26,23 @@ import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnBuckets,
     getColumnClasses,
+    getColumnCreatedAt,
+    getColumnCreatedBy,
     getColumnDescription,
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnId, getColumnCreatedBy, getColumnCreatedAt
+    getColumnId,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
 } from "../utils/StandardColumns";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import {getTagMapper} from "../../utils/NullValueMappers";
 import ClassesContext from "../../context/classes/ClassesContext";
 import TagsContext from "../../context/tags/TagsContext";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function TagsTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -101,8 +109,8 @@ export default function TagsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -203,9 +211,19 @@ export default function TagsTab() {
                                     .catch(error => {
                                         e = true;
                                         if (error.includes('already used by items'))
-                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'warning',
+                                                title: 'Item can not be removed',
+                                                message: error
+                                            });
                                         else
-                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'error',
+                                                title: 'Error',
+                                                message: error
+                                            });
                                         reject();
                                     })
                                     .then(() => {

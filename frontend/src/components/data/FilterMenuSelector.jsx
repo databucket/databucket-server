@@ -1,8 +1,35 @@
 import React, {useState} from 'react';
 import PropTypes from "prop-types";
-import MenuItem from "@material-ui/core/MenuItem";
-import {IconButton, Menu, Tooltip} from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import {IconButton, Menu, MenuItem, styled, Tooltip} from "@mui/material";
+
+const PREFIX = 'FilterMenuSelector';
+
+const classes = {
+    view: `${PREFIX}-view`,
+    select: `${PREFIX}-select`,
+    description: `${PREFIX}-description`
+};
+
+const Root = styled('div')(({theme}) => ({
+    flexGrow: 1,
+
+    [`& .${classes.view}`]: {
+        paddingLeft: theme.spacing(2),
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.select}`]: {
+        marginLeft: '10px',
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.description}`]: {
+        padding: theme.spacing(2),
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+    }
+}));
 
 FilterMenuSelector.propTypes = {
     filters: PropTypes.array.isRequired,
@@ -10,7 +37,7 @@ FilterMenuSelector.propTypes = {
 }
 
 export default function FilterMenuSelector(props) {
-    const classes = useStyles();
+
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -30,14 +57,14 @@ export default function FilterMenuSelector(props) {
 
     if (props.filters != null && props.filters.length > 0)
         return (
-            <div className={classes.root}>
+            <Root>
                 <Tooltip title={'Select filter'}>
                     <IconButton
                         className={classes.select}
                         aria-controls="long-menu"
                         onClick={handleClick}
                         color={'inherit'}
-                    >
+                        size="large">
                         <span className="material-icons">arrow_circle_down</span>
                     </IconButton>
                 </Tooltip>
@@ -64,28 +91,8 @@ export default function FilterMenuSelector(props) {
                         </MenuItem>
                     ))}
                 </Menu>
-            </div>
+            </Root>
         );
     else
         return (<div/>);
-};
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1
-    },
-    view: {
-        paddingLeft: theme.spacing(2),
-        padding: theme.spacing(1)
-    },
-    select: {
-        marginLeft: '10px',
-        padding: theme.spacing(1)
-    },
-    description: {
-        padding: theme.spacing(2),
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis"
-    }
-}));
+}

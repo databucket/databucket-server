@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from "react";
 import "./SignUpPage.css";
 import Logo from "../../images/databucket-logo.png";
-import {Paper} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
+import {Paper, Typography} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
 import {Redirect, useParams} from "react-router-dom";
 import {getConfirmationUrl} from "../../utils/UrlBuilder";
@@ -12,31 +11,37 @@ import {getGetOptions} from "../../utils/MaterialTableHelper";
 export default function ConfirmationPage() {
 
     const inputParams = useParams();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [done, setDone] = useState(false);
     const [redirect, setRedirect] = useState(false);
 
     useEffect(() => {
         let resultOk = true;
         fetch(getConfirmationUrl(inputParams[0]), getGetOptions())
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(response => {
-                if (resultOk) {
-                    setDone(true);
-                    setTimeout(() => {
-                        setRedirect(true);
-                    }, 6000)
-                }
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(response => {
+            if (resultOk) {
+                setDone(true);
+                setTimeout(() => {
+                    setRedirect(true);
+                }, 6000)
+            }
+        });
     }, [inputParams]);
 
-    if (redirect)
+    if (redirect) {
         return (<Redirect to="/login-form"/>);
-    else
+    } else {
         return (
             <div className="ContainerClass">
                 {<img src={Logo} alt=''/>}
@@ -55,4 +60,5 @@ export default function ConfirmationPage() {
                 />
             </div>
         );
+    }
 }

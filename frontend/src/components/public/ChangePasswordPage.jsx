@@ -1,4 +1,4 @@
-import {Button, FormControl, Input, InputLabel, Link as MaterialLink, Paper, Typography} from "@material-ui/core";
+import {Button, FormControl, Input, InputLabel, Link as MaterialLink, Paper, Typography} from "@mui/material";
 import React, {forwardRef, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {clearToken, getToken, getUsername} from "../../utils/ConfigurationStorage";

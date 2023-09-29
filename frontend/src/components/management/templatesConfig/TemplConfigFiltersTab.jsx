@@ -1,19 +1,39 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
-import {getClassByUid, getObjectLengthStr, isItemChanged, validateItem} from "../../../utils/JsonHelper";
+import {
+    getClassByUid,
+    getObjectLengthStr,
+    isItemChanged,
+    validateItem
+} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
-import {getColumnClass, getColumnCreatedAt, getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {
+    getColumnClass,
+    getColumnCreatedAt,
+    getColumnDescription,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
+} from "../../utils/StandardColumns";
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 import PropTypes from "prop-types";
 import {getClassesLookup} from "../../../utils/LookupHelper";
-import EditTemplateFilterRulesDialog from "../../dialogs/EditTemplateFilterRulesDialog";
-import {getTemplatesArtefacts, getTemplatesArtefactsEditable, templateArtefactCreationEnrichment, templateArtefactModifyingEnrichment} from "./_TemplUtils";
+import EditTemplateFilterRulesDialog
+    from "../../dialogs/EditTemplateFilterRulesDialog";
+import {
+    getTemplatesArtefacts,
+    getTemplatesArtefactsEditable,
+    templateArtefactCreationEnrichment,
+    templateArtefactModifyingEnrichment
+} from "./_TemplUtils";
 
 TemplConfigFiltersTab.propTypes = {
     template: PropTypes.object.isRequired,
@@ -23,7 +43,6 @@ TemplConfigFiltersTab.propTypes = {
 export default function TemplConfigFiltersTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -108,8 +127,8 @@ export default function TemplConfigFiltersTab(props) {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getTemplateTableHeight(height),
-                    minBodyHeight: getTemplateTableHeight(height),
+                    maxBodyHeight: getTemplateTableHeight(),
+                    minBodyHeight: getTemplateTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

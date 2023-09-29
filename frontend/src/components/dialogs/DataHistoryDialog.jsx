@@ -1,58 +1,78 @@
 import React, {createRef, useEffect, useState} from 'react';
-import {useTheme, withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
+import {
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
+import {
+    Close as CloseIcon,
+    Lock as LockedIcon,
+    LockOpen as UnlockedIcon
+} from '@mui/icons-material';
 import MaterialTable from 'material-table';
-import LockedIcon from '@material-ui/icons/Lock';
-import UnlockedIcon from '@material-ui/icons/LockOpen';
 import DataHistoryPropertiesDiffDialog from './DataHistoryPropertiesDiffDialog';
 import PropTypes from "prop-types";
 import {createTagLookup} from "../../utils/JsonHelper";
-import {getDeleteOptions, getTableHeaderBackgroundColor} from "../../utils/MaterialTableHelper";
-import {Tooltip} from "@material-ui/core";
+import {
+    getDeleteOptions,
+    getTableHeaderBackgroundColor
+} from "../../utils/MaterialTableHelper";
 import {getClearDataHistoryByIdUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
 
-const styles = theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    container: {
+const PREFIX = 'DataHistoryDialog';
+
+const classes = {
+    container: `${PREFIX}-container`,
+    clearHistoryButton: `${PREFIX}-clearHistoryButton`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const StyledDialog = styled(Dialog)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
+
+    [`& .${classes.container}`]: {
         display: 'flex',
         flexWrap: 'wrap',
     },
-    clearHistoryButton: {
+
+    [`& .${classes.clearHistoryButton}`]: {
         position: 'absolute',
         right: theme.spacing(6),
         top: theme.spacing(1)
     },
-    closeButton: {
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
     }
-});
+}));
 
-const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose, onClearDataHistory} = props;
+const DialogTitle = (({children, onClose, onClearDataHistory}) => {
     return (
-        <MuiDialogTitle disableTypography className={classes.root}>
+        <MuiDialogTitle>
             <Typography variant="h6">{children}</Typography>
             <Tooltip id="clear-history" title="Clear data history">
-                <IconButton className={classes.clearHistoryButton} onClick={onClearDataHistory} color={"inherit"}>
+                <IconButton
+                    className={classes.clearHistoryButton}
+                    onClick={onClearDataHistory}
+                    color={"inherit"}
+                    size="large">
                     <span className="material-icons">delete</span>
                 </IconButton>
             </Tooltip>
             {onClose ? (
                 <Tooltip id="close" title="Close">
-                    <IconButton className={classes.closeButton} onClick={onClose}>
+                    <IconButton className={classes.closeButton} onClick={onClose} size="large">
                         <CloseIcon/>
                     </IconButton>
                 </Tooltip>
@@ -61,18 +81,9 @@ const DialogTitle = withStyles(styles)(props => {
     );
 });
 
-const DialogContent = withStyles(theme => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+const DialogActions = MuiDialogActions;
 
 DataHistoryDialog.propTypes = {
     bucket: PropTypes.object,
@@ -97,13 +108,15 @@ export default function DataHistoryDialog(props) {
                 {title: 'Id', field: 'index'},
                 {
                     title: 'Modified at', field: 'modified_at', type: 'datetime', editable: 'never',
-                    render: rowData => <div>{rowData != null ? rowData.modified_at != null ? new Date(rowData.modified_at).toLocaleString() : null : null}</div>
+                    render: rowData =>
+                        <div>{rowData != null ? rowData.modified_at != null ? new Date(rowData.modified_at).toLocaleString() : null : null}</div>
                 },
                 {title: 'Modified by', field: 'modified_by', editable: 'never'},
                 {title: 'Tag', field: 'tag_id', editable: 'never', lookup: tagsLookup},
                 {
                     title: 'Reserved', field: 'reserved', editable: 'never',
-                    render: rowData => <div>{rowData.reserved != null ? rowData.reserved ? <LockedIcon color="action"/> : <UnlockedIcon color="action"/> : ''}</div>
+                    render: rowData => <div>{rowData.reserved != null ? rowData.reserved ?
+                        <LockedIcon color="action"/> : <UnlockedIcon color="action"/> : ''}</div>
                 },
                 {
                     title: 'Properties', field: 'properties', editable: 'never',
@@ -137,23 +150,19 @@ export default function DataHistoryDialog(props) {
     };
 
     const handleClearDataHistory = () => {
-        let resultOk = true;
         fetch(getClearDataHistoryByIdUrl(props.bucket, props.dataRowId), getDeleteOptions())
             .then(handleErrors)
+            .then(result => {
+                setState({...state, history: []});
+            })
             .catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(result => {
-                if (resultOk) {
-                    setState({...state, history: []});
-                }
             });
     }
 
 
     return (
-        <Dialog
+        <StyledDialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
             aria-labelledby="customized-dialog-title"
             open={state.open}
@@ -187,6 +196,6 @@ export default function DataHistoryDialog(props) {
                 />
             </DialogContent>
             <DialogActions/>
-        </Dialog>
+        </StyledDialog>
     );
 }

@@ -1,72 +1,146 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {makeStyles, withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
+import {
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions as MuiDialogActions,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    Grid,
+    IconButton,
+    styled,
+    Tab,
+    Tabs,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon} from '@mui/icons-material';
 import PropTypes from "prop-types";
-import {CircularProgress, Tabs} from "@material-ui/core";
-import {getDeleteOptions, getPostOptions, getPutOptions, getSettingsTabHooverBackgroundColor, getSettingsTabSelectedColor} from "../../utils/MaterialTableHelper";
-import Tab from "@material-ui/core/Tab";
+import {
+    getDeleteOptions,
+    getPostOptions,
+    getPutOptions
+} from "../../utils/MaterialTableHelper";
 import {MessageBox} from "../utils/MessageBox";
 import TaskActions from "../utils/TaskActions";
 import PropertiesTable from "../utils/PropertiesTable";
 import {getBucketTags, getBucketTasks} from "../data/BucketDataTableHelper";
 import EnumsProvider from "../../context/enums/EnumsProvider";
-import Button from "@material-ui/core/Button";
 import TaskMenuSelector from "../data/TaskMenuSelector";
 import {handleErrors} from "../../utils/FetchHelper";
-import {getClearDataHistoryByRulesUrl, getDataUrl} from "../../utils/UrlBuilder";
+import {
+    getClearDataHistoryByRulesUrl,
+    getDataUrl
+} from "../../utils/UrlBuilder";
 import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
-import {Query, Utils as QbUtils} from "react-awesome-query-builder";
-import {createConfig, getInitialTree, renderBuilder, renderResult} from "../utils/QueryBuilderHelper";
+import {Query, Utils as QbUtils} from "@react-awesome-query-builder/mui";
+import {
+    createConfig,
+    getInitialTree,
+    renderBuilder,
+    renderResult
+} from "../utils/QueryBuilderHelper";
 import AccessContext from "../../context/access/AccessContext";
-import {getTaskExecutionDialogSize, setTaskExecutionDialogSize} from "../../utils/ConfigurationStorage";
-import Grid from "@material-ui/core/Grid";
-import {debounce2} from "../utils/UseWindowDimension";
+import {
+    getTaskExecutionDialogSize,
+    setTaskExecutionDialogSize
+} from "../../utils/ConfigurationStorage";
+import {debounce} from "../utils/Debouncer";
 
-const styles = theme => ({
-    root: {
+const PREFIX = 'TaskExecutionDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    root3: `${PREFIX}-root3`,
+    selected: `${PREFIX}-selected`,
+    dialogPaper: `${PREFIX}-dialogPaper`,
+    oneLine: `${PREFIX}-oneLine`,
+    tabs: `${PREFIX}-tabs`,
+    devGrabSpace: `${PREFIX}-devGrabSpace`,
+    divActionGrabSpace: `${PREFIX}-divActionGrabSpace`,
+    container: `${PREFIX}-container`,
+    closeButton: `${PREFIX}-closeButton`,
+    smallerButton: `${PREFIX}-smallerButton`,
+    largerButton: `${PREFIX}-largerButton`
+};
+
+const StyledDialog = styled(Dialog)(({theme}) => ({
+    [`& .${classes.dialogPaper}`]: {
+        minHeight: '80vh',
+    },
+
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+    },
+
+    [`& .${classes.tabs}`]: {
+        flexGrow: 1
+    },
+
+    [`& .${classes.devGrabSpace}`]: {
+        width: '170px'
+    },
+
+    [`& .${classes.divActionGrabSpace}`]: {
+        width: '30px'
+    },
+
+    [`& .${classes.root}`]: {
         margin: 0,
         padding: theme.spacing(2),
     },
-    container: {
+    [`& .${classes.container}`]: {
         display: 'flex',
         flexWrap: 'wrap',
     },
-    closeButton: {
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
     },
-    smallerButton: {
+    [`& .${classes.smallerButton}`]: {
         position: 'absolute',
         right: theme.spacing(15),
         top: theme.spacing(1)
     },
-    largerButton: {
+    [`& .${classes.largerButton}`]: {
         position: 'absolute',
         right: theme.spacing(10),
         top: theme.spacing(1)
     }
-});
+}));
 
-const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
+const DialogTitle = (props => {
+    const {children, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="Smaller" className={classes.smallerButton} onClick={onMakeDialogSmaller} color={"inherit"} disabled={onMakeDialogSmaller == null}>
+            <IconButton
+                aria-label="Smaller"
+                className={classes.smallerButton}
+                onClick={onMakeDialogSmaller}
+                color={"inherit"}
+                disabled={onMakeDialogSmaller == null}
+                size="large">
                 <span className="material-icons">fullscreen_exit</span>
             </IconButton>
-            <IconButton aria-label="Larger" className={classes.largerButton} onClick={onMakeDialogLarger} color={"inherit"} disabled={onMakeDialogLarger == null}>
+            <IconButton
+                aria-label="Larger"
+                className={classes.largerButton}
+                onClick={onMakeDialogLarger}
+                color={"inherit"}
+                disabled={onMakeDialogLarger == null}
+                size="large">
                 <span className="material-icons">fullscreen</span>
             </IconButton>
             {onClose ? (
-                <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="Close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}
@@ -74,18 +148,9 @@ const DialogTitle = withStyles(styles)(props => {
     );
 });
 
-const DialogContent = withStyles(theme => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
-const DialogActions = withStyles(theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+const DialogActions = MuiDialogActions;
 
 TaskExecutionDialog.propTypes = {
     open: PropTypes.bool.isRequired,
@@ -99,13 +164,20 @@ const initialActions = {properties: []};
 
 export default function TaskExecutionDialog(props) {
 
-    const classes = useStyles();
+
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [appliesCount, setAppliesCount] = useState(0);
-    const [state, setState] = useState({actions: initialActions, properties: [], logic: null, tree: null, config: null, processing: false});
+    const [state, setState] = useState({
+        actions: initialActions,
+        properties: [],
+        logic: null,
+        tree: null,
+        config: null,
+        processing: false
+    });
     const [dialogSize, setDialogSize] = useState('md');
     const dialogContentRef = React.useRef(null);
 
@@ -119,7 +191,14 @@ export default function TaskExecutionDialog(props) {
             const properties = getClassProperties();
             const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
             const tree = QbUtils.checkTree(getInitialTree(props.activeLogic, null, config), config);
-            setState({...state, properties: getClassProperties(), actions: initialActions, logic: props.activeLogic, tree: tree, config: config});
+            setState({
+                ...state,
+                properties: getClassProperties(),
+                actions: initialActions,
+                logic: props.activeLogic,
+                tree: tree,
+                config: config
+            });
         }
     }, [props.open]);
 
@@ -158,7 +237,7 @@ export default function TaskExecutionDialog(props) {
     }, [props.open, state.logic]);
 
     const refreshAppliesCount = useCallback(
-        debounce2(({open, bucket, logic}) => {
+        debounce(({open, bucket, logic}) => {
             if (open) {
                 let resultOk = true;
                 fetch(getDataUrl(bucket) + '/get?limit=0', getPostOptions({logic}))
@@ -261,7 +340,12 @@ export default function TaskExecutionDialog(props) {
                         }
                     });
             } else
-                setMessageBox({open: true, severity: 'info', title: "No modifications has been defined!", message: null});
+                setMessageBox({
+                    open: true,
+                    severity: 'info',
+                    title: "No modifications has been defined!",
+                    message: null
+                });
         }
     }
 
@@ -339,7 +423,7 @@ export default function TaskExecutionDialog(props) {
     }
 
     return (
-        <Dialog
+        <StyledDialog
             onClose={handleClose} // Enable this to close editor by clicking outside the dialog
             aria-labelledby="task-execution-dialog-title"
             open={props.open}
@@ -354,7 +438,8 @@ export default function TaskExecutionDialog(props) {
             >
                 <div className={classes.oneLine}>
                     <Typography variant="h6">{'Task execution'}</Typography>
-                    <TaskMenuSelector tasks={getBucketTasks(props.bucket, accessContext.tasks)} onTaskSelected={onTaskSelected}/>
+                    <TaskMenuSelector tasks={getBucketTasks(props.bucket, accessContext.tasks)}
+                                      onTaskSelected={onTaskSelected}/>
                     <Tabs
                         className={classes.tabs}
                         value={activeTab}
@@ -369,57 +454,67 @@ export default function TaskExecutionDialog(props) {
                 </div>
             </DialogTitle>
             <EnumsProvider>
-                <DialogContent dividers style={{height: '62vh'}} ref={dialogContentRef}>
+                <DialogContent
+                    dividers
+                    style={{height: '62vh'}}
+                    ref={dialogContentRef}
+                    classes={{
+                        root: classes.root
+                    }}>
                     {props.open && state.processing &&
-                    <Grid
-                        container
-                        spacing={0}
-                        direction="column"
-                        alignItems="center"
-                        justify="center"
-                        style={{minHeight: '50vh'}}
-                    >
-                        <Grid item xs={3}>
-                            <CircularProgress disableShrink/>
+                        <Grid
+                            container
+                            spacing={0}
+                            direction="column"
+                            alignItems="center"
+                            justifyContent="center"
+                            style={{minHeight: '50vh'}}
+                        >
+                            <Grid item xs={3}>
+                                <CircularProgress disableShrink/>
+                            </Grid>
                         </Grid>
-                    </Grid>
                     }
                     {props.open && !state.processing && activeTab === 0 &&
-                    <TaskActions
-                        actions={state.actions}
-                        properties={state.properties}
-                        tags={getBucketTags(props.bucket, accessContext.tags)}
-                        onChange={setActions}
-                        pageSize={null}
-                    />}
+                        <TaskActions
+                            actions={state.actions}
+                            properties={state.properties}
+                            tags={getBucketTags(props.bucket, accessContext.tags)}
+                            onChange={setActions}
+                            pageSize={null}
+                        />}
 
                     {props.open && !state.processing && activeTab === 1 &&
-                    <div>
-                        <Query
-                            {...state.config}
-                            value={state.tree}
-                            onChange={onRulesChange}
-                            renderBuilder={renderBuilder}
-                        />
-                        {renderResult({tree: state.tree, config: state.config})}
-                    </div>
+                        <div>
+                            <Query
+                                {...state.config}
+                                value={state.tree}
+                                onChange={onRulesChange}
+                                renderBuilder={renderBuilder}
+                            />
+                            {renderResult({tree: state.tree, config: state.config})}
+                        </div>
                     }
 
                     {props.open && !state.processing && activeTab === 2 &&
-                    <PropertiesTable
-                        used={getUsedUuids()}
-                        data={state.properties}
-                        enums={accessContext.enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        pageSize={null}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={getUsedUuids()}
+                            data={state.properties}
+                            enums={accessContext.enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            pageSize={null}
+                            parentContentRef={dialogContentRef}
+                        />}
 
                 </DialogContent>
             </EnumsProvider>
-            <DialogActions>
-                <Typography color={'primary'}>{`${appliesCount} data ${appliesCount > 1 ? 'rows' : 'row'} ${appliesCount > 1 ? 'match' : 'matches'} the rules`}</Typography>
+            <DialogActions
+                classes={{
+                    root: classes.root2
+                }}>
+                <Typography
+                    color={'primary'}>{`${appliesCount} data ${appliesCount > 1 ? 'rows' : 'row'} ${appliesCount > 1 ? 'match' : 'matches'} the rules`}</Typography>
                 <div className={classes.divActionGrabSpace}/>
                 <Button
                     variant="contained"
@@ -434,44 +529,9 @@ export default function TaskExecutionDialog(props) {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </Dialog>
+        </StyledDialog>
     );
 }
 
 
-const useStyles = makeStyles(() => ({
-    dialogPaper: {
-        minHeight: '80vh',
-    },
-    oneLine: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-    tabs: {
-        flexGrow: 1
-    },
-    devGrabSpace: {
-        width: '170px'
-    },
-    divActionGrabSpace: {
-        width: '30px'
-    }
-}));
-
-const tabStyles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: getSettingsTabHooverBackgroundColor(theme),
-            opacity: 1
-        },
-        "&$selected": {
-            // backgroundColor: getSettingsTabSelectedBackgroundColor(theme),
-            color: getSettingsTabSelectedColor(theme),
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(tabStyles)(Tab)
+const StyledTab = Tab

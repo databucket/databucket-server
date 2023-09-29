@@ -1,9 +1,5 @@
 import React, {useState} from 'react';
-import Input from '@material-ui/core/Input';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Select from '@material-ui/core/Select';
-import Checkbox from '@material-ui/core/Checkbox';
+import {Checkbox, Input, ListItemText, MenuItem, Select} from '@mui/material';
 import {features} from "../utils/ViewFeatures";
 
 const MenuProps = {
@@ -15,7 +11,9 @@ const MenuProps = {
 };
 
 export default function SelectMultiViewFeaturesLookup(props) {
-    const [selectedFeatures, setSelectedFeatures] = useState(props.rowData['featuresIds'] != null ? props.rowData['featuresIds'] : []);
+    const [selectedFeatures, setSelectedFeatures] = useState(
+        props.rowData['featuresIds'] != null ? props.rowData['featuresIds']
+            : []);
 
     const handleChange = (event) => {
         setSelectedFeatures(event.target.value);
@@ -35,7 +33,8 @@ export default function SelectMultiViewFeaturesLookup(props) {
             >
                 {features.map((feature) => (
                     <MenuItem key={feature.id} value={feature.id}>
-                        <Checkbox checked={selectedFeatures.indexOf(feature.id) > -1}/>
+                        <Checkbox checked={selectedFeatures.indexOf(feature.id)
+                            > -1}/>
                         <ListItemText primary={feature.name}/>
                     </MenuItem>
                 ))}

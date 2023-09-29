@@ -1,18 +1,42 @@
 import React, {useState} from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
+import {
+    IconButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    styled,
+    Typography
+} from '@mui/material';
 import DynamicIcon from '../utils/DynamicIcon';
-import {Typography} from "@material-ui/core";
 
-const StyledMenu = withStyles({
-    paper: {
+const PREFIX = 'FieldSelectEnum';
+
+const classes = {
+    paper: `${PREFIX}-paper`,
+    root: `${PREFIX}-root`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.paper}`]: {
         border: '1px solid #d3d4d5',
     },
-})(props => (
+
+    [`& .${classes.root}`]: {
+        // '&:focus': {
+        //     backgroundColor: theme.palette.secondary.main,
+        //     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+        //         color: theme.palette.common.white,
+        //     },
+        // },
+    }
+}));
+
+const StyledMenu = (props => (
     <Menu
         // elevation={10}
         getContentAnchorEl={null}
@@ -28,16 +52,7 @@ const StyledMenu = withStyles({
     />
 ));
 
-const StyledMenuItem = withStyles(theme => ({
-    root: {
-        // '&:focus': {
-        //     backgroundColor: theme.palette.secondary.main,
-        //     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-        //         color: theme.palette.common.white,
-        //     },
-        // },
-    },
-}))(MenuItem);
+const StyledMenuItem = MenuItem;
 
 export default function FieldSelectEnum(props) {
 
@@ -55,13 +70,11 @@ export default function FieldSelectEnum(props) {
     };
 
     return (
-        <div>
+        <Root>
             {iconsEnabled ?
-                <IconButton
-                    onClick={handleClick}
-                    color="default"
-                >
-                    <DynamicIcon iconName={items.filter(item => item.value === props.value)[0].icon}/>
+                <IconButton onClick={handleClick} color="default" size="large">
+                    <DynamicIcon iconName={items.filter(
+                        item => item.value === props.value)[0].icon}/>
                 </IconButton>
                 :
                 <Typography>{props.value}</Typography>
@@ -72,18 +85,23 @@ export default function FieldSelectEnum(props) {
                 keepMounted
                 open={Boolean(anchorEl)}
                 onClose={() => handleClose(null, null)}
-            >
+                classes={{
+                    paper: classes.paper
+                }}>
                 {items.map((item) => (
                     <StyledMenuItem
                         onClick={() => handleClose(item.value)}
                         selected={item.value === props.value}
                         key={item.value}
-                    >
-                        {iconsEnabled && <ListItemIcon> <DynamicIcon iconName={item.icon}/> </ListItemIcon>}
+                        classes={{
+                            root: classes.root
+                        }}>
+                        {iconsEnabled && <ListItemIcon> <DynamicIcon
+                            iconName={item.icon}/> </ListItemIcon>}
                         <ListItemText primary={item.text}/>
                     </StyledMenuItem>
                 ))}
             </StyledMenu>
-        </div>
+        </Root>
     );
 }

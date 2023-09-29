@@ -1,56 +1,64 @@
 import React, {useEffect, useState} from 'react'
-import {withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
-import CompareIcon from '@material-ui/icons/YoutubeSearchedFor';
+import {
+    Dialog,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    useTheme
+} from '@mui/material';
+import {
+    Close as CloseIcon,
+    YoutubeSearchedFor as CompareIcon
+} from '@mui/icons-material';
 import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-import ReactDiffViewer from "react-diff-viewer";
-import {useTheme} from "@material-ui/core";
+import ReactDiffViewer from "react-diff-viewer-continued";
 
-const styles = theme => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    closeButton: {
+const PREFIX = 'DataHistoryPropertiesDiffDialog';
+
+const classes = {
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1)
-    },
-});
+    }
+}));
 
-const DialogTitle = withStyles(styles)(props => {
-    const {children, classes, onClose} = props;
+const DialogTitle = (({children, onClose}) => {
     return (
-        <MuiDialogTitle disableTypography className={classes.root}>
-            <Typography variant="h6">{children}</Typography>
+        <StyledDialogTitle>
+            {children}
             {onClose ? (
-                <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="Close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
 });
 
-const DialogContent = withStyles(theme => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
 export default function DataHistoryPropertiesDiffDialog(props) {
 
     const theme = useTheme();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [state, setState] = useState({
         bucket: null,
         dataRowId: null,
@@ -77,40 +85,50 @@ export default function DataHistoryPropertiesDiffDialog(props) {
         const previousId = getPreviousId(state.history, state.selectedRow);
 
         let resultOk = true;
-        fetch(getDataHistoryPropertiesUrl(state.bucket, state.dataRowId, previousId, state.selectedRow.id), getGetOptions())
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                resultOk = false;
-            })
-            .then(result => {
-                if (resultOk) {
-                    if (previousId > 0) {
-                        oValue = result.filter(d => (d.id === previousId))[0].properties;
-                        oValue = JSON.stringify(oValue, null, 2);
-                    }
-
-                    nValue = result.filter(d => (d.id === state.selectedRow.id))[0].properties;
-                    nValue = JSON.stringify(nValue, null, 2);
-                    setState({
-                        ...state,
-                        oldValue: oValue,
-                        newValue: nValue,
-                        open: true,
-                    });
-                }
+        fetch(getDataHistoryPropertiesUrl(state.bucket, state.dataRowId,
+            previousId, state.selectedRow.id), getGetOptions())
+        .then(handleErrors)
+        .catch(error => {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Error',
+                message: error
             });
+            resultOk = false;
+        })
+        .then(result => {
+            if (resultOk) {
+                if (previousId > 0) {
+                    oValue = result.filter(
+                        d => (d.id === previousId))[0].properties;
+                    oValue = JSON.stringify(oValue, null, 2);
+                }
+
+                nValue = result.filter(
+                    d => (d.id === state.selectedRow.id))[0].properties;
+                nValue = JSON.stringify(nValue, null, 2);
+                setState({
+                    ...state,
+                    oldValue: oValue,
+                    newValue: nValue,
+                    open: true,
+                });
+            }
+        });
     };
 
     const getPreviousId = (history, row) => {
         let result = -1;
-        for (let i = 0; i < history.length; i++) {
-            let obj = history[i];
-            if (obj.hasOwnProperty('properties') && obj.properties === true && obj.id !== row.id) {
+        for (const element of history) {
+            let obj = element;
+            if (obj.hasOwnProperty('properties') && obj.properties === true
+                && obj.id !== row.id) {
                 result = obj.id;
             }
-            if (obj.id === row.id)
+            if (obj.id === row.id) {
                 return result;
+            }
         }
     }
 
@@ -119,7 +137,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
     };
 
     return (
-        <div>
+        <>
             <Tooltip title='Show changes'>
                 <IconButton
                     onClick={handleClickOpen}
@@ -141,7 +159,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <ReactDiffViewer
-                        useDarkTheme={theme.palette.type === 'dark'}
+                        useDarkTheme={theme.palette.mode === 'dark'}
                         oldValue={state.oldValue}
                         newValue={state.newValue}
                         splitView={true}
@@ -153,6 +171,6 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
             </Dialog>
-        </div>
+        </>
     );
 }

@@ -1,17 +1,20 @@
 import React, {useState} from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    InputAdornment,
+    OutlinedInput,
+    Typography
+} from '@mui/material';
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import CopyIcon from "@material-ui/icons/FileCopy";
-import FormControl from "@material-ui/core/FormControl";
-import {InputAdornment, OutlinedInput} from "@material-ui/core";
+import {FileCopy as CopyIcon} from "@mui/icons-material";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export default function ResetPasswordDialog(props) {
@@ -95,7 +98,7 @@ export default function ResetPasswordDialog(props) {
                                     role={"alert"}
                                     onClick={() => copyToClipBoard(password)}
                                     edge="end"
-                                >
+                                    size="large">
                                     {<CopyIcon />}
                                 </IconButton>
                             </InputAdornment>}

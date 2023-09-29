@@ -1,18 +1,34 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
 import {isItemChanged, validateItem} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
-import {getColumnCreatedAt, getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName, getColumnRole, getColumnShortName, getColumnTeams} from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {
+    getColumnCreatedAt,
+    getColumnDescription,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName,
+    getColumnRole,
+    getColumnShortName,
+    getColumnTeams
+} from "../../utils/StandardColumns";
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 import PropTypes from "prop-types";
 import RolesContext from "../../../context/roles/RolesContext";
-import {getTemplatesArtefacts, getTemplatesArtefactsEditable, templateArtefactCreationEnrichment, templateArtefactModifyingEnrichment} from "./_TemplUtils";
+import {
+    getTemplatesArtefacts,
+    getTemplatesArtefactsEditable,
+    templateArtefactCreationEnrichment,
+    templateArtefactModifyingEnrichment
+} from "./_TemplUtils";
 
 TemplConfigGroupsTab.propTypes = {
     template: PropTypes.object.isRequired,
@@ -22,7 +38,6 @@ TemplConfigGroupsTab.propTypes = {
 export default function TemplConfigGroupsTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -82,8 +97,8 @@ export default function TemplConfigGroupsTab(props) {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getTemplateTableHeight(height),
-                    minBodyHeight: getTemplateTableHeight(height),
+                    maxBodyHeight: getTemplateTableHeight(),
+                    minBodyHeight: getTemplateTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

@@ -1,19 +1,38 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
-import {getArrayLengthStr, getClassByUid, isItemChanged, validateItem} from "../../../utils/JsonHelper";
+import {
+    getArrayLengthStr,
+    getClassByUid,
+    isItemChanged,
+    validateItem
+} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
-import {getColumnClass, getColumnCreatedAt, getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
+import {
+    getColumnClass,
+    getColumnCreatedAt,
+    getColumnDescription,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
+} from "../../utils/StandardColumns";
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 import PropTypes from "prop-types";
 import {getClassesLookup} from "../../../utils/LookupHelper";
 import EditTemplateColumnsDialog from "../../dialogs/EditTemplateColumnsDialog";
-import {getTemplatesArtefacts, getTemplatesArtefactsEditable, templateArtefactCreationEnrichment, templateArtefactModifyingEnrichment} from "./_TemplUtils";
+import {
+    getTemplatesArtefacts,
+    getTemplatesArtefactsEditable,
+    templateArtefactCreationEnrichment,
+    templateArtefactModifyingEnrichment
+} from "./_TemplUtils";
 
 TemplConfigColumnsTab.propTypes = {
     template: PropTypes.object.isRequired,
@@ -23,7 +42,6 @@ TemplConfigColumnsTab.propTypes = {
 export default function TemplConfigColumnsTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -72,7 +90,10 @@ export default function TemplConfigColumnsTab(props) {
                         editComponent: props => (
                             <EditTemplateColumnsDialog
                                 template={template}
-                                configuration={props.rowData.configuration != null ? props.rowData.configuration : {fields: [], columns: []}}
+                                configuration={props.rowData.configuration != null ? props.rowData.configuration : {
+                                    fields: [],
+                                    columns: []
+                                }}
                                 dataClass={getClassByUid(classes, props.rowData.classId)}
                                 name={props.rowData.name != null ? props.rowData.name : ''}
                                 onChange={props.onChange}
@@ -95,8 +116,8 @@ export default function TemplConfigColumnsTab(props) {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getTemplateTableHeight(height),
-                    minBodyHeight: getTemplateTableHeight(height),
+                    maxBodyHeight: getTemplateTableHeight(),
+                    minBodyHeight: getTemplateTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

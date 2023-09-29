@@ -1,46 +1,22 @@
-import React, {useContext, useEffect, useState} from 'react';
-import Tab from "@material-ui/core/Tab";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Tabs from "@material-ui/core/Tabs";
-import {lighten, makeStyles, withStyles} from "@material-ui/core/styles";
-import {getAppBarBackgroundColor} from "../../utils/Themes";
+import React, {useContext} from 'react';
+import {IconButton, styled, Tabs, Tooltip} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import AccessContext from "../../context/access/AccessContext";
-import {Tooltip} from "@material-ui/core";
-import StyledIconButtonTab from "../utils/StyledIconButtonTab";
 import {getIconColor} from "../../utils/MaterialTableHelper";
+import StyledIcon from "../utils/StyledIcon";
+import {CustomTab} from "../common/CustomAppBar";
 
-const useStyles = makeStyles((theme) => ({
-    tabs: {
-        flex: 1,
-    }
+const StyledTabs = styled(Tabs)(() => ({
+    flex: 1,
+    textTransform: "initial",
 }));
-
-const styles = theme => ({
-    root: {
-        "&:hover": {
-            backgroundColor: lighten(getAppBarBackgroundColor(), 0.05),
-            opacity: 1
-        },
-        textTransform: "initial"
-    },
-    selected: {}
-});
-
-const StyledTab = withStyles(styles)(Tab)
 
 export default function BucketTabSelector() {
 
-    const classes = useStyles();
+
     const accessContext = useContext(AccessContext);
     const {bucketsTabs, activeBucket, setActiveBucket, removeTab} = accessContext;
     let removing = false; // indicate whether changing tab is invoked by selection or by removing
-
-    // This timeout allows to load Material Icons before first rendering
-    const [ delay, setDelay ] = useState(true);
-    useEffect(() => {
-        setTimeout(() => setDelay(false), 700)
-    }, []);
 
     const getBucketVisibleName = (name) => {
         return name.length > 17 ? name.substring(0, 15) + "..." : name;
@@ -53,7 +29,8 @@ export default function BucketTabSelector() {
             return "";
     }
 
-    const handleChangedTab = (bucket) => {
+    const handleChangedTab = (event, bucket) => {
+        event.stopPropagation();
         if (!removing) {
             if (bucket !== activeBucket) {
                 setActiveBucket(bucket);
@@ -63,34 +40,43 @@ export default function BucketTabSelector() {
         }
     };
 
-    const handleRemovedTab = (bucket) => {
+    const handleRemovedTab = (event, bucket) => {
+        event.stopPropagation();
         removing = true;
         removeTab(bucket);
     }
 
-    const tabs = (
-        <Tabs
+    return (
+        <StyledTabs
             value={bucketsTabs.indexOf(activeBucket)}
+            textColor="inherit"
+            indicatorColor="secondary"
             variant="scrollable"
-            scrollButtons="on"
-            className={classes.tabs}
-        >
+            scrollButtons
+            allowScrollButtonsMobile>
             {bucketsTabs.map((bucket) => (
-                <StyledTab key={bucket.id} component="div" onClick={() => handleChangedTab(bucket)} label={
-                    <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
-                    <span>
-                        <StyledIconButtonTab iconName={bucket.iconName} iconColor={getIconColor('banner', bucket.iconColor)} iconSvg={bucket.iconSvg} />
-                        {getBucketVisibleName(bucket.name)}
-                        <IconButton color={'inherit'} onClick={() => handleRemovedTab(bucket)}>
-                            <CloseIcon style={{fontSize: 18}}/>
-                        </IconButton>
-                    </span>
-                    </Tooltip>
-                }
+                <CustomTab key={bucket.id}
+                           component="div"
+                           onClick={(event) => handleChangedTab(event, bucket)}
+                           iconPosition="start"
+                           icon={<StyledIcon iconName={bucket.iconName}
+                                             iconColor={getIconColor('banner', bucket.iconColor)}
+                                             iconSvg={bucket.iconSvg}
+                                             sx={{marginRight: 1}}
+                           />}
+                           label={
+                               <Tooltip title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
+                                   <span>
+                                       {getBucketVisibleName(bucket.name)}
+                                       <IconButton color="inherit"
+                                                   onClick={(event) => handleRemovedTab(event, bucket)} size="large">
+                                           <CloseIcon sx={{fontSize: 18}}/>
+                                       </IconButton>
+                                   </span>
+                               </Tooltip>
+                           }
                 />
             ))}
-        </Tabs>
+        </StyledTabs>
     );
-
-    return !delay && tabs;
 }

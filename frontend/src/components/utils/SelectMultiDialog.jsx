@@ -1,13 +1,16 @@
 import React, {createRef, useState} from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Done';
-import Typography from '@material-ui/core/Typography';
-import MoreHoriz from "@material-ui/icons/MoreHoriz";
-import Tooltip from "@material-ui/core/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import {
     getDialogTableHeight,
     getPageSizeOptionsOnDialog,
@@ -19,45 +22,49 @@ import {
     getLastPageSizeOnDialog,
     setLastPageSizeOnDialog
 } from "../../utils/ConfigurationStorage";
-import {useTheme} from '@material-ui/core/styles';
 import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
-import Button from "@material-ui/core/Button";
-import {useWindowDimension} from "./UseWindowDimension";
-// import TableIcons from "./TableIcons";
 
-const styles = (theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    closeButton: {
+const PREFIX = 'SelectMultiDialog';
+
+const classes = {
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const Root = styled('div')(({theme}) => ({
+    padding: theme.spacing(0),
+}));
+const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+    margin: 0,
+    padding: theme.spacing(2),
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
-    },
-});
+    }
+}));
 
-const DialogTitle = withStyles(styles)((props) => {
-    const {children, classes, onClose, ...other} = props;
+const DialogTitle = ((props) => {
+    const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <StyledDialogTitle disableTypography {...other}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
+const DialogContent = MuiDialogContent;
 
 SelectMultiDialog.propTypes = {
     columns: PropTypes.array.isRequired,
@@ -73,7 +80,6 @@ SelectMultiDialog.propTypes = {
 export default function SelectMultiDialog(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const [open, setOpen] = useState(false);
     const [data] = useState(setSelectionItemsByIds(props.data, props.ids));
     const tableRef = createRef();
@@ -85,7 +91,9 @@ export default function SelectMultiDialog(props) {
     };
 
     const handleSave = () => {
-        props.onChange(selection.map((item) => {return item.id}));
+        props.onChange(selection.map((item) => {
+            return item.id
+        }));
         setOpen(false);
     }
 
@@ -95,7 +103,7 @@ export default function SelectMultiDialog(props) {
     }
 
     return (
-        <div>
+        <Root>
             <Tooltip title={props.tooltipTitle}>
                 <Button
                     endIcon={<MoreHoriz/>}
@@ -134,8 +142,8 @@ export default function SelectMultiDialog(props) {
                             filtering: false,
                             padding: 'dense',
                             headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                            maxBodyHeight: getDialogTableHeight(height, 30),
-                            minBodyHeight: getDialogTableHeight(height, 30),
+                            maxBodyHeight: getDialogTableHeight(30),
+                            minBodyHeight: getDialogTableHeight(30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{
@@ -144,6 +152,6 @@ export default function SelectMultiDialog(props) {
                     />
                 </DialogContent>
             </Dialog>
-        </div>
+        </Root>
     );
 }

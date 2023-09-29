@@ -1,23 +1,48 @@
 import React, {useContext, useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import {Checkbox, FormControlLabel, InputLabel, MenuItem, Select, Slider, Tooltip} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
+import {
+    Button,
+    Checkbox,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    Menu,
+    MenuItem,
+    Select,
+    Slider,
+    styled,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import {getUsername, hasAdminRole} from "../../utils/ConfigurationStorage";
-import FormControl from "@material-ui/core/FormControl";
-import Button from "@material-ui/core/Button";
 import AccessContext from "../../context/access/AccessContext";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
+const PREFIX = 'ReserveDataDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    reserveButton: `${PREFIX}-reserveButton`,
+    content: `${PREFIX}-content`,
+    button: `${PREFIX}-button`,
+    formControl: `${PREFIX}-formControl`,
+    selectEmpty: `${PREFIX}-selectEmpty`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`&.${classes.root}`]: {
         flexGrow: 1
     },
-    reserveButton: {
+
+    [`& .${classes.reserveButton}`]: {
         marginLeft: '10px',
         padding: theme.spacing(1)
     },
-    content: {
+
+    [`& .${classes.content}`]: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
@@ -25,16 +50,19 @@ const useStyles = makeStyles((theme) => ({
         padding: "15px",
         margin: theme.spacing(1),
     },
-    button: {
+
+    [`& .${classes.button}`]: {
         marginTop: "13px"
     },
-    formControl: {
+
+    [`& .${classes.formControl}`]: {
         margin: theme.spacing(1),
         minWidth: 150,
     },
-    selectEmpty: {
+
+    [`& .${classes.selectEmpty}`]: {
         marginTop: theme.spacing(2),
-    },
+    }
 }));
 
 // ReserveDataDialog.propTypes = {
@@ -66,7 +94,7 @@ const marks = [
 
 export default function ReserveDataDialog(props) {
 
-    const classes = useStyles();
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const accessContext = useContext(AccessContext);
@@ -99,9 +127,13 @@ export default function ReserveDataDialog(props) {
     }
 
     return (
-        <div className={classes.root}>
+        <Root className={classes.root}>
             <Tooltip title={'Reserve data'}>
-                <IconButton onClick={handleMenu} color={'inherit'} className={classes.reserveButton}>
+                <IconButton
+                    onClick={handleMenu}
+                    color={'inherit'}
+                    className={classes.reserveButton}
+                    size="large">
                     <span className="material-icons">add_task</span>
                 </IconButton>
             </Tooltip>
@@ -166,6 +198,6 @@ export default function ReserveDataDialog(props) {
                     </FormControl>
                 </div>
             </Menu>
-        </div>
+        </Root>
     );
 }

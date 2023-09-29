@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from "react";
 import Logo from "../../images/databucket-logo.png";
-// import {Redirect} from 'react-router-dom';
 import {MessageBox} from "../utils/MessageBox";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import OauthLoginComponent from "../auth/OauthLogin";
-import {Box, Divider, Paper, Typography} from "@material-ui/core";
+import {Box, Divider, Paper, Typography} from "@mui/material";
 import LoginFormComponent from "../auth/LoginForm";
 import "./AuthPage.css"
 import {useParams} from "react-router-dom";

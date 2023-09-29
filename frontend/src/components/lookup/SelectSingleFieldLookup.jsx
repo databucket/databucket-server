@@ -1,9 +1,6 @@
 import React from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Select from '@material-ui/core/Select';
+import {ListItemText, ListSubheader, MenuItem, Select} from '@mui/material';
 import PropTypes from "prop-types";
-import {ListSubheader} from "@material-ui/core";
 
 SelectSingleFieldLookup.propTypes = {
     selected: PropTypes.string.isRequired,
@@ -33,7 +30,7 @@ export default function SelectSingleFieldLookup(props) {
                             <ListItemText primary={field.title}/>
                         </MenuItem>
                 ))}
-                <ListSubheader color={'primary'}>Common</ListSubheader>}
+                <ListSubheader color={'primary'}>Common</ListSubheader>
                 {commonFields.map((field) => (
                     <MenuItem key={field.uuid} value={field.uuid}>
                         <ListItemText primary={field.title}/>

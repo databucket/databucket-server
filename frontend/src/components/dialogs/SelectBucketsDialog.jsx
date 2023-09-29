@@ -1,12 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SelectMultiDialog from "../utils/SelectMultiDialog";
-import {
-    getColumnDescription,
-    getColumnName, getColumnModifiedAt, getColumnModifiedBy
-} from "../utils/StandardColumns";
+import {getColumnDescription, getColumnModifiedAt, getColumnModifiedBy, getColumnName} from "../utils/StandardColumns";
 import StyledIcon from "../utils/StyledIcon";
-import {useTheme} from "@material-ui/core/styles";
 
 SelectBucketsDialog.propTypes = {
     buckets: PropTypes.array.isRequired,
@@ -16,16 +12,22 @@ SelectBucketsDialog.propTypes = {
 
 export default function SelectBucketsDialog(props) {
 
-    const theme = useTheme();
-
     const columns = [
         {
-            title: 'Icon', sorting: false, field: 'iconName', searchable: false, filtering: false, initialEditValue: 'PanoramaFishEye',
-            render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>
+            title: 'Icon',
+            sorting: false,
+            field: 'iconName',
+            searchable: false,
+            filtering: false,
+            initialEditValue: 'PanoramaFishEye',
+            render: rowData => <StyledIcon
+                iconName={rowData.icon.name}
+                iconColor={rowData.icon.color}
+                iconSvg={rowData.icon.svg}/>
         },
         getColumnName(),
         getColumnDescription(),
-        { title: 'Class', field: 'classId' },
+        {title: 'Class', field: 'classId'},
         getColumnModifiedAt(),
         getColumnModifiedBy()
     ]

@@ -1,9 +1,12 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
+import {FilterList} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
 import {
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor, getTemplatePageSizeOptions, getTemplateTableHeight
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    getTemplatePageSizeOptions,
+    getTemplateTableHeight
 } from "../../../utils/MaterialTableHelper";
 import {isItemChanged, validateItem} from "../../../utils/JsonHelper";
 import {MessageBox} from "../../utils/MessageBox";
@@ -18,13 +21,17 @@ import {
     getColumnRole,
     getColumnTeams
 } from "../../utils/StandardColumns";
-import {useWindowDimension} from "../../utils/UseWindowDimension";
 import TemplatesContext from "../../../context/templates/TemplatesContext";
 import PropTypes from "prop-types";
 import SelectIconDialog from "../../dialogs/SelectIconDialog";
 import RolesContext from "../../../context/roles/RolesContext";
 import {getClassesLookup} from "../../../utils/LookupHelper";
-import {getTemplatesArtefacts, getTemplatesArtefactsEditable, templateArtefactCreationEnrichment, templateArtefactModifyingEnrichment} from "./_TemplUtils";
+import {
+    getTemplatesArtefacts,
+    getTemplatesArtefactsEditable,
+    templateArtefactCreationEnrichment,
+    templateArtefactModifyingEnrichment
+} from "./_TemplUtils";
 import StyledIcon from "../../utils/StyledIcon";
 
 TemplConfigBucketsTab.propTypes = {
@@ -35,7 +42,6 @@ TemplConfigBucketsTab.propTypes = {
 export default function TemplConfigBucketsTab(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
@@ -91,7 +97,11 @@ export default function TemplConfigBucketsTab(props) {
                         searchable: false,
                         filtering: false,
                         initialEditValue: 'panorama_fish_eye',
-                        render: rowData => <StyledIcon iconName={rowData.icon.name}  iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
+                        render: rowData => <StyledIcon
+                            iconName={rowData.icon.name}
+                            iconColor={rowData.icon.color}
+                            iconSvg={rowData.icon.svg}
+                        />,
                         editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
                     },
                     getColumnName(),
@@ -118,8 +128,8 @@ export default function TemplConfigBucketsTab(props) {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getTemplateTableHeight(height),
-                    minBodyHeight: getTemplateTableHeight(height),
+                    maxBodyHeight: getTemplateTableHeight(),
+                    minBodyHeight: getTemplateTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

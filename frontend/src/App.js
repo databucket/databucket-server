@@ -1,24 +1,24 @@
-import React, {useContext} from 'react';
-import {ThemeProvider} from '@material-ui/core/styles';
-import {getTheme} from './utils/Themes'
+import React from 'react';
 import AppRouter from './route/AppRouter'
-import CssBaseline from "@material-ui/core/CssBaseline";
-import CustomThemeContext from "./context/theme/CustomThemeContext";
-import {clearAllSearchedText, clearAllOrders} from "./utils/ConfigurationStorage";
+import {CssBaseline, StyledEngineProvider} from "@mui/material";
+import {
+    clearAllOrders,
+    clearAllSearchedText,
+    getThemeName
+} from "./utils/ConfigurationStorage";
 import StaticStylesSelector from "./components/StaticStylesSelector";
 
 export default function App() {
 
     clearAllSearchedText();
     clearAllOrders();
-    const [themeName] = useContext(CustomThemeContext);
     return (
-        <ThemeProvider theme={getTheme(themeName)}>
+        <StyledEngineProvider injectFirst>
             <CssBaseline>
-                <StaticStylesSelector themeName={themeName}>
+                <StaticStylesSelector themeName={getThemeName()}>
                     <AppRouter/>
                 </StaticStylesSelector>
             </CssBaseline>
-        </ThemeProvider>
+        </StyledEngineProvider>
     );
 }

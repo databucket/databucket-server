@@ -1,30 +1,21 @@
 import React from 'react';
 import {parseCustomSvg} from "./SvgHelper";
-import PropTypes from "prop-types";
-import {SvgIcon} from "@material-ui/core";
+import {Icon, styled, SvgIcon, useTheme} from "@mui/material";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 
-StyledIcon.propTypes = {
-    iconName: PropTypes.string.isRequired,
-    iconColor: PropTypes.string.isRequired,
-    iconSvg: PropTypes.string.isRequired,
-    themeType: PropTypes.string.isRequired
-};
+const InnerStyledIcon = styled(Icon)(({theme}) => ({
+    marginRight: theme.spacing(1)
+}));
 
-export default function StyledIcon(props) {
-    if (props.iconSvg != null)
-        return (
-            <SvgIcon>
-                {parseCustomSvg(props.iconSvg, getIconColor(props.themeType, props.iconColor))}
-            </SvgIcon>
-        );
-    else
-        return (
-            <span
-                style={{color: getIconColor(props.themeType, props.iconColor)}}
-                className="material-icons"
-            >
-                {props.iconName}
-            </span>
-        );
+export default function StyledIcon({onClick, iconName, iconColor, iconSvg, ...props}) {
+    const theme = useTheme();
+
+    if (!iconSvg) {
+        return (<InnerStyledIcon sx={{color: iconColor}}>{iconName}</InnerStyledIcon>);
+    }
+    return (
+        <SvgIcon {...props}>
+            {parseCustomSvg(iconSvg, getIconColor(theme.palette.mode, iconColor))}
+        </SvgIcon>
+    );
 }

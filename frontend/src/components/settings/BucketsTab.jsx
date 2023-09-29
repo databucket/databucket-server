@@ -1,13 +1,19 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
@@ -19,9 +25,14 @@ import {
 import {MessageBox} from "../utils/MessageBox";
 import {
     getColumnClass,
-    getColumnDescription, getColumnGroups,
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnRole, getColumnTeams, getColumnUsers
+    getColumnDescription,
+    getColumnGroups,
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName,
+    getColumnRole,
+    getColumnTeams,
+    getColumnUsers
 } from "../utils/StandardColumns";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import GroupsContext from "../../context/groups/GroupsContext";
@@ -31,16 +42,16 @@ import UsersContext from "../../context/users/UsersContext";
 import {getBucketMapper} from "../../utils/NullValueMappers";
 import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
 import ClassesContext from "../../context/classes/ClassesContext";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
 import StyledIcon from "../utils/StyledIcon";
 
+const EditComponent = props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>;
+
 export default function BucketsTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
@@ -114,7 +125,12 @@ export default function BucketsTab() {
                 .catch(error => {
                     e = true;
                     if (error.includes('already used by items'))
-                        setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                        setMessageBox({
+                            open: true,
+                            severity: 'warning',
+                            title: 'Item can not be removed',
+                            message: error
+                        });
                     else
                         setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                 })
@@ -130,6 +146,7 @@ export default function BucketsTab() {
         setConfirmRemove({open: false, id: 0, name: ''});
     }
 
+
     return (
         <div>
             <MaterialTable
@@ -142,9 +159,11 @@ export default function BucketsTab() {
                         field: 'icon',
                         searchable: false,
                         filtering: false,
-                        initialEditValue: {"name":"trip_origin","color":null,"svg":null},
-                        render: rowData => <StyledIcon iconName={rowData.icon.name} iconColor={rowData.icon.color} iconSvg={rowData.icon.svg} themeType={theme.palette.type}/>,
-                        editComponent: props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>
+                        initialEditValue: {"name": "trip_origin", "color": null, "svg": null},
+                        render: rowData => <StyledIcon iconName={rowData.icon.name}
+                                                       iconColor={rowData.icon.color}
+                                                       iconSvg={rowData.icon.svg}/>,
+                        editComponent: EditComponent
                     },
                     getColumnName("20%"),
                     getColumnDescription("20%"),
@@ -173,8 +192,8 @@ export default function BucketsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

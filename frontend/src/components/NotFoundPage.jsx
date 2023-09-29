@@ -1,10 +1,14 @@
-import {Paper} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
+import {Paper, styled, Typography} from "@mui/material";
 import React from "react";
-import {makeStyles} from "@material-ui/core/styles";
 
-const useStyles = makeStyles(theme => ({
-    PaperClass: {
+const PREFIX = 'NotFoundPage';
+
+const classes = {
+    PaperClass: `${PREFIX}-PaperClass`
+};
+
+const Root = styled('div')(() => ({
+    [`& .${classes.PaperClass}`]: {
         padding: '50px',
         alignItems: "center",
         display: "flex",
@@ -13,13 +17,15 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function NotFoundPage() {
-    const classes = useStyles();
+
     return (
-        <div className="ContainerClass">
+        <Root className="ContainerClass">
             <Paper className={classes.PaperClass} elevation={3}>
-                <Typography variant="h1" component="h2" color='secondary'>404. That's an error</Typography>
-                <Typography variant="h5">The requested URL was not found on this server.</Typography>
+                <Typography variant="h1" component="h2" color='secondary'>404.
+                    That's an error</Typography>
+                <Typography variant="h5">The requested URL was not found on this
+                    server.</Typography>
             </Paper>
-        </div>
+        </Root>
     );
 }

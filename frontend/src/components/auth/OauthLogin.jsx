@@ -1,5 +1,5 @@
 import React from "react";
-import {Box, Button, Typography} from "@material-ui/core";
+import {Box, Button, Typography} from "@mui/material";
 
 export default function OauthLoginComponent({authOptions}) {
     return (

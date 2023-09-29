@@ -1,55 +1,30 @@
 import React, {useContext, useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Menu from '@material-ui/core/Menu';
-import Typography from "@material-ui/core/Typography";
-import SetLightTheme from "@material-ui/icons/Brightness7";
-import SetDarkTheme from "@material-ui/icons/Brightness4";
-import {getUsername, saveThemeName} from "../../utils/ConfigurationStorage";
+import {
+    AccountCircle,
+    Brightness4 as SetDarkTheme,
+    Brightness7 as SetLightTheme
+} from '@mui/icons-material';
+import {getUsername} from "../../utils/ConfigurationStorage";
+import {
+    Button,
+    IconButton,
+    Menu,
+    MenuItem,
+    Tooltip,
+    Typography,
+    useTheme
+} from "@mui/material";
 import CustomThemeContext from "../../context/theme/CustomThemeContext";
-import Button from "@material-ui/core/Button";
-import {Tooltip} from "@material-ui/core";
-
-const useStyles = makeStyles((theme) => ({
-    oneLine: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-    content: {
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
-        padding: "15px",
-        margin: theme.spacing(1),
-    },
-    button: {
-        marginTop: "13px"
-    }
-}));
 
 export default function UserProfile(props) {
-    const classes = useStyles();
+    let currentMode = useTheme().palette.mode;
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const [customThemeName] = useContext(CustomThemeContext);
+    const {toggleColorMode} = useContext(CustomThemeContext);
 
     const handleLogout = () => {
         props.onLogout();
     }
-
-    const handleChangeTheme = () => {
-        let newThemeName;
-        if (customThemeName === 'light')
-            newThemeName = 'dark';
-        else
-            newThemeName = 'light';
-
-        saveThemeName(newThemeName);
-        window.location.reload();
-    };
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -62,12 +37,12 @@ export default function UserProfile(props) {
     return (
         <div>
             <Tooltip title={'User profile'}>
-                <IconButton onClick={handleMenu} color={'inherit'}>
+                <IconButton onClick={handleMenu} color={'inherit'} size="large">
                     <AccountCircle/>
                 </IconButton>
             </Tooltip>
             <Menu
-                id="menu-appbar"
+                id="user-menu"
                 anchorEl={anchorEl}
                 anchorOrigin={{
                     vertical: 'top',
@@ -81,27 +56,28 @@ export default function UserProfile(props) {
                 open={open}
                 onClose={handleClose}
             >
-                <div className={classes.content}>
-                    <div className={classes.oneLine}>
-                        <AccountCircle/>
-                        <Typography color="secondary" style={{marginLeft: "10px"}}>{getUsername()}</Typography>
-                    </div>
+                <MenuItem sx={{cursor: "default"}}>
+                    <AccountCircle/>
+                    <Typography color="secondary" style={{marginLeft: "10px"}}>{getUsername()}</Typography>
+                </MenuItem>
+                <MenuItem>
                     <Button
-                        className={classes.button}
-                        startIcon={customThemeName === 'light' ? <SetDarkTheme/> : <SetLightTheme/>}
-                        onClick={handleChangeTheme}
+                        startIcon={currentMode === 'light' ? <SetDarkTheme/> : <SetLightTheme/>}
+                        onClick={toggleColorMode}
+                        color="inherit"
                     >
-                        {customThemeName === 'light' ? "Dark" : "Light"}
+                        {currentMode === 'light' ? "Dark" : "Light"}
                     </Button>
+                </MenuItem>
+                <MenuItem>
                     <Button
                         variant="contained"
-                        className={classes.button}
                         onClick={handleLogout}
                         color="primary"
                     >
                         Logout
                     </Button>
-                </div>
+                </MenuItem>
             </Menu>
         </div>
     );

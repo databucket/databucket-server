@@ -1,17 +1,19 @@
-import {createTheme} from "@material-ui/core/styles";
-
 export function getTheme(name) {
-    switch (name) {
-        case 'dark':
-            return DarkTheme;
-        default:
-            return LightTheme;
+    if (name === 'dark') {
+        return DarkTheme;
+    } else {
+        return LightTheme;
     }
 }
 
-export const LightTheme = createTheme({
+export const LightTheme = {
+    common: {
+        toolbar: {
+            backgroundColor: '#0d47a1'
+        }
+    },
     palette: {
-        type: 'light',
+        mode: 'light',
         background: {
             default: '#f7f7f7',
             paper: '#eeeeee',
@@ -28,11 +30,16 @@ export const LightTheme = createTheme({
             // secondary: '#585858'
         }
     },
-});
+};
 
-export const DarkTheme = createTheme({
+export const DarkTheme = {
+    common: {
+        toolbar: {
+            backgroundColor: '#0d47a1'
+        }
+    },
     palette: {
-        type: 'dark',
+        mode: 'dark',
         background: {
             default: '#2f3129',
             paper: '#43453e',
@@ -49,8 +56,4 @@ export const DarkTheme = createTheme({
             // secondary: '#c2c4be'
         }
     },
-});
-
-export const getAppBarBackgroundColor = () => {
-    return '#0d47a1';
-}
+};

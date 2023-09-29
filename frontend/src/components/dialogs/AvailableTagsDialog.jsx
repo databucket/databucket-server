@@ -1,19 +1,31 @@
 import React, {useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import {ListItem, ListItemText, ListSubheader, Tooltip} from "@material-ui/core";
-import List from "@material-ui/core/List";
+import {
+    IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    ListSubheader,
+    Menu,
+    styled,
+    Tooltip
+} from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1
-    },
-    availableTagsButton: {
+const PREFIX = 'AvailableTagsDialog';
+
+const classes = {
+    availableTagsButton: `${PREFIX}-availableTagsButton`,
+    content: `${PREFIX}-content`
+};
+
+const Root = styled('div')(({theme}) => ({
+    flexGrow: 1,
+
+    [`& .${classes.availableTagsButton}`]: {
         marginLeft: '10px',
         padding: theme.spacing(1)
     },
-    content: {
+
+    [`& .${classes.content}`]: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
@@ -26,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AvailableTagsDialog(props) {
 
-    const classes = useStyles();
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
@@ -39,9 +51,13 @@ export default function AvailableTagsDialog(props) {
     };
 
     return (
-        <div className={classes.root}>
+        <Root>
             <Tooltip title={'Available tags'}>
-                <IconButton onClick={handleMenu} color={'inherit'} className={classes.availableTagsButton}>
+                <IconButton
+                    onClick={handleMenu}
+                    color={'inherit'}
+                    className={classes.availableTagsButton}
+                    size="large">
                     <span className="material-icons">local_offer</span>
                 </IconButton>
             </Tooltip>
@@ -73,13 +89,13 @@ export default function AvailableTagsDialog(props) {
                     >
                         {props.bucketTags.map((tag) => (
                             <ListItem key={`tag-${tag.id}`}>
-                                <ListItemText primary={`[${tag.id}] ${tag.name}`} />
+                                <ListItemText primary={`[${tag.id}] ${tag.name}`}/>
                             </ListItem>
-                            ))
+                        ))
                         }
                     </List>
                 </div>
             </Menu>
-        </div>
+        </Root>
     );
 }

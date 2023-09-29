@@ -1,9 +1,15 @@
 import React, {useState} from 'react';
-import Dialog from '@material-ui/core/Dialog';
-import Typography from '@material-ui/core/Typography';
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItem from "@material-ui/core/ListItem";
+import {
+    Dialog,
+    Link,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    styled,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
 import DatabucketLogo from "../../images/databucket-logo.png";
 import SpringBootLogo from "../../images/spring-boot-logo.png";
 import PostgresqlLogo from "../../images/postgresql-logo.png";
@@ -18,19 +24,21 @@ import ReactDiffViewerLogo from "../../images/react-diff-viewer-logo.png";
 import DockerLogo from "../../images/docker-logo.png";
 import TravisLogo from "../../images/travis-ci-logo.png";
 import SwaggerLogo from "../../images/swagger-logo.png";
-import Link from "@material-ui/core/Link";
-import {useTheme} from "@material-ui/core/styles";
-import {Tooltip, withStyles} from "@material-ui/core";
 import {getButtonColor} from "../../utils/MaterialTableHelper";
 
+const PREFIX = 'InfoDialog';
 
-const styles = {
-    tooltip: {
-        backgroundColor: "silver"
-    }
+const classes = {
+    tooltip: `${PREFIX}-tooltip`
 };
 
-const CustomTooltip = withStyles(styles)(Tooltip);
+const Root = styled('div')({
+    [`& .${classes.tooltip}`]: {
+        backgroundColor: "silver"
+    }
+});
+
+const CustomTooltip = Tooltip;
 
 export default function InfoDialog() {
 
@@ -45,7 +53,7 @@ export default function InfoDialog() {
     };
 
     return (
-        <div>
+        <Root>
             <ListItem button onClick={handleClickOpen}>
                 <ListItemIcon>
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill={getButtonColor(theme)}>
@@ -111,7 +119,7 @@ export default function InfoDialog() {
                         interactive
                         title={<Link rel="noopener noreferrer" href="https://jsonlogic.com/" target="_blank">JsonLogic</Link>}
                     >
-                        <img src={theme.palette.type === 'light' ? JsonLogicLight : JsonLogicDark} alt='JsonLogic' width='38' style={{marginLeft: '10px', marginTop: '7px'}}/>
+                        <img src={theme.palette.mode === 'light' ? JsonLogicLight : JsonLogicDark} alt='JsonLogic' width='38' style={{marginLeft: '10px', marginTop: '7px'}}/>
                     </CustomTooltip>
 
                     <CustomTooltip
@@ -132,7 +140,7 @@ export default function InfoDialog() {
                         interactive
                         title={<Link rel="noopener noreferrer" href="https://github.com/" target="_blank">Github</Link>}
                     >
-                        <img src={theme.palette.type === 'light' ? GithubLogoLight : GithubLogoDark} alt='Github' width='53' style={{marginLeft: '5px', marginTop: '3px', marginBottom: '1px'}}/>
+                        <img src={theme.palette.mode === 'light' ? GithubLogoLight : GithubLogoDark} alt='Github' width='53' style={{marginLeft: '5px', marginTop: '3px', marginBottom: '1px'}}/>
                     </CustomTooltip>
 
                     <CustomTooltip
@@ -150,6 +158,6 @@ export default function InfoDialog() {
                     </CustomTooltip>
                 </div>
             </Dialog>
-        </div>
+        </Root>
     );
 }

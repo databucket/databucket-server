@@ -1,14 +1,25 @@
-import {getTableBodyHeight, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp} from "../../utils/MaterialTableHelper";
-import {convertPropertiesDates, getPropertyByUuid, getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
+import {
+    getTableBodyHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    moveDown,
+    moveUp
+} from "../../utils/MaterialTableHelper";
+import {
+    convertPropertiesDates,
+    getPropertyByUuid,
+    getPropertyTitle,
+    isItemChanged,
+    validateItem
+} from "../../utils/JsonHelper";
+import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable, {MTableEditField} from "material-table";
 import React, {useContext, useEffect, useState} from "react";
 import EnumsContext from "../../context/enums/EnumsContext";
-import {useTheme} from "@material-ui/core/styles";
+import {useTheme} from "@mui/material";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
-import {useWindowDimension} from "./UseWindowDimension";
 import moment from 'moment';
 
 ActionPropertiesTable.propTypes = {
@@ -22,7 +33,6 @@ ActionPropertiesTable.propTypes = {
 export default function ActionPropertiesTable(props) {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
@@ -43,7 +53,7 @@ export default function ActionPropertiesTable(props) {
         props.onChange(newData);
     }
 
-    const getBodyHeight = (windowHeight) => {
+    const getBodyHeight = () => {
         return getTableBodyHeight(props.parentContentRef, 66);
     }
 
@@ -206,7 +216,11 @@ export default function ActionPropertiesTable(props) {
                 title={'Modify properties:'}
                 tableRef={tableRef}
                 columns={[
-                    {title: '#', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''},
+                    {
+                        title: '#',
+                        cellStyle: {width: '1%'},
+                        render: (rowData) => rowData ? rowData.tableData.id + 1 : ''
+                    },
                     {
                         title: 'Property',
                         field: 'uuid',
@@ -261,8 +275,8 @@ export default function ActionPropertiesTable(props) {
                     search: true,
                     filtering: false,
                     padding: 'dense',
-                    minBodyHeight: getBodyHeight(height),
-                    maxBodyHeight: getBodyHeight(height),
+                    minBodyHeight: getBodyHeight(),
+                    maxBodyHeight: getBodyHeight(),
                     headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
@@ -272,13 +286,13 @@ export default function ActionPropertiesTable(props) {
                 editable={getEditable()}
                 actions={[
                     rowData => ({
-                        icon: () => <ArrowDropDown/>,
+                        icon: ArrowDropDown,
                         tooltip: 'Move down',
                         onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === data.length - 1)
                     }),
                     rowData => ({
-                        icon: () => <ArrowDropUp/>,
+                        icon: ArrowDropUp,
                         tooltip: 'Move up',
                         onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === 0)

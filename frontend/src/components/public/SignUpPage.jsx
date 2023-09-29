@@ -1,12 +1,16 @@
 import React, {useEffect, useState} from "react";
 import "./SignUpPage.css";
-import Button from "@material-ui/core/Button";
 import Logo from "../../images/databucket-logo.png";
-import {Input, InputLabel, Paper} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
-import FormControl from "@material-ui/core/FormControl";
+import {
+    Button,
+    FormControl,
+    Input,
+    InputLabel,
+    Link,
+    Paper,
+    Typography
+} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
-import Link from "@material-ui/core/Link";
 import {Redirect} from "react-router-dom";
 import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
@@ -19,7 +23,8 @@ export default function SignUpPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [recaptcha, setRecaptcha] = useState({enabled: true, siteKey: null});
     const [loading, setLoading] = useState(false);
 
@@ -29,17 +34,23 @@ export default function SignUpPage() {
                 method: 'GET',
                 headers: {'Content-Type': 'application/json'}
             })
-                .then(handleLoginErrors)
-                .then(response => {
-                    // console.log("Loaded site key: " + response.siteKey);
-                    if (response.enabled === true)
-                        setRecaptcha({enabled: true, siteKey: response.siteKey});
-                    else
-                        setRecaptcha({...recaptcha, enabled: false});
-                })
-                .catch(error => {
-                    setMessageBox({open: true, severity: 'error', title: 'Getting site key failed', message: error});
+            .then(handleLoginErrors)
+            .then(response => {
+                // console.log("Loaded site key: " + response.siteKey);
+                if (response.enabled === true) {
+                    setRecaptcha({enabled: true, siteKey: response.siteKey});
+                } else {
+                    setRecaptcha({...recaptcha, enabled: false});
+                }
+            })
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Getting site key failed',
+                    message: error
                 });
+            });
         }
     }, []);
 
@@ -53,18 +64,24 @@ export default function SignUpPage() {
                 script.src = url;
                 script.id = id;
                 script.onload = function () {
-                    if (callback) callback();
+                    if (callback) {
+                        callback();
+                    }
                 };
                 document.body.appendChild(script);
             }
-            if (isScriptExist && callback) callback();
+            if (isScriptExist && callback) {
+                callback();
+            }
         }
 
         // load the script by passing the URL
         if (recaptcha.siteKey != null) {
-            loadScriptByURL("recaptcha-key", `https://www.google.com/recaptcha/api.js?render=${recaptcha.siteKey}`, function () {
-                // console.log("Recaptcha script loaded with given site key!");
-            });
+            loadScriptByURL("recaptcha-key",
+                `https://www.google.com/recaptcha/api.js?render=${recaptcha.siteKey}`,
+                function () {
+                    // console.log("Recaptcha script loaded with given site key!");
+                });
         }
     }, [recaptcha.siteKey]);
 
@@ -74,12 +91,14 @@ export default function SignUpPage() {
 
         if (recaptcha.enabled) {
             window.grecaptcha.ready(() => {
-                window.grecaptcha.execute(recaptcha.siteKey, {action: 'submit'}).then(token => {
+                window.grecaptcha.execute(recaptcha.siteKey,
+                    {action: 'submit'}).then(token => {
                     submitData(token);
                 });
             });
-        } else
+        } else {
             submitData(null);
+        }
     }
 
     const submitData = token => {
@@ -88,7 +107,8 @@ export default function SignUpPage() {
             username: username,
             email: email,
             password: password,
-            url: window.location.origin + getContextPath() + "/confirmation/sign-up/",
+            url: window.location.origin + getContextPath()
+                + "/confirmation/sign-up/",
             recaptchaToken: token
         }
 
@@ -97,21 +117,31 @@ export default function SignUpPage() {
             body: JSON.stringify(payload),
             headers: {'Content-Type': 'application/json'}
         })
-            .then(handleErrors)
-            .catch(error => {
-                errorResp = true;
-                setLoading(false);
-                setMessageBox({open: true, severity: 'error', title: 'Registration failed', message: error});
-            })
-            .then(() => {
-                if (!errorResp) {
-                    setLoading(false);
-                    setMessageBox({open: true, severity: 'info', title: 'Send confirmation email', message: ""});
-                    setTimeout(() => {
-                        setBack(true);
-                    }, 6000)
-                }
+        .then(handleErrors)
+        .catch(error => {
+            errorResp = true;
+            setLoading(false);
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Registration failed',
+                message: error
             });
+        })
+        .then(() => {
+            if (!errorResp) {
+                setLoading(false);
+                setMessageBox({
+                    open: true,
+                    severity: 'info',
+                    title: 'Send confirmation email',
+                    message: ""
+                });
+                setTimeout(() => {
+                    setBack(true);
+                }, 6000)
+            }
+        });
     }
 
     const handleSetUsername = e => {
@@ -135,46 +165,93 @@ export default function SignUpPage() {
     };
 
     const getPasswordStrength = (pwd) => {
-        const strongRegex = new RegExp("^(?=.{14,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
-        const mediumRegex = new RegExp("^(?=.{10,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$", "g");
+        const strongRegex = new RegExp(
+            "^(?=.{14,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
+        const mediumRegex = new RegExp(
+            "^(?=.{10,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$",
+            "g");
         const enoughRegex = new RegExp("(?=.{8,}).*", "g");
 
         if (strongRegex.test(pwd)) {
-            setMessageBox({open: true, severity: 'success', title: 'Strong password.', message: ''});
+            setMessageBox({
+                open: true,
+                severity: 'success',
+                title: 'Strong password.',
+                message: ''
+            });
         } else if (mediumRegex.test(pwd)) {
-            setMessageBox({open: true, severity: 'info', title: 'Medium password.', message: ''});
+            setMessageBox({
+                open: true,
+                severity: 'info',
+                title: 'Medium password.',
+                message: ''
+            });
         } else if (enoughRegex.test(pwd)) {
-            setMessageBox({open: true, severity: 'warning', title: 'Weak password!', message: ''});
+            setMessageBox({
+                open: true,
+                severity: 'warning',
+                title: 'Weak password!',
+                message: ''
+            });
         } else {
-            setMessageBox({open: true, severity: 'error', title: 'Very weak password!!!', message: ''});
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Very weak password!!!',
+                message: ''
+            });
         }
     }
 
     const checkPasswordConfirmation = (passwordConfirmation) => {
-        if (passwordConfirmation !== password)
-            setMessageBox({open: true, severity: 'error', title: 'Your password and confirmation password do not match.', message: ''});
-        else
-            setMessageBox({open: true, severity: 'success', title: 'Your password and confirmation password match.', message: ''});
+        if (passwordConfirmation !== password) {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Your password and confirmation password do not match.',
+                message: ''
+            });
+        } else {
+            setMessageBox({
+                open: true,
+                severity: 'success',
+                title: 'Your password and confirmation password match.',
+                message: ''
+            });
+        }
     }
 
     const checkUsername = (username) => {
-        if (!(username.length >= 3 && username.length < 30))
-            setMessageBox({open: true, severity: 'info', title: 'Please enter a username between 3 and 30 characters.', message: ''});
+        if (!(username.length >= 3 && username.length < 30)) {
+            setMessageBox({
+                open: true,
+                severity: 'info',
+                title: 'Please enter a username between 3 and 30 characters.',
+                message: ''
+            });
+        }
     }
 
     const checkEmail = (email) => {
-        if (!validateEmail(email))
-            setMessageBox({open: true, severity: 'error', title: 'Invalid email address.', message: ''});
+        if (!validateEmail(email)) {
+            setMessageBox({
+                open: true,
+                severity: 'error',
+                title: 'Invalid email address.',
+                message: ''
+            });
+        }
     }
 
     const handleKeypress = e => {
-        if (e.key === 'Enter')
+        if (e.key === 'Enter') {
             handleSubmit();
+        }
     };
 
-    if (back)
+    if (back) {
         return (<Redirect to="/login-form"/>);
-    else
+    } else {
         return (
             <div className="ContainerClassSingUp">
                 {<img src={Logo} alt=''/>}
@@ -185,10 +262,12 @@ export default function SignUpPage() {
                     <Typography className="DescriptionSingUp">
                         You want to create a new account?
                         Send required fields and wait for the confirmation link.
-                        Until you confirm your registration, your account will be inactive.
+                        Until you confirm your registration, your account will
+                        be inactive.
                     </Typography>
                     <FormControl className="UsernameInputTextSingUp">
-                        <InputLabel htmlFor="standard-adornment-username">Username</InputLabel>
+                        <InputLabel
+                            htmlFor="standard-adornment-username">Username</InputLabel>
                         <Input
                             id="standard-adornment-username"
                             name="username"
@@ -197,12 +276,14 @@ export default function SignUpPage() {
                             onChange={handleSetUsername}
                             onKeyPress={(event) => handleKeypress(event)}
                             onFocus={(event) => {
-                                event.target.setAttribute('autocomplete', 'off');
+                                event.target.setAttribute('autocomplete',
+                                    'off');
                             }}
                         />
                     </FormControl>
                     <FormControl className="EmailInputTextSingUp">
-                        <InputLabel htmlFor="standard-adornment-email">Email</InputLabel>
+                        <InputLabel
+                            htmlFor="standard-adornment-email">Email</InputLabel>
                         <Input
                             id="standard-adornment-email"
                             name="email"
@@ -213,7 +294,8 @@ export default function SignUpPage() {
                         />
                     </FormControl>
                     <FormControl className="PasswordTextSingUp">
-                        <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
+                        <InputLabel
+                            htmlFor="standard-adornment-password">Password</InputLabel>
                         <Input
                             id="standard-adornment-password"
                             name="password"
@@ -221,19 +303,23 @@ export default function SignUpPage() {
                             value={password}
                             onChange={handlePassword}
                             onFocus={(event) => {
-                                event.target.setAttribute('autocomplete', 'off');
+                                event.target.setAttribute('autocomplete',
+                                    'off');
                             }}
                         />
                     </FormControl>
                     <FormControl className="PasswordTextSingUp">
-                        <InputLabel htmlFor="standard-adornment-confirm-password">Confirm password</InputLabel>
+                        <InputLabel
+                            htmlFor="standard-adornment-confirm-password">Confirm
+                            password</InputLabel>
                         <Input
                             name="passwordConfirmation"
                             type='password'
                             value={passwordConfirmation}
                             onChange={handlePasswordConfirmation}
                             onFocus={(event) => {
-                                event.target.setAttribute('autocomplete', 'off');
+                                event.target.setAttribute('autocomplete',
+                                    'off');
                             }}
                         />
                     </FormControl>
@@ -274,4 +360,5 @@ export default function SignUpPage() {
                 />
             </div>
         );
+    }
 }

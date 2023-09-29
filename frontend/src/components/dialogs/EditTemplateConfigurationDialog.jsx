@@ -1,37 +1,55 @@
 import React, {useEffect, useState} from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Done';
-import Typography from '@material-ui/core/Typography';
-import MoreHoriz from "@material-ui/icons/MoreHoriz";
-import Tooltip from "@material-ui/core/Tooltip";
+import {
+    Button,
+    Dialog,
+    DialogContent as MuiDialogContent,
+    DialogTitle as MuiDialogTitle,
+    IconButton,
+    styled,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import Button from "@material-ui/core/Button";
 import TemplateTabs from "../management/templatesConfig/_TemplConfigTabs";
 
-const styles = (theme) => ({
-    root: {
+const PREFIX = 'EditTemplateConfigurationDialog';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    root2: `${PREFIX}-root2`,
+    closeButton: `${PREFIX}-closeButton`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root2}`]: {
         margin: 0,
         padding: theme.spacing(2),
     },
-    closeButton: {
+
+    [`& .${classes.closeButton}`]: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
-    },
-});
+    }
+}));
 
-const DialogTitle = withStyles(styles)((props) => {
-    const {children, classes, onClose, ...other} = props;
+const DialogTitle = ((props) => {
+    const {children, onClose, ...other} = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon/>
                 </IconButton>
             ) : null}
@@ -39,12 +57,7 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}))(MuiDialogContent);
-
+const DialogContent = MuiDialogContent;
 
 EditTemplateConfigurationDialog.propTypes = {
     name: PropTypes.string.isRequired,
@@ -72,7 +85,7 @@ export default function EditTemplateConfigurationDialog(props) {
     }
 
     return (
-        <div>
+        <Root>
             <Tooltip title='Configuration'>
                 <Button
                     endIcon={<MoreHoriz/>}
@@ -91,13 +104,17 @@ export default function EditTemplateConfigurationDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     {`Template: ${props.name}`}
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent
+                    dividers
+                    classes={{
+                        root: classes.root
+                    }}>
                     <TemplateTabs
                         template={template}
                         setTemplate={setTemplate}
                     />
                 </DialogContent>
             </Dialog>
-        </div>
+        </Root>
     );
 }

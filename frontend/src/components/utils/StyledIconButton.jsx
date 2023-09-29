@@ -1,42 +1,50 @@
-import React from 'react';
-import IconButton from "@material-ui/core/IconButton";
-import {makeStyles, useTheme} from "@material-ui/core/styles";
+import React, {forwardRef} from 'react';
+import {Icon, IconButton, styled, useTheme} from '@mui/material';
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 
-const useStyles = makeStyles(theme => ({
-    customStyles: {
-        color: (props) => props.iconColor
-    }
+const PREFIX = 'StyledIconButton';
+
+const classes = {
+    customStyles: `${PREFIX}-customStyles`
+};
+
+const TheStyledIconButton = styled(IconButton)(({theme}) => ({
+    color: (props) => getIconColor(theme.palette.mode, props.iconColor)
 }));
 
-StyledIconButton.propTypes = {
+TheStyledIconButton.propTypes = {
     iconName: PropTypes.string.isRequired,
     iconColor: PropTypes.string.isRequired,
     iconSvg: PropTypes.string.isRequired,
     onClick: PropTypes.func
 };
 
-export default function StyledIconButton(props) {
-    const classes = useStyles(props);
-    const theme = useTheme();
+export default forwardRef(
+    function StyledIconButton({onClick, iconName, iconColor, iconSvg, ...props},
+        ref) {
+        const theme = useTheme();
 
-    if (props.iconSvg != null)
-        return (
-            <IconButton onClick={props.onClick} className={classes.customStyles}>
-                {parseCustomSvg(props.iconSvg, getIconColor(theme.palette.type, props.iconColor))}
-            </IconButton>
-        );
-    else
-        return (
-            <IconButton onClick={props.onClick} className={classes.customStyles}>
-                <span
-                    style={{color: getIconColor(theme.palette.type, props.iconColor)}}
-                    className="material-icons"
-                >
-                {props.iconName}
-                </span>
-            </IconButton>
-        );
-}
+        if (iconSvg !== null) {
+            return (
+                <TheStyledIconButton onClick={onClick}
+                                     size="large"
+                                     {...props}
+                                     ref={ref}>
+                    {parseCustomSvg(iconSvg,
+                        getIconColor(theme.palette.mode, iconColor))}
+                </TheStyledIconButton>
+            );
+        } else {
+            return (
+                <IconButton onClick={onClick}
+                            className={classes.customStyles}
+                            size="large"
+                            {...props}
+                            ref={ref}>
+                    <Icon>{iconName}</Icon>
+                </IconButton>
+            );
+        }
+    });

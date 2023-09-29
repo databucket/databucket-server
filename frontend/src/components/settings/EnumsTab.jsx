@@ -1,36 +1,53 @@
 import MaterialTable from "material-table";
 import React, {useContext, useEffect, useState} from "react";
-import Refresh from "@material-ui/icons/Refresh";
-import FilterList from "@material-ui/icons/FilterList";
-import {useTheme} from "@material-ui/core/styles";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
+import {FilterList, Refresh} from "@mui/icons-material";
+import {useTheme} from "@mui/material";
+import {
+    getLastPageSize,
+    setLastPageSize
+} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
-    getPageSizeOptions, getPostOptions, getPutOptions, getSettingsTableHeight,
-    getTableHeaderBackgroundColor, getTableRowBackgroundColor
+    getPageSizeOptions,
+    getPostOptions,
+    getPutOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
-    convertNullValuesInObject, getArrayLengthStr,
+    convertNullValuesInObject,
+    getArrayLengthStr,
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
 import {MessageBox} from "../utils/MessageBox";
 import {
+    getColumnCreatedAt,
+    getColumnCreatedBy,
     getColumnDescription,
-    getColumnModifiedBy, getColumnModifiedAt,
-    getColumnName, getColumnCreatedBy, getColumnCreatedAt
+    getColumnModifiedAt,
+    getColumnModifiedBy,
+    getColumnName
 } from "../utils/StandardColumns";
 import {getEnumMapper} from "../../utils/NullValueMappers";
 import EditEnumDialog from "../dialogs/EditEnumDialog";
 import EnumsContext from "../../context/enums/EnumsContext";
-import {useWindowDimension} from "../utils/UseWindowDimension";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+
+const EditEnumComponent = props => (
+    <EditEnumDialog
+        name={props.rowData['name'] != null ? props.rowData['name'] : ''}
+        iconsEnabled={props.rowData['iconsEnabled'] === true || props.rowData['iconsEnabled'] === 'true'}
+        items={props.rowData['items'] != null ? props.rowData['items'] : []}
+        onChange={props.onChange}
+    />
+)
 
 export default function EnumsTab() {
 
     const theme = useTheme();
-    const [height] = useWindowDimension();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSize);
@@ -55,9 +72,8 @@ export default function EnumsTab() {
     }
 
     return (
-        <div>
+        <>
             <MaterialTable
-
                 title='Enums'
                 tableRef={tableRef}
                 columns={[
@@ -72,14 +88,7 @@ export default function EnumsTab() {
                     {
                         title: 'Items', field: 'items',
                         render: rowData => getArrayLengthStr(rowData['items']),
-                        editComponent: props => (
-                            <EditEnumDialog
-                                name={props.rowData['name'] != null ? props.rowData['name'] : ''}
-                                iconsEnabled={props.rowData['iconsEnabled'] === true || props.rowData['iconsEnabled'] === 'true'}
-                                items={props.rowData['items'] != null ? props.rowData['items'] : []}
-                                onChange={props.onChange}
-                            />
-                        )
+                        editComponent: EditEnumComponent
                     },
                     getColumnCreatedBy(),
                     getColumnCreatedAt(),
@@ -99,8 +108,8 @@ export default function EnumsTab() {
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getSettingsTableHeight(height),
-                    minBodyHeight: getSettingsTableHeight(height),
+                    maxBodyHeight: getSettingsTableHeight(),
+                    minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
@@ -108,13 +117,13 @@ export default function EnumsTab() {
                 }}
                 actions={[
                     {
-                        icon: () => <Refresh/>,
+                        icon: Refresh,
                         tooltip: 'Refresh',
                         isFreeAction: true,
                         onClick: () => fetchEnums()
                     },
                     {
-                        icon: () => <FilterList/>,
+                        icon: FilterList,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: () => setFiltering(!filtering)
@@ -151,7 +160,6 @@ export default function EnumsTab() {
 
                     onRowUpdate: (newData, oldData) =>
                         new Promise((resolve, reject) => {
-
                             if (!isItemChanged(oldData, newData, changeableFields)) {
                                 setMessageBox({
                                     open: true,
@@ -198,9 +206,19 @@ export default function EnumsTab() {
                                     .catch(error => {
                                         e = true;
                                         if (error.includes('already used by items'))
-                                            setMessageBox({open: true, severity: 'warning', title: 'Item can not be removed', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'warning',
+                                                title: 'Item can not be removed',
+                                                message: error
+                                            });
                                         else
-                                            setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                            setMessageBox({
+                                                open: true,
+                                                severity: 'error',
+                                                title: 'Error',
+                                                message: error
+                                            });
                                         reject();
                                     })
                                     .then(() => {
@@ -218,6 +236,6 @@ export default function EnumsTab() {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </div>
+        </>
     );
 }

@@ -1,24 +1,21 @@
 import React from 'react';
-import {Typography} from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import {styled, Typography} from "@mui/material";
+
+const StyledTypography = styled(Typography)(({theme}) => ({
+    padding: theme.spacing(3),
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+}));
 
 export default function MissingActiveView() {
-    const classes = useStyles();
+
     return (
-        <Typography
+        <StyledTypography
             variant="h6"
             color={'error'}
-            className={classes.message}
         >
             {'You do not have permission to any view of this bucket.'}
-        </Typography>);
+        </StyledTypography>
+    );
 }
-
-const useStyles = makeStyles((theme) => ({
-    message: {
-        padding: theme.spacing(3),
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-    }
-}));

@@ -1,10 +1,16 @@
 import PropTypes from "prop-types";
 import React, {useContext, useEffect, useState} from 'react';
-import {Query, Builder, Utils as QbUtils} from 'react-awesome-query-builder';
+import {Query, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import EnumsContext from "../../context/enums/EnumsContext";
-import Typography from "@material-ui/core/Typography";
 import PropertiesTable, {mergeProperties} from "./PropertiesTable";
-import {createConfig, getInitialTree} from "./QueryBuilderHelper";
+import {
+    createConfig,
+    getInitialTree,
+    renderBuilder,
+    renderResult
+} from "./QueryBuilderHelper";
+import '@react-awesome-query-builder/mui/css/styles.css';
+import {Box, useTheme} from "@mui/material";
 
 FilterRulesEditor.propTypes = {
     activeTab: PropTypes.number.isRequired,
@@ -18,47 +24,31 @@ FilterRulesEditor.propTypes = {
 
 export default function FilterRulesEditor(props) {
 
+    const theme = useTheme();
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
-    const [properties, setFields] = useState(mergeProperties(props.configuration.properties, props.dataClass));
+    const [properties, setFields] = useState(
+        mergeProperties(props.configuration.properties, props.dataClass));
     const [state, setState] = useState({config: {}, tree: {}});
 
     useEffect(() => {
-        const conf = createConfig(properties, props.tags, props.users, enums);
+        const conf = createConfig(properties, props.tags, props.users, enums,
+            theme);
         if (Object.keys(state.tree).length === 0) {
-            const initialTree = QbUtils.checkTree(getInitialTree(props.configuration.logic, props.configuration.tree, conf), conf);
+            const initialTree = QbUtils.checkTree(
+                getInitialTree(props.configuration.logic,
+                    props.configuration.tree, conf), conf);
             setState({config: conf, tree: initialTree});
         } else {
             setState({config: conf, tree: state.tree});
         }
-
-        // eslint-disable-next-line
     }, [properties]);
 
     useEffect(() => {
-        if (enums == null)
+        if (enums == null) {
             fetchEnums();
+        }
     }, [enums, fetchEnums]);
-
-    const renderBuilder = (props) => (
-        <div className="query-builder-container" style={{padding: '10px'}}>
-            <div className="query-builder qb-lite">
-                <Builder {...props} />
-            </div>
-        </div>
-    );
-
-    const renderResult = ({tree, config}) => {
-        const pureSql = JSON.stringify(QbUtils.sqlFormat(tree, config));
-        if (pureSql != null) {
-            const sql = pureSql.substring(1, pureSql.length - 1).replaceAll("prop.", "").replaceAll("*", ".");
-            return (
-                <div style={{margin: '10px'}}>
-                    <Typography>{sql}</Typography>
-                </div>
-            );
-        } else return (<div/>);
-    };
 
     const onChange = (tree, config) => {
         setState({config, tree});
@@ -73,25 +63,25 @@ export default function FilterRulesEditor(props) {
     }
 
     return (
-        <div>
+        <>
             {props.activeTab === 0 && Object.keys(state.tree).length > 0 &&
-            <div>
-                <Query
-                    {...state.config}
-                    value={state.tree}
-                    onChange={onChange}
-                    renderBuilder={renderBuilder}
-                />
-                {renderResult({tree: state.tree, config: state.config})}
-            </div>}
+                <Box sx={{margin: 0}}>
+                    <Query
+                        {...state.config}
+                        value={state.tree}
+                        onChange={onChange}
+                        renderBuilder={renderBuilder}
+                    />
+                    {renderResult({tree: state.tree, config: state.config})}
+                </Box>}
             {props.activeTab === 0 && <div/>}
             {props.activeTab === 1 &&
-            <PropertiesTable
-                data={properties}
-                enums={enums}
-                onChange={handleChangeFields}
-                parentContentRef={props.parentContentRef}
-            />}
-        </div>
+                <PropertiesTable
+                    data={properties}
+                    enums={enums}
+                    onChange={handleChangeFields}
+                    parentContentRef={props.parentContentRef}
+                />}
+        </>
     );
 };

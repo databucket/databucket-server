@@ -1,25 +1,40 @@
-import {getPageSizeOptionsOnDialog, getTableHeaderBackgroundColor, getTableRowBackgroundColor, moveDown, moveUp, getTableBodyHeight} from "../../utils/MaterialTableHelper";
-import {getPropertyTitle, isItemChanged, validateItem} from "../../utils/JsonHelper";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
+import {
+    getPageSizeOptionsOnDialog,
+    getTableBodyHeight,
+    getTableHeaderBackgroundColor,
+    getTableRowBackgroundColor,
+    moveDown,
+    moveUp
+} from "../../utils/MaterialTableHelper";
+import {
+    getPropertyTitle,
+    isItemChanged,
+    validateItem
+} from "../../utils/JsonHelper";
+import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 import MaterialTable from "material-table";
 import React, {useEffect, useState} from "react";
-import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
-import {useTheme} from "@material-ui/core/styles";
+import {
+    getLastPageSizeOnDialog,
+    setLastPageSizeOnDialog
+} from "../../utils/ConfigurationStorage";
+import {useTheme} from "@mui/material";
 import {MessageBox} from "./MessageBox";
-import {useWindowDimension} from "./UseWindowDimension";
-import SelectSingleFieldLookup, {commonFields} from "../lookup/SelectSingleFieldLookup";
+import SelectSingleFieldLookup, {
+    commonFields
+} from "../lookup/SelectSingleFieldLookup";
 
 export default function ColumnsTable(props) {
 
     const theme = useTheme();
     const tableRef = React.createRef();
-    const [height] = useWindowDimension();
-    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState(
+        {open: false, severity: 'error', title: '', message: ''});
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     const columns = props.columns;
     const properties = props.properties;
-    const changeableFields = ['uuid', 'enabled', 'hidden', 'editable', 'sorting', 'filtering', 'width']; // disabled: format, align, width
+    const changeableFields = ['uuid', 'enabled', 'hidden', 'editable',
+        'sorting', 'filtering', 'width']; // disabled: format, align, width
     const fieldsSpecification = {
         uuid: {title: 'Title', check: ['notEmpty']}
     };
@@ -30,7 +45,7 @@ export default function ColumnsTable(props) {
         setTimeout(() => setDelay(false), 1)
     }, []);
 
-    const getBodyHeight = (windowHeight) => {
+    const getBodyHeight = () => {
         return getTableBodyHeight(props.parentContentRef, 66);
     }
 
@@ -49,15 +64,40 @@ export default function ColumnsTable(props) {
                 title={'Class origin or defined properties:'}
                 tableRef={tableRef}
                 columns={[
-                    {title: '#', cellStyle: {width: '1%'}, render: (rowData) => rowData ? rowData.tableData.id + 1 : ''},
-                    {title: 'Enabled', field: 'enabled', type: 'boolean', initialEditValue: true, cellStyle: {width: '1%'}},
                     {
-                        title: 'Title', field: 'uuid', filtering: false, sorting: false, type: 'string',
-                        initialEditValue: "uuid_data_id",
-                        render: rowData => getPropertyTitle(properties.concat(commonFields), rowData.uuid),
-                        editComponent: props => <SelectSingleFieldLookup selected={props.rowData.uuid} properties={properties} onChange={props.onChange}/>
+                        title: '#',
+                        cellStyle: {width: '1%'},
+                        render: (rowData) => rowData ? rowData.tableData.id + 1
+                            : ''
                     },
-                    {title: 'Hidden', field: 'hidden', type: 'boolean', initialEditValue: false, cellStyle: {width: '1%'}},
+                    {
+                        title: 'Enabled',
+                        field: 'enabled',
+                        type: 'boolean',
+                        initialEditValue: true,
+                        cellStyle: {width: '1%'}
+                    },
+                    {
+                        title: 'Title',
+                        field: 'uuid',
+                        filtering: false,
+                        sorting: false,
+                        type: 'string',
+                        initialEditValue: "uuid_data_id",
+                        render: rowData => getPropertyTitle(
+                            properties.concat(commonFields), rowData.uuid),
+                        editComponent: props => <SelectSingleFieldLookup
+                            selected={props.rowData.uuid}
+                            properties={properties}
+                            onChange={props.onChange}/>
+                    },
+                    {
+                        title: 'Hidden',
+                        field: 'hidden',
+                        type: 'boolean',
+                        initialEditValue: false,
+                        cellStyle: {width: '1%'}
+                    },
                     // {
                     //     title: 'Align', field: 'align', type: 'string', editable: 'always',
                     //     lookup: {
@@ -69,7 +109,13 @@ export default function ColumnsTable(props) {
                     //     }, initialEditValue: 'center'
                     // },
                     // {title: 'Format', field: 'format', type: 'string', editable: 'always', emptyValue: ''},
-                    {title: 'Width', field: 'width', type: 'string', editable: 'always', emptyValue: ''},
+                    {
+                        title: 'Width',
+                        field: 'width',
+                        type: 'string',
+                        editable: 'always',
+                        emptyValue: ''
+                    },
                     {
                         title: 'Editable',
                         field: 'editable',
@@ -81,8 +127,20 @@ export default function ColumnsTable(props) {
                         },
                         initialEditValue: 'always'
                     },
-                    {title: 'Sorting', field: 'sorting', type: 'boolean', initialEditValue: true, cellStyle: {width: '1%'}},
-                    {title: 'Filtering', field: 'filtering', type: 'boolean', initialEditValue: true, cellStyle: {width: '1%'}}
+                    {
+                        title: 'Sorting',
+                        field: 'sorting',
+                        type: 'boolean',
+                        initialEditValue: true,
+                        cellStyle: {width: '1%'}
+                    },
+                    {
+                        title: 'Filtering',
+                        field: 'filtering',
+                        type: 'boolean',
+                        initialEditValue: true,
+                        cellStyle: {width: '1%'}
+                    }
                 ]}
                 data={columns}
                 onChangeRowsPerPage={onChangeRowsPerPage}
@@ -96,10 +154,17 @@ export default function ColumnsTable(props) {
                     selection: false,
                     filtering: false,
                     padding: 'dense',
-                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
-                    maxBodyHeight: getBodyHeight(height),
-                    minBodyHeight: getBodyHeight(height),
-                    rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
+                    headerStyle: {
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                    },
+                    maxBodyHeight: getBodyHeight(),
+                    minBodyHeight: getBodyHeight(),
+                    rowStyle: rowData => ({
+                        backgroundColor: getTableRowBackgroundColor(rowData,
+                            theme)
+                    })
                 }}
                 components={{
                     Container: props => <div {...props} />
@@ -107,7 +172,8 @@ export default function ColumnsTable(props) {
                 editable={{
                     onRowAdd: newData =>
                         new Promise((resolve, reject) => {
-                            let message = validateItem(newData, fieldsSpecification);
+                            let message = validateItem(newData,
+                                fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -124,7 +190,8 @@ export default function ColumnsTable(props) {
                         }),
                     onRowUpdate: (newData, oldData) =>
                         new Promise((resolve, reject) => {
-                            if (!isItemChanged(oldData, newData, changeableFields)) {
+                            if (!isItemChanged(oldData, newData,
+                                changeableFields)) {
                                 setMessageBox({
                                     open: true,
                                     severity: 'info',
@@ -135,7 +202,8 @@ export default function ColumnsTable(props) {
                                 return;
                             }
 
-                            let message = validateItem(newData, fieldsSpecification);
+                            let message = validateItem(newData,
+                                fieldsSpecification);
                             if (message != null) {
                                 setMessageBox({
                                     open: true,
@@ -148,8 +216,10 @@ export default function ColumnsTable(props) {
                             }
 
                             const updated = columns.map(column => {
-                                if (column.tableData.id === oldData.tableData.id)
+                                if (column.tableData.id
+                                    === oldData.tableData.id) {
                                     return newData;
+                                }
                                 return column;
                             });
                             setData(updated);
@@ -157,7 +227,8 @@ export default function ColumnsTable(props) {
                         }),
                     onRowDelete: oldData =>
                         new Promise((resolve) => {
-                            setData(columns.filter(column => column.tableData.id !== oldData.tableData.id))
+                            setData(columns.filter(column => column.tableData.id
+                                !== oldData.tableData.id))
                             resolve();
                         }),
                 }}
@@ -165,13 +236,15 @@ export default function ColumnsTable(props) {
                     rowData => ({
                         icon: () => <ArrowDropDown/>,
                         tooltip: 'Move down',
-                        onClick: (event, rowData) => setData(moveDown(columns, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(
+                            moveDown(columns, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === columns.length - 1)
                     }),
                     rowData => ({
                         icon: () => <ArrowDropUp/>,
                         tooltip: 'Move up',
-                        onClick: (event, rowData) => setData(moveUp(columns, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(
+                            moveUp(columns, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === 0)
                     })
                 ]}

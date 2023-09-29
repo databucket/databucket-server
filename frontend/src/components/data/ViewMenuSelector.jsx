@@ -1,9 +1,43 @@
 import React, {useState} from 'react';
 import PropTypes from "prop-types";
-import MenuItem from "@material-ui/core/MenuItem";
-import Typography from "@material-ui/core/Typography";
-import {Grid, IconButton, Menu, Tooltip} from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import {
+    Grid,
+    IconButton,
+    Menu,
+    MenuItem,
+    styled,
+    Tooltip,
+    Typography
+} from "@mui/material";
+
+const PREFIX = 'ViewMenuSelector';
+
+const classes = {
+    view: `${PREFIX}-view`,
+    select: `${PREFIX}-select`,
+    description: `${PREFIX}-description`
+};
+
+const Root = styled('div')(({theme}) => ({
+    flexGrow: 1,
+
+    [`& .${classes.view}`]: {
+        paddingLeft: theme.spacing(2),
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.select}`]: {
+        marginLeft: '10px',
+        padding: theme.spacing(1)
+    },
+
+    [`& .${classes.description}`]: {
+        padding: theme.spacing(2),
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+    }
+}));
 
 ViewMenuSelector.propTypes = {
     views: PropTypes.array.isRequired,
@@ -12,7 +46,7 @@ ViewMenuSelector.propTypes = {
 }
 
 export default function ViewMenuSelector(props) {
-    const classes = useStyles();
+
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -44,16 +78,16 @@ export default function ViewMenuSelector(props) {
     }
 
     return (
-        <div className={classes.root}>
+        <Root>
             <Grid container direction="row" alignItems="center" wrap={'nowrap'}>
-                { props.views.length > 1 &&
+                {props.views.length > 1 &&
                     <Tooltip title={'Select view'}>
                         <IconButton
                             className={classes.select}
                             aria-controls="long-menu"
                             onClick={handleClick}
                             color={'inherit'}
-                        >
+                            size="large">
                             <span className="material-icons">double_arrow</span>
                         </IconButton>
                     </Tooltip>
@@ -88,26 +122,6 @@ export default function ViewMenuSelector(props) {
                     </MenuItem>
                 ))}
             </Menu>
-        </div>
+        </Root>
     );
-};
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1
-    },
-    view: {
-        paddingLeft: theme.spacing(2),
-        padding: theme.spacing(1)
-    },
-    select: {
-        marginLeft: '10px',
-        padding: theme.spacing(1)
-    },
-    description: {
-        padding: theme.spacing(2),
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis"
-    }
-}));
+}

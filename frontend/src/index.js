@@ -1,10 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import {getThemeName} from "./utils/ConfigurationStorage";
 import CustomThemeProvider from "./context/theme/CustomThemeProvider";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import './index.css';
 
 ReactDOM.render(
     <CustomThemeProvider name={getThemeName()}>
