@@ -60,3 +60,4 @@ Installed below dependencies:
 |`export SPRING_PROFILES_ACTIVE=dev && ./gradlew bootRun`| starts app with dev profile |
 |`./gradlew clean build`| compiles java classes, builds frontend, runs tests and prepares all-in-one runnable jar |
 
+
