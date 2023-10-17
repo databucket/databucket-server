@@ -1,12 +1,36 @@
 import React, {useState} from "react";
-import "./ForgotPasswordPage.css";
 import Logo from "../../images/databucket-logo.png";
-import {Button, Link, Paper, Stack, TextField, Typography} from "@mui/material";
+import {
+    Button,
+    Link as RawLink,
+    Paper as RawPaper,
+    Stack as RawStack,
+    TextField,
+    Typography
+} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
 import {Link as RouterLink} from "react-router-dom";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import {handleLoginErrors} from "../../utils/FetchHelper";
 import {validateEmail} from "../../utils/Misc";
+import styled from "@emotion/styled";
+
+const Paper = styled(RawPaper)`
+  min-width: 20vw;
+  max-width: 50vw;
+`;
+const Stack = styled(RawStack)`
+  min-width: 30vw;
+`;
+
+const Link = styled(RawLink)`
+  width: 100%;
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+`;
 
 export default function ForgotPasswordPage() {
 
@@ -54,9 +78,9 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <Stack direction="column"
-               alignItems="center"
-               spacing={2}
+        <RawStack direction="column"
+                  alignItems="center"
+                  spacing={2}
         >
             {<img src={Logo} alt=''/>}
             <Paper elevation={3}>
@@ -113,6 +137,6 @@ export default function ForgotPasswordPage() {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </Stack>
+        </RawStack>
     );
 }

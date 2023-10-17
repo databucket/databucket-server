@@ -5,7 +5,8 @@ jwt:
 
 server:
   port: 8080
-  servlet.context-path: /
+  servlet:
+    context-path: /
 
 spring:
   datasource:

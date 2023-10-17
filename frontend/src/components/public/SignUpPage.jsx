@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import "./SignUpPage.css";
 import Logo from "../../images/databucket-logo.png";
 import {
     Button,
@@ -8,9 +7,9 @@ import {
     Input,
     InputAdornment,
     InputLabel,
-    Link,
-    Paper,
-    Stack,
+    Link as RawLink,
+    Paper as RawPaper,
+    Stack as RawStack,
     TextField,
     Typography
 } from "@mui/material";
@@ -20,6 +19,26 @@ import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import {handleErrors, handleLoginErrors} from "../../utils/FetchHelper";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
+import styled from "@emotion/styled";
+
+const Paper = styled(RawPaper)`
+  min-width: 20vw;
+  max-width: 50vw;
+`;
+const Stack = styled(RawStack)`
+  min-width: 30vw;
+`;
+
+const Link = styled(RawLink)`
+  width: 100%;
+  margin-top: 20px;
+  margin-left: 40px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+`;
 
 export default function SignUpPage() {
 
@@ -375,10 +394,11 @@ export default function SignUpPage() {
                             />
                         </FormControl>
                         <Button
+                            type="submit"
                             fullWidth
                             variant="contained"
                             color="primary"
-                            size={'large'}
+                            size="large"
                             disabled={
                                 !(validateEmail(email)
                                     && username.length >= 3
@@ -391,7 +411,6 @@ export default function SignUpPage() {
                             {loading ? 'Processing...' : 'Submit'}
                         </Button>
                         <Link
-                            className="BackLinkSingUp"
                             component={RouterLink}
                             color="inherit"
                             to="/login-form"

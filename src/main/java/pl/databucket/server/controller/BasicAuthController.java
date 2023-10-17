@@ -10,6 +10,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.mail.MessagingException;
+import javax.servlet.ServletContext;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +67,7 @@ public class BasicAuthController {
     AppProperties appProperties;
     ClientRegistrationRepository clientRegistrationRepository;
     AuthResponseBuilder authResponseBuilder;
+    ServletContext servletContext;
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(BasicAuthController.class);
 
     @PostMapping(value = "/forgot-password", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -145,17 +147,17 @@ public class BasicAuthController {
 
     @GetMapping("/auth-options")
     public Map<String, String> getLoginPage() {
-        Iterable<ClientRegistration> clientRegistrations = null;
-        ResolvableType type = ResolvableType.forInstance(clientRegistrationRepository)
-            .as(Iterable.class);
+        Iterable<ClientRegistration> clientRegistrations;
+        ResolvableType type = ResolvableType.forInstance(clientRegistrationRepository).as(Iterable.class);
         if (type != ResolvableType.NONE &&
             ClientRegistration.class.isAssignableFrom(type.resolveGenerics()[0])) {
             clientRegistrations = (Iterable<ClientRegistration>) clientRegistrationRepository;
             return StreamSupport.stream(clientRegistrations.spliterator(), false)
                 .collect(Collectors.toMap(
-                    reg -> new StringJoiner("/").add(
-                            OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI)
-                        .add(reg.getRegistrationId()).toString(),
+                    reg -> servletContext.getContextPath() +
+                        new StringJoiner("/")
+                            .add(OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI)
+                            .add(reg.getRegistrationId()),
                     ClientRegistration::getRegistrationId));
         }
         return Map.of();

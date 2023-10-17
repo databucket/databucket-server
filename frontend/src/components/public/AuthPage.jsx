@@ -3,10 +3,16 @@ import Logo from "../../images/databucket-logo.png";
 import {MessageBox} from "../utils/MessageBox";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import OauthLoginComponent from "../auth/OauthLogin";
-import {Divider, Paper, Stack, Typography} from "@mui/material";
+import {Divider, Paper as RawPaper, Stack, Typography} from "@mui/material";
 import LoginFormComponent from "../auth/LoginForm";
-import "./AuthPage.css"
+import styled from '@emotion/styled'
 import {useParams} from "react-router-dom";
+
+const Paper = styled(RawPaper)`
+  min-width: 20vw;
+  max-width: 50vw;
+`;
+
 
 export default function AuthPage() {
 

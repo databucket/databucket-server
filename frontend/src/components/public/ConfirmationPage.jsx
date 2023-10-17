@@ -1,12 +1,24 @@
 import React, {useEffect, useState} from "react";
-import "./SignUpPage.css";
 import Logo from "../../images/databucket-logo.png";
-import {Paper, Typography} from "@mui/material";
+import {
+    Paper as RawPaper,
+    Stack as RawStack,
+    Typography
+} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
 import {Redirect, useParams} from "react-router-dom";
 import {getConfirmationUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
+import styled from "@emotion/styled";
+
+const Paper = styled(RawPaper)`
+  min-width: 20vw;
+  max-width: 50vw;
+`;
+const Stack = styled(RawStack)`
+  min-width: 30vw;
+`;
 
 export default function ConfirmationPage() {
 
@@ -43,22 +55,32 @@ export default function ConfirmationPage() {
         return (<Redirect to="/login-form"/>);
     } else {
         return (
-            <div className="ContainerClass">
+            <Stack direction="column"
+                   alignItems="center"
+                   spacing={2}
+            >
                 {<img src={Logo} alt=''/>}
-                <Paper className="PaperClass" elevation={3}>
-                    <Typography className="Title" variant="h5">
-                        Confirmation
-                    </Typography>
-                    <div style={{height: '100px'}}/>
-                    <Typography className="Description">
-                        {!done ? "Processing..." : "Check your email inbox."}
-                    </Typography>
+                <Paper elevation={3}>
+                    <Stack direction="column"
+                           spacing={2}
+                           alignItems="center"
+                           p={3}
+                    >
+                        <Typography className="Title" variant="h5">
+                            Confirmation
+                        </Typography>
+                        <div style={{height: '100px'}}/>
+                        <Typography className="Description">
+                            {!done ? "Processing..."
+                                : "Check your email inbox."}
+                        </Typography>
+                    </Stack>
                 </Paper>
                 <MessageBox
                     config={messageBox}
                     onClose={() => setMessageBox({...messageBox, open: false})}
                 />
-            </div>
+            </Stack>
         );
     }
 }

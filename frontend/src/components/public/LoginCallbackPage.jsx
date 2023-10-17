@@ -1,5 +1,4 @@
 import React, {useEffect, useMemo} from "react";
-import "./AuthPage.css"
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import {handleSuccessfulLogin} from "../utils/AuthHelper";
 import {useHistory, useLocation} from "react-router-dom";

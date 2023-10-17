@@ -1,5 +1,4 @@
 import React, {forwardRef, useState} from "react";
-import "./LoginForm.css";
 import {
     Button,
     FormControl,
@@ -8,7 +7,7 @@ import {
     InputAdornment,
     InputLabel,
     Link as MaterialLink,
-    Stack,
+    Stack as RawStack,
     TextField,
     Typography
 } from "@mui/material";
@@ -18,6 +17,7 @@ import {handleSuccessfulLogin} from "../utils/AuthHelper";
 import {handleLoginErrors} from "../../utils/FetchHelper";
 import {Link, useHistory} from "react-router-dom";
 import {MessageBox} from "../utils/MessageBox";
+import styled from "@emotion/styled";
 
 const FancyLink = forwardRef(({navigate, ...props}, ref) => {
     return (
@@ -31,6 +31,11 @@ const FancyLink = forwardRef(({navigate, ...props}, ref) => {
         >{props.children}</MaterialLink>
     )
 });
+
+const Stack = styled(RawStack)`
+  min-width: 30vw;
+`;
+
 export default function LoginFormComponent() {
 
     const [showPassword, setShowPassword] = useState(false);
