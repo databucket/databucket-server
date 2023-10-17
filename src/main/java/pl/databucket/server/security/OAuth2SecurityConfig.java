@@ -65,6 +65,7 @@ public class OAuth2SecurityConfig {
 
     private static AuthenticationFailureHandler getAuthenticationFailureHandler(ObjectMapper mapper) {
         return (request, response, exception) -> {
+            log.error("Auth error", exception);
             AuthRespDTO authResponse = AuthRespDTO.builder().message(exception.getMessage()).build();
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
