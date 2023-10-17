@@ -37,6 +37,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
+import pl.databucket.server.configuration.MainPageTransformer;
 import pl.databucket.server.dto.DataFilterDto;
 import pl.databucket.server.entity.DataFilter;
 import pl.databucket.server.mapper.DataFilterPropertyMap;
@@ -67,6 +68,8 @@ class DataFilterControllerTest {
     ClientRegistrationRepository clientRegistrationRepository;
     @MockBean
     UserDetailsService userDetailsService;
+    @MockBean
+    MainPageTransformer mainPageTransformer;
     private static MockMvc mvc;
 
     @BeforeEach
