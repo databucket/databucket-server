@@ -18,6 +18,7 @@ import {handleLoginErrors} from "../../utils/FetchHelper";
 import {Link, useHistory} from "react-router-dom";
 import {MessageBox} from "../utils/MessageBox";
 import styled from "@emotion/styled";
+import {getOrigin} from "../../utils/UrlBuilder";
 
 const FancyLink = forwardRef(({navigate, ...props}, ref) => {
     return (
@@ -53,7 +54,7 @@ export default function LoginFormComponent() {
         e.preventDefault();
 
         const formData = new FormData(e.target);
-        fetch("/login-form", {
+        fetch(`${getOrigin()}/login-form`, {
             method: "POST",
             body: formData,
         })

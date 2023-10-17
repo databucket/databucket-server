@@ -9,16 +9,6 @@ import {
     setToken,
     setUsername
 } from "../../utils/ConfigurationStorage";
-
-export const signIn = (formData, state) => {
-    return fetch("/login-form", {
-        method: "POST",
-        body: formData,
-    })
-        .then(handleLoginErrors)
-        .then(value => handleSuccessfulLogin(value, state));
-};
-
 export const handleSuccessfulLogin = (data, state) => {
     logOut();
     setUsername(data.username);

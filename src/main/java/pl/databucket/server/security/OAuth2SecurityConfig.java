@@ -30,34 +30,6 @@ public class OAuth2SecurityConfig {
         AuthenticationFailureHandler failureHandler = getAuthenticationFailureHandler(mapper);
         http.cors().and().csrf().disable()
             .authorizeRequests()
-//            .antMatchers(
-//                "/",
-//                "/api/public/**", // public endpoint
-//                "/**/static/**",
-//                "/actuator/**",
-//                "/**/favicon.ico",
-//                "/login",
-//                "/confirmation/**",
-//                "/forgot-password",
-//                "/sign-up",
-//                "/change-password",
-//                "/project",
-//                "/project/**",
-//                "/management",
-//                "/management/**"
-//            ).permitAll()
-//            // swagger
-//            .antMatchers(HttpMethod.GET,
-//                "/swagger-ui/**",
-//                "/v2/api-docs",
-//                "/v3/api-docs",
-//                "/webjars/**",            // swagger-ui webjars
-//                "/swagger-resources/**",  // swagger-ui resources
-//                "/configuration/**",      // swagger configuration
-//                "/**/*.html",
-//                "/**/*.css",
-//                "/**/*.js"
-//            ).permitAll()
             .antMatchers(HttpMethod.GET,
                 "/", "/login**", "/sign-up", "/forgot-password", "/change-password",
                 "/index*", "/**/static/**", "/*.js", "/*.json", "/*.ico",

@@ -24,9 +24,7 @@ export default function AppRouter() {
     setPathname(window.location.pathname.replace(getContextPath(), ""));
 
     return (
-        <BrowserRouter
-            basename={getContextPath()}
-        >
+        <BrowserRouter basename={getContextPath()}>
             <Switch>
                 <Redirect exact from='/' to={getProjectDataPath()}/>
                 {/*<PublicRoute exact restricted={true} path="/login" component={LoginPage}/>*/}
