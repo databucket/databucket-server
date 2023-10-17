@@ -1,6 +1,8 @@
 package pl.databucket.server.configuration;
 
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -10,13 +12,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     private final MainPageTransformer mainPageTransformer;
-
-    public WebMvcConfiguration(@Value("${server.servlet.context-path}") String contextPath) {
-        this.mainPageTransformer = new MainPageTransformer(contextPath);
-    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
