@@ -54,6 +54,7 @@ public class OAuth2SecurityConfig {
             .and()
             .logout()
             .addLogoutHandler(oauth2LogoutHandler)
+            .deleteCookies("JSESSIONID")
             .logoutSuccessUrl("/");
 //            .and()
 //            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler);

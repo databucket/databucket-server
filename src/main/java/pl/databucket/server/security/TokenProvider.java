@@ -53,7 +53,7 @@ public class TokenProvider implements Serializable {
             .issuedAt(Instant.now())
             .expiresAt(Instant.now().plus(expireHours, ChronoUnit.HOURS))
             .build();
-        JwsHeader jwsHeader = JwsHeader.with(() -> "HS256").build();
+        JwsHeader jwsHeader = JwsHeader.with(() -> "HS512").build();
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claimsSet)).getTokenValue();
     }
 
