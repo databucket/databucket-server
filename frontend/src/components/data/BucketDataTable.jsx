@@ -766,6 +766,7 @@ export default function BucketDataTable() {
         return (
             <React.StrictMode>
                 <MaterialTable
+                    title={activeBucket.name}
                     tableRef={tableRef}
                     columns={state.tableColumns}
                     data={query =>
