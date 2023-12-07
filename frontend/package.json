@@ -36,10 +36,11 @@
   },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
-    "build": "npm run build-submodule; react-scripts build",
-    "build-submodule": "cd material-table; npm run build",
+    "build": "npm run build-submodule && react-scripts build",
+    "build-submodule": "cd material-table && npm run build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "cd material-table && npm i"
   },
   "eslintConfig": {
     "extends": "react-app"
