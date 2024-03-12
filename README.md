@@ -46,18 +46,33 @@
 
 Installed below dependencies:
 
-- java8
-- nodeJS
+- Java 17
+- NodeJS 18
+
+# Cloning
+
+This project uses the [material-table](https://github.com/databucket/material-table.git) project as a Git Submodule.
+In order to be able to build the frontend, the submodule is also built.
+Clone the project with the extra `--recurse-submodules` argument in order to also have the material-table code.
+
+```shell
+git clone --recurse-submodules https://github.com/databucket/databucket-server.git
+```
+
+If you need to update the material-table submodule, you can run:
+```shell
+git submodule update --recursive --remote
+```
 
 ## Useful commands
 
-| command       | what it does|
-| ------------- |-------------| 
-|`./gradlew clean assemble`| compiles java classes|
-|`./gradlew test`| runs all tests |
-|`./gradlew buildFrontend`| installs frontend dependencies and builds frontend|
-|`./gradlew copyFrontend`|`buildFrontend` and copies frontend file to java resources |
-|`export SPRING_PROFILES_ACTIVE=dev && ./gradlew bootRun`| starts app with dev profile |
-|`./gradlew clean build`| compiles java classes, builds frontend, runs tests and prepares all-in-one runnable jar |
+| command                                                  | what it does                                                                            |
+|----------------------------------------------------------|-----------------------------------------------------------------------------------------| 
+| `./gradlew clean assemble`                               | compiles java classes                                                                   |
+| `./gradlew test`                                         | runs all tests                                                                          |
+| `./gradlew buildFrontend`                                | installs frontend dependencies and builds frontend                                      |
+| `./gradlew copyFrontend`                                 | `buildFrontend` and copies frontend file to java resources                              |
+| `export SPRING_PROFILES_ACTIVE=dev && ./gradlew bootRun` | starts app with dev profile                                                             |
+| `./gradlew clean build`                                  | compiles java classes, builds frontend, runs tests and prepares all-in-one runnable jar |
 
 
