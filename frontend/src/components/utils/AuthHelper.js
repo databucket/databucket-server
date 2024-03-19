@@ -1,4 +1,3 @@
-import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
     hasAdminRole,
     hasMemberRole,
@@ -9,6 +8,7 @@ import {
     setToken,
     setUsername
 } from "../../utils/ConfigurationStorage";
+
 export const handleSuccessfulLogin = (data, state) => {
     logOut();
     setUsername(data.username);

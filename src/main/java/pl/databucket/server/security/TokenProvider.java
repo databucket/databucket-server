@@ -1,19 +1,27 @@
 package pl.databucket.server.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -57,6 +65,11 @@ public class TokenProvider implements Serializable {
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claimsSet)).getTokenValue();
     }
 
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String username = getClaimFromToken(token, Claims::getSubject);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
@@ -97,4 +110,19 @@ public class TokenProvider implements Serializable {
             .getBody().get(CONTENT).toString();
     }
 
+    JwtAuthenticationToken getAuthentication(final String token, final CustomUserDetails customUserDetails) {
+
+        final JwtParser jwtParser = Jwts.parser().setSigningKey(singingKey);
+        final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token);
+        final Claims claims = claimsJws.getBody();
+
+        customUserDetails.setProjectId((Integer) claims.get(PROJECT_ID));
+
+        final Collection<? extends GrantedAuthority> authorities =
+            Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        return new JwtAuthenticationToken(Jwt.withTokenValue(token).build(), authorities);
+//        return new UsernamePasswordAuthenticationToken(customUserDetails, "", authorities);
+    }
 }

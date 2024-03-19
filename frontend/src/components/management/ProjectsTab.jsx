@@ -10,10 +10,7 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
+import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
     convertNullValuesInObject,
@@ -54,38 +51,39 @@ export default function ProjectsTab() {
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [filtering, setFiltering] = useState(false);
     const tableRef = createRef();
-    const projectsContext = useContext(ProjectsContext);
-    const {projects, fetchProjects, addProject, editProject, removeProject} = projectsContext;
-    const usersContext = useContext(ManageUsersContext);
-    const {users, fetchUsers, notifyUsers} = usersContext;
-    const templatesContext = useContext(TemplatesContext);
-    const {templates, fetchTemplates, notifyTemplates} = templatesContext;
-    const rolesContext = useContext(RolesContext);
-    const {roles, fetchRoles} = rolesContext;
-    const changeableFields = ['id', 'publicVisible', 'enabled', 'name', 'description', 'usersIds', 'templatesIds', 'expirationDate'];
+    const {projects, fetchProjects, addProject, editProject, removeProject} = useContext(ProjectsContext);
+    const {users, fetchUsers, notifyUsers} = useContext(ManageUsersContext);
+    const {templates, fetchTemplates, notifyTemplates} = useContext(TemplatesContext);
+    const {roles, fetchRoles} = useContext(RolesContext);
+    const changeableFields = ['id', 'publicVisible', 'enabled', 'name', 'description', 'usersIds', 'templatesIds',
+        'expirationDate'];
     const projectSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
     };
 
     useEffect(() => {
-        if (users == null)
+        if (users == null) {
             fetchUsers();
+        }
     }, [users, fetchUsers]);
 
     useEffect(() => {
-        if (templates == null)
+        if (templates == null) {
             fetchTemplates();
+        }
     }, [templates, fetchTemplates]);
 
     useEffect(() => {
-        if (projects == null)
+        if (projects == null) {
             fetchProjects();
+        }
     }, [projects, fetchProjects]);
 
     useEffect(() => {
-        if (roles == null)
+        if (roles == null) {
             fetchRoles();
+        }
     }, [roles, fetchRoles]);
 
     const onChangeRowsPerPage = (pageSize) => {
@@ -101,15 +99,16 @@ export default function ProjectsTab() {
             setTimeout(() => {
                 let e = false;
                 fetch(getBaseUrl(`manage/projects/${confirmRemove.id}`), getDeleteOptions())
-                    .then(handleErrors)
-                    .catch(error => {
-                        e = true;
-                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                    })
-                    .then(() => {
-                        if (!e)
-                            removeProject(confirmRemove.id);
-                    });
+                .then(handleErrors)
+                .catch(error => {
+                    e = true;
+                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                })
+                .then(() => {
+                    if (!e) {
+                        removeProject(confirmRemove.id);
+                    }
+                });
             }, 100);
         }
 
@@ -119,7 +118,6 @@ export default function ProjectsTab() {
     return (
         <div>
             <MaterialTable
-
                 title='Projects'
                 tableRef={tableRef}
                 columns={[
@@ -214,19 +212,19 @@ export default function ProjectsTab() {
                             }
 
                             fetch(getBaseUrl('manage/projects'), getPostOptions(newData))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    reject();
-                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                })
-                                .then((project) => {
-                                    if (project != null) {
-                                        addProject(convertNullValuesInObject(project, getManageProjectMapper()));
-                                        notifyUsers('PROJECT', project.id, project['usersIds']);
-                                        notifyTemplates('PROJECT', project.id, project['templatesIds']);
-                                        resolve();
-                                    }
-                                });
+                            .then(handleErrors)
+                            .catch(error => {
+                                reject();
+                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                            })
+                            .then((project) => {
+                                if (project != null) {
+                                    addProject(convertNullValuesInObject(project, getManageProjectMapper()));
+                                    notifyUsers('PROJECT', project.id, project['usersIds']);
+                                    notifyTemplates('PROJECT', project.id, project['templatesIds']);
+                                    resolve();
+                                }
+                            });
                         }),
 
                     onRowUpdate: (newData, oldData) =>
@@ -258,20 +256,21 @@ export default function ProjectsTab() {
                             const payload = getSelectedValues(newData, changeableFields);
 
                             fetch(getBaseUrl('manage/projects'), getPutOptions(payload))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                                    reject();
-                                })
-                                .then((project) => {
-                                    if (project != null) {
-                                        editProject(convertNullValuesInObject(project, getManageProjectMapper()));
-                                        if (!arraysEquals(newData, oldData, 'usersIds'))
-                                            notifyUsers('PROJECT', project.id, project['usersIds']);
-                                        notifyTemplates('PROJECT', project.id, project['templatesIds']);
-                                        resolve();
+                            .then(handleErrors)
+                            .catch(error => {
+                                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+                                reject();
+                            })
+                            .then((project) => {
+                                if (project != null) {
+                                    editProject(convertNullValuesInObject(project, getManageProjectMapper()));
+                                    if (!arraysEquals(newData, oldData, 'usersIds')) {
+                                        notifyUsers('PROJECT', project.id, project['usersIds']);
                                     }
-                                });
+                                    notifyTemplates('PROJECT', project.id, project['templatesIds']);
+                                    resolve();
+                                }
+                            });
                         }),
 
                     // onRowDelete: oldData =>

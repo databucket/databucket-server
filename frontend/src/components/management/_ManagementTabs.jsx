@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {IconButton, Tabs, Toolbar} from "@mui/material";
+import React, {useState, Suspense, lazy } from 'react';
+import { IconButton, Stack, Tabs, Toolbar } from "@mui/material";
 import {Close as CloseIcon} from "@mui/icons-material";
 import {Link, Redirect, Route, Switch} from "react-router-dom";
 import {
@@ -16,7 +16,6 @@ import {
     setLastManagementPageName,
     setPathname
 } from "../../utils/ConfigurationStorage";
-import ProjectsTab from "./ProjectsTab";
 import UsersTab from "./UsersTab";
 import NotFoundPage from "../NotFoundPage";
 import ManagementRoute from "../../route/ManagementRoute";
@@ -59,13 +58,17 @@ export default function _ManagementTabs() {
     }
 
     if (logged) {
+        const ProjectsTab = lazy(() => import("./ProjectsTab"));
+        const UsersTab = lazy(() => import("./UsersTab"));
+        const TemplatesTab = lazy(() => import("./TemplatesTab"));
+
         setPathname(null); // clear path
         return (
             <Route
                 path="/"
                 render={({location}) => (
-                    <>
-                        <CustomAppBar position="fixed" sx={{flex: 1}}>
+                    <Stack>
+                        <CustomAppBar position={"sticky"} sx={{flex: 1}}>
                             <Toolbar variant={'dense'}>
                                 {hasProject() ? (
                                     <IconButton
@@ -95,18 +98,19 @@ export default function _ManagementTabs() {
                                 <UserProfile onLogout={handleLogout}/>
                             </Toolbar>
                         </CustomAppBar>
-                        <ProjectsProvider> <ManageUsersProvider> <RolesProvider> <TemplatesProvider> <DataProvider>
-                            <DataItemsProvider>
-                                <Switch>
-                                    <ManagementRoute exact path={getManagementProjectsPath()} component={ProjectsTab}/>
-                                    <ManagementRoute exact path={getManagementUsersPath()} component={UsersTab}/>
-                                    <ManagementRoute exact path={getManagementTemplatesPath()}
-                                                     component={TemplatesTab}/>
-                                    <PublicRoute path="*" component={NotFoundPage}/>
-                                </Switch>
-                            </DataItemsProvider> </DataProvider> </TemplatesProvider> </RolesProvider>
-                        </ManageUsersProvider> </ProjectsProvider>
-                    </>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <ProjectsProvider> <ManageUsersProvider> <RolesProvider> <TemplatesProvider> <DataProvider>
+                                <DataItemsProvider>
+                                    <Switch>
+                                        <ManagementRoute exact path={getManagementProjectsPath()} component={ProjectsTab}/>
+                                        <ManagementRoute exact path={getManagementUsersPath()} component={UsersTab}/>
+                                        <ManagementRoute exact path={getManagementTemplatesPath()} component={TemplatesTab}/>
+                                        <PublicRoute path="*" component={NotFoundPage}/>
+                                    </Switch>
+                                </DataItemsProvider> </DataProvider> </TemplatesProvider> </RolesProvider>
+                            </ManageUsersProvider> </ProjectsProvider>
+                        </Suspense>
+                    </Stack>
                 )}
             />
         );
