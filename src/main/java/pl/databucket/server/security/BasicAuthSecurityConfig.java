@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import pl.databucket.server.dto.AuthRespDTO;
 
 @Log4j2
@@ -22,10 +23,12 @@ public class BasicAuthSecurityConfig {
     @Bean
     public SecurityFilterChain basicSecurityFilterChain(HttpSecurity http,
         AuthResponseBuilder authResponseBuilder,
+        JsonAuthenticationFilter jsonLoginFilter,
         ObjectMapper mapper) throws Exception {
         AuthenticationSuccessHandler successHandler = getFormSuccessHandler(authResponseBuilder);
         AuthenticationFailureHandler failureHandler = getAuthenticationFailureHandler(mapper);
         http.cors().and().csrf().disable()
+            .addFilterBefore(jsonLoginFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeRequests()
             .antMatchers(HttpMethod.GET,
                 "/", "/login**", "/sign-up", "/forgot-password", "/change-password",
@@ -52,7 +55,8 @@ public class BasicAuthSecurityConfig {
         return http.build();
     }
 
-    private static AuthenticationFailureHandler getAuthenticationFailureHandler(ObjectMapper mapper) {
+    @Bean
+    public AuthenticationFailureHandler getAuthenticationFailureHandler(ObjectMapper mapper) {
         return (request, response, exception) -> {
             log.error("Auth error", exception);
             AuthRespDTO authResponse = AuthRespDTO.builder().message(exception.getMessage()).build();
@@ -63,7 +67,8 @@ public class BasicAuthSecurityConfig {
         };
     }
 
-    private AuthenticationSuccessHandler getFormSuccessHandler(AuthResponseBuilder authResponseBuilder) {
+    @Bean
+    public AuthenticationSuccessHandler getFormSuccessHandler(AuthResponseBuilder authResponseBuilder) {
         return new FormAuthSuccessHandler(authResponseBuilder);
     }
 }

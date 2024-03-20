@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import pl.databucket.server.dto.AuthRespDTO;
 import pl.databucket.server.repository.RoleRepository;
 import pl.databucket.server.service.ManageUserService;
@@ -26,11 +27,13 @@ public class OAuth2SecurityConfig {
     public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http,
         OAuth2LogoutHandler oauth2LogoutHandler,
         AuthResponseBuilder authResponseBuilder,
+        JsonAuthenticationFilter jsonLoginFilter,
         ObjectMapper mapper,
         AuthenticationSuccessHandler oAuth2SuccessHandler) throws Exception {
         AuthenticationSuccessHandler successHandler = getFormSuccessHandler(authResponseBuilder);
         AuthenticationFailureHandler failureHandler = getAuthenticationFailureHandler(mapper);
         http.cors().and().csrf().disable()
+            .addFilterBefore(jsonLoginFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeRequests()
             .antMatchers(HttpMethod.GET,
                 "/", "/login**", "/sign-up", "/forgot-password", "/change-password",

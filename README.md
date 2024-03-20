@@ -49,21 +49,6 @@ Installed below dependencies:
 - Java 17
 - NodeJS 18
 
-# Cloning
-
-This project uses the [material-table](https://github.com/databucket/material-table.git) project as a Git Submodule.
-In order to be able to build the frontend, the submodule is also built.
-Clone the project with the extra `--recurse-submodules` argument in order to also have the material-table code.
-
-```shell
-git clone --recurse-submodules https://github.com/databucket/databucket-server.git
-```
-
-If you need to update the material-table submodule, you can run:
-```shell
-git submodule update --recursive --remote
-```
-
 ## Useful commands
 
 | command                                                  | what it does                                                                            |
