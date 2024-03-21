@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,12 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
@@ -45,7 +44,9 @@ import pl.databucket.server.security.AuthConfig;
 import pl.databucket.server.security.AuthResponseBuilder;
 import pl.databucket.server.security.OAuth2LogoutHandler;
 import pl.databucket.server.security.OAuth2SecurityConfig;
+import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.DataFilterService;
+import pl.databucket.server.service.UserService;
 
 @ExtendWith(SpringExtension.class)
 //@ContextConfiguration(classes = {AuthConfig.class, OAuth2SecurityConfig.class, CustomJwtDecoder.class})
@@ -67,9 +68,11 @@ class DataFilterControllerTest {
     @MockBean
     ClientRegistrationRepository clientRegistrationRepository;
     @MockBean
-    UserDetailsService userDetailsService;
+    UserService userService;
     @MockBean
     MainPageTransformer mainPageTransformer;
+    @MockBean
+    TokenProvider tokenProvider;
     private static MockMvc mvc;
 
     @BeforeEach
@@ -86,7 +89,7 @@ class DataFilterControllerTest {
         when(dataFilterService.createFilter(any(DataFilterDto.class))).thenReturn(new DataFilter());
         mvc.perform(post("/api/filters")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"NAME\"}"))
+                .content("{\"name\": \"NAME\"}").with(csrf()))
             .andExpect(status().isCreated());
         verify(dataFilterService).createFilter(any(DataFilterDto.class));
     }
