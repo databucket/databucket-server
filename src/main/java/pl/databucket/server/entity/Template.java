@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.TemplateConfDto;
+
 import javax.persistence.*;
 import java.util.Set;
 import java.util.stream.Collectors;

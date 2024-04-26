@@ -1,35 +1,32 @@
 package pl.databucket.server.configuration;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceTransformerChain;
 import org.springframework.web.servlet.resource.TransformedResource;
 
-@Component
-@RequiredArgsConstructor
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 public class MainPageTransformer implements ResourceTransformer {
 
-    private final ServletContext servletContext;
+    private final String contextPath;
 
+    public MainPageTransformer(String contextPath) {
+        this.contextPath = contextPath;
+    }
 
     @Override
-    public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain)
-        throws IOException {
-        if (Objects.equals(resource.getFilename(), "index.html")) {
-            String info = "<span id=\"context-path\" hidden>" + servletContext.getContextPath() + "</span>";
+    public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain) throws IOException {
+        if (resource.getFilename().equals("index.html")) {
+            String info = "<span id=\"context-path\" hidden>" + contextPath + "</span>";
 
-            String html = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String html = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
             html = html.replace("<body>", "<body>" + info);
             return new TransformedResource(resource, html.getBytes());
-        } else {
+        } else
             return resource;
-        }
     }
 }

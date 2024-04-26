@@ -6,11 +6,14 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.databucket.server.configuration.Constants;
-import pl.databucket.server.entity.*;
-import pl.databucket.server.repository.*;
+import pl.databucket.server.entity.Role;
+import pl.databucket.server.entity.User;
+import pl.databucket.server.repository.RoleRepository;
+import pl.databucket.server.repository.UserRepository;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class ApplicationInitialDataCreator implements ApplicationRunner {

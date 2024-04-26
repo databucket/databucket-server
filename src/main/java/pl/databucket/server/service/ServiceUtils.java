@@ -7,9 +7,9 @@ import org.postgresql.util.PGobject;
 import pl.databucket.server.exception.UnexpectedException;
 
 import java.sql.SQLException;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceUtils {
 

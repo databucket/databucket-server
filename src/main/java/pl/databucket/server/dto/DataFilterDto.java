@@ -3,6 +3,7 @@ package pl.databucket.server.dto;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
+
 import javax.validation.constraints.Size;
 import java.util.Date;
 

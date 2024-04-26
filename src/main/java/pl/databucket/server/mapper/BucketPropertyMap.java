@@ -2,7 +2,6 @@ package pl.databucket.server.mapper;
 
 import org.modelmapper.PropertyMap;
 import pl.databucket.server.dto.BucketDto;
-import pl.databucket.server.dto.IconDto;
 import pl.databucket.server.entity.Bucket;
 
 public class BucketPropertyMap extends PropertyMap<Bucket, BucketDto> {

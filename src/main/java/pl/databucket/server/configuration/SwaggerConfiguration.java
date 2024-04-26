@@ -18,8 +18,8 @@ import static io.swagger.v3.oas.annotations.enums.SecuritySchemeIn.HEADER;
 import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
-//@Configuration
-//@EnableSwagger2
+@Configuration
+@EnableSwagger2
 public class SwaggerConfiguration {
 
     @Bean
@@ -48,7 +48,7 @@ public class SwaggerConfiguration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Databucket API")
-                .version("4.0.0")
+                .version("3.5.0")
                 .build();
     }
 }

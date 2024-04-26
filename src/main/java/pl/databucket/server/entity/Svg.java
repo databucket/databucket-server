@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
-import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.tenant.TenantSupport;
 
 import javax.persistence.*;

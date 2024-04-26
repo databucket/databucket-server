@@ -14,6 +14,8 @@ spring:
       mode: always
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+#  main:
+#    allow-circular-references: true
 
 recaptcha:
   enabled: false
@@ -27,6 +29,3 @@ logging:
     org.hibernate: error
     pl.databucket.service.data.DataService: error
     pl.databucket.service.BucketService: error
-springfox:
-  documentation:
-    enabled: false

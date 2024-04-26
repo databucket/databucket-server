@@ -52,7 +52,7 @@ export default function ConfirmationPage() {
     }, [inputParams]);
 
     if (redirect) {
-        return (<Redirect to="/login-form"/>);
+        return (<Redirect to="/login"/>);
     } else {
         return (
             <Stack direction="column"

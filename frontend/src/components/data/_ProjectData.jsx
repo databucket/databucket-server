@@ -215,7 +215,7 @@ export default function ProjectData() {
     };
 
     if (!logged) {
-        return (<Redirect to="/login-form"/>);
+        return (<Redirect to="/login"/>);
     }
 
     if (projects == null || enums == null || columns == null || filters == null

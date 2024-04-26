@@ -3,16 +3,16 @@ package pl.databucket.server.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.*;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.IconDto;
 import pl.databucket.server.tenant.TenantSupport;
+
+import javax.persistence.*;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Entity

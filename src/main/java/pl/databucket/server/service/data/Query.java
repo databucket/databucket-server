@@ -1,21 +1,20 @@
 package pl.databucket.server.service.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import pl.databucket.server.dto.CustomColumnDto;
+import pl.databucket.server.dto.DataModifyDTO;
+import pl.databucket.server.exception.ConditionNotAllowedException;
+import pl.databucket.server.exception.UnknownColumnException;
+
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-
-import pl.databucket.server.dto.CustomColumnDto;
-import pl.databucket.server.dto.DataModifyDTO;
-import pl.databucket.server.exception.ConditionNotAllowedException;
-import pl.databucket.server.exception.UnknownColumnException;
 
 public class Query {
 
@@ -478,11 +477,11 @@ public class Query {
         return result.substring(1); // cut first comma character
     }
 
-    private java.sql.Timestamp isValidDate(String inDate) {
+    private Timestamp isValidDate(String inDate) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setLenient(false);
         try {
-            return new java.sql.Timestamp(dateFormat.parse(inDate.trim()).getTime());
+            return new Timestamp(dateFormat.parse(inDate.trim()).getTime());
         } catch (ParseException pe) {
             return null;
         }

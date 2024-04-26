@@ -1,6 +1,5 @@
 package pl.databucket.server.dto;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
@@ -12,7 +11,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Builder
 public class ManageUserDtoRequest {
 
     @NotEmpty

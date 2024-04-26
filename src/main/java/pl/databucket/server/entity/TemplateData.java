@@ -3,6 +3,7 @@ package pl.databucket.server.entity;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
+
 import javax.persistence.*;
 
 @Entity

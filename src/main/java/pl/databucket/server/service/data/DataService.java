@@ -211,7 +211,7 @@ public class DataService {
             paramMap.put(COL.TAG_ID, dataModifyDto.getTagId());
 
         paramMap.put(COL.MODIFIED_BY, user.getUsername());
-        paramMap.put(COL.MODIFIED_AT, new java.sql.Timestamp(new java.util.Date().getTime()));
+        paramMap.put(COL.MODIFIED_AT, new java.sql.Timestamp(new Date().getTime()));
 
         if (dataModifyDto.getReserved() != null) {
             paramMap.put(COL.RESERVED, dataModifyDto.getReserved());
@@ -261,7 +261,7 @@ public class DataService {
                     Map<String, Object> updateNamedParams = new HashMap<>();
                     updateNamedParams.put(COL.RESERVED_BY, targetOwnerUsername);
                     updateNamedParams.put(COL.MODIFIED_BY, user.getUsername());
-                    updateNamedParams.put(COL.MODIFIED_AT, new java.sql.Timestamp(new java.util.Date().getTime()));
+                    updateNamedParams.put(COL.MODIFIED_AT, new java.sql.Timestamp(new Date().getTime()));
                     updateNamedParams.put(COL.RESERVED, true);
 
                     Query updateQuery = new Query(bucket.getTableName());

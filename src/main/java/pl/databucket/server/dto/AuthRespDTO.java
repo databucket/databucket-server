@@ -2,14 +2,14 @@ package pl.databucket.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.util.List;
 
-@Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthRespDTO {
 
@@ -21,9 +21,6 @@ public class AuthRespDTO {
 
     @ApiModelProperty(hidden = true)
     private String message;
-
-    @ApiModelProperty(hidden = true)
-    private String username;
 
     @ApiModelProperty(hidden = true)
     private List<AuthProjectDTO> projects;

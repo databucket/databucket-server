@@ -1,43 +1,39 @@
 package pl.databucket.server.controller;
 
 import io.swagger.annotations.ApiParam;
-import java.util.List;
-import javax.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.TemplateDto;
 import pl.databucket.server.entity.Template;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
-import pl.databucket.server.security.TokenProvider;
+import pl.databucket.server.security.CustomUserDetails;
 import pl.databucket.server.service.template.TemplateService;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/templates")
 @RestController
-@RequiredArgsConstructor
 public class TemplateController {
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(TemplateController.class);
 
-    private final TemplateService templateService;
-    private final ModelMapper modelMapper;
+    @Autowired
+    private TemplateService templateService;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
 
     @PreAuthorize("hasRole('SUPER')")
     @PostMapping
@@ -45,7 +41,7 @@ public class TemplateController {
         try {
             Template template = templateService.createTemplate(templateDto);
             modelMapper.map(template, templateDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(templateDto);
+            return new ResponseEntity<>(templateDto, HttpStatus.CREATED);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -56,9 +52,8 @@ public class TemplateController {
     public ResponseEntity<?> getTemplates() {
         try {
             List<Template> templates = templateService.getTemplates();
-            List<TemplateDto> templatesDto = templates.stream().map(item -> modelMapper.map(item, TemplateDto.class))
-                .toList();
-            return ResponseEntity.ok(templatesDto);
+            List<TemplateDto> templatesDto = templates.stream().map(item -> modelMapper.map(item, TemplateDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(templatesDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
         }
@@ -66,22 +61,15 @@ public class TemplateController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = {"/project/{projectId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getProjectTemplates(
-        @ApiParam(value = "id", example = "1", required = true) @PathVariable Integer projectId,
-        Authentication auth) {
+    public ResponseEntity<?> getProjectTemplates(@ApiParam(value="id", example = "1", required = true) @PathVariable Integer projectId) {
         try {
             // Check if user has token generated to the projectId
-            Jwt jwt = (Jwt) auth.getPrincipal();
-            Long currentProjectId = jwt.getClaim(TokenProvider.PROJECT_ID);
-
-            if (!projectId.equals(currentProjectId.intValue())) {
+            if (!((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId().equals(projectId))
                 return exceptionFormatter.customException("Incorrect project", HttpStatus.NOT_ACCEPTABLE);
-            }
 
             List<Template> templates = templateService.getTemplates(projectId);
-            List<TemplateDto> templatesDto = templates.stream().map(item -> modelMapper.map(item, TemplateDto.class))
-                .toList();
-            return ResponseEntity.ok(templatesDto);
+            List<TemplateDto> templatesDto = templates.stream().map(item -> modelMapper.map(item, TemplateDto.class)).collect(Collectors.toList());
+            return new ResponseEntity<>(templatesDto, HttpStatus.OK);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception ee) {
@@ -95,7 +83,7 @@ public class TemplateController {
         try {
             Template template = templateService.modifyTemplate(templateDto);
             modelMapper.map(template, templateDto);
-            return ResponseEntity.ok(templateDto);
+            return new ResponseEntity<>(templateDto, HttpStatus.OK);
         } catch (ItemNotFoundException | ModifyByNullEntityIdException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -108,7 +96,7 @@ public class TemplateController {
     public ResponseEntity<?> deleteTemplate(@PathVariable int templateId) {
         try {
             templateService.deleteTemplate(templateId);
-            return ResponseEntity.noContent().build();
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -119,7 +107,7 @@ public class TemplateController {
     public ResponseEntity<?> runTemplate(@PathVariable int templateId) {
         try {
             templateService.runTemplate(templateId);
-            return ResponseEntity.noContent().build();
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

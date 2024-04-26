@@ -8,7 +8,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/databucket
+    url: jdbc:postgresql://localhost:5432/databucket1
     username: databucket_user
     password: databucket_user
   mail:
@@ -17,9 +17,5 @@ spring:
     username: username
     password: password
     from: admin@email.io
-    properties:
-      mail:
-        smtp:
-          auth: true
-        starttls:
-          enable: true
+    properties.mail.smtp.auth: true
+    properties.mail.smtp.starttls.enable: true

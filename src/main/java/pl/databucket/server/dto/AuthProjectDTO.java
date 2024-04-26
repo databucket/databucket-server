@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
+
 import javax.validation.constraints.Size;
 
 @Getter

@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.databucket.server.dto.DataClassDto;
 import pl.databucket.server.entity.*;
-import pl.databucket.server.exception.*;
+import pl.databucket.server.exception.ItemAlreadyExistsException;
+import pl.databucket.server.exception.ItemAlreadyUsedException;
+import pl.databucket.server.exception.ItemNotFoundException;
+import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.repository.*;
 
 import java.util.HashMap;

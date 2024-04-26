@@ -115,6 +115,6 @@ export default function _ManagementTabs() {
             />
         );
     } else
-        return (<Redirect to="/login-form"/>);
+        return (<Redirect to="/login"/>);
 
 }
