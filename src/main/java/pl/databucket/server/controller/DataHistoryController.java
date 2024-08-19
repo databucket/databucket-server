@@ -1,6 +1,6 @@
 package pl.databucket.server.controller;
 
-import io.swagger.annotations.ApiParam;
+//import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -94,8 +94,10 @@ public class DataHistoryController {
             "/bucket/{bucketName}/{id}/history/clear"},
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> clearHistory(
-            @ApiParam(value = "bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value = "id", example = "1", required = true) @PathVariable Long id
+//            @ApiParam(value = "bucket name", required = true)
+            @PathVariable String bucketName,
+//            @ApiParam(value = "id", example = "1", required = true)
+            @PathVariable Long id
             ) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -119,8 +121,10 @@ public class DataHistoryController {
             "/bucket/{bucketName}/history/clear"},
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> clearHistory(
-            @ApiParam(value="bucket name", required = true) @PathVariable String bucketName,
-            @ApiParam(value="payload - rules", required = true) @RequestBody DataRemoveDTO dataRemoveDTO) {
+//            @ApiParam(value="bucket name", required = true)
+            @PathVariable String bucketName,
+//            @ApiParam(value="payload - rules", required = true)
+            @RequestBody DataRemoveDTO dataRemoveDTO) {
 
         if ((dataRemoveDTO.getConditions() == null || dataRemoveDTO.getConditions().size() == 0)
                 && (dataRemoveDTO.getRules() == null || dataRemoveDTO.getRules().size() == 0)

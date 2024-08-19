@@ -1,6 +1,6 @@
 package pl.databucket.server.controller;
 
-import io.swagger.annotations.ApiParam;
+//import io.swagger.annotations.ApiParam;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,7 +61,9 @@ public class TemplateController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = {"/project/{projectId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getProjectTemplates(@ApiParam(value="id", example = "1", required = true) @PathVariable Integer projectId) {
+    public ResponseEntity<?> getProjectTemplates(
+//            @ApiParam(value="id", example = "1", required = true)
+            @PathVariable Integer projectId) {
         try {
             // Check if user has token generated to the projectId
             if (!((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId().equals(projectId))

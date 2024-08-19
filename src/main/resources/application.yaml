@@ -14,8 +14,8 @@ spring:
       mode: always
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
-#  main:
-#    allow-circular-references: true
+  main:
+    allow-circular-references: true
 
 recaptcha:
   enabled: false
