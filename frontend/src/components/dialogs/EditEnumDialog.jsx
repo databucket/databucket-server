@@ -63,7 +63,10 @@ const DialogTitle = ((props) => {
     );
 });
 
-const DialogContent = MuiDialogContent;
+const DialogContent = styled(MuiDialogContent)({
+    padding: 0,
+});
+
 
 const EditComponent = props => <EditIconDialog icon={props.value}
                                                onChange={props.onChange}/>

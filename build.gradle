@@ -1,19 +1,13 @@
 plugins {
     id 'java'
-//    id 'org.springframework.boot' version '2.7.8'
-//    id 'io.spring.dependency-management' version '1.1.0'
     id 'org.springframework.boot' version '2.5.7'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 group = 'pl.databucket'
-version = '3.5.1'
+version = '3.5.2'
 targetCompatibility = 17
 sourceCompatibility = 17
-
-ext['log4j2.version'] = '2.20.0'
-ext['tomcat.version'] = '9.0.71'
-ext['jackson.version'] = '2.14.2'
 
 configurations {
     compileOnly {
@@ -29,7 +23,6 @@ repositories {
 jar {
     enabled = false
 }
-
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Button,
     Dialog,
@@ -9,68 +9,66 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
+import { Close as CloseIcon, MoreHoriz } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 import TemplateTabs from "../management/templatesConfig/_TemplConfigTabs";
 
-const PREFIX = 'EditTemplateConfigurationDialog';
+const StyledDialogTitle = styled(MuiDialogTitle)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    margin: 0,
+    padding: theme.spacing(0),
+    width: '100%',
 
-const classes = {
-    root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
-    closeButton: `${PREFIX}-closeButton`
-};
-
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.root2}`]: {
-        margin: 0,
-        padding: theme.spacing(2),
+    '& .titleText': {
+        flexGrow: 1,
+        marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2),
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
     },
 
-    [`& .${classes.closeButton}`]: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
+    '& .closeButton': {
         color: theme.palette.grey[500],
-    }
+        padding: theme.spacing(2),
+    },
 }));
 
-const DialogTitle = ((props) => {
-    const {children, onClose, ...other} = props;
+const DialogTitle = (props) => {
+    const { children, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
-            <Typography variant="h6">{children}</Typography>
+        <StyledDialogTitle disableTypography {...other}>
+            <Typography variant="h6" className="titleText">{children}</Typography>
             {onClose ? (
                 <IconButton
                     aria-label="close"
-                    className={classes.closeButton}
+                    className="closeButton"
                     onClick={onClose}
-                    size="large">
-                    <CloseIcon/>
+                    size="large"
+                >
+                    <CloseIcon />
                 </IconButton>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
-});
+};
 
-const DialogContent = MuiDialogContent;
+const StyledDialogContent = styled(MuiDialogContent)(({ theme }) => ({
+    padding: 0,
+}));
 
 EditTemplateConfigurationDialog.propTypes = {
     name: PropTypes.string.isRequired,
     rowData: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired
-}
+    onChange: PropTypes.func.isRequired,
+};
 
 export default function EditTemplateConfigurationDialog(props) {
-
     const [open, setOpen] = useState(false);
     const [template, setTemplate] = useState(null);
 
-    // must be initiated by hook
     useEffect(() => {
         setTemplate(props.rowData);
     }, [props.rowData]);
@@ -82,13 +80,13 @@ export default function EditTemplateConfigurationDialog(props) {
     const handleSave = () => {
         props.onChange(template['configuration']);
         setOpen(false);
-    }
+    };
 
     return (
-        <Root>
+        <div>
             <Tooltip title='Configuration'>
                 <Button
-                    endIcon={<MoreHoriz/>}
+                    endIcon={<MoreHoriz />}
                     onClick={handleClickOpen}
                 >
                     {``}
@@ -99,22 +97,18 @@ export default function EditTemplateConfigurationDialog(props) {
                 aria-labelledby="customized-dialog-title"
                 open={open}
                 fullWidth={true}
-                maxWidth='xl' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+                maxWidth='xl'
             >
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     {`Template: ${props.name}`}
                 </DialogTitle>
-                <DialogContent
-                    dividers
-                    classes={{
-                        root: classes.root
-                    }}>
+                <StyledDialogContent dividers>
                     <TemplateTabs
                         template={template}
                         setTemplate={setTemplate}
                     />
-                </DialogContent>
+                </StyledDialogContent>
             </Dialog>
-        </Root>
+        </div>
     );
 }

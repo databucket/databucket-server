@@ -150,12 +150,6 @@ export default function ProjectData() {
     }, []);
 
     useEffect(() => {
-        if (views != null && columns == null) {
-            fetchSessionColumns();
-        }
-    }, [views]);
-
-    useEffect(() => {
         if (views != null && tasks != null && filters == null) {
             fetchSessionFilters();
         }
@@ -171,12 +165,6 @@ export default function ProjectData() {
             }
         }
     }, [views]);
-
-    useEffect(() => {
-        if (views != null && tasks != null && filters == null) {
-            fetchSessionFilters();
-        }
-    }, [views, tasks]);
 
     const handleDrawerOpen = (event) => {
         event.stopPropagation();

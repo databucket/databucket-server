@@ -101,80 +101,78 @@ export default function TaskActionsTemplate(props) {
                         />
                     </RadioGroup>
                     {props.actions.type === 'modify' &&
-                        <div>
-                            {props.tags != null && props.tags.length > 0 &&
-                                <FormGroup row>
-                                    <FormControlLabel
-                                        label="Set tag"
-                                        control={<Checkbox
-                                            checked={props.actions.setTag
-                                                || false}
-                                            onChange={handleActionSetTag}/>}
-                                    />
-                                    {props.actions.setTag === true &&
-                                        <FormControlLabel
-                                            label=''
-                                            labelPlacement="start"
-                                            control={
-                                                <Select
-                                                    id="tag-select"
-                                                    onChange={handleTagChange}
-                                                    value={props.actions.tagId}
-                                                >
-                                                    {props.tags.map(tag => (
-                                                        <MenuItem key={tag.id}
-                                                                  value={tag.id}>
-                                                            {tag.name}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            }
-                                        />
-                                    }
-                                </FormGroup>
-                            }
-                            <FormGroup row>
-                                <FormControlLabel
-                                    label="Set reserved"
-                                    control={<Checkbox
-                                        checked={props.actions.setReserved
-                                            || false}
-                                        onChange={handleActionSetReserved}/>}
-                                />
-                                {props.actions.setReserved === true &&
-                                    <RadioGroup row
-                                                value={props.actions.reserved
-                                                    || false}
-                                                onChange={handleActionReserveChange}>
-                                        <FormControlLabel
-                                            value={true}
-                                            control={<Radio/>}
-                                            label="True"
-                                        />
-                                        <FormControlLabel
-                                            value={false}
-                                            control={<Radio/>}
-                                            label="False"
-                                        />
-                                    </RadioGroup>
+                    <div>
+                        {props.tags != null && props.tags.length > 0 &&
+                        <FormGroup row>
+                            <FormControlLabel
+                                label="Set tag"
+                                control={<Checkbox
+                                    checked={props.actions.setTag || false}
+                                    onChange={handleActionSetTag}/>}
+                            />
+                            {props.actions.setTag === true &&
+                            <FormControlLabel
+                                label=''
+                                labelPlacement="start"
+                                control={
+                                    <Select
+                                        id="tag-select"
+                                        onChange={handleTagChange}
+                                        value={props.actions.tagId}
+                                    >
+                                        {props.tags.map(tag => (
+                                            <MenuItem key={tag.id} value={tag.id}>
+                                                {tag.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
                                 }
-                            </FormGroup>
-                        </div>
+                            />
+                            }
+                        </FormGroup>
+                        }
+                        <FormGroup row>
+                            <FormControlLabel
+                                label="Set reserved"
+                                control={<Checkbox
+                                    checked={props.actions.setReserved
+                                    || false}
+                                    onChange={handleActionSetReserved}/>}
+                            />
+                            {props.actions.setReserved === true &&
+                            <RadioGroup row
+                                        value={props.actions.reserved
+                                        || false}
+                                        onChange={handleActionReserveChange}>
+                                <FormControlLabel
+                                    value={true}
+                                    control={<Radio/>}
+                                    label="True"
+                                />
+                                <FormControlLabel
+                                    value={false}
+                                    control={<Radio/>}
+                                    label="False"
+                                />
+                            </RadioGroup>
+                            }
+                        </FormGroup>
+                    </div>
                     }
                 </FormControl>
             </div>
             {props.actions.type === 'modify' &&
-                <div ref={actionsPropertiesContentRef}
-                     className={classes.propertiesContainer}>
-                    <ActionPropertiesTableTemplate
-                        data={props.actions.properties}
-                        properties={props.properties}
-                        onChange={onActionPropertiesChange}
-                        pageSize={props.pageSize}
-                        parentContentRef={actionsPropertiesContentRef}
-                        enums={props.enums}
-                    />
-                </div>
+            <div ref={actionsPropertiesContentRef}
+                 className={classes.propertiesContainer}>
+                <ActionPropertiesTableTemplate
+                    data={props.actions.properties}
+                    properties={props.properties}
+                    onChange={onActionPropertiesChange}
+                    pageSize={props.pageSize}
+                    parentContentRef={actionsPropertiesContentRef}
+                    enums={props.enums}
+                />
+            </div>
             }
         </Root>
     );

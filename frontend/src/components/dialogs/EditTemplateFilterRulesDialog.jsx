@@ -156,6 +156,8 @@ export default function EditTemplateFilterRulesDialog(props) {
                             value={activeTab}
                             onChange={handleChangedTab}
                             centered
+                            textColor="secondary"
+                            indicatorColor="secondary"
                         >
 
                             <StyledTab label="Rules"/>

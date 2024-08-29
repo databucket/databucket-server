@@ -33,9 +33,11 @@ const Root = styled('div')((
         theme
     }
 ) => ({
-    [`& .${classes.root2}`]: {
-        flexGrow: 1,
-        display: 'flex'
+    [`& .${classes.root}`]: {
+        display: 'flex',
+        flexDirection: 'row',
+        height: '100%',
+        overflow: 'hidden'
     },
 
     [`& .${classes.tabs}`]: {
@@ -73,6 +75,8 @@ export default function _TemplConfigTabs(props) {
                     <Tabs
                         value={activeTab}
                         onChange={handleChangeTab}
+                        textColor="secondary"
+                        indicatorColor="secondary"
                         variant="scrollable"
                         scrollButtons
                         orientation={'vertical'}

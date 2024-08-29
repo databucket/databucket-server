@@ -166,6 +166,8 @@ export default function TaskEditConfigDialogTemplate(props) {
                             value={activeTab}
                             onChange={handleChangedTab}
                             centered
+                            textColor="secondary"
+                            indicatorColor="secondary"
                         >
                             <StyledTab label="Action"/>
                             <StyledTab label="Properties"/>

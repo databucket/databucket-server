@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
     Button,
     Dialog,
@@ -8,9 +8,10 @@ import {
     IconButton,
     styled,
     Tooltip,
-    Typography
+    Typography,
+    Box
 } from '@mui/material';
-import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
+import { Close as CloseIcon, MoreHoriz } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 import EnumsContext from "../../context/enums/EnumsContext";
 import PropertiesTable from "../utils/PropertiesTable";
@@ -24,11 +25,7 @@ const classes = {
     closeButton: `${PREFIX}-closeButton`
 };
 
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
+const Root = styled('div')(({ theme }) => ({
     [`& .${classes.root3}`]: {
         margin: 0,
         padding: theme.spacing(2),
@@ -42,25 +39,32 @@ const Root = styled('div')((
     }
 }));
 
+const StyledDialogContent = styled(MuiDialogContent)(({ theme }) => ({
+    padding: 0,
+    '&:first-of-type': {
+        paddingTop: 0,
+    },
+}));
+
 const DialogTitle = ((props) => {
-    const {children,  onClose, ...other} = props;
+    const { children, onClose, ...other } = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
-            <Typography variant="h6">{children}</Typography>
-            {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                    size="large">
-                    <CloseIcon/>
-                </IconButton>
-            ) : null}
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6">{children}</Typography>
+                {onClose && (
+                    <IconButton
+                        aria-label="close"
+                        className={classes.closeButton}
+                        onClick={onClose}
+                        size="large">
+                        <CloseIcon />
+                    </IconButton>
+                )}
+            </Box>
         </MuiDialogTitle>
     );
 });
-
-const DialogContent = MuiDialogContent;
 
 const DialogActions = MuiDialogActions;
 
@@ -83,7 +87,7 @@ export default function EditClassFieldsDialog(props) {
     };
 
     const handleSave = () => {
-        props.onChange(data.map(({title, path, type, enumId, uuid}) => ({title, path, type, enumId, uuid})));
+        props.onChange(data.map(({ title, path, type, enumId, uuid }) => ({ title, path, type, enumId, uuid })));
         setOpen(false);
     }
 
@@ -91,7 +95,7 @@ export default function EditClassFieldsDialog(props) {
         <Root>
             <Tooltip title={'Configure properties'}>
                 <Button
-                    endIcon={<MoreHoriz/>}
+                    endIcon={<MoreHoriz />}
                     onClick={handleClickOpen}
                 >
                     {`${props.configuration.length}`}
@@ -107,9 +111,9 @@ export default function EditClassFieldsDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleSave}>
                     {'Define class properties'}
                 </DialogTitle>
-                <DialogContent
+                <StyledDialogContent
                     dividers
-                    style={{height: '75vh'}}
+                    style={{ height: '75vh' }}
                     ref={dialogContentRef}
                     classes={{
                         root: classes.root
@@ -123,7 +127,7 @@ export default function EditClassFieldsDialog(props) {
                         parentContentRef={dialogContentRef}
                     />
                     }
-                </DialogContent>
+                </StyledDialogContent>
                 <DialogActions
                     classes={{
                         root: classes.root2

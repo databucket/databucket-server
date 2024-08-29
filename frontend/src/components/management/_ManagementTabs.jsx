@@ -87,6 +87,8 @@ export default function _ManagementTabs() {
                                     variant="scrollable"
                                     scrollButtons
                                     allowScrollButtonsMobile
+                                    textColor="secondary"
+                                    indicatorColor="secondary"
                                     sx={{flex: 1}}>
                                     <CustomTab label="Projects" value={tabs[0]} component={Link}
                                                to={getManagementProjectsPath()}/>

@@ -3,6 +3,7 @@ package pl.databucket.server.service.data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pl.databucket.server.exception.InvalidRuleException;
 
 import java.io.InvalidObjectException;
 import java.util.*;
@@ -17,8 +18,9 @@ public class QueryRule {
     private List<String> strRules = new ArrayList<>(); // given in the rules as string
     private List<QueryRule> queryRules = new ArrayList<>();
     private String currentUser;
+    private String errorMessage;
 
-    public QueryRule(String currentUser, SearchRules searchRules) throws InvalidObjectException {
+    public QueryRule(String currentUser, SearchRules searchRules) throws InvalidObjectException, InvalidRuleException {
         this.currentUser = currentUser;
 
         if (searchRules.getLogic() != null)
@@ -31,6 +33,9 @@ public class QueryRule {
             for (Map<String, Object> conditionMap : searchRules.getConditions())
                 conditions.add(new Condition(conditionMap));
         }
+
+        if (errorMessage != null)
+            throw new InvalidRuleException(errorMessage);
     }
 
     private void getQueryRulesFromLogic(String localCurrentUser, List<QueryRule> localQueryRule, List<Condition> localConditions, Object inputLogic) {
@@ -211,9 +216,14 @@ public class QueryRule {
             return SourceType.s_const;
     }
 
-    private Condition getConditionFromRule(Object leftObject, Operator operator, Object rightObject) {
+    private Condition getConditionFromRule(Object leftObject, Operator operator, Object rightObject) throws InvalidObjectException {
         SourceType leftSourceType = getSourceType(leftObject);
         SourceType rightSourceType = getSourceType(rightObject);
+
+        if (leftSourceType.equals(SourceType.s_const) && rightSourceType.equals(SourceType.s_const)) {
+            errorMessage = "Both sides of the rule [" + leftObject + " " + operator + " " + rightObject + "] were interpreted as constants. " +
+                    "This happens, for example, when a parameter or function does not have a '$.' prefix.";
+        }
 
         leftObject = retrieveCurrentUser(leftObject);
         if (leftObject instanceof String) {

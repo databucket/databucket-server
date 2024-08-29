@@ -72,7 +72,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     [`& .${classes.oneLine}`]: {
         display: 'flex',
         alignItems: 'center',
-        flexWrap: 'wrap'
+        padding: theme.spacing(2)
     },
 
     [`& .${classes.tabs}`]: {
@@ -80,7 +80,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     },
 
     [`& .${classes.devGrabSpace}`]: {
-        width: '170px'
+        width: '250px'
     },
 
     [`& .${classes.divActionGrabSpace}`]: {
@@ -89,7 +89,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
 
     [`& .${classes.root}`]: {
         margin: 0,
-        padding: theme.spacing(2),
+        padding: theme.spacing(0),
     },
     [`& .${classes.container}`]: {
         display: 'flex',
@@ -163,7 +163,6 @@ TaskExecutionDialog.propTypes = {
 const initialActions = {properties: []};
 
 export default function TaskExecutionDialog(props) {
-
 
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
@@ -438,10 +437,14 @@ export default function TaskExecutionDialog(props) {
             >
                 <div className={classes.oneLine}>
                     <Typography variant="h6">{'Task execution'}</Typography>
-                    <TaskMenuSelector tasks={getBucketTasks(props.bucket, accessContext.tasks)}
-                                      onTaskSelected={onTaskSelected}/>
+                    <TaskMenuSelector
+                        tasks={getBucketTasks(props.bucket, accessContext.tasks)}
+                        onTaskSelected={onTaskSelected}
+                    />
                     <Tabs
                         className={classes.tabs}
+                        textColor="secondary"
+                        indicatorColor="secondary"
                         value={activeTab}
                         onChange={handleChangedTab}
                         centered
@@ -462,51 +465,50 @@ export default function TaskExecutionDialog(props) {
                         root: classes.root
                     }}>
                     {props.open && state.processing &&
-                        <Grid
-                            container
-                            spacing={0}
-                            direction="column"
-                            alignItems="center"
-                            justifyContent="center"
-                            style={{minHeight: '50vh'}}
-                        >
-                            <Grid item xs={3}>
-                                <CircularProgress disableShrink/>
-                            </Grid>
+                    <Grid
+                        container
+                        spacing={0}
+                        direction="column"
+                        alignItems="center"
+                        justifyContent="center"
+                        style={{minHeight: '50vh'}}
+                    >
+                        <Grid item xs={3}>
+                            <CircularProgress disableShrink/>
                         </Grid>
+                    </Grid>
                     }
                     {props.open && !state.processing && activeTab === 0 &&
-                        <TaskActions
-                            actions={state.actions}
-                            properties={state.properties}
-                            tags={getBucketTags(props.bucket, accessContext.tags)}
-                            onChange={setActions}
-                            pageSize={null}
-                        />}
+                    <TaskActions
+                        actions={state.actions}
+                        properties={state.properties}
+                        tags={getBucketTags(props.bucket, accessContext.tags)}
+                        onChange={setActions}
+                        pageSize={null}
+                    />}
 
                     {props.open && !state.processing && activeTab === 1 &&
-                        <div>
-                            <Query
-                                {...state.config}
-                                value={state.tree}
-                                onChange={onRulesChange}
-                                renderBuilder={renderBuilder}
-                            />
-                            {renderResult({tree: state.tree, config: state.config})}
-                        </div>
+                    <div>
+                        <Query
+                            {...state.config}
+                            value={state.tree}
+                            onChange={onRulesChange}
+                            renderBuilder={renderBuilder}
+                        />
+                        {renderResult({tree: state.tree, config: state.config})}
+                    </div>
                     }
 
                     {props.open && !state.processing && activeTab === 2 &&
-                        <PropertiesTable
-                            used={getUsedUuids()}
-                            data={state.properties}
-                            enums={accessContext.enums}
-                            onChange={setProperties}
-                            title={'Class origin and defined properties:'}
-                            pageSize={null}
-                            parentContentRef={dialogContentRef}
-                        />}
-
+                    <PropertiesTable
+                        used={getUsedUuids()}
+                        data={state.properties}
+                        enums={accessContext.enums}
+                        onChange={setProperties}
+                        title={'Class origin and defined properties:'}
+                        pageSize={null}
+                        parentContentRef={dialogContentRef}
+                    />}
                 </DialogContent>
             </EnumsProvider>
             <DialogActions

@@ -33,6 +33,7 @@ const classes = {
 
 const Root = styled('div')(({theme}) => ({
     padding: theme.spacing(0),
+    margin: 0
 }));
 const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
     margin: 0,
@@ -64,7 +65,12 @@ const DialogTitle = ((props) => {
     );
 });
 
-const DialogContent = MuiDialogContent;
+const DialogContent = styled(MuiDialogContent)(({ theme }) => ({
+    padding: 0,
+    '&:first-of-type': {
+        paddingTop: 0, // Padding for the first child
+    },
+}));
 
 SelectMultiDialog.propTypes = {
     columns: PropTypes.array.isRequired,

@@ -1,7 +1,7 @@
 package pl.databucket.server.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-//import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.util.List;
@@ -13,22 +13,22 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthRespDTO {
 
-//    @ApiModelProperty(position = 1, example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXBlciIsImEta2V5IjoiUk9MRV9ST0JPVCxST0xFX01FTUJFUixST0xFX1NVUEVSLFJPTEVfQURNSU.rsHfwqgquz1e-YYC9UgyYSDWrEdpPQSnMV_XbrpHT6I")
+    @ApiModelProperty(position = 1, example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXBlciIsImEta2V5IjoiUk9MRV9ST0JPVCxST0xFX01FTUJFUixST0xFX1NVUEVSLFJPTEVfQURNSU.rsHfwqgquz1e-YYC9UgyYSDWrEdpPQSnMV_XbrpHT6I")
     private String token;
 
-//    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = true)
     private Boolean changePassword;
 
-//    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = true)
     private String message;
 
-//    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = true)
     private List<AuthProjectDTO> projects;
 
-//    @ApiModelProperty(position = 2)
+    @ApiModelProperty(position = 2)
     private AuthProjectDTO project;
 
-//    @ApiModelProperty(position = 3, example = "[\"ROBOT\", \"MEMBER\"]")
+    @ApiModelProperty(position = 3, example = "[\"ROBOT\", \"MEMBER\"]")
     private List<String> roles;
 
 }

@@ -277,14 +277,15 @@ public class Query {
 
                 // eg.: 5 in $.jsonArray   >>> v1 @> '[v2]'
             } else if (condition.getRightSource().equals(SourceType.s_property)) {
-                v1 = "properties #> '{" + getPGPropertyArray(condition.getRightValue().toString()) + "}'";
+                // COALESCE - avoid situation when missing property used in the condition
+                v1 = "COALESCE(properties #> '{" + getPGPropertyArray(condition.getRightValue().toString()) + "}', '[]'::jsonb)";
                 op = "@>";
                 if (condition.getLeftValue() instanceof String) {
-                    v2 = "'[\"" + condition.getLeftValue() + "\"]'";
+                    v2 = "'[\"" + condition.getLeftValue() + "\"]'::jsonb";
                 } else if (condition.getLeftValue() instanceof ArrayList<?>) {
-                    v2 = "'[" + getPGStringArray((ArrayList<?>) condition.getLeftValue()) + "]'";
+                    v2 = "'[" + getPGStringArray((ArrayList<?>) condition.getLeftValue()) + "]'::jsonb";
                 } else
-                    v2 = "'[" + condition.getLeftValue() + "]'";
+                    v2 = "'[" + condition.getLeftValue() + "]'::jsonb";
 
                 // eg.: $.prop in [1, 2, 3]   >>> v1 in 'v2
             } else if (condition.getLeftSource().equals(SourceType.s_property)) {

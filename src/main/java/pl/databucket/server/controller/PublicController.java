@@ -1,6 +1,6 @@
 package pl.databucket.server.controller;
 
-//import io.swagger.annotations.*;
+import io.swagger.annotations.*;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ import javax.mail.MessagingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//@Api(tags = "PUBLIC")
+@Api(tags = "PUBLIC")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/public")
@@ -57,16 +57,16 @@ public class PublicController {
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
 
 
-//    @ApiOperation(value = "Authenticate", notes = "Returns the token required to authorize the user, user's roles, project details if given projectId, or list of user's projects if the projectId is not given.", response = AuthRespDTO.class)
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "OK", response = AuthRespDTO.class),
-//            @ApiResponse(code = 401, message = "Unauthorized - the given credentials are not correct"),
-//            @ApiResponse(code = 403, message = "Forbidden - user access has expired | the project is disabled | the project is expired | the user is not assign to given project | the user is not assign to any project"),
-//            @ApiResponse(code = 500, message = "Internal server error"),
-//    })
+    @ApiOperation(value = "Authenticate", notes = "Returns the token required to authorize the user, user's roles, project details if given projectId, or list of user's projects if the projectId is not given.", response = AuthRespDTO.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = AuthRespDTO.class),
+            @ApiResponse(code = 401, message = "Unauthorized - the given credentials are not correct"),
+            @ApiResponse(code = 403, message = "Forbidden - user access has expired | the project is disabled | the project is expired | the user is not assign to given project | the user is not assign to any project"),
+            @ApiResponse(code = 500, message = "Internal server error"),
+    })
     @PostMapping(value = {"/sign-in", "/signin"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signIn(
-//            @ApiParam(value = "payload - username (required), password (required), projectId (optional)", required = true)
+            @ApiParam(value = "payload - username (required), password (required), projectId (optional)", required = true)
             @RequestBody AuthReqDTO authReqDTO) {
         User user = userRepository.findByUsername(authReqDTO.getUsername());
         if (user == null)

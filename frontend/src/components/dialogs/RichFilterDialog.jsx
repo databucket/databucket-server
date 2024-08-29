@@ -69,7 +69,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     },
     [`& .${classes.root}`]: {
         margin: 0,
-        padding: theme.spacing(2),
+        padding: theme.spacing(0),
     },
     [`& .${classes.container}`]: {
         display: 'flex',
@@ -126,7 +126,9 @@ const DialogTitleGrid = (props => {
                             <IconButton
                                 aria-label="Close"
                                 onClick={onClose}
-                                size="large">
+                                size="large"
+                                style={{marginLeft: '20px'}}
+                            >
                                 <CloseIcon/>
                             </IconButton>
                         ) : null}
@@ -260,21 +262,21 @@ export default function RichFilterDialog(props) {
                 let resultOk = true;
                 fetch(getDataUrl(bucket) + '/get?limit=0',
                     getPostOptions({logic}))
-                .then(handleErrors)
-                .catch(error => {
-                    setMessageBox({
-                        open: true,
-                        severity: 'error',
-                        title: 'Error',
-                        message: error
+                    .then(handleErrors)
+                    .catch(error => {
+                        setMessageBox({
+                            open: true,
+                            severity: 'error',
+                            title: 'Error',
+                            message: error
+                        });
+                        resultOk = false;
+                    })
+                    .then(result => {
+                        if (resultOk) {
+                            setAppliesCount(result.total);
+                        }
                     });
-                    resultOk = false;
-                })
-                .then(result => {
-                    if (resultOk) {
-                        setAppliesCount(result.total);
-                    }
-                });
             }
         }, 1000),
         []
@@ -343,29 +345,28 @@ export default function RichFilterDialog(props) {
             <DialogTitleGrid
                 id="customized-dialog-title"
                 onClose={handleClose}
-                onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller
-                    : null}
-                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger
-                    : null}
+                onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller : null}
+                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger : null}
             >
                 <TopPaddedGridItem item>
                     {'Data filter'}
                 </TopPaddedGridItem>
                 <TopPaddedGridItem item xs>
-                    <FilterMenuSelector filters={getBucketFilters(props.bucket,
-                        accessContext.filters)}
-                                        onFilterSelected={onFilterSelected}/>
+                    <FilterMenuSelector
+                        filters={getBucketFilters(props.bucket, accessContext.filters)}
+                        onFilterSelected={onFilterSelected}
+                    />
                 </TopPaddedGridItem>
-                <Grid item xs={6}>
-                    <Tabs
-                        className={classes.tabs}
-                        value={activeTab}
-                        onChange={handleChangedTab}
-                    >
-                        <StyledTab label="Rules"/>
-                        <StyledTab label="Properties"/>
-                    </Tabs>
-                </Grid>
+                <Tabs
+                    className={classes.tabs}
+                    textColor="secondary"
+                    indicatorColor="secondary"
+                    value={activeTab}
+                    onChange={handleChangedTab}
+                >
+                    <StyledTab label="Rules"/>
+                    <StyledTab label="Properties"/>
+                </Tabs>
             </DialogTitleGrid>
             <EnumsProvider>
                 <DialogContent
@@ -376,29 +377,29 @@ export default function RichFilterDialog(props) {
                         root: classes.root
                     }}>
                     {props.open && activeTab === 0 && Object.keys(
-                            state.tree).length > 0 &&
-                        <div>
-                            <Query
-                                {...state.config}
-                                value={state.tree}
-                                onChange={onRulesChange}
-                                renderBuilder={renderBuilder}
-                            />
-                            {renderResult(
-                                {tree: state.tree, config: state.config})}
-                        </div>
+                        state.tree).length > 0 &&
+                    <div>
+                        <Query
+                            {...state.config}
+                            value={state.tree}
+                            onChange={onRulesChange}
+                            renderBuilder={renderBuilder}
+                        />
+                        {renderResult(
+                            {tree: state.tree, config: state.config})}
+                    </div>
                     }
 
                     {props.open && activeTab === 1 &&
-                        <PropertiesTable
-                            used={[]}
-                            data={state.properties}
-                            enums={accessContext.enums}
-                            onChange={setProperties}
-                            title={'Class origin and defined properties:'}
-                            pageSize={null}
-                            parentContentRef={dialogContentRef}
-                        />}
+                    <PropertiesTable
+                        used={[]}
+                        data={state.properties}
+                        enums={accessContext.enums}
+                        onChange={setProperties}
+                        title={'Class origin and defined properties:'}
+                        pageSize={null}
+                        parentContentRef={dialogContentRef}
+                    />}
 
                 </DialogContent>
             </EnumsProvider>

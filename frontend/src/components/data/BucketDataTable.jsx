@@ -87,21 +87,21 @@ const filterIcon = (filtering) => () => filtering
     <FilterList/>;
 
 const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange,
-    theme) => (props) => {
+                      theme) => (props) => {
     return (
         <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
             <Grid container direction="row">
                 <Grid container item direction="row" xs={3} alignItems="center">
                     {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
-                        <Grid item>
-                            <ReserveDataDialog onReserve={onDataReserve}/>
-                        </Grid>
+                    <Grid item>
+                        <ReserveDataDialog onReserve={onDataReserve}/>
+                    </Grid>
                     }
                     {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView)
-                        && <Grid item>
-                            <AvailableTagsDialog
-                                bucketTags={state.bucketTags}/>
-                        </Grid>
+                    && <Grid item>
+                        <AvailableTagsDialog
+                            bucketTags={state.bucketTags}/>
+                    </Grid>
                     }
                     <Grid item>
                         <ViewMenuSelector
@@ -129,8 +129,7 @@ export default function BucketDataTable() {
 
     const theme = useTheme();
     const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [messageBox, setMessageBox] = useState(
-        {open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
     const accessContext = useContext(AccessContext);
     const {
@@ -169,43 +168,32 @@ export default function BucketDataTable() {
         tableColumns: [],   // columns prepared for material table,
         resetPage: false
     });
-    let searchText = activeBucket != null ? getLastBucketSearchedText(
-        activeBucket.id) : "";
+    let searchText = activeBucket != null ? getLastBucketSearchedText(activeBucket.id) : "";
     const [changedBucket, setChangedBucket] = useState(false);
+
+    // fix: set search text when back from settings
+    useEffect(() => {
+        updateTableDataManager();
+    }, [tableRef.current]);
 
     // active bucket has been changed
     useEffect(() => {
-        // console.log(">> active bucket has been changed");
         setChangedBucket(true);
         setFiltering(false);
         const bucketViews = getBucketViews(activeBucket, views);
         if (bucketViews.length > 0 && tags != null && enums != null && views
             != null && columns != null) {
-            // console.log(">> 1");
             const orderBy = getLastBucketOrder(activeBucket.id);
-            // console.log("lastBucketOrder: " + orderBy);
-            if (tableRef !== null && tableRef.current !== null) {
-                // console.log("lastBucketSearchText: " + searchText);
-                tableRef.current.dataManager.changeSearchText(searchText);
-                tableRef.current.dataManager.orderBy = -1;
-                tableRef.current.dataManager.orderDirection = "";
-                tableRef.current.setState({searchText: searchText});
-                tableRef.current.setState(
-                    tableRef.current.dataManager.getRenderState());
-            }
+            updateTableDataManager();
 
             const bucketTags = getBucketTags(activeBucket, tags);
             const bucketTasks = getBucketTasks(activeBucket, tasks);
             const lastActiveViewId = getLastActiveView(activeBucket.id);
             const activeView = getActiveView(bucketViews, lastActiveViewId);
-            const columnsDef = columns.filter(
-                c => c.id === activeView.columnsId)[0];
-            const tableColumns = prepareTableColumns(columnsDef, bucketTags,
-                enums, users, orderBy);
-            const filteredFilters = filters.filter(
-                f => f.id === activeView.filterId);
-            const activeLogic = filteredFilters.length > 0
-                ? filteredFilters[0].configuration.logic : null;
+            const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
+            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, users, orderBy);
+            const filteredFilters = filters.filter(f => f.id === activeView.filterId);
+            const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
 
             setState({
                 ...state,
@@ -234,6 +222,18 @@ export default function BucketDataTable() {
         }
 
     }, [activeBucket, enums, tags, views, columns, filters]);
+
+    const updateTableDataManager = () => {
+        // console.log("updateTableDataManager - in");
+        if (tableRef !== null && tableRef.current !== null) {
+            // console.log("updateTableDataManager - update");
+            tableRef.current.dataManager.changeSearchText(searchText);
+            tableRef.current.dataManager.orderBy = -1;
+            tableRef.current.dataManager.orderDirection = "";
+            tableRef.current.setState({searchText: searchText});
+            tableRef.current.setState(tableRef.current.dataManager.getRenderState());
+        }
+    }
 
     const handleSearchChange = (text) => {
         searchText = text;
@@ -296,31 +296,6 @@ export default function BucketDataTable() {
         let resultOk = true;
         fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)),
             getGetOptions())
-        .then(handleErrors)
-        .catch(error => {
-            setMessageBox({
-                open: true,
-                severity: 'error',
-                title: 'Error',
-                message: error
-            });
-            resultOk = false;
-        })
-        .then(dataRow => {
-            if (resultOk) {
-                setDetailsState({
-                    dataRow: dataRow,
-                    open: true
-                });
-            }
-        });
-    }
-
-    const onCloseDataDetailsDialog = (dataRow, changed) => {
-        if (changed) {
-            let resultOk = true;
-            fetch(getDataByIdUrl(activeBucket, dataRow.id),
-                getPutOptions({properties: dataRow.properties}))
             .then(handleErrors)
             .catch(error => {
                 setMessageBox({
@@ -331,61 +306,21 @@ export default function BucketDataTable() {
                 });
                 resultOk = false;
             })
-            .then(() => {
-                resultOk && reloadData();
+            .then(dataRow => {
+                if (resultOk) {
+                    setDetailsState({
+                        dataRow: dataRow,
+                        open: true
+                    });
+                }
             });
-        }
-        setDetailsState({...detailsState, open: false});
     }
 
-    const onOpenDataHistoryDialog = (rowData) => {
-        let resultOk = true;
-        fetch(getDataHistoryUrl(activeBucket, getRowDataId(rowData)),
-            getGetOptions())
-        .then(handleErrors)
-        .catch(error => {
-            setMessageBox({
-                open: true,
-                severity: 'error',
-                title: 'Error',
-                message: error
-            });
-            resultOk = false;
-        })
-        .then(resultHistory => {
-            if (resultOk) {
-                setHistoryState({
-                    ...historyState,
-                    dataRowId: getRowDataId(rowData),
-                    history: resultHistory,
-                    open: true
-                });
-            }
-        });
-    }
-
-    const onDuplicateData = (rowData) => {
-        let resultOk = true;
-        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)),
-            getGetOptions())
-        .then(handleErrors)
-        .catch(error => {
-            setMessageBox({
-                open: true,
-                severity: 'error',
-                title: 'Error',
-                message: error
-            });
-            resultOk = false;
-        })
-        .then(dataRow => {
-            if (resultOk) {
-                const duplicatedData = {
-                    tagId: dataRow.tagId,
-                    reserved: dataRow.reserved,
-                    properties: dataRow.properties
-                };
-                fetch(getDataUrl(activeBucket), getPostOptions(duplicatedData))
+    const onCloseDataDetailsDialog = (dataRow, changed) => {
+        if (changed) {
+            let resultOk = true;
+            fetch(getDataByIdUrl(activeBucket, dataRow.id),
+                getPutOptions({properties: dataRow.properties}))
                 .then(handleErrors)
                 .catch(error => {
                     setMessageBox({
@@ -397,12 +332,77 @@ export default function BucketDataTable() {
                     resultOk = false;
                 })
                 .then(() => {
-                    if (resultOk) {
-                        reloadData();
-                    }
+                    resultOk && reloadData();
                 });
-            }
-        });
+        }
+        setDetailsState({...detailsState, open: false});
+    }
+
+    const onOpenDataHistoryDialog = (rowData) => {
+        let resultOk = true;
+        fetch(getDataHistoryUrl(activeBucket, getRowDataId(rowData)),
+            getGetOptions())
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: error
+                });
+                resultOk = false;
+            })
+            .then(resultHistory => {
+                if (resultOk) {
+                    setHistoryState({
+                        ...historyState,
+                        dataRowId: getRowDataId(rowData),
+                        history: resultHistory,
+                        open: true
+                    });
+                }
+            });
+    }
+
+    const onDuplicateData = (rowData) => {
+        let resultOk = true;
+        fetch(getDataByIdUrl(activeBucket, getRowDataId(rowData)),
+            getGetOptions())
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: error
+                });
+                resultOk = false;
+            })
+            .then(dataRow => {
+                if (resultOk) {
+                    const duplicatedData = {
+                        tagId: dataRow.tagId,
+                        reserved: dataRow.reserved,
+                        properties: dataRow.properties
+                    };
+                    fetch(getDataUrl(activeBucket), getPostOptions(duplicatedData))
+                        .then(handleErrors)
+                        .catch(error => {
+                            setMessageBox({
+                                open: true,
+                                severity: 'error',
+                                title: 'Error',
+                                message: error
+                            });
+                            resultOk = false;
+                        })
+                        .then(() => {
+                            if (resultOk) {
+                                reloadData();
+                            }
+                        });
+                }
+            });
     }
 
     const onCloseDataHistoryDialog = () => {
@@ -420,30 +420,30 @@ export default function BucketDataTable() {
         let resultOk = true;
         fetch(getDataReserveUrl(activeBucket, number, random),
             getPostOptions(payload))
-        .then(handleErrors)
-        .catch(error => {
-            setMessageBox({
-                open: true,
-                severity: 'error',
-                title: 'Error',
-                message: error
-            });
-            resultOk = false;
-        })
-        .then((response) => {
-            if (resultOk) {
-                if (response.hasOwnProperty("message")) {
-                    setMessageBox({
-                        open: true,
-                        severity: 'info',
-                        title: 'Info',
-                        message: response.message
-                    });
-                } else {
-                    reloadData();
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: error
+                });
+                resultOk = false;
+            })
+            .then((response) => {
+                if (resultOk) {
+                    if (response.hasOwnProperty("message")) {
+                        setMessageBox({
+                            open: true,
+                            severity: 'info',
+                            title: 'Info',
+                            message: response.message
+                        });
+                    } else {
+                        reloadData();
+                    }
                 }
-            }
-        });
+            });
     }
 
     const consolidateAllConditions = (tableSearch, tableFilters) => {
@@ -662,19 +662,19 @@ export default function BucketDataTable() {
         let resultOk = true;
         fetch(getDataUrl(activeBucket),
             getPostOptions(convertDataBeforeAdd(state.tableColumns, newData)))
-        .then(handleErrors)
-        .catch(error => {
-            setMessageBox({
-                open: true,
-                severity: 'error',
-                title: 'Error',
-                message: error
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: error
+                });
+                resultOk = false;
+            })
+            .then(() => {
+                resultOk ? resolve() : reject();
             });
-            resultOk = false;
-        })
-        .then(() => {
-            resultOk ? resolve() : reject();
-        });
     });
 
     const onRowUpdateAction = (newData, oldData) => new Promise(
@@ -685,19 +685,19 @@ export default function BucketDataTable() {
             if (Object.keys(payload).length > 0) {
                 fetch(getDataByIdUrl(activeBucket, getRowDataId(newData)),
                     getPutOptions(payload))
-                .then(handleErrors)
-                .catch(error => {
-                    setMessageBox({
-                        open: true,
-                        severity: 'error',
-                        title: 'Error',
-                        message: error
+                    .then(handleErrors)
+                    .catch(error => {
+                        setMessageBox({
+                            open: true,
+                            severity: 'error',
+                            title: 'Error',
+                            message: error
+                        });
+                        resultOk = false;
+                    })
+                    .then(() => {
+                        resultOk ? resolve() : reject();
                     });
-                    resultOk = false;
-                })
-                .then(() => {
-                    resultOk ? resolve() : reject();
-                });
             } else {
                 setMessageBox({
                     open: true,
@@ -713,19 +713,19 @@ export default function BucketDataTable() {
         let resultOk = true;
         fetch(getDataByIdUrl(activeBucket, getRowDataId(oldData)),
             getDeleteOptions())
-        .then(handleErrors)
-        .catch(error => {
-            setMessageBox({
-                open: true,
-                severity: 'error',
-                title: 'Error',
-                message: error
+            .then(handleErrors)
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: error
+                });
+                resultOk = false;
+            })
+            .then(() => {
+                resultOk ? resolve() : reject();
             });
-            resultOk = false;
-        })
-        .then(() => {
-            resultOk ? resolve() : reject();
-        });
     });
 
     const getEditable = () => {
@@ -826,27 +826,27 @@ export default function BucketDataTable() {
 
                                 let resultOk = true;
                                 fetch(url, getPostOptions(payload))
-                                .then(handleErrors)
-                                .catch(error => {
-                                    setMessageBox({
-                                        open: true,
-                                        severity: 'error',
-                                        title: 'Error',
-                                        message: error
+                                    .then(handleErrors)
+                                    .catch(error => {
+                                        setMessageBox({
+                                            open: true,
+                                            severity: 'error',
+                                            title: 'Error',
+                                            message: error
+                                        });
+                                        resultOk = false;
+                                    })
+                                    .then(result => {
+                                        if (resultOk) {
+                                            resolve({
+                                                data: result.customData,
+                                                page: result.page - 1,
+                                                totalCount: result.total,
+                                            })
+                                        } else {
+                                            resolve({data: []});
+                                        }
                                     });
-                                    resultOk = false;
-                                })
-                                .then(result => {
-                                    if (resultOk) {
-                                        resolve({
-                                            data: result.customData,
-                                            page: result.page - 1,
-                                            totalCount: result.total,
-                                        })
-                                    } else {
-                                        resolve({data: []});
-                                    }
-                                });
                             } catch (error) {
                                 setMessageBox({
                                     open: true,

@@ -106,6 +106,8 @@ export default function _ProjectSettingsTabs() {
                         </IconButton>
                         <Tabs
                             value={getTabsValue(location.pathname)}
+                            textColor="secondary"
+                            indicatorColor="secondary"
                             variant="scrollable"
                             scrollButtons
                             orientation={'vertical'}

@@ -16,7 +16,7 @@ export const LightTheme = {
         mode: 'light',
         background: {
             default: '#f7f7f7',
-            paper: '#eeeeee',
+            paper: '#eeeeee'
         },
         primary: {
             main: '#0d47a1',
@@ -42,11 +42,11 @@ export const DarkTheme = {
         mode: 'dark',
         background: {
             default: '#2f3129',
-            paper: '#43453e',
+            paper: '#43453e'
         },
         primary: {
             main: '#357eef',
-            contrastText: '#ebf2fd',
+            contrastText: '#ebf2fd'
         },
         secondary: {
             main: '#ff9800'
@@ -55,5 +55,14 @@ export const DarkTheme = {
             primary: '#d6d7d2',
             // secondary: '#c2c4be'
         }
+    },
+    components: {
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'unset', // remove background-image
+                },
+            },
+        },
     },
 };
