@@ -1,17 +1,16 @@
 package pl.databucket.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.DataClassItemDto;
 import pl.databucket.server.tenant.TenantSupport;
 
-import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +18,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name="data_classes")
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Filter(name = "projectFilter", condition = "project_id = :projectId")
 public class DataClass extends Auditable<String> implements TenantSupport {
 
@@ -38,14 +36,14 @@ public class DataClass extends Auditable<String> implements TenantSupport {
     @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
 
-    @Type(type = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private List<DataClassItemDto> configuration;
 
     @ManyToMany(mappedBy = "dataClasses")
     private Set<View> views;
 
-    @ManyToMany(mappedBy = "buckets")
+    @ManyToMany(mappedBy = "dataClasses")
     private Set<Tag> tags;
 
     @JsonIgnore

@@ -4,11 +4,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import pl.databucket.server.mapper.*;
 
 @Configuration
-@EnableJpaRepositories("pl.databucket.server.repository")
 public class ApplicationConfiguration {
 
     @Bean
@@ -33,9 +31,6 @@ public class ApplicationConfiguration {
         modelMapper.addMappings(new AccessTreeBucketPropertyMap());
         modelMapper.addMappings(new AccessTreeViewPropertyMap());
         modelMapper.addMappings(new UserColumnsPropertyMap());
-        modelMapper.addMappings(new TemplatePropertyMap());
-        modelMapper.addMappings(new TemplateDataPropertyMap());
-        modelMapper.addMappings(new TemplateDataItemPropertyMap());
         modelMapper.addMappings(new SvgPropertyMap());
         return modelMapper;
     }

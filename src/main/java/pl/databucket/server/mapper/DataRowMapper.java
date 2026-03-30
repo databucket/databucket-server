@@ -1,12 +1,13 @@
 package pl.databucket.server.mapper;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.postgresql.util.PGobject;
 import org.springframework.jdbc.core.RowMapper;
-import pl.databucket.server.service.data.COL;
 import pl.databucket.server.dto.DataDTO;
+import pl.databucket.server.service.data.COL;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

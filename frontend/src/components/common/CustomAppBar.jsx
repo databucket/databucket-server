@@ -1,4 +1,4 @@
-import {AppBar, lighten, styled, Tab} from "@mui/material";
+import {AppBar, lighten, alpha, styled, Tab} from "@mui/material";
 
 export const drawerClosedWidth = 73;
 export const drawerWidth = 260;
@@ -23,6 +23,22 @@ export const CustomAppBar = styled(AppBar, {
 }));
 
 export const CustomTab = styled(Tab)(({theme}) => ({
+
+    "&:hover": {
+        opacity: 0.9,
+        color: theme.palette.primary.contrastText,
+        backgroundColor: lighten(theme.common.toolbar.backgroundColor, 0.05)
+    },
+
+    '&.Mui-selected': {
+        color: theme.palette.primary.contrastText,
+    },
+
+}));
+
+export const CustomTabManagement = styled(Tab)(({theme}) => ({
+
+    color: alpha(theme.palette.primary.contrastText, 0.7),
 
     "&:hover": {
         opacity: 0.9,

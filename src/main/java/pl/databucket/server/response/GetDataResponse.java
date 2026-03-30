@@ -1,7 +1,8 @@
 package pl.databucket.server.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,29 +14,34 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"page", "limit", "sort", "total", "totalPages", "data", "customData", "message"})
+@Schema(description = "Response object for data retrieval operations")
 public class GetDataResponse {
 
-    @ApiModelProperty(position = 1, example = "1")
+    @Schema(description = "Current page number", example = "1")
     private Integer page;
 
-    @ApiModelProperty(position = 2, example = "10")
+    @Schema(description = "Number of items per page", example = "10")
     private Integer limit;
 
-    @ApiModelProperty(position = 3, example = "id")
+    @Schema(description = "Sort field", example = "id")
     private String sort;
 
-    @ApiModelProperty(position = 4, example = "50")
+    @Schema(description = "Total number of items", example = "50")
     private Long total;
 
-    @ApiModelProperty(position = 5, example = "5")
+    @Schema(description = "Total number of pages", example = "5")
     private Integer totalPages;
 
-    @ApiModelProperty(position = 6)
+    @Schema(description = "List of data items")
     private List<DataDTO> data;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true, description = "Response message")
     private String message;
 
-    @ApiModelProperty(position = 7, example = "[{\"id\":53,\"name\":\"Sabra\"},{\"id\":58,\"name\":\"Shenika\"},{\"id\":117,\"name\":\"Shawna\"}]")
+    @Schema(
+            description = "Custom data with selected columns",
+            example = "[{\"id\":53,\"name\":\"Sabra\"},{\"id\":58,\"name\":\"Shenika\"},{\"id\":117,\"name\":\"Shawna\"}]"
+    )
     private Object customData;
 }

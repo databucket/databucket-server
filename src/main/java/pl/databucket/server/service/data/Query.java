@@ -1,21 +1,20 @@
 package pl.databucket.server.service.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import pl.databucket.server.dto.CustomColumnDto;
+import pl.databucket.server.dto.DataModifyDTO;
+import pl.databucket.server.exception.ConditionNotAllowedException;
+import pl.databucket.server.exception.UnknownColumnException;
+
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-
-import pl.databucket.server.dto.CustomColumnDto;
-import pl.databucket.server.dto.DataModifyDTO;
-import pl.databucket.server.exception.ConditionNotAllowedException;
-import pl.databucket.server.exception.UnknownColumnException;
 
 public class Query {
 
@@ -278,14 +277,15 @@ public class Query {
 
                 // eg.: 5 in $.jsonArray   >>> v1 @> '[v2]'
             } else if (condition.getRightSource().equals(SourceType.s_property)) {
-                v1 = "properties #> '{" + getPGPropertyArray(condition.getRightValue().toString()) + "}'";
+                // COALESCE - avoid situation when missing property used in the condition
+                v1 = "COALESCE(properties #> '{" + getPGPropertyArray(condition.getRightValue().toString()) + "}', '[]'::jsonb)";
                 op = "@>";
                 if (condition.getLeftValue() instanceof String) {
-                    v2 = "'[\"" + condition.getLeftValue() + "\"]'";
+                    v2 = "'[\"" + condition.getLeftValue() + "\"]'::jsonb";
                 } else if (condition.getLeftValue() instanceof ArrayList<?>) {
-                    v2 = "'[" + getPGStringArray((ArrayList<?>) condition.getLeftValue()) + "]'";
+                    v2 = "'[" + getPGStringArray((ArrayList<?>) condition.getLeftValue()) + "]'::jsonb";
                 } else
-                    v2 = "'[" + condition.getLeftValue() + "]'";
+                    v2 = "'[" + condition.getLeftValue() + "]'::jsonb";
 
                 // eg.: $.prop in [1, 2, 3]   >>> v1 in 'v2
             } else if (condition.getLeftSource().equals(SourceType.s_property)) {
@@ -478,11 +478,11 @@ public class Query {
         return result.substring(1); // cut first comma character
     }
 
-    private java.sql.Timestamp isValidDate(String inDate) {
+    private Timestamp isValidDate(String inDate) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setLenient(false);
         try {
-            return new java.sql.Timestamp(dateFormat.parse(inDate.trim()).getTime());
+            return new Timestamp(dateFormat.parse(inDate.trim()).getTime());
         } catch (ParseException pe) {
             return null;
         }

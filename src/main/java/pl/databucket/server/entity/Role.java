@@ -1,10 +1,11 @@
 package pl.databucket.server.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
-import javax.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 @Table(name="roles")
 public class Role extends Auditable<String> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

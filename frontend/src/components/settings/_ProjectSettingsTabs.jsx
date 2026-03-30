@@ -26,7 +26,6 @@ import {
     getSettingsTabsBackgroundColor,
     getSettingsTabsColor
 } from "../../utils/MaterialTableHelper";
-import TemplatesTab from "../settings/TemplatesTab";
 import SvgTab from "./SvgTab";
 import RolesProvider from "../../context/roles/RolesProvider";
 import GroupsProvider from "../../context/groups/GroupsProvider";
@@ -41,7 +40,6 @@ import TasksProvider from "../../context/tasks/TasksProvider";
 import EventsProvider from "../../context/events/EventsProvider";
 import ViewsProvider from "../../context/views/ViewsProvider";
 import TeamsProvider from "../../context/teams/TeamsProvider";
-import TemplatesProvider from "../../context/templates/TemplatesProvider";
 import SvgProvider from "../../context/svgs/SvgProvider";
 import TeamsTab from "./TeamsTab";
 import UsersTab from "./UsersTab";
@@ -106,6 +104,8 @@ export default function _ProjectSettingsTabs() {
                         </IconButton>
                         <Tabs
                             value={getTabsValue(location.pathname)}
+                            textColor="secondary"
+                            indicatorColor="secondary"
                             variant="scrollable"
                             scrollButtons
                             orientation={'vertical'}
@@ -134,14 +134,12 @@ export default function _ProjectSettingsTabs() {
                                        to={`${getProjectSettingsPath()}/views`}/>
                             <StyledTab label="Tasks" value={tabs[11]} component={Link}
                                        to={`${getProjectSettingsPath()}/tasks`}/>
-                            <StyledTab label="Templates" value={tabs[12]} component={Link}
-                                       to={`${getProjectSettingsPath()}/templates`}/>
                         </Tabs>
                     </div>
                     <div className={classes.panel}>
                         <RolesProvider><GroupsProvider><BucketsProvider><UsersProvider><ClassesProvider>
                             <TagsProvider><ColumnsProvider> <EnumsProvider> <FiltersProvider> <TasksProvider>
-                                <EventsProvider><ViewsProvider> <TeamsProvider><TemplatesProvider> <SvgProvider>
+                                <EventsProvider><ViewsProvider> <TeamsProvider> <SvgProvider>
                                     <Switch>
                                         <ProjectRoute exact
                                                       path={`${getProjectSettingsPath()}/teams`}
@@ -179,14 +177,10 @@ export default function _ProjectSettingsTabs() {
                                         <ProjectRoute exact
                                                       path={`${getProjectSettingsPath()}/tasks`}
                                                       component={TasksTab}/>
-                                        <ProjectRoute exact
-                                                      path={`${getProjectSettingsPath()}/templates`}
-                                                      component={TemplatesTab}/>
                                         <ProjectRoute path={`${getProjectSettingsPath()}/*`}
                                                       component={NotFoundPage}/>
                                     </Switch>
                                 </SvgProvider>
-                                </TemplatesProvider>
                                 </TeamsProvider> </ViewsProvider> </EventsProvider>
                             </TasksProvider> </FiltersProvider> </EnumsProvider>
                             </ColumnsProvider> </TagsProvider> </ClassesProvider> </UsersProvider>

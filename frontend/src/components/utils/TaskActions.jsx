@@ -76,20 +76,24 @@ export default function TaskActions(props) {
         <Root style={{height: '95%'}}>
             <div className={classes.settingsContainer}>
                 <FormControl component="fieldset">
-                    <RadioGroup row value={props.actions.type || ''} onChange={handleActionTypeChange}>
+                    <RadioGroup
+                        row
+                        value={props.actions.type || ''}
+                        onChange={handleActionTypeChange}
+                    >
                         <FormControlLabel
                             value="remove"
-                            control={<Radio/>}
+                            control={<Radio color="secondary" />}
                             label="Remove data"
                         />
                         <FormControlLabel
                             value="modify"
-                            control={<Radio/>}
+                            control={<Radio color="secondary" />}
                             label="Modify data"
                         />
                         <FormControlLabel
                             value="clear history"
-                            control={<Radio/>}
+                            control={<Radio color="secondary" />}
                             label="Clear history"
                         />
                     </RadioGroup>
@@ -99,7 +103,7 @@ export default function TaskActions(props) {
                         <FormGroup row>
                             <FormControlLabel
                                 label="Set tag"
-                                control={<Checkbox checked={props.actions.setTag || false} onChange={handleActionSetTag}/>}
+                                control={<Checkbox checked={props.actions.setTag || false} onChange={handleActionSetTag} color="secondary"/>}
                             />
                             {props.actions.setTag === true &&
                             <FormControlLabel
@@ -110,6 +114,8 @@ export default function TaskActions(props) {
                                         id="tag-select"
                                         onChange={handleTagChange}
                                         value={props.actions.tagId}
+                                        color="secondary"
+                                        variant="standard"
                                     >
                                         {props.tags.map(tag => (
                                             <MenuItem key={tag.id} value={tag.id}>
@@ -125,18 +131,18 @@ export default function TaskActions(props) {
                         <FormGroup row>
                             <FormControlLabel
                                 label="Set reserved"
-                                control={<Checkbox checked={props.actions.setReserved || false} onChange={handleActionSetReserved}/>}
+                                control={<Checkbox checked={props.actions.setReserved || false} onChange={handleActionSetReserved} color="secondary"/>}
                             />
                             {props.actions.setReserved === true &&
                             <RadioGroup row value={props.actions.reserved || false} onChange={handleActionReserveChange}>
                                 <FormControlLabel
                                     value={true}
-                                    control={<Radio/>}
+                                    control={<Radio color="secondary"/>}
                                     label="True"
                                 />
                                 <FormControlLabel
                                     value={false}
-                                    control={<Radio/>}
+                                    control={<Radio color="secondary"/>}
                                     label="False"
                                 />
                             </RadioGroup>

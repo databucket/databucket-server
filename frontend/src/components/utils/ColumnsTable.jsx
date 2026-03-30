@@ -12,7 +12,7 @@ import {
     validateItem
 } from "../../utils/JsonHelper";
 import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import React, {useEffect, useState} from "react";
 import {
     getLastPageSizeOnDialog,
@@ -150,7 +150,7 @@ export default function ColumnsTable(props) {
                     paginationType: 'stepped',
                     pageSizeOptions: getPageSizeOptionsOnDialog(),
                     actionsColumnIndex: -1,
-                    sorting: true,
+                    maxColumnSort: 1,
                     selection: false,
                     filtering: false,
                     padding: 'dense',

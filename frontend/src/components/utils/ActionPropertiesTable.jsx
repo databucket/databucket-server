@@ -14,7 +14,7 @@ import {
 } from "../../utils/JsonHelper";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
-import MaterialTable, {MTableEditField} from "material-table";
+import MaterialTable, {MTableEditField} from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
 import EnumsContext from "../../context/enums/EnumsContext";
 import {useTheme} from "@mui/material";
@@ -270,7 +270,7 @@ export default function ActionPropertiesTable(props) {
                 options={{
                     paging: false,
                     actionsColumnIndex: -1,
-                    sorting: true,
+                    maxColumnSort: 1,
                     selection: false,
                     search: true,
                     filtering: false,

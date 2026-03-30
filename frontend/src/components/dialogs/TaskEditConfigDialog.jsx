@@ -37,12 +37,6 @@ const Root = styled('div')(({theme}) => ({
         minHeight: '80vh',
     },
 
-    [`& .${classes.oneLine}`]: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-
     [`& .${classes.tabs}`]: {
         flexGrow: 1
     },
@@ -62,10 +56,29 @@ const Root = styled('div')(({theme}) => ({
     }
 }));
 
+const StyledDialogTitle = styled(MuiDialogTitle)(({ theme }) => ({
+    margin: 0,
+    marginLeft: 0,
+    padding: theme.spacing(2),
+    position: 'relative',
+    [`& .${classes.closeButton}`]: {
+        position: 'absolute',
+        right: theme.spacing(2),
+        top: theme.spacing(2),
+        color: theme.palette.grey[500],
+    },
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+}));
+
+
 const DialogTitle = ((props) => {
     const {children, onClose, ...other} = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <StyledDialogTitle {...other}>
             {children}
             {onClose ? (
                 <IconButton
@@ -76,11 +89,13 @@ const DialogTitle = ((props) => {
                     <CloseIcon/>
                 </IconButton>
             ) : null}
-        </MuiDialogTitle>
+        </StyledDialogTitle>
     );
 });
 
-const DialogContent = MuiDialogContent;
+const DialogContent = styled(MuiDialogContent)({
+    padding: 0,
+});
 
 const DialogActions = MuiDialogActions;
 
@@ -93,7 +108,6 @@ TaskEditConfigDialog.propTypes = {
 }
 
 export default function TaskEditConfigDialog(props) {
-
 
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''})
@@ -158,6 +172,7 @@ export default function TaskEditConfigDialog(props) {
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
+                    color={'inherit'}
                 >
                     {getActionsType(actions)}
                 </Button>
@@ -178,6 +193,8 @@ export default function TaskEditConfigDialog(props) {
                             value={activeTab}
                             onChange={handleChangedTab}
                             centered
+                            textColor="secondary"
+                            indicatorColor="secondary"
                         >
                             <StyledTab label="Action"/>
                             <StyledTab label="Properties"/>

@@ -11,7 +11,7 @@ import pl.databucket.server.entity.Group;
 import pl.databucket.server.exception.*;
 import pl.databucket.server.service.GroupService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 

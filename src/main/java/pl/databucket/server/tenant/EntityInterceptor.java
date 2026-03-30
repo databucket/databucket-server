@@ -1,39 +1,54 @@
 package pl.databucket.server.tenant;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import pl.databucket.server.security.TokenProvider;
+import pl.databucket.server.security.CustomUserDetails;
+import java.util.Arrays;
 
-public class EntityInterceptor extends EmptyInterceptor {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class EntityInterceptor implements Interceptor {
 
     @Override
-    public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+    public boolean onSave(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types) {
         if (entity instanceof TenantSupport) {
-            setProjectId(state, propertyNames);
+            return setProjectId(state, propertyNames);
         }
-        return super.onSave(entity, id, state, propertyNames, types);
+        return false;
     }
 
     @Override
-    public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
-        String[] propertyNames, Type[] types) {
+    public boolean onFlushDirty(Object entity, Object id, Object[] currentState, Object[] previousState,
+                                String[] propertyNames, Type[] types) {
         if (entity instanceof TenantSupport) {
-            setProjectId(currentState, propertyNames);
+            return setProjectId(currentState, propertyNames);
         }
-        return super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
+        return false;
     }
 
-    private void setProjectId(Object[] currentState, String[] propertyNames) {
-        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long projectId = jwt.getClaim(TokenProvider.PROJECT_ID);
-        currentState[List.of(propertyNames).indexOf("projectId")] = projectId.intValue();
+    private boolean setProjectId(Object[] currentState, String[] propertyNames) {
+        int index = Arrays.asList(propertyNames).indexOf("projectId");
+        if (index >= 0) {
+            Integer projectId = extractProjectIdFromSecurityContext();
+            if (projectId != null && !projectId.equals(currentState[index])) {
+                currentState[index] = projectId;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Integer extractProjectIdFromSecurityContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getProjectId();
+        }
+
+        return null;
     }
 }

@@ -7,7 +7,7 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import TagsContext from "../../../context/tags/TagsContext";
 import {
     Button,
@@ -25,7 +25,7 @@ import {handleErrors} from "../../../utils/FetchHelper";
 import jp from "jsonpath";
 import {MessageBox} from "../../utils/MessageBox";
 import {getDirectDataPath, getProjectDataPath} from "../../../route/AppRouter";
-import {JsonEditor as Editor} from 'jsoneditor-react';
+import { JsonEditor as Editor } from 'jsoneditor-react18';
 import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
@@ -187,7 +187,7 @@ export default function DataDetailsPage() {
                     paging: false,
                     toolbar: false,
                     actionsColumnIndex: -1,
-                    sorting: false,
+                    maxColumnSort: 0,
                     search: false,
                     filtering: false,
                     padding: 'dense',

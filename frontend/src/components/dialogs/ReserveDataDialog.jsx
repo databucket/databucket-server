@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
     Button,
     Checkbox,
@@ -10,96 +10,26 @@ import {
     MenuItem,
     Select,
     Slider,
-    styled,
     Tooltip,
     Typography
 } from '@mui/material';
-import {getUsername, hasAdminRole} from "../../utils/ConfigurationStorage";
+import { getUsername, hasAdminRole } from "../../utils/ConfigurationStorage";
 import AccessContext from "../../context/access/AccessContext";
 
-const PREFIX = 'ReserveDataDialog';
-
-const classes = {
-    root: `${PREFIX}-root`,
-    reserveButton: `${PREFIX}-reserveButton`,
-    content: `${PREFIX}-content`,
-    button: `${PREFIX}-button`,
-    formControl: `${PREFIX}-formControl`,
-    selectEmpty: `${PREFIX}-selectEmpty`
-};
-
-const Root = styled('div')((
-    {
-        theme
-    }
-) => ({
-    [`&.${classes.root}`]: {
-        flexGrow: 1
-    },
-
-    [`& .${classes.reserveButton}`]: {
-        marginLeft: '10px',
-        padding: theme.spacing(1)
-    },
-
-    [`& .${classes.content}`]: {
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
-        padding: "15px",
-        margin: theme.spacing(1),
-    },
-
-    [`& .${classes.button}`]: {
-        marginTop: "13px"
-    },
-
-    [`& .${classes.formControl}`]: {
-        margin: theme.spacing(1),
-        minWidth: 150,
-    },
-
-    [`& .${classes.selectEmpty}`]: {
-        marginTop: theme.spacing(2),
-    }
-}));
-
-// ReserveDataDialog.propTypes = {
-//     onReserve: PropTypes.func.isRequired
-// }
-
 const marks = [
-    {
-        value: 1,
-        label: '1',
-    },
-    {
-        value: 5,
-        label: '5',
-    },
-    {
-        value: 10,
-        label: '10',
-    },
-    {
-        value: 15,
-        label: '15',
-    },
-    {
-        value: 20,
-        label: '20',
-    }
+    { value: 1, label: '1' },
+    { value: 5, label: '5' },
+    { value: 10, label: '10' },
+    { value: 15, label: '15' },
+    { value: 20, label: '20' }
 ];
 
 export default function ReserveDataDialog(props) {
-
-
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const accessContext = useContext(AccessContext);
-    const {users} = accessContext;
-    const [state, setState] = useState({random: false, number: 1, username: getUsername()});
+    const { users } = accessContext;
+    const [state, setState] = useState({ random: false, number: 1, username: getUsername() });
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -109,30 +39,30 @@ export default function ReserveDataDialog(props) {
         setAnchorEl(null);
     };
 
-    const handleChangeRandom = (event, newValue) => {
-        setState({...state, random: newValue});
+    const handleChangeRandom = (event) => {
+        setState({ ...state, random: event.target.checked });
     };
 
     const handleChangeNumber = (event, newValue) => {
-        setState({...state, number: newValue});
-    }
+        setState({ ...state, number: newValue });
+    };
 
     const onChangeUser = (user) => {
-        setState({...state, username: user.username});
-    }
+        setState({ ...state, username: user.username });
+    };
 
     const handleReserve = () => {
         props.onReserve(state);
         handleClose();
-    }
+    };
 
     return (
-        <Root className={classes.root}>
+        <>
             <Tooltip title={'Reserve data'}>
                 <IconButton
                     onClick={handleMenu}
                     color={'inherit'}
-                    className={classes.reserveButton}
+                    style={{ marginLeft: '10px', padding: '8px' }}
                     size="large">
                     <span className="material-icons">add_task</span>
                 </IconButton>
@@ -140,26 +70,17 @@ export default function ReserveDataDialog(props) {
             <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 keepMounted
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 open={open}
                 onClose={handleClose}
             >
-                <div className={classes.content}>
-                    <FormControl className={classes.formControl}>
-                        <Typography gutterBottom>
-                            Number of data rows
-                        </Typography>
+                <div style={{ display: 'flex', flexDirection: 'column', padding: '15px' }}>
+                    <FormControl style={{ margin: '8px 0', minWidth: 150, display: 'flex', flexDirection: 'column' }}>
+                        <Typography gutterBottom>Number of data rows</Typography>
                         <Slider
                             value={state.number}
-                            // defaultValue={state.number}
                             aria-labelledby="discrete-slider-steps"
                             step={1}
                             marks={marks}
@@ -169,35 +90,35 @@ export default function ReserveDataDialog(props) {
                             onChange={handleChangeNumber}
                         />
                     </FormControl>
-                    {hasAdminRole() &&
-                    <FormControl className={classes.formControl}>
-                        <InputLabel id="user-select-label">Target owner</InputLabel>
-                        <Select
-                            labelId="user-select-label"
-                            id="user-select"
-                            value={state.username}
-                            // onChange={onChangeUser}
-                        >
-                            {users.map(user => (
-                                <MenuItem key={user.id} value={user.username} onClick={() => onChangeUser(user)}>
-                                    {user.username}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    }
+                    {hasAdminRole() && (
+                        <FormControl style={{ margin: '8px 0', minWidth: 150, display: 'flex', flexDirection: 'column' }}>
+                            <InputLabel id="user-select-label">Target owner</InputLabel>
+                            <Select
+                                labelId="user-select-label"
+                                id="user-select"
+                                value={state.username}
+                                variant="standard"
+                            >
+                                {users.map((user) => (
+                                    <MenuItem key={user.id} value={user.username} onClick={() => onChangeUser(user)}>
+                                        {user.username}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    )}
                     <FormControlLabel
-                        control={<Checkbox checked={state.random} onChange={handleChangeRandom} name="checkRandom"/>}
+                        control={<Checkbox checked={state.random} onChange={handleChangeRandom} name="checkRandom" />}
                         label="Random data"
-                        className={classes.formControl}
+                        style={{ margin: '8px 0' }}
                     />
-                    <FormControl className={classes.formControl}>
-                        <Button variant="contained" color="secondary" id="reserveButton" onClick={handleReserve}>
+                    <FormControl style={{ margin: '8px 0', minWidth: 150 }}>
+                        <Button variant="contained" color="secondary" onClick={handleReserve}>
                             Reserve
                         </Button>
                     </FormControl>
                 </div>
             </Menu>
-        </Root>
+        </>
     );
 }

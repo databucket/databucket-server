@@ -29,7 +29,7 @@ export default function SelectTeamsDialog(props) {
             tooltipTitle={'Select teams'}
             dialogTitle={'Select teams'}
             tableTitle={(props.rowData['name'] || props.rowData['username'] || '-')}
-            maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />
     );

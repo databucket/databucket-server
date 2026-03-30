@@ -1,31 +1,54 @@
 package pl.databucket.server.security;
 
-import java.util.Collection;
-import java.util.Set;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.databucket.server.entity.Project;
 
-@Data
-@Builder
+import java.util.Collection;
+
+@Getter
+@Setter
 public class CustomUserDetails implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
     private String password;
     private String username;
     private Integer projectId;
-    private boolean enabled;
-    private boolean expired;
+    private Boolean enabled;
     private boolean superUser;
-    private boolean changePassword;
-    private Set<Project> projects;
 
+    public CustomUserDetails(String username,
+                             String password,
+                             Collection<? extends GrantedAuthority> authorities,
+                             boolean enabled,
+                             boolean superUser) {
+
+        this.username = username;
+        this.password = password;
+        this.authorities = authorities;
+        this.enabled = enabled;
+        this.superUser = superUser;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
 
     @Override
     public boolean isAccountNonExpired() {
-        return !expired;
+        return true;
     }
 
     @Override
@@ -35,7 +58,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return !changePassword;
+        return true;
     }
 
     @Override

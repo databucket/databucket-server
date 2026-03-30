@@ -50,16 +50,22 @@ const Root = styled('div')(({theme}) => ({
     }
 }));
 
-const StyledDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
+const StyledDialogTitle = styled(MuiDialogTitle)(({ theme }) => ({
     margin: 0,
-    padding: theme.spacing(1),
-
+    marginLeft: 0,
+    padding: theme.spacing(2),
+    position: 'relative',
     [`& .${classes.closeButton}`]: {
         position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
+        right: theme.spacing(2),
+        top: theme.spacing(2),
         color: theme.palette.grey[500],
-    }
+    },
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
 }));
 
 
@@ -81,7 +87,9 @@ const DialogTitle = ((props) => {
     );
 });
 
-const DialogContent = MuiDialogContent;
+const DialogContent = styled(MuiDialogContent)({
+    padding: 0,
+});
 
 const DialogActions = MuiDialogActions;
 
@@ -132,6 +140,7 @@ export default function EditFilterRulesDialog(props) {
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
+                    color={'inherit'}
                 >
                     {getObjectLengthStr(props.configuration)}
                 </Button>
@@ -152,6 +161,8 @@ export default function EditFilterRulesDialog(props) {
                             value={activeTab}
                             onChange={handleChangedTab}
                             centered
+                            textColor="secondary"
+                            indicatorColor="secondary"
                         >
 
                             <StyledTab label="Rules"/>

@@ -1,18 +1,17 @@
 package pl.databucket.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.TaskConfigDto;
 import pl.databucket.server.tenant.TenantSupport;
 
-import javax.persistence.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Getter
 @Setter
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="tasks")
 @Filter(name = "projectFilter", condition = "project_id = :projectId")
 public class Task extends Auditable<String> implements TenantSupport {
@@ -60,7 +58,7 @@ public class Task extends Auditable<String> implements TenantSupport {
 	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
 	private DataFilter dataFilter;
 
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	@Column(columnDefinition = "jsonb")
 	private TaskConfigDto configuration;
 
@@ -68,14 +66,14 @@ public class Task extends Auditable<String> implements TenantSupport {
 	private Boolean deleted = false;
 
 	public Set<Long> getBucketsIds() {
-		if (buckets != null && buckets.size() > 0)
+		if (buckets != null && !buckets.isEmpty())
 			return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
 		else
 			return null;
 	}
 
 	public Set<Long> getClassesIds() {
-		if (dataClasses != null && dataClasses.size() > 0)
+		if (dataClasses != null && !dataClasses.isEmpty())
 			return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
 		else
 			return null;

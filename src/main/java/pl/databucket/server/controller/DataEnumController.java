@@ -1,6 +1,5 @@
 package pl.databucket.server.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,21 +11,22 @@ import pl.databucket.server.entity.DataEnum;
 import pl.databucket.server.exception.*;
 import pl.databucket.server.service.DataEnumService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/enums")
 @RestController
-@RequiredArgsConstructor
 public class DataEnumController {
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(DataEnumController.class);
 
-    private final DataEnumService dataEnumService;
+    @Autowired
+    private DataEnumService dataEnumService;
 
-    private final ModelMapper modelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
@@ -46,7 +46,7 @@ public class DataEnumController {
     public ResponseEntity<?> getDataEnums() {
         try {
             List<DataEnum> dataEnums = dataEnumService.getDataEnums();
-            List<DataEnumDto> dataEnumsDto = dataEnums.stream().map(item -> modelMapper.map(item, DataEnumDto.class)).toList();
+            List<DataEnumDto> dataEnumsDto = dataEnums.stream().map(item -> modelMapper.map(item, DataEnumDto.class)).collect(Collectors.toList());
             return new ResponseEntity<>(dataEnumsDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);

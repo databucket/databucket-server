@@ -1,17 +1,17 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.7.8'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'org.springframework.boot' version '3.5.12'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'pl.databucket'
-version = '4.0.0'
-targetCompatibility = 17
-sourceCompatibility = 17
+version = '5.0.0'
 
-ext['log4j2.version'] = '2.20.0'
-ext['tomcat.version'] = '9.0.71'
-ext['jackson.version'] = '2.14.2'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 
 configurations {
     compileOnly {
@@ -25,49 +25,28 @@ repositories {
 }
 
 jar {
-    enabled = false
+    enabled = true
 }
 
-
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'org.springframework:spring-tx:5.3.25'
-    implementation 'org.postgresql:postgresql:42.3.8'
-    implementation 'io.springfox:springfox-boot-starter:3.0.0'
-    implementation 'javax.validation:validation-api:2.0.1.Final'
-    implementation 'com.vladmihalcea:hibernate-types-52:2.12.0'
-    implementation 'io.jsonwebtoken:jjwt:0.9.1'
-    implementation 'org.modelmapper:modelmapper:2.4.4'
-    implementation 'com.lmax:disruptor:3.4.3'
-    implementation 'org.projectlombok:lombok:1.18.20'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
-    compileOnly 'org.projectlombok:lombok:1.18.20'
+    implementation 'org.postgresql:postgresql:42.7.10'
+    implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
+    implementation 'org.modelmapper:modelmapper:3.2.6'
+    implementation 'com.lmax:disruptor:4.0.0'
+    implementation 'commons-io:commons-io:2.21.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.44'
     annotationProcessor 'org.projectlombok:lombok'
-
-//    testImplementation('org.springframework.boot:spring-boot-starter-test:2.5.4') {exclude group: 'junit', module: 'junit'}
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.mockito:mockito-core:4.+'
-    testImplementation 'com.h2database:h2'
-
-    // JUnit dependencies
-//    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
-//    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.7.2'
-//    testRuntimeOnly 'org.junit.platform:junit-platform-commons:1.7.2'
-
-
-    // Spock - Mandatory dependencies
-//    testImplementation 'org.codehaus.groovy:groovy-all:3.0.8'
-//    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
-//    testImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
 }
 
 test {

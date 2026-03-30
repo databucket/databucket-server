@@ -1,5 +1,6 @@
 package pl.databucket.server.entity;
 
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pl.databucket.server.configuration.Constants;
 
-import javax.persistence.*;
 import java.util.Date;
 
 

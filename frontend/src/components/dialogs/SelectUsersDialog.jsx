@@ -41,7 +41,7 @@ export default function SelectUsersDialog(props) {
             tooltipTitle={'Select users'}
             dialogTitle={'Select users'}
             tableTitle={(props.rowData['name'] || '-')}
-            maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />
     );

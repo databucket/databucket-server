@@ -1,5 +1,6 @@
 import React, {createRef, useState} from 'react';
 import {
+    Box,
     Button,
     Dialog,
     DialogContent as MuiDialogContent,
@@ -22,7 +23,7 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import {
     getLastPageSizeOnDialog,
     setLastPageSizeOnDialog
@@ -33,7 +34,7 @@ const PREFIX = 'SelectSingleDialog';
 
 const classes = {
     root: `${PREFIX}-root`,
-    root2: `${PREFIX}-root2`,
+    bar: `${PREFIX}-bar`,
     closeButton: `${PREFIX}-closeButton`
 };
 
@@ -42,9 +43,14 @@ const Root = styled('div')((
         theme
     }
 ) => ({
-    [`& .${classes.root2}`]: {
+    [`& .${classes.root}`]: {
         margin: 0,
-        padding: theme.spacing(2),
+        padding: theme.spacing(0),
+    },
+
+    [`& .${classes.bar}`]: {
+        margin: 5,
+        padding: theme.spacing(0),
     },
 
     [`& .${classes.closeButton}`]: {
@@ -55,25 +61,30 @@ const Root = styled('div')((
     }
 }));
 
-const DialogTitle = ((props) => {
-    const {children, onClose, ...other} = props;
+const DialogTitle = (props) => {
+    const { children, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
-            <Typography variant="h6">{children}</Typography>
-            {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                    size="large">
-                    <CloseIcon/>
-                </IconButton>
-            ) : null}
+        <MuiDialogTitle disableTypography className={classes.bar} {...other}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6">{children}</Typography>
+                {onClose && (
+                    <IconButton
+                        aria-label="close"
+                        className={classes.closeButton}
+                        onClick={onClose}
+                        size="large"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                )}
+            </Box>
         </MuiDialogTitle>
     );
-});
+};
 
-const DialogContent = MuiDialogContent;
+const DialogContent = styled(MuiDialogContent)({
+    padding: 0,
+});
 
 SelectSingleDialog.propTypes = {
     columns: PropTypes.array.isRequired,
@@ -136,6 +147,7 @@ export default function SelectSingleDialog(props) {
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
+                    color={'inherit'}
                 >
                     {getSelectionName()}
                 </Button>
@@ -170,7 +182,7 @@ export default function SelectSingleDialog(props) {
                             paginationType: 'stepped',
                             pageSizeOptions: getPageSizeOptionsOnDialog(),
                             actionsColumnIndex: -1,
-                            sorting: false,
+                            maxColumnSort: 0,
                             selection: false,
                             filtering: false,
                             padding: 'dense',

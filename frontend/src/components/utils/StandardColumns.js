@@ -15,7 +15,7 @@ export const getColumnId = () => {
         type: 'numeric',
         editable: 'never',
         filtering: true,
-        width: '1%',
+        // width: '1%',
         cellStyle: {width: '1%'}
     };
 };
@@ -28,7 +28,7 @@ export const getColumnName = (width) => {
             type: 'string',
             editable: 'always',
             filtering: true,
-            width: {width},
+            // width: {width},
             cellStyle: {width: {width}}
         };
     else
@@ -59,7 +59,7 @@ export const getColumnDescription = (width) => {
             type: 'string',
             editable: 'always',
             filtering: true,
-            width: {width},
+            // width: {width},
             cellStyle: {width: {width}}
         };
     } else
@@ -77,7 +77,7 @@ export const getColumnEnabled = () => {
         title: 'Enabled',
         field: 'enabled',
         type: 'boolean',
-        width: '1%',
+        // width: '1%',
         cellStyle: {width: '1%'}
     };
 };

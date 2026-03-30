@@ -4,11 +4,10 @@ import {
     Link,
     ListItem,
     ListItemIcon,
-    ListItemText,
-    styled,
+    ListItemText, styled,
     Tooltip,
     Typography,
-    useTheme
+    useTheme, withStyles
 } from '@mui/material';
 import DatabucketLogo from "../../images/databucket-logo.png";
 import SpringBootLogo from "../../images/spring-boot-logo.png";
@@ -26,19 +25,10 @@ import TravisLogo from "../../images/travis-ci-logo.png";
 import SwaggerLogo from "../../images/swagger-logo.png";
 import {getButtonColor} from "../../utils/MaterialTableHelper";
 
-const PREFIX = 'InfoDialog';
 
-const classes = {
-    tooltip: `${PREFIX}-tooltip`
-};
-
-const Root = styled('div')({
-    [`& .${classes.tooltip}`]: {
-        backgroundColor: "silver"
-    }
-});
-
-const CustomTooltip = Tooltip;
+const Root = styled('div')(({theme}) => ({
+    padding: theme.spacing(0),
+}));
 
 export default function InfoDialog() {
 
@@ -70,7 +60,7 @@ export default function InfoDialog() {
             >
                 <img style={{marginLeft: '100px', marginTop: '20px'}} src={DatabucketLogo} alt='' width='399' height='65'/>
                 <div style={{margin: '20px'}}>
-                    <Typography color='secondary'>Version: <b>4.0.0</b></Typography>
+                    <Typography color='secondary'>Version: <b>5.0.0</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="primary">www.databucket.pl</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server' color="textSecondary">Source code</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server/wiki' color="textSecondary">Documentation</Link><br/>
@@ -80,82 +70,92 @@ export default function InfoDialog() {
                 </div>
 
                 <div style={{marginLeft: '25px', marginBottom: '10px'}}>
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://spring.io/projects/spring-boot" target="_blank">Spring Boot</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://spring.io/projects/spring-boot" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>Spring Boot</Link>}
                     >
                         <img src={SpringBootLogo} alt='Spring Boot' width='37' style={{marginLeft: '12px', marginTop: '4px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://www.postgresql.org/" target="_blank">PostgreSQL</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://www.postgresql.org/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>PostgreSQL</Link>}
                     >
                         <img src={PostgresqlLogo} alt='PostgreSQL' width='33' style={{marginLeft: '16px', marginTop: '4px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://reactjs.org/" target="_blank">React</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://reactjs.org/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>React</Link>}
                     >
                         <img src={ReactLogo} alt='React' width='38' style={{marginLeft: '12px', marginTop: '11px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://material-ui.com/" target="_blank">Material-UI</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://mui.com/material-ui/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>MUI</Link>}
                     >
-                        <img src={MaterialLogo} alt='Material-UI' width='35' style={{marginLeft: '10px', marginTop: '6px'}}/>
-                    </CustomTooltip>
+                        <img src={MaterialLogo} alt='MUI' width='35' style={{marginLeft: '10px', marginTop: '6px'}}/>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://material-table.com/#/" target="_blank">material-table</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://material-table.com/#/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>material-table</Link>}
                     >
                         <img src={MaterialTableLogo} alt='material-table' width='40' style={{marginLeft: '10px', marginTop: '12px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://jsonlogic.com/" target="_blank">JsonLogic</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://jsonlogic.com/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>JsonLogic</Link>}
                     >
                         <img src={theme.palette.mode === 'light' ? JsonLogicLight : JsonLogicDark} alt='JsonLogic' width='38' style={{marginLeft: '10px', marginTop: '7px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://praneshravi.in/react-diff-viewer/" target="_blank">React Diff Viewer</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://praneshravi.in/react-diff-viewer/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>React Diff Viewer</Link>}
                     >
                         <img src={ReactDiffViewerLogo} alt='React Diff Viewer' width='33' style={{marginLeft: '15px', marginTop: '2px', marginBottom: '3px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://swagger.io/" target="_blank">Swagger</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://swagger.io/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>Swagger</Link>}
                     >
                         <img src={SwaggerLogo} alt='Swagger' width='32' style={{marginLeft: '15px', marginTop: '0px', marginBottom: '3px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://github.com/" target="_blank">Github</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={<Link rel="noopener noreferrer" href="https://github.com/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>Github</Link>}
                     >
                         <img src={theme.palette.mode === 'light' ? GithubLogoLight : GithubLogoDark} alt='Github' width='53' style={{marginLeft: '5px', marginTop: '3px', marginBottom: '1px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://www.docker.com/" target="_blank">Docker</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={
+                            <Link rel="noopener noreferrer" href="https://www.docker.com/" target="_blank" style={{color: 'white', textDecoration: 'underline'}}>Docker</Link>}
                     >
                         <img src={DockerLogo} alt='Docker' width='40' style={{marginLeft: '7px', marginTop: '5px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
 
-                    <CustomTooltip
-                        interactive
-                        title={<Link rel="noopener noreferrer" href="https://www.travis-ci.com/" target="_blank">Travis CI</Link>}
+                    <Tooltip
+                        placement="top"
+                        title={
+                            <Link
+                                rel="noopener noreferrer"
+                                href="https://www.travis-ci.com/"
+                                target="_blank"
+                                style={{color: 'white', textDecoration: 'underline'}}
+                            >
+                                Travis CI
+                            </Link>
+                        }
                     >
                         <img src={TravisLogo} alt='Travis CI' width='32' style={{marginLeft: '10px', marginTop: '0px', marginBottom: '2px'}}/>
-                    </CustomTooltip>
+                    </Tooltip>
                 </div>
             </Dialog>
         </Root>

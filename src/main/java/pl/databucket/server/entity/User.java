@@ -1,15 +1,12 @@
 package pl.databucket.server.entity;
 
-import java.io.Serial;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
+import jakarta.validation.constraints.Email;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
@@ -19,9 +16,6 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Table(name = "users")
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class User extends Auditable<String> implements Serializable {
 
     @Serial
@@ -70,7 +64,7 @@ public class User extends Auditable<String> implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> roles;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "users_projects",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "project_id")})

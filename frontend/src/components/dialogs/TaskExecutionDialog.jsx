@@ -1,5 +1,6 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {
+    Box,
     Button,
     CircularProgress,
     Dialog,
@@ -32,7 +33,7 @@ import {
     getDataUrl
 } from "../../utils/UrlBuilder";
 import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
-import {Query, Utils as QbUtils} from "@react-awesome-query-builder/mui";
+import {Query, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import {
     createConfig,
     getInitialTree,
@@ -72,7 +73,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     [`& .${classes.oneLine}`]: {
         display: 'flex',
         alignItems: 'center',
-        flexWrap: 'wrap'
+        padding: theme.spacing(2)
     },
 
     [`& .${classes.tabs}`]: {
@@ -80,7 +81,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     },
 
     [`& .${classes.devGrabSpace}`]: {
-        width: '170px'
+        width: '250px'
     },
 
     [`& .${classes.divActionGrabSpace}`]: {
@@ -89,7 +90,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
 
     [`& .${classes.root}`]: {
         margin: 0,
-        padding: theme.spacing(2),
+        padding: theme.spacing(0),
     },
     [`& .${classes.container}`]: {
         display: 'flex',
@@ -163,7 +164,6 @@ TaskExecutionDialog.propTypes = {
 const initialActions = {properties: []};
 
 export default function TaskExecutionDialog(props) {
-
 
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
@@ -438,10 +438,14 @@ export default function TaskExecutionDialog(props) {
             >
                 <div className={classes.oneLine}>
                     <Typography variant="h6">{'Task execution'}</Typography>
-                    <TaskMenuSelector tasks={getBucketTasks(props.bucket, accessContext.tasks)}
-                                      onTaskSelected={onTaskSelected}/>
+                    <TaskMenuSelector
+                        tasks={getBucketTasks(props.bucket, accessContext.tasks)}
+                        onTaskSelected={onTaskSelected}
+                    />
                     <Tabs
                         className={classes.tabs}
+                        textColor="secondary"
+                        indicatorColor="secondary"
                         value={activeTab}
                         onChange={handleChangedTab}
                         centered
@@ -460,7 +464,8 @@ export default function TaskExecutionDialog(props) {
                     ref={dialogContentRef}
                     classes={{
                         root: classes.root
-                    }}>
+                    }}
+                >
                     {props.open && state.processing &&
                         <Grid
                             container
@@ -485,7 +490,7 @@ export default function TaskExecutionDialog(props) {
                         />}
 
                     {props.open && !state.processing && activeTab === 1 &&
-                        <div>
+                        <Box sx={{margin: 0}}>
                             <Query
                                 {...state.config}
                                 value={state.tree}
@@ -493,7 +498,7 @@ export default function TaskExecutionDialog(props) {
                                 renderBuilder={renderBuilder}
                             />
                             {renderResult({tree: state.tree, config: state.config})}
-                        </div>
+                        </Box>
                     }
 
                     {props.open && !state.processing && activeTab === 2 &&
@@ -506,7 +511,6 @@ export default function TaskExecutionDialog(props) {
                             pageSize={null}
                             parentContentRef={dialogContentRef}
                         />}
-
                 </DialogContent>
             </EnumsProvider>
             <DialogActions

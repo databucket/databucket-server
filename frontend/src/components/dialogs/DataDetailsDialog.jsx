@@ -1,5 +1,6 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
 import {
+    Box,
     Button,
     Dialog,
     DialogActions as MuiDialogActions,
@@ -14,7 +15,7 @@ import {
     useTheme
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import {Close as CloseIcon} from '@mui/icons-material';
 import {createTagLookup} from "../../utils/JsonHelper";
 import {
@@ -29,7 +30,7 @@ import {MessageBox} from "../utils/MessageBox";
 import jp from "jsonpath";
 import {getDirectDataPath} from "../../route/AppRouter";
 import {debounce} from "../utils/Debouncer";
-import {JsonEditor as Editor} from 'jsoneditor-react';
+import { JsonEditor as Editor } from 'jsoneditor-react18';
 import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
@@ -62,7 +63,7 @@ const ajv = new Ajv({allErrors: true, verbose: true});
 const jsonThemeLight = null; //"ace/theme/eclipse";
 const jsonThemeDark = "ace/theme/monokai";
 
-const DialogTitle = (props => {
+const DialogTitle = (props) => {
     const {
         children,
         onClose,
@@ -71,62 +72,69 @@ const DialogTitle = (props => {
         onCopyDataLink,
         onOpenDataLink
     } = props;
+
     return (
         <MuiDialogTitle disableTypography className={classes.root}>
-            <Typography variant="h6">{children}</Typography>
-            <Tooltip id="link-tooltip" title="Copy direct link to data">
-                <IconButton
-                    className={classes.linkButton}
-                    onClick={onCopyDataLink}
-                    color={"inherit"}
-                    size="large">
-                    <span className="material-icons">link</span>
-                </IconButton>
-            </Tooltip>
-            <Tooltip id="open-in-new-tooltip" title="Open details in new tab">
-                <IconButton
-                    className={classes.openButton}
-                    onClick={onOpenDataLink}
-                    color={"inherit"}
-                    size="large">
-                    <span className="material-icons">open_in_new</span>
-                </IconButton>
-            </Tooltip>
-            <Tooltip id="smaller-window-tooltip" title="Smaller">
-                <IconButton
-                    className={classes.smallerButton}
-                    onClick={onMakeDialogSmaller}
-                    color={"inherit"}
-                    disabled={onMakeDialogSmaller == null}
-                    size="large">
-                    <span className="material-icons">fullscreen_exit</span>
-                </IconButton>
-            </Tooltip>
-            <Tooltip id="larger-window-tooltip" title="Larger">
-                <IconButton
-                    aria-label="Larger"
-                    className={classes.largerButton}
-                    onClick={onMakeDialogLarger}
-                    color={"inherit"}
-                    disabled={onMakeDialogLarger == null}
-                    size="large">
-                    <span className="material-icons">fullscreen</span>
-                </IconButton>
-            </Tooltip>
-            {onClose ? (
-                <Tooltip id="close-window-tooltip" title="Close">
-                    <IconButton
-                        aria-label="Close"
-                        className={classes.closeButton}
-                        onClick={onClose}
-                        size="large">
-                        <CloseIcon/>
-                    </IconButton>
-                </Tooltip>
-            ) : null}
+            <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Typography variant="h6">{children}</Typography>
+                <Box>
+                    <Tooltip id="link-tooltip" title="Copy direct link to data">
+                        <IconButton
+                            className={classes.linkButton}
+                            onClick={onCopyDataLink}
+                            color={"inherit"}
+                            size="large">
+                            <span className="material-icons">link</span>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip id="open-in-new-tooltip" title="Open details in new tab">
+                        <IconButton
+                            className={classes.openButton}
+                            onClick={onOpenDataLink}
+                            color={"inherit"}
+                            size="large">
+                            <span className="material-icons">open_in_new</span>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip id="smaller-window-tooltip" title="Smaller">
+                        <IconButton
+                            className={classes.smallerButton}
+                            onClick={onMakeDialogSmaller}
+                            color={"inherit"}
+                            disabled={onMakeDialogSmaller == null}
+                            size="large">
+                            <span className="material-icons">fullscreen_exit</span>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip id="larger-window-tooltip" title="Larger">
+                        <IconButton
+                            aria-label="Larger"
+                            className={classes.largerButton}
+                            onClick={onMakeDialogLarger}
+                            color={"inherit"}
+                            disabled={onMakeDialogLarger == null}
+                            size="large"
+                            style={{marginRight: '30px'}}
+                        >
+                            <span className="material-icons">fullscreen</span>
+                        </IconButton>
+                    </Tooltip>
+                    {onClose ? (
+                        <Tooltip id="close-window-tooltip" title="Close">
+                            <IconButton
+                                aria-label="Close"
+                                className={classes.closeButton}
+                                onClick={onClose}
+                                size="large">
+                                <CloseIcon/>
+                            </IconButton>
+                        </Tooltip>
+                    ) : null}
+                </Box>
+            </Box>
         </MuiDialogTitle>
     );
-});
+};
 
 const DialogContent = MuiDialogContent;
 
@@ -292,10 +300,8 @@ export default function DataDetailsDialog(props) {
             <DialogTitle
                 id="customized-dialog-title"
                 onClose={handleClose}
-                onMakeDialogSmaller={dialogSize !== 'md' ? onMakeDialogSmaller
-                    : null}
-                onMakeDialogLarger={dialogSize !== 'true' ? onMakeDialogLarger
-                    : null}
+                onMakeDialogSmaller={dialogSize !== 'md' ? onMakeDialogSmaller : null}
+                onMakeDialogLarger={dialogSize !== 'true' ? onMakeDialogLarger : null}
                 onCopyDataLink={copyDataLink}
                 onOpenDataLink={openDataLink}
             >
@@ -329,7 +335,7 @@ export default function DataDetailsDialog(props) {
                     paging: false,
                     toolbar: false,
                     actionsColumnIndex: -1,
-                    sorting: false,
+                    maxColumnSort: 0,
                     search: false,
                     filtering: false,
                     padding: 'dense',
@@ -348,7 +354,7 @@ export default function DataDetailsDialog(props) {
                 }}
             />
             <DialogContent
-                style={{height: '75vh'}}
+                style={{height: '75vh', padding: 0}}
                 classes={{
                     root: classes.root
                 }}>
@@ -381,6 +387,7 @@ export default function DataDetailsDialog(props) {
                     hiddenLabel
                     id="jsonPathId"
                     size="small"
+                    variant="standard"
                     fullWidth
                     placeholder={"$.store.books[*].title"}
                     InputProps={{disableUnderline: true}}

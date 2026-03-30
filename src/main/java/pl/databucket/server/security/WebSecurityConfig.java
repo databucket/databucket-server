@@ -1,88 +1,127 @@
 package pl.databucket.server.security;
 
-import lombok.extern.log4j.Log4j2;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Deprecated(forRemoval = true)
-@Log4j2
-//@Configuration
+import java.util.Arrays;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
-//    @Bean
-//    public JwtAuthenticationFilter authenticationTokenFilterBean() {
-//        return new JwtAuthenticationFilter();
-//    }
+    @Resource(name = "userService")
+    private UserDetailsService userDetailsService;
 
-    //    @Bean
-    public SecurityFilterChain formSecurityFilterChain(HttpSecurity http,
-        JwtAuthenticationEntryPoint unauthorizedHandler) throws Exception {
-        http.sessionManagement().invalidSessionUrl("/");
+    @Autowired
+    private JwtAuthenticationEntryPoint unauthorizedHandler;
 
-        http.cors().and().csrf().disable()
-            .authorizeRequests()
-            .antMatchers(
-                "/api/public/**", // public endpoint
-                "/**/static/**",
-                "/**/favicon.ico",
-                "/login*",
-                "/sign-up"
-            ).permitAll()
-//            .antMatchers(
-//                "/",
-//                "/api/public/**", // public endpoint
-//                "/**/static/**",
-//                "/actuator/**",
-//                "/**/favicon.ico",
-//                "/login",
-//                "/confirmation/**",
-//                "/forgot-password",
-//                "/sign-up",
-//                "/change-password",
-//                "/project",
-//                "/project/**",
-//                "/management",
-//                "/management/**"
-//            ).permitAll()
-//            // swagger
-//            .antMatchers(HttpMethod.GET,
-//                "/swagger-ui/**",
-//                "/v2/api-docs",
-//                "/v3/api-docs",
-//                "/webjars/**",            // swagger-ui webjars
-//                "/swagger-resources/**",  // swagger-ui resources
-//                "/configuration/**",      // swagger configuration
-//                "/**/*.html",
-//                "/**/*.css",
-//                "/**/*.js"
-//            ).permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .formLogin()
-            .loginPage("/login-form")
-            .loginProcessingUrl("/public/sign-in")
-            .defaultSuccessUrl("/index.html", true)
-            .failureUrl("/login-form?error=true")
-            .failureHandler((request, response, exception) -> {
-                log.error("Oops", exception);
-            })
-            .and()
-            .logout()
-            .logoutUrl("/logout")
-            .deleteCookies("JSESSIONID")
-            .logoutSuccessHandler((request, response, authentication) -> {
-                log.debug(authentication);
-            });
-
-//        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-//            .anyRequest().authenticated()
-//            .and()
-//            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-//            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//
-//        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
+    @Bean
+    public JwtAuthenticationFilter authenticationTokenFilterBean() {
+        return new JwtAuthenticationFilter();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        // Public endpoints
+                        .requestMatchers(
+                                "/",
+                                "/favicon.ico",
+                                "/index.html",
+                                "/static/**",
+                                "/assets/**",
+                                "/api/public/**",
+                                "/actuator/**",
+                                "/login",
+                                "/confirmation/**",
+                                "/forgot-password",
+                                "/sign-up",
+                                "/change-password",
+                                "/project",
+                                "/project/**",
+                                "/management",
+                                "/management/**"
+                        ).permitAll()
+                        // Swagger endpoints
+                        .requestMatchers(HttpMethod.GET,
+                                "/swagger-ui/**",
+                                "/v2/api-docs",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/webjars/**",
+                                "/swagger-resources/**",
+                                "/configuration/**"
+                        ).permitAll()
+                        // Common static file types (root-level only; bez /**/*.ext)
+                        .requestMatchers(HttpMethod.GET,
+                                "/*.html",
+                                "/*.css",
+                                "/*.js",
+                                "/*.map",
+                                "/*.json",
+                                "/*.png",
+                                "/*.jpg",
+                                "/*.jpeg",
+                                "/*.svg",
+                                "/*.woff",
+                                "/*.woff2",
+                                "/*.ttf",
+                                "/*.ico"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler)
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public BCryptPasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

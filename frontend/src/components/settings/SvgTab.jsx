@@ -1,4 +1,4 @@
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useRef, useState} from "react";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {IconButton, useTheme} from "@mui/material";
@@ -132,8 +132,7 @@ export default function SvgTab() {
                         searchable: false,
                         filtering: false,
                         editable: "never",
-                        render: rowData => <IconButton
-                            size="large">{parseCustomSvg(rowData.structure, getButtonColor(theme))}</IconButton>,
+                        render: rowData => <IconButton size="small">{parseCustomSvg(rowData.structure, getButtonColor(theme))}</IconButton>,
                     },
                     getColumnName(),
                     getColumnCreatedBy(),
@@ -148,12 +147,17 @@ export default function SvgTab() {
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
-                    sorting: true,
+                    maxColumnSort: 1,
                     search: true,
                     filtering: filtering,
                     debounceInterval: 700,
                     padding: 'dense',
-                    headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    headerStyle: {
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                    },
+                    cellStyle: {whiteSpace: 'nowrap'},
                     maxBodyHeight: getSettingsTableHeight(),
                     minBodyHeight: getSettingsTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})

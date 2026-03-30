@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Button,
     Dialog,
@@ -12,12 +12,12 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
+import { Close as CloseIcon, MoreHoriz } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 import EnumsContext from "../../context/enums/EnumsContext";
-import {convertNullValuesInCollection} from "../../utils/JsonHelper";
-import {getColumnMapper} from "../../utils/NullValueMappers";
-import PropertiesTable, {mergeProperties} from "../utils/PropertiesTable";
+import { convertNullValuesInCollection } from "../../utils/JsonHelper";
+import { getColumnMapper } from "../../utils/NullValueMappers";
+import PropertiesTable, { mergeProperties } from "../utils/PropertiesTable";
 import ColumnsTable from "../utils/ColumnsTable";
 
 const PREFIX = 'EditColumnsDialog';
@@ -31,13 +31,7 @@ const classes = {
     closeButton: `${PREFIX}-closeButton`
 };
 
-const Root = styled('div')(({theme}) => ({
-    [`& .${classes.oneLine}`]: {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-    },
-
+const Root = styled('div')(({ theme }) => ({
     [`& .${classes.tabs}`]: {
         flexGrow: 1
     },
@@ -59,28 +53,47 @@ const Root = styled('div')(({theme}) => ({
     }
 }));
 
-const DialogTitle = ((props) => {
-    const {children, onClose, ...other} = props;
+const StyledDialogTitle = styled(MuiDialogTitle)(({ theme }) => ({
+    margin: 0,
+    marginLeft: 0,
+    padding: theme.spacing(2),
+    position: 'relative',
+    [`& .${classes.closeButton}`]: {
+        position: 'absolute',
+        right: theme.spacing(2),
+        top: theme.spacing(2),
+        color: theme.palette.grey[500],
+    },
+    [`& .${classes.oneLine}`]: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+}));
+
+const DialogTitle = (props) => {
+    const { children, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <StyledDialogTitle disableTypography {...other}>
             {children}
-            {onClose ? (
+            {onClose && (
                 <IconButton
                     aria-label="close"
                     className={classes.closeButton}
                     onClick={onClose}
                     size="large">
-                    <CloseIcon/>
+                    <CloseIcon />
                 </IconButton>
-            ) : null}
-        </MuiDialogTitle>
+            )}
+        </StyledDialogTitle>
     );
+};
+
+const DialogContent = styled(MuiDialogContent)({
+    padding: 0,
 });
 
-const DialogContent = MuiDialogContent;
-
 const DialogActions = MuiDialogActions;
-
 
 EditColumnsDialog.propTypes = {
     configuration: PropTypes.object.isRequired,
@@ -96,7 +109,7 @@ export default function EditColumnsDialog(props) {
     const [open, setOpen] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const enumsContext = useContext(EnumsContext);
-    const {enums, fetchEnums} = enumsContext;
+    const { enums, fetchEnums } = enumsContext;
     const dialogContentRef = React.useRef(null);
 
     useEffect(() => {
@@ -113,7 +126,7 @@ export default function EditColumnsDialog(props) {
     };
 
     const handleSave = () => {
-        props.onChange({properties, columns});
+        props.onChange({ properties, columns });
         setOpen(false);
     }
 
@@ -129,8 +142,9 @@ export default function EditColumnsDialog(props) {
         <Root>
             <Tooltip title={'Define columns'}>
                 <Button
-                    endIcon={<MoreHoriz/>}
+                    endIcon={<MoreHoriz />}
                     onClick={handleClickOpen}
+                    color={'inherit'}
                 >
                     {`${props.configuration.columns.length}`}
                 </Button>
@@ -142,7 +156,7 @@ export default function EditColumnsDialog(props) {
                 fullWidth={true}
                 maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             >
-                <DialogTitle id="customized-dialog-title" onClose={handleSave}>
+                <DialogTitle id="customized-dialog-title" onClose={handleSave} >
                     <div className={classes.oneLine}>
                         <Typography variant="h6">{'Define the list of columns'}</Typography>
                         <Tabs
@@ -150,45 +164,47 @@ export default function EditColumnsDialog(props) {
                             value={activeTab}
                             onChange={handleChangedTab}
                             centered
+                            textColor="secondary"
+                            indicatorColor="secondary"
                         >
 
-                            <StyledTab label="Columns"/>
-                            <StyledTab label="Properties"/>
+                            <StyledTab label="Columns" />
+                            <StyledTab label="Properties" />
                         </Tabs>
-                        <div className={classes.devGrabSpace}/>
+                        <div className={classes.devGrabSpace} />
                     </div>
                 </DialogTitle>
                 <DialogContent
                     dividers
-                    style={{height: '75vh'}}
+                    style={{ height: '75vh' }}
                     ref={dialogContentRef}
                     classes={{
                         root: classes.root
                     }}>
                     {activeTab === 0 &&
-                        <ColumnsTable
-                            columns={columns}
-                            properties={properties}
-                            onChange={setColumns}
-                            parentContentRef={dialogContentRef}
-                        />}
+                    <ColumnsTable
+                        columns={columns}
+                        properties={properties}
+                        onChange={setColumns}
+                        parentContentRef={dialogContentRef}
+                    />}
                     {activeTab === 1 &&
-                        <PropertiesTable
-                            used={getUsedUuids()}
-                            data={properties}
-                            enums={enums}
-                            onChange={setProperties}
-                            title={'Class origin and defined properties:'}
-                            parentContentRef={dialogContentRef}
-                        />}
+                    <PropertiesTable
+                        used={getUsedUuids()}
+                        data={properties}
+                        enums={enums}
+                        onChange={setProperties}
+                        title={'Class origin and defined properties:'}
+                        parentContentRef={dialogContentRef}
+                    />}
                 </DialogContent>
                 <DialogActions
                     classes={{
                         root: classes.root
-                    }}/>
+                    }} />
             </Dialog>
         </Root>
     );
 }
 
-const StyledTab = Tab
+const StyledTab = Tab;

@@ -1,27 +1,22 @@
 package pl.databucket.server.dto;
 
-import io.swagger.annotations.ApiModelProperty;
-import javax.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
-@Builder
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Authentication request data transfer object")
 public class AuthReqDTO {
 
-    @ApiModelProperty(position = 1, required = true, example = "username")
-    @NotEmpty
+    @Schema(description = "Username", example = "username", requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
 
-    @ApiModelProperty(position = 2, required = true, example = "example password")
-    @NotEmpty
+    @Schema(description = "Password", example = "example password", requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 
-    @ApiModelProperty(position = 3, example = "1")
+    @Schema(description = "Project ID", example = "1")
     private Integer projectId;
 
 }

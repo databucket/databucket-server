@@ -15,7 +15,7 @@ import {
     Lock as LockedIcon,
     LockOpen as UnlockedIcon
 } from '@mui/icons-material';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import DataHistoryPropertiesDiffDialog from './DataHistoryPropertiesDiffDialog';
 import PropTypes from "prop-types";
 import {createTagLookup} from "../../utils/JsonHelper";
@@ -81,7 +81,9 @@ const DialogTitle = (({children, onClose, onClearDataHistory}) => {
     );
 });
 
-const DialogContent = MuiDialogContent;
+const StyledDialogContent = styled(MuiDialogContent)(({ theme }) => ({
+    padding: 0,
+}));
 
 const DialogActions = MuiDialogActions;
 
@@ -172,7 +174,7 @@ export default function DataHistoryDialog(props) {
             <DialogTitle id="customized-dialog-title" onClose={handleClose} onClearDataHistory={handleClearDataHistory}>
                 Data history [Id: {state.dataRowId}]
             </DialogTitle>
-            <DialogContent dividers>
+            <StyledDialogContent dividers>
                 <MaterialTable
                     tableRef={tableRef}
                     columns={state.columns}
@@ -180,11 +182,11 @@ export default function DataHistoryDialog(props) {
                     options={{
                         toolbar: false,
                         paging: false,
-                        sorting: false,
+                        maxColumnSort: 0,
                         search: false,
                         filtering: false,
                         padding: 'dense',
-                        headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)}
+                        headerStyle: { position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme) }
                     }}
                     components={{
                         Container: props => <div {...props} />
@@ -192,9 +194,9 @@ export default function DataHistoryDialog(props) {
                 />
                 <MessageBox
                     config={messageBox}
-                    onClose={() => setMessageBox({...messageBox, open: false})}
+                    onClose={() => setMessageBox({ ...messageBox, open: false })}
                 />
-            </DialogContent>
+            </StyledDialogContent>
             <DialogActions/>
         </StyledDialog>
     );

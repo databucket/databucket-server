@@ -147,7 +147,7 @@ export default function ChangePasswordPage() {
                         </Button>
                     </div>
                     <div className="BackLink">
-                        <Link to="/login-form" component={FancyLink}>Back</Link>
+                        <Link to="/login" component={FancyLink}>Back</Link>
                     </div>
                 </Paper>
                 <MessageBox

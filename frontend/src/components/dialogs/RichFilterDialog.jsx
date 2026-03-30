@@ -69,7 +69,7 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     },
     [`& .${classes.root}`]: {
         margin: 0,
-        padding: theme.spacing(2),
+        padding: theme.spacing(0),
     },
     [`& .${classes.container}`]: {
         display: 'flex',
@@ -126,7 +126,9 @@ const DialogTitleGrid = (props => {
                             <IconButton
                                 aria-label="Close"
                                 onClick={onClose}
-                                size="large">
+                                size="large"
+                                style={{marginLeft: '20px'}}
+                            >
                                 <CloseIcon/>
                             </IconButton>
                         ) : null}
@@ -159,11 +161,9 @@ export default function RichFilterDialog(props) {
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
     const [activeTab, setActiveTab] = useState(0);
-    const [messageBox, setMessageBox] = useState(
-        {open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [appliesCount, setAppliesCount] = useState(0);
-    const [state, setState] = useState(
-        {properties: [], logic: {}, tree: {}, config: {}});
+    const [state, setState] = useState({properties: [], logic: {}, tree: {}, config: {}});
     const [dialogSize, setDialogSize] = useState('md');
     const dialogContentRef = React.useRef(null);
 
@@ -175,12 +175,10 @@ export default function RichFilterDialog(props) {
         if (props.open) {
             setActiveTab(0);
             const properties = getClassProperties();
-            const config = createConfig(properties, bucketTags,
-                accessContext.users, accessContext.enums, theme);
+            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums, theme);
             const disabledRulesLogic = makeRulesDisabled(props.activeLogic);
             if (Object.keys(state.tree).length === 0) {
-                let tree = QbUtils.checkTree(
-                    getInitialTree(disabledRulesLogic, null, config), config);
+                let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
                 setState({
                     ...state,
                     properties: getClassProperties(),
@@ -233,13 +231,10 @@ export default function RichFilterDialog(props) {
     }
 
     const onFilterSelected = (filter) => {
-        const properties = getMergedProperties(getClassProperties(),
-            filter.configuration.properties);
-        const config = createConfig(properties, bucketTags, accessContext.users,
-            accessContext.enums);
+        const properties = getMergedProperties(getClassProperties(), filter.configuration.properties);
+        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
         const tree = QbUtils.checkTree(
-            getInitialTree(filter.configuration.logic,
-                filter.configuration.tree, config), config);
+            getInitialTree(filter.configuration.logic, filter.configuration.tree, config), config);
         setState({
             ...state,
             logic: filter.configuration.logic,
@@ -250,8 +245,7 @@ export default function RichFilterDialog(props) {
     }
 
     useEffect(() => {
-        refreshAppliesCount(
-            {open: props.open, bucket: props.bucket, logic: state.logic});
+        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
     }, [props.open, state.logic]);
 
     const refreshAppliesCount = useCallback(
@@ -260,21 +254,21 @@ export default function RichFilterDialog(props) {
                 let resultOk = true;
                 fetch(getDataUrl(bucket) + '/get?limit=0',
                     getPostOptions({logic}))
-                .then(handleErrors)
-                .catch(error => {
-                    setMessageBox({
-                        open: true,
-                        severity: 'error',
-                        title: 'Error',
-                        message: error
+                    .then(handleErrors)
+                    .catch(error => {
+                        setMessageBox({
+                            open: true,
+                            severity: 'error',
+                            title: 'Error',
+                            message: error
+                        });
+                        resultOk = false;
+                    })
+                    .then(result => {
+                        if (resultOk) {
+                            setAppliesCount(result.total);
+                        }
                     });
-                    resultOk = false;
-                })
-                .then(result => {
-                    if (resultOk) {
-                        setAppliesCount(result.total);
-                    }
-                });
             }
         }, 1000),
         []
@@ -290,8 +284,7 @@ export default function RichFilterDialog(props) {
 
     const getClassProperties = () => {
         if (props.bucket.classId != null) {
-            const dataClass = getClassById(accessContext.classes,
-                props.bucket.classId);
+            const dataClass = getClassById(accessContext.classes, props.bucket.classId);
             return dataClass.configuration;
         } else {
             return [];
@@ -299,11 +292,9 @@ export default function RichFilterDialog(props) {
     }
 
     const setProperties = (properties) => {
-        const config = createConfig(properties, bucketTags, accessContext.users,
-            accessContext.enums);
+        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
         const disabledRulesLogic = makeRulesDisabled(props.activeLogic);
-        let tree = QbUtils.checkTree(
-            getInitialTree(disabledRulesLogic, null, config), config);
+        let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
         setState({
             ...state,
             properties: properties,
@@ -343,29 +334,28 @@ export default function RichFilterDialog(props) {
             <DialogTitleGrid
                 id="customized-dialog-title"
                 onClose={handleClose}
-                onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller
-                    : null}
-                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger
-                    : null}
+                onMakeDialogSmaller={dialogSize === 'lg' ? onMakeDialogSmaller : null}
+                onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger : null}
             >
                 <TopPaddedGridItem item>
                     {'Data filter'}
                 </TopPaddedGridItem>
                 <TopPaddedGridItem item xs>
-                    <FilterMenuSelector filters={getBucketFilters(props.bucket,
-                        accessContext.filters)}
-                                        onFilterSelected={onFilterSelected}/>
+                    <FilterMenuSelector
+                        filters={getBucketFilters(props.bucket, accessContext.filters)}
+                        onFilterSelected={onFilterSelected}
+                    />
                 </TopPaddedGridItem>
-                <Grid item xs={6}>
-                    <Tabs
-                        className={classes.tabs}
-                        value={activeTab}
-                        onChange={handleChangedTab}
-                    >
-                        <StyledTab label="Rules"/>
-                        <StyledTab label="Properties"/>
-                    </Tabs>
-                </Grid>
+                <Tabs
+                    className={classes.tabs}
+                    textColor="secondary"
+                    indicatorColor="secondary"
+                    value={activeTab}
+                    onChange={handleChangedTab}
+                >
+                    <StyledTab label="Rules"/>
+                    <StyledTab label="Properties"/>
+                </Tabs>
             </DialogTitleGrid>
             <EnumsProvider>
                 <DialogContent
@@ -375,18 +365,16 @@ export default function RichFilterDialog(props) {
                     classes={{
                         root: classes.root
                     }}>
-                    {props.open && activeTab === 0 && Object.keys(
-                            state.tree).length > 0 &&
-                        <div>
+                    {props.open && activeTab === 0 && Object.keys(state.tree).length > 0 &&
+                        <Box sx={{margin: 0}}>
                             <Query
                                 {...state.config}
                                 value={state.tree}
                                 onChange={onRulesChange}
                                 renderBuilder={renderBuilder}
                             />
-                            {renderResult(
-                                {tree: state.tree, config: state.config})}
-                        </div>
+                            {renderResult({tree: state.tree, config: state.config})}
+                        </Box>
                     }
 
                     {props.open && activeTab === 1 &&

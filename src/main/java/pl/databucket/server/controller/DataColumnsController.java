@@ -12,8 +12,8 @@ import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.service.DataColumnsService;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 

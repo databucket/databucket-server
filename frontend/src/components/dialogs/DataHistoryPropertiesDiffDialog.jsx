@@ -52,7 +52,9 @@ const DialogTitle = (({children, onClose}) => {
     );
 });
 
-const DialogContent = MuiDialogContent;
+const StyledDialogContent = styled(MuiDialogContent)(({ theme }) => ({
+    padding: 0,
+}));
 
 export default function DataHistoryPropertiesDiffDialog(props) {
 
@@ -157,7 +159,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                 <DialogTitle id="customized-dialog-title" onClose={handleClose}>
                     Properties difference
                 </DialogTitle>
-                <DialogContent dividers>
+                <StyledDialogContent dividers>
                     <ReactDiffViewer
                         useDarkTheme={theme.palette.mode === 'dark'}
                         oldValue={state.oldValue}
@@ -165,7 +167,7 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                         splitView={true}
                         disableWordDiff={false}
                     />
-                </DialogContent>
+                </StyledDialogContent>
                 <MessageBox
                     config={messageBox}
                     onClose={() => setMessageBox({...messageBox, open: false})}
