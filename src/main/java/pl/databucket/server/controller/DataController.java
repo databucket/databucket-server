@@ -1,6 +1,13 @@
 package pl.databucket.server.controller;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -10,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.*;
 import pl.databucket.server.entity.Bucket;
-import pl.databucket.server.entity.Tag;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.*;
 import pl.databucket.server.response.GetDataResponse;
@@ -25,7 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@Api(tags="SECURED")
+@Tag(name = "SECURED", description = "Secured data operations")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/bucket/{bucketName}")
 @RestController
@@ -44,18 +50,18 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Insert data", notes = "Inserts one data set into the selected bucket.")
+    @Operation(summary = "Insert data", description = "Inserts one data set into the selected bucket.")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not existing tagId"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            @ApiResponse(responseCode = "201", description = "Created"),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> insertData(
-            @ApiParam(value="bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="payload - data", required = true)
+            @Parameter(description = "payload - data", required = true)
             @RequestBody DataCreateDTO dataCreateDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -71,7 +77,7 @@ public class DataController {
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataCreateDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
+                return exceptionFormatter.customException(new ItemNotFoundException(pl.databucket.server.entity.Tag.class, dataCreateDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
             else
                 return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
@@ -80,18 +86,18 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Insert multi data", notes = "Inserts multiple data sets into the selected bucket.")
+    @Operation(summary = "Insert multi data", description = "Inserts multiple data sets into the selected bucket.")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not existing tagId"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            @ApiResponse(responseCode = "201", description = "Created"),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = {"/multi"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> insertMultiData(
-            @ApiParam(value="bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="payload - a list of data", required = true)
+            @Parameter(description = "payload - a list of data", required = true)
             @RequestBody List<DataCreateDTO> dataList) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -114,25 +120,28 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Modify data by data ids", notes = "Makes changes on data based on data ids.")
+    @Operation(summary = "Modify data by data ids", description = "Makes changes on data based on data ids.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}"
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}")
                     )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not exising tagId"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            ),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping(value = { "/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
-            @ApiParam(value="bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="ids", example = "1,2,3", required = true)
+            @Parameter(description = "ids", example = "1,2,3", required = true)
             @PathVariable Optional<List<Long>> ids,
-            @ApiParam(value="payload - data details (rules are ignored in this endpoint)", required = true)
+            @Parameter(description = "payload - data details (rules are ignored in this endpoint)", required = true)
             @RequestBody DataModifyDTO dataModifyDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -148,7 +157,7 @@ public class DataController {
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             if (Objects.requireNonNull(e.getMessage()).contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
+                return exceptionFormatter.customException(new ItemNotFoundException(pl.databucket.server.entity.Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
             else if (e.getMessage().contains("cannot cast jsonb null"))
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
@@ -159,28 +168,31 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Modify data by rules", notes = "Makes changes on data based on data rules.")
+    @Operation(summary = "Modify data by rules", description = "Makes changes on data based on data rules.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}"
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}")
                     )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - used not existing tagId or rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            ),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId or rules contain not existing property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
-            @ApiParam(value="bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="payload - data details and rules", required = true)
+            @Parameter(description = "payload - data details and rules", required = true)
             @RequestBody DataModifyDTO dataModifyDTO) {
 
         if ((dataModifyDTO.getConditions() == null || dataModifyDTO.getConditions().size() == 0)
-            && (dataModifyDTO.getRules() == null || dataModifyDTO.getRules().size() == 0)
-            && dataModifyDTO.getLogic() == null)
+                && (dataModifyDTO.getRules() == null || dataModifyDTO.getRules().size() == 0)
+                && dataModifyDTO.getLogic() == null)
             return new ResponseEntity<>(new MessageResponse("Can not modify data without any rules!"), HttpStatus.NOT_ACCEPTABLE);
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -196,7 +208,7 @@ public class DataController {
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             if (Objects.requireNonNull(e.getMessage()).contains("is not present in table \"tags\""))
-                return exceptionFormatter.customException(new ItemNotFoundException(Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
+                return exceptionFormatter.customException(new ItemNotFoundException(pl.databucket.server.entity.Tag.class, dataModifyDTO.getTagId()), HttpStatus.NOT_ACCEPTABLE);
             else if (e.getMessage().contains("cannot cast jsonb null"))
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
@@ -209,18 +221,22 @@ public class DataController {
     }
 
 
-    @ApiOperation(value = "Get data by data ids", notes = "Retrieves data based on data ids.")
+    @Operation(summary = "Get data by data ids", description = "Retrieves data based on data ids.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = DataDTO.class),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(schema = @Schema(implementation = DataDTO.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @GetMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getData(
-            @ApiParam(value="bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="ids", example = "1,2,3", required = true)
+            @Parameter(description = "ids", example = "1,2,3", required = true)
             @PathVariable List<Long> ids) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -243,23 +259,26 @@ public class DataController {
     }
 
 
-    @ApiOperation(value = "Remove data by data ids", notes = "Removes data based on data ids.")
+    @Operation(summary = "Remove data by data ids", description = "Removes data based on data ids.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}"
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}")
                     )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            ),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @DeleteMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteData(
-            @ApiParam(value="bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="ids", example = "1,2,3", required = true)
+            @Parameter(description = "ids", example = "1,2,3", required = true)
             @PathVariable List<Long> ids) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -279,24 +298,28 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Get data by rules", notes = "Retrieves data based on data rules. Define 'columns' to limit the retrieved data sets. Search for 'data' if columns are not defined and 'customData' if columns are defined.")
+    @Operation(summary = "Get data by rules", description = "Retrieves data based on data rules. Define 'columns' to limit the retrieved data sets. Search for 'data' if columns are not defined and 'customData' if columns are defined.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = GetDataResponse.class),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(schema = @Schema(implementation = GetDataResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not existing property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getData(
-            @ApiParam(value="bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="page", example="1")
+            @Parameter(description = "page", example = "1")
             @RequestParam(required = false, defaultValue = "1") Integer page,
-            @ApiParam(value="limit", example = "1")
+            @Parameter(description = "limit", example = "1")
             @RequestParam(required = false, defaultValue = "1") Integer limit,
-            @ApiParam(value="sort", example = "id")
+            @Parameter(description = "sort", example = "id")
             @RequestParam(required = false, defaultValue = "id") String sort,
-            @ApiParam(value="payload - rules (required), columns (optional)", required = true)
+            @Parameter(description = "payload - rules (required), columns (optional)", required = true)
             @RequestBody DataGetDTO dataGetDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -344,22 +367,26 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Reserve data by rules", notes = "Reserves data based on data rules.")
+    @Operation(summary = "Reserve data by rules", description = "Reserves data based on data rules.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ReserveDataResponse.class),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(schema = @Schema(implementation = ReserveDataResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not existing property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = {"/reserve"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reserveData(
-            @ApiParam(value="bucket name", example = "bucket", required = true)
+            @Parameter(description = "bucket name", example = "bucket", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="limit", example = "1")
+            @Parameter(description = "limit", example = "1")
             @RequestParam(required = false, defaultValue = "1") Integer limit,
-            @ApiParam(value="sort", example = "random")
+            @Parameter(description = "sort", example = "random")
             @RequestParam(required = false, defaultValue = "id") String sort,
-            @ApiParam(value="payload - rules (required)", required = true)
+            @Parameter(description = "payload - rules (required)", required = true)
             @RequestBody DataReserveDTO dataReserveDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -414,23 +441,26 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @ApiOperation(value = "Remove data by rules", notes = "Removes data based on data rules.")
+    @Operation(summary = "Remove data by rules", description = "Removes data based on data rules.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, examples=@Example(
-                    value = @ExampleProperty(
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}"
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}")
                     )
-            )),
-            @ApiResponse(code = 404, message = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(code = 406, message = "Not acceptable - rules contain not exising property"),
-            @ApiResponse(code = 500, message = "Internal server error"),
+            ),
+            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not existing property"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteData(
-            @ApiParam(name = "bucket name", required = true)
+            @Parameter(description = "bucket name", required = true)
             @PathVariable String bucketName,
-            @ApiParam(value="payload - rules (required)", required = true)
+            @Parameter(description = "payload - rules (required)", required = true)
             @RequestBody DataRemoveDTO dataRemoveDTO) {
 
         if ((dataRemoveDTO.getConditions() == null || dataRemoveDTO.getConditions().size() == 0)

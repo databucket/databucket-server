@@ -5,6 +5,7 @@ import {
 } from '@react-awesome-query-builder/mui';
 import React from "react";
 import {styled, Typography} from "@mui/material";
+import './../styles/query-builder-styles.css';
 
 export const getInitialTree = (loadedInitLogic, tree, config) => {
     if (tree && Object.keys(tree).length > 0) {
@@ -36,11 +37,13 @@ const StyledBuilder = styled('div')(({theme}) => ({
     "& .rule": {
         backgroundColor: theme.palette.background.paper
     },
-
-    "& .group": {
-        backgroundColor: theme.palette.primary.contrastText
-    },
+    //
+    // "& .group": {
+    //     backgroundColor: alpha(theme.palette.text.primary, 0.5)
+    // },
 }));
+
+
 export const renderBuilder = (props) => (
     <StyledBuilder className="query-builder-container">
         <div className="query-builder qb-lite">

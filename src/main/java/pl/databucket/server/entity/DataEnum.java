@@ -1,25 +1,23 @@
 package pl.databucket.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.DataEnumItemDto;
 import pl.databucket.server.tenant.TenantSupport;
 
-import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(name="data_enum")
 @Filter(name = "projectFilter", condition = "project_id = :projectId")
 public class DataEnum extends Auditable<String> implements TenantSupport {
@@ -42,7 +40,7 @@ public class DataEnum extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	@Column(columnDefinition = "jsonb")
 	private List<DataEnumItemDto> items;
 

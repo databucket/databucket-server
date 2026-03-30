@@ -15,7 +15,7 @@ import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
 import pl.databucket.server.service.ManageUserService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 

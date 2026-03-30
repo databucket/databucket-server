@@ -7,7 +7,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.10",
-    "@material-table/core": "^6.4.4",
+    "@material-table/core": "^6.2.11",
     "@mui/icons-material": "^5.18.0",
     "@mui/lab": "^5.0.0-alpha.176",
     "@mui/material": "^5.18.0",
@@ -34,6 +34,7 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

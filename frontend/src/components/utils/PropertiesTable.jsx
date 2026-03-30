@@ -9,7 +9,7 @@ import {
 import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import React, {useEffect, useState} from "react";
 import {
     getLastPageSizeOnDialog,
@@ -77,6 +77,9 @@ export default function PropertiesTable(props) {
         return '';
     }
 
+    console.log("data:");
+    console.log(data);
+
     return !delay && (
         <div>
             <MaterialTable
@@ -140,7 +143,7 @@ export default function PropertiesTable(props) {
                     paginationType: 'stepped',
                     pageSizeOptions: getPageSizeOptionsOnDialog(),
                     actionsColumnIndex: -1,
-                    sorting: true,
+                    maxColumnSort: 1,
                     selection: false,
                     filtering: false,
                     padding: 'dense',
@@ -240,15 +243,13 @@ export default function PropertiesTable(props) {
                     rowData => ({
                         icon: () => <ArrowDropDown/>,
                         tooltip: 'Move down',
-                        onClick: (event, rowData) => setData(
-                            moveDown(data, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === data.length - 1)
                     }),
                     rowData => ({
                         icon: () => <ArrowDropUp/>,
                         tooltip: 'Move up',
-                        onClick: (event, rowData) => setData(
-                            moveUp(data, rowData.tableData.id)),
+                        onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
                         disabled: (rowData.tableData.id === 0)
                     })
                 ]}

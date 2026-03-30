@@ -172,6 +172,7 @@ export default function TaskEditConfigDialog(props) {
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
+                    color={'inherit'}
                 >
                     {getActionsType(actions)}
                 </Button>

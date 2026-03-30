@@ -144,6 +144,7 @@ export default function EditColumnsDialog(props) {
                 <Button
                     endIcon={<MoreHoriz />}
                     onClick={handleClickOpen}
+                    color={'inherit'}
                 >
                     {`${props.configuration.columns.length}`}
                 </Button>

@@ -1,5 +1,6 @@
 jwt:
-  secret: veryverysecret
+  secret: SGVsbG9Yb3JsZFRoaXNJc015U2VjcmV0S2V5Rm9xSldUVG9rZW5zMTIzNDU2Nzg5MA==
+  secret.legacy: veryverysecret
   expire.hours: 24
 
 server:
@@ -8,7 +9,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/databucket1
+    url: jdbc:postgresql://localhost:5432/databucket
     username: databucket_user
     password: databucket_user
   mail:

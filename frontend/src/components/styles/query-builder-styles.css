@@ -25,13 +25,13 @@
 
 .group {
   background: rgba(250, 240, 210, 0.5);
-  border: 1px solid #DCC896;
+  border: 1px solid #968966
 }
 
 .rule {
   background-color: white;
   border: 1px solid transparent;
-  padding: 10px;
+  padding: 5px;
 }
 
 .rule-with-error .rule {
@@ -111,7 +111,7 @@
   content: "";
   position: absolute;
   border-width: 0 0 0 2px;
-  border-color: #ccc;
+  border-color: #424242;
   border-style: solid;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -136,7 +136,7 @@
 .group--children > .group-or-rule-container > .group-or-rule::before, .group--children > .group-or-rule-container > .group-or-rule::after {
   content: "";
   position: absolute;
-  border-color: #ccc;
+  border-color: #424242;
   border-style: solid;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -151,7 +151,7 @@
   height: calc(50% - 1px + 10px + 2px);
 }
 .group--children > .group-or-rule-container > .group-or-rule::before, .group--children > .group-or-rule-container > .group-or-rule::after {
-  left: -14px;
+  left: -15px;
   width: 13px;
 }
 .group--children > .group-or-rule-container:last-child > .group-or-rule::before {

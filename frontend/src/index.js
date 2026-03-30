@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import {getThemeName} from "./utils/ConfigurationStorage";
@@ -10,12 +10,14 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import './index.css';
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+
+root.render(
     <CustomThemeProvider name={getThemeName()}>
         <App/>
-    </CustomThemeProvider>,
-    document.getElementById('root'));
-
+    </CustomThemeProvider>
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

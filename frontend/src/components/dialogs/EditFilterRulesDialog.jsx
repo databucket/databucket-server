@@ -140,6 +140,7 @@ export default function EditFilterRulesDialog(props) {
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
+                    color={'inherit'}
                 >
                     {getObjectLengthStr(props.configuration)}
                 </Button>

@@ -84,10 +84,6 @@ export const getPageSizeOptions = () => {
     return [10, 15, 20, 25, 30, 35, 40, 50];
 }
 
-export const getTemplatePageSizeOptions = () => {
-    return [10, 15, 20];
-}
-
 export const getPageSizeOptionsOnDialog = () => {
     return [10, 15, 20, 25, 30, 40, 50];
 }
@@ -213,33 +209,17 @@ export const getUserIcon = (rowData) => {
 }
 
 export const moveUp = (dataCollection, itemId) => {
-    const updated = dataCollection.map(item => {
-        if (item.tableData.id === itemId - 1) {
-            item.tableData.id = itemId;
-        } else if (item.tableData.id === itemId) {
-            item.tableData.id = itemId - 1;
-        }
-        return item;
-    });
-
-    return (updated.sort((a, b) => {
-        return (a.tableData.id > b.tableData.id) ? 1 : -1;
-    }));
+    return swappedArray(dataCollection, itemId, itemId - 1);
 }
 
 export const moveDown = (dataCollection, itemId) => {
-    const updated = dataCollection.map(item => {
-        if (item.tableData.id === itemId) {
-            item.tableData.id = itemId + 1;
-        } else if (item.tableData.id === itemId + 1) {
-            item.tableData.id = itemId;
-        }
-        return item;
-    });
+    return swappedArray(dataCollection, itemId, itemId + 1);
+}
 
-    return updated.sort((a, b) => {
-        return (a.tableData.id > b.tableData.id) ? 1 : -1;
-    });
+function swappedArray(arr, index1, index2) {
+    const newArr = [...arr];
+    [newArr[index1], newArr[index2]] = [newArr[index2], newArr[index1]];
+    return newArr;
 }
 
 export const getTableHeight = () => {

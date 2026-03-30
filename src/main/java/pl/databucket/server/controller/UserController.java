@@ -18,7 +18,7 @@ import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.TeamService;
 import pl.databucket.server.service.UserService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

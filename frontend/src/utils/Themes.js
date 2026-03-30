@@ -23,13 +23,59 @@ export const LightTheme = {
             contrastText: '#eeeee4'
         },
         secondary: {
-            main: '#ff9800'
+            main: '#eb9414'
         },
         text: {
             primary: '#4e4e4e'
             // secondary: '#585858'
         }
     },
+    components: {
+        MuiCheckbox: {
+            defaultProps: {
+                color: 'secondary'
+            }
+        },
+        MuiSelect: {
+            defaultProps: {
+                variant: 'standard'
+            },
+            styleOverrides: {
+                root: {
+                    '&:before': {
+                        borderBottom: `1px solid #4e4e4e`
+                    },
+                    '&:after': {
+                        borderBottom: `2px solid #4e4e4e`
+                    },
+                    '&:hover:not(.Mui-disabled):before': {
+                        borderBottom: `2px solid #4e4e4e`
+                    }
+                }
+            }
+        },
+        MuiInput: {
+            styleOverrides: {
+                root: {
+                    '&:before': {
+                        borderBottom: `1px solid #4e4e4e`
+                    },
+                    '&:after': {
+                        borderBottom: `2px solid #4e4e4e`
+                    },
+                    '&:hover:not(.Mui-disabled):before': {
+                        borderBottom: `2px solid #4e4e4e`
+                    }
+                }
+            }
+        },
+        MuiOutlinedInput: {
+            defaultProps: {
+                color: 'secondary',
+                size: 'small'
+            }
+        }
+    }
 };
 
 export const DarkTheme = {
@@ -52,8 +98,7 @@ export const DarkTheme = {
             main: '#ff9800'
         },
         text: {
-            primary: '#d6d7d2',
-            // secondary: '#c2c4be'
+            primary: '#d6d7d2'
         }
     },
     components: {
@@ -64,5 +109,49 @@ export const DarkTheme = {
                 },
             },
         },
+        MuiCheckbox: {
+            defaultProps: {
+                color: 'secondary'
+            }
+        },
+        MuiSelect: {
+            defaultProps: {
+                variant: 'standard'
+            },
+            styleOverrides: {
+                root: {
+                    '&:before': {
+                        borderBottom: `1px solid #d6d7d2`
+                    },
+                    '&:after': {
+                        borderBottom: `2px solid #d6d7d2`
+                    },
+                    '&:hover:not(.Mui-disabled):before': {
+                        borderBottom: `2px solid #d6d7d2`
+                    }
+                }
+            }
+        },
+        MuiInput: {
+            styleOverrides: {
+                root: {
+                    '&:before': {
+                        borderBottom: `1px solid #d6d7d2`
+                    },
+                    '&:after': {
+                        borderBottom: `2px solid #d6d7d2`
+                    },
+                    '&:hover:not(.Mui-disabled):before': {
+                        borderBottom: `2px solid #d6d7d2`
+                    }
+                }
+            }
+        },
+        MuiOutlinedInput: {
+            defaultProps: {
+                color: 'secondary',
+                size: 'small'
+            }
+        }
     },
 };

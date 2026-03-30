@@ -1,6 +1,7 @@
 package pl.databucket.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,7 +9,6 @@ import org.hibernate.annotations.Filter;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.tenant.TenantSupport;
 
-import javax.persistence.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,7 @@ public class Team extends Auditable<String> implements TenantSupport {
 	private Boolean deleted = false;
 
 	public Set<Long> getUsersIds() {
-		if (users != null && users.size() > 0)
+		if (users != null && !users.isEmpty())
 			return users.stream().map(User::getId).collect(Collectors.toSet());
 		else
 			return null;

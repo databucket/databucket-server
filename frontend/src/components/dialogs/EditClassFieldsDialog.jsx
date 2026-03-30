@@ -97,6 +97,7 @@ export default function EditClassFieldsDialog(props) {
                 <Button
                     endIcon={<MoreHoriz />}
                     onClick={handleClickOpen}
+                    color={'inherit'}
                 >
                     {`${props.configuration.length}`}
                 </Button>

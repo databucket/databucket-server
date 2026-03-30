@@ -15,7 +15,7 @@ import {
     Lock as LockedIcon,
     LockOpen as UnlockedIcon
 } from '@mui/icons-material';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import DataHistoryPropertiesDiffDialog from './DataHistoryPropertiesDiffDialog';
 import PropTypes from "prop-types";
 import {createTagLookup} from "../../utils/JsonHelper";
@@ -182,7 +182,7 @@ export default function DataHistoryDialog(props) {
                     options={{
                         toolbar: false,
                         paging: false,
-                        sorting: false,
+                        maxColumnSort: 0,
                         search: false,
                         filtering: false,
                         padding: 'dense',

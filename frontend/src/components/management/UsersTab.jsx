@@ -1,4 +1,4 @@
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {
@@ -112,7 +112,7 @@ export default function UsersTab() {
                         cellStyle: {width: '1%'},
                         editable: 'never',
                         searchable: false,
-                        sorting: false,
+                        maxColumnSort: 0,
                         render: (rowData) => getUserIcon(rowData)
                     },
                     getColumnEnabled(),
@@ -142,12 +142,17 @@ export default function UsersTab() {
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
-                    sorting: true,
+                    maxColumnSort: 1,
                     search: true,
                     filtering: filtering,
                     debounceInterval: 700,
                     padding: 'dense',
-                    headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    cellStyle: {whiteSpace: 'nowrap'},
+                    headerStyle: {
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                    },
                     maxBodyHeight: getManagementTableHeight(),
                     minBodyHeight: getManagementTableHeight(),
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})

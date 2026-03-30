@@ -29,7 +29,7 @@ export default function SelectFilterDialog(props) {
             tooltipTitle={'Select filter'}
             dialogTitle={'Select filter'}
             tableTitle={(props.rowData['name'] || '-')}
-            maxWidth='md' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+            maxWidth='lg' //'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
             onChange={props.onChange}
         />
     );

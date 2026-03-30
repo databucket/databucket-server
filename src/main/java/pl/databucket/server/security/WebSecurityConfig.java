@@ -1,26 +1,31 @@
 package pl.databucket.server.security;
 
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.annotation.Resource;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableMethodSecurity(prePostEnabled = true)
+public class WebSecurityConfig {
 
     @Resource(name = "userService")
     private UserDetailsService userDetailsService;
@@ -28,68 +33,95 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    @Override
     @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
-    @Autowired
-    public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService)
-                .passwordEncoder(encoder());
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean
-    public JwtAuthenticationFilter authenticationTokenFilterBean() throws Exception {
+    public JwtAuthenticationFilter authenticationTokenFilterBean() {
         return new JwtAuthenticationFilter();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.sessionManagement().invalidSessionUrl("/");
-
-        http.cors().and().csrf().disable()
-                .authorizeRequests()
-                .antMatchers(
-                        "/",
-                        "/api/public/**", // public endpoint
-                        "/**/static/**",
-                        "/actuator/**",
-                        "/**/favicon.ico",
-                        "/login",
-                        "/confirmation/**",
-                        "/forgot-password",
-                        "/sign-up",
-                        "/change-password",
-                        "/project",
-                        "/project/**",
-                        "/management",
-                        "/management/**"
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        // Public endpoints
+                        .requestMatchers(
+                                "/",
+                                "/favicon.ico",
+                                "/index.html",
+                                "/static/**",
+                                "/assets/**",
+                                "/api/public/**",
+                                "/actuator/**",
+                                "/login",
+                                "/confirmation/**",
+                                "/forgot-password",
+                                "/sign-up",
+                                "/change-password",
+                                "/project",
+                                "/project/**",
+                                "/management",
+                                "/management/**"
                         ).permitAll()
-                // swagger
-                .antMatchers(HttpMethod.GET,
-                        "/swagger-ui/**",
-                        "/v2/api-docs",
-                        "/v3/api-docs",
-                        "/webjars/**",            // swagger-ui webjars
-                        "/swagger-resources/**",  // swagger-ui resources
-                        "/configuration/**",      // swagger configuration
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js"
-                ).permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                        // Swagger endpoints
+                        .requestMatchers(HttpMethod.GET,
+                                "/swagger-ui/**",
+                                "/v2/api-docs",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/webjars/**",
+                                "/swagger-resources/**",
+                                "/configuration/**"
+                        ).permitAll()
+                        // Common static file types (root-level only; bez /**/*.ext)
+                        .requestMatchers(HttpMethod.GET,
+                                "/*.html",
+                                "/*.css",
+                                "/*.js",
+                                "/*.map",
+                                "/*.json",
+                                "/*.png",
+                                "/*.jpg",
+                                "/*.jpeg",
+                                "/*.svg",
+                                "/*.woff",
+                                "/*.woff2",
+                                "/*.ttf",
+                                "/*.ico"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler)
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
 
-        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
     }
 
     @Bean
-    public BCryptPasswordEncoder encoder(){
-        return new BCryptPasswordEncoder();
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
+    @Bean
+    public BCryptPasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

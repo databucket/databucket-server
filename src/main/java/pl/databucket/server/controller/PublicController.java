@@ -1,6 +1,12 @@
 package pl.databucket.server.controller;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +30,11 @@ import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.ManageUserService;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Api(tags = "PUBLIC")
+@Tag(name = "PUBLIC", description = "Public endpoints for authentication and user registration")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/public")
@@ -57,16 +63,32 @@ public class PublicController {
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
 
 
-    @ApiOperation(value = "Authenticate", notes = "Returns the token required to authorize the user, user's roles, project details if given projectId, or list of user's projects if the projectId is not given.", response = AuthRespDTO.class)
+    @Operation(
+            summary = "Authenticate",
+            description = "Returns the token required to authorize the user, user's roles, project details if given projectId, or list of user's projects if the projectId is not given."
+    )
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = AuthRespDTO.class),
-            @ApiResponse(code = 401, message = "Unauthorized - the given credentials are not correct"),
-            @ApiResponse(code = 403, message = "Forbidden - user access has expired | the project is disabled | the project is expired | the user is not assign to given project | the user is not assign to any project"),
-            @ApiResponse(code = 500, message = "Internal server error"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OK",
+                    content = @Content(schema = @Schema(implementation = AuthRespDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - the given credentials are not correct"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - user access has expired | the project is disabled | the project is expired | the user is not assign to given project | the user is not assign to any project"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error"
+            )
     })
     @PostMapping(value = {"/sign-in", "/signin"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signIn(
-            @ApiParam(value = "payload - username (required), password (required), projectId (optional)", required = true)
+            @Parameter(description = "payload - username (required), password (required), projectId (optional)", required = true)
             @RequestBody AuthReqDTO authReqDTO) {
         User user = userRepository.findByUsername(authReqDTO.getUsername());
         if (user == null)
@@ -182,8 +204,21 @@ public class PublicController {
         }
     }
 
+    @Operation(
+            summary = "Forgot password",
+            description = "Sends a password reset email to the user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "No Content - email sent successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not found"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - too many requests"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping(value = "/forgot-password", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordReqDTO forgotPasswordReqDTO) {
+    public ResponseEntity<?> forgotPassword(
+            @Parameter(description = "Forgot password request payload", required = true)
+            @RequestBody ForgotPasswordReqDTO forgotPasswordReqDTO) {
         try {
             manageUserService.forgotPasswordMessage(forgotPasswordReqDTO);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -198,8 +233,20 @@ public class PublicController {
         }
     }
 
+    @Operation(
+            summary = "Forgot password confirmation",
+            description = "Confirms password reset and sends new password to user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK - password reset successful"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - invalid or expired token"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping(value = {"/confirmation/forgot-password/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> forgotPasswordConfirmation(@PathVariable String jwts) {
+    public ResponseEntity<?> forgotPasswordConfirmation(
+            @Parameter(description = "JWT token for password reset", required = true)
+            @PathVariable String jwts) {
         try {
             manageUserService.resetAndSendPassword(jwts);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -212,8 +259,21 @@ public class PublicController {
         }
     }
 
+    @Operation(
+            summary = "Sign up",
+            description = "Creates a new user account and sends confirmation email"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created - account created successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - reCAPTCHA verification failed"),
+            @ApiResponse(responseCode = "409", description = "Conflict - username or email already exists"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping(value = {"/sign-up"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> signUp(@RequestBody SignUpDtoRequest signUpDtoRequest) {
+    public ResponseEntity<?> signUp(
+            @Parameter(description = "Sign up request payload", required = true)
+            @RequestBody SignUpDtoRequest signUpDtoRequest) {
         try {
             if (appProperties.getRecaptchaEnabled() && !checkReCaptcha(signUpDtoRequest.getRecaptchaToken()))
                 return exceptionFormatter.customPublicException("Anti-bot verification blocked your request!", HttpStatus.FORBIDDEN);
@@ -254,8 +314,20 @@ public class PublicController {
         return reCaptchaSiteVerifyResponse.isSuccess() && reCaptchaSiteVerifyResponse.getScore() > 0.5;
     }
 
+    @Operation(
+            summary = "Sign up confirmation",
+            description = "Confirms user registration via email token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK - account confirmed successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - invalid or expired token"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping(value = {"/confirmation/sign-up/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> signUpConfirmation(@PathVariable String jwts) {
+    public ResponseEntity<?> signUpConfirmation(
+            @Parameter(description = "JWT token for sign up confirmation", required = true)
+            @PathVariable String jwts) {
         try {
             manageUserService.signUpUserConfirmation(jwts);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -268,6 +340,14 @@ public class PublicController {
         }
     }
 
+    @Operation(
+            summary = "Get reCAPTCHA site key",
+            description = "Returns the reCAPTCHA site key and enabled status"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping(value = {"/recaptcha-site-key"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getReCaptchaSiteKey() {
         try {

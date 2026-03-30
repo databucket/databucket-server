@@ -1,11 +1,11 @@
 package pl.databucket.server.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,19 +45,9 @@ public class Project extends Auditable<String> {
     @ManyToMany(mappedBy = "projects")
     private Set<User> users;
 
-    @ManyToMany(mappedBy = "projects")
-    private Set<Template> templates;
-
     public Set<Long> getUsersIds() {
-        if (users != null && users.size() > 0)
+        if (users != null && !users.isEmpty())
             return users.stream().map(User::getId).collect(Collectors.toSet());
-        else
-            return null;
-    }
-
-    public Set<Integer> getTemplatesIds() {
-        if (templates != null && templates.size() > 0)
-            return templates.stream().map(Template::getId).collect(Collectors.toSet());
         else
             return null;
     }

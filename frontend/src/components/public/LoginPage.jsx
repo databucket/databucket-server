@@ -174,7 +174,7 @@ export default function LoginPage() {
                         Login
                     </Button>
                 </div>
-                <div className="RegistrationLink">
+                <div className="RegistrationLink" style={{marginBottom: "10px"}}>
                     <Link to="/sign-up"
                           component={FancyLink}
                           mb={2}
@@ -288,7 +288,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">3.5.2</Typography>
+            <Typography variant="caption">5.0.0</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

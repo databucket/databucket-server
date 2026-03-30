@@ -1,11 +1,12 @@
 package pl.databucket.server.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
+import jakarta.validation.constraints.Email;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @Table(name = "users")
 public class User extends Auditable<String> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -75,35 +77,35 @@ public class User extends Auditable<String> implements Serializable {
     private Set<Team> teams;
 
     public Set<Short> getRolesIds() {
-        if (roles != null && roles.size() > 0)
+        if (roles != null && !roles.isEmpty())
             return roles.stream().map(Role::getId).collect(Collectors.toSet());
         else
             return null;
     }
 
     public Set<Integer> getProjectsIds() {
-        if (projects != null && projects.size() > 0)
+        if (projects != null && !projects.isEmpty())
             return projects.stream().map(Project::getId).collect(Collectors.toSet());
         else
             return null;
     }
 
     public Set<Short> getTeamsIds() {
-        if (teams != null && teams.size() > 0)
+        if (teams != null && !teams.isEmpty())
             return teams.stream().map(Team::getId).collect(Collectors.toSet());
         else
             return null;
     }
 
     public boolean isSuperUser() {
-        if (roles != null && roles.size() > 0)
+        if (roles != null && !roles.isEmpty())
             return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_SUPER));
         else
             return false;
     }
 
     public boolean isAdminUser() {
-        if (roles != null && roles.size() > 0)
+        if (roles != null && !roles.isEmpty())
             return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_ADMIN));
         else
             return false;

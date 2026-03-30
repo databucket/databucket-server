@@ -17,7 +17,7 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import {
     getLastPageSizeOnDialog,
     setLastPageSizeOnDialog
@@ -51,7 +51,7 @@ const DialogTitle = ((props) => {
     const {children, onClose, ...other} = props;
     return (
         <StyledDialogTitle disableTypography {...other}>
-            <Typography variant="h6">{children}</Typography>
+            {children}
             {onClose ? (
                 <IconButton
                     aria-label="close"
@@ -115,6 +115,7 @@ export default function SelectMultiDialog(props) {
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
+                    color={'inherit'}
                 >
                     {`${selection.length}`}
                 </Button>
@@ -143,11 +144,16 @@ export default function SelectMultiDialog(props) {
                             paginationType: 'stepped',
                             pageSizeOptions: getPageSizeOptionsOnDialog(),
                             actionsColumnIndex: -1,
-                            sorting: false,
+                            maxColumnSort: 0,
                             selection: true,
                             filtering: false,
                             padding: 'dense',
-                            headerStyle: {backgroundColor: getTableHeaderBackgroundColor(theme)},
+                            headerStyle: {
+                                position: 'sticky',
+                                top: 0,
+                                backgroundColor: getTableHeaderBackgroundColor(theme)
+                            },
+                            cellStyle: {whiteSpace: 'nowrap'},
                             maxBodyHeight: getDialogTableHeight(30),
                             minBodyHeight: getDialogTableHeight(30),
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})

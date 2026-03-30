@@ -1,12 +1,11 @@
 package pl.databucket.server.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
 import pl.databucket.server.tenant.TenantSupport;
-
-import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor

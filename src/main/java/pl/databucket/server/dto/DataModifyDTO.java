@@ -1,6 +1,6 @@
 package pl.databucket.server.dto;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.service.data.SearchRules;
@@ -10,31 +10,41 @@ import java.util.Map;
 
 @Getter
 @Setter
+@Schema(description = "Data transfer object for modifying data")
 public class DataModifyDTO implements SearchRules {
 
-    @ApiModelProperty(position = 1, example = "1")
+    @Schema(description = "Tag ID", example = "1")
     private Long tagId;
 
-    @ApiModelProperty(position = 2, example = "false")
+    @Schema(description = "Reserved flag", example = "false")
     private Boolean reserved;
 
-    @ApiModelProperty(position = 3, example = "{\"name\": \"John\", \"age\": 34}")
+    @Schema(description = "Data properties", example = "{\"name\": \"John\", \"age\": 34}")
     private Map<String, Object> properties;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private Map<String, Object> propertiesToSet;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private List<String> propertiesToRemove;
 
-    @ApiModelProperty(hidden = true, example = "[{\"left_source\": \"field\", \"left_value\": \"data_id\", \"operator\": \"<\", \"right_source\": \"const\", \"right_value\": 100},\n" +
-            "{\"left_source\": \"property\",\t\"left_value\": \"$.name\",\t\"operator\": \"like\",\t\"right_source\": \"const\", \"right_value\": \"Jo%\"}]")
-    private List<Map<String, Object>> conditions; // Old filtering method
+    @Schema(
+            hidden = true,
+            description = "Old filtering method - conditions",
+            example = "[{\"left_source\": \"field\", \"left_value\": \"data_id\", \"operator\": \"<\", \"right_source\": \"const\", \"right_value\": 100}, {\"left_source\": \"property\", \"left_value\": \"$.name\", \"operator\": \"like\", \"right_source\": \"const\", \"right_value\": \"Jo%\"}]"
+    )
+    private List<Map<String, Object>> conditions;
 
-    @ApiModelProperty(hidden = true)
-    private Map<String, Object> logic; // New rules defined in frontend (property is saved as prop.$*group*itemName)
+    @Schema(
+            hidden = true,
+            description = "New rules defined in frontend (property is saved as prop.$*group*itemName)"
+    )
+    private Map<String, Object> logic;
 
-    @ApiModelProperty(position = 4, example = "[[\"$.firstName\",\"like\",\"S%a\"],[\"id\", \">\",  10],[\"tagId\",\">\", 0],{\"or\": [[\"owner\", \"!=\", null],[\"createdBy\", \"=\", \"@currentUser\"]]}]")
+    @Schema(
+            description = "Search rules",
+            example = "[[\"$.firstName\",\"like\",\"S%a\"],[\"id\", \">\", 10],[\"tagId\",\">\", 0],{\"or\": [[\"owner\", \"!=\", null],[\"createdBy\", \"=\", \"@currentUser\"]]}]"
+    )
     private List<Object> rules;
 
 }

@@ -161,11 +161,9 @@ export default function RichFilterDialog(props) {
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
     const [activeTab, setActiveTab] = useState(0);
-    const [messageBox, setMessageBox] = useState(
-        {open: false, severity: 'error', title: '', message: ''});
+    const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [appliesCount, setAppliesCount] = useState(0);
-    const [state, setState] = useState(
-        {properties: [], logic: {}, tree: {}, config: {}});
+    const [state, setState] = useState({properties: [], logic: {}, tree: {}, config: {}});
     const [dialogSize, setDialogSize] = useState('md');
     const dialogContentRef = React.useRef(null);
 
@@ -177,12 +175,10 @@ export default function RichFilterDialog(props) {
         if (props.open) {
             setActiveTab(0);
             const properties = getClassProperties();
-            const config = createConfig(properties, bucketTags,
-                accessContext.users, accessContext.enums, theme);
+            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums, theme);
             const disabledRulesLogic = makeRulesDisabled(props.activeLogic);
             if (Object.keys(state.tree).length === 0) {
-                let tree = QbUtils.checkTree(
-                    getInitialTree(disabledRulesLogic, null, config), config);
+                let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
                 setState({
                     ...state,
                     properties: getClassProperties(),
@@ -235,13 +231,10 @@ export default function RichFilterDialog(props) {
     }
 
     const onFilterSelected = (filter) => {
-        const properties = getMergedProperties(getClassProperties(),
-            filter.configuration.properties);
-        const config = createConfig(properties, bucketTags, accessContext.users,
-            accessContext.enums);
+        const properties = getMergedProperties(getClassProperties(), filter.configuration.properties);
+        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
         const tree = QbUtils.checkTree(
-            getInitialTree(filter.configuration.logic,
-                filter.configuration.tree, config), config);
+            getInitialTree(filter.configuration.logic, filter.configuration.tree, config), config);
         setState({
             ...state,
             logic: filter.configuration.logic,
@@ -252,8 +245,7 @@ export default function RichFilterDialog(props) {
     }
 
     useEffect(() => {
-        refreshAppliesCount(
-            {open: props.open, bucket: props.bucket, logic: state.logic});
+        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
     }, [props.open, state.logic]);
 
     const refreshAppliesCount = useCallback(
@@ -292,8 +284,7 @@ export default function RichFilterDialog(props) {
 
     const getClassProperties = () => {
         if (props.bucket.classId != null) {
-            const dataClass = getClassById(accessContext.classes,
-                props.bucket.classId);
+            const dataClass = getClassById(accessContext.classes, props.bucket.classId);
             return dataClass.configuration;
         } else {
             return [];
@@ -301,11 +292,9 @@ export default function RichFilterDialog(props) {
     }
 
     const setProperties = (properties) => {
-        const config = createConfig(properties, bucketTags, accessContext.users,
-            accessContext.enums);
+        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
         const disabledRulesLogic = makeRulesDisabled(props.activeLogic);
-        let tree = QbUtils.checkTree(
-            getInitialTree(disabledRulesLogic, null, config), config);
+        let tree = QbUtils.checkTree(getInitialTree(disabledRulesLogic, null, config), config);
         setState({
             ...state,
             properties: properties,
@@ -376,30 +365,28 @@ export default function RichFilterDialog(props) {
                     classes={{
                         root: classes.root
                     }}>
-                    {props.open && activeTab === 0 && Object.keys(
-                        state.tree).length > 0 &&
-                    <div>
-                        <Query
-                            {...state.config}
-                            value={state.tree}
-                            onChange={onRulesChange}
-                            renderBuilder={renderBuilder}
-                        />
-                        {renderResult(
-                            {tree: state.tree, config: state.config})}
-                    </div>
+                    {props.open && activeTab === 0 && Object.keys(state.tree).length > 0 &&
+                        <Box sx={{margin: 0}}>
+                            <Query
+                                {...state.config}
+                                value={state.tree}
+                                onChange={onRulesChange}
+                                renderBuilder={renderBuilder}
+                            />
+                            {renderResult({tree: state.tree, config: state.config})}
+                        </Box>
                     }
 
                     {props.open && activeTab === 1 &&
-                    <PropertiesTable
-                        used={[]}
-                        data={state.properties}
-                        enums={accessContext.enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        pageSize={null}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={[]}
+                            data={state.properties}
+                            enums={accessContext.enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            pageSize={null}
+                            parentContentRef={dialogContentRef}
+                        />}
 
                 </DialogContent>
             </EnumsProvider>

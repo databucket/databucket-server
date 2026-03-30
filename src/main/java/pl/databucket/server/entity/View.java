@@ -1,14 +1,16 @@
 package pl.databucket.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.tenant.TenantSupport;
 
-import javax.persistence.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,8 +37,9 @@ public class View extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@Column(name = "features")
-	private Short[] featuresIds; // hibernate has problem with Set<Short>
+	@Column(name = "features", columnDefinition = "smallint[]")
+	@JdbcTypeCode(SqlTypes.ARRAY)
+	private Short[] featuresIds;
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "views_classes",
@@ -79,28 +82,28 @@ public class View extends Auditable<String> implements TenantSupport {
 	private Boolean deleted = false;
 
 	public Set<Long> getUsersIds() {
-		if (users != null && users.size() > 0)
+		if (users != null && !users.isEmpty())
 			return users.stream().map(User::getId).collect(Collectors.toSet());
 		else
 			return null;
 	}
 
 	public Set<Short> getTeamsIds() {
-		if (teams != null && teams.size() > 0)
+		if (teams != null && !teams.isEmpty())
 			return teams.stream().map(Team::getId).collect(Collectors.toSet());
 		else
 			return null;
 	}
 
 	public Set<Long> getBucketsIds() {
-		if (buckets != null && buckets.size() > 0)
+		if (buckets != null && !buckets.isEmpty())
 			return buckets.stream().map(Bucket::getId).collect(Collectors.toSet());
 		else
 			return null;
 	}
 
 	public Set<Long> getClassesIds() {
-		if (dataClasses != null && dataClasses.size() > 0)
+		if (dataClasses != null && !dataClasses.isEmpty())
 			return dataClasses.stream().map(DataClass::getId).collect(Collectors.toSet());
 		else
 			return null;

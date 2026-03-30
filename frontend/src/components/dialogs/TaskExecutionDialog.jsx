@@ -1,5 +1,6 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {
+    Box,
     Button,
     CircularProgress,
     Dialog,
@@ -32,7 +33,7 @@ import {
     getDataUrl
 } from "../../utils/UrlBuilder";
 import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
-import {Query, Utils as QbUtils} from "@react-awesome-query-builder/mui";
+import {Query, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import {
     createConfig,
     getInitialTree,
@@ -463,52 +464,53 @@ export default function TaskExecutionDialog(props) {
                     ref={dialogContentRef}
                     classes={{
                         root: classes.root
-                    }}>
+                    }}
+                >
                     {props.open && state.processing &&
-                    <Grid
-                        container
-                        spacing={0}
-                        direction="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        style={{minHeight: '50vh'}}
-                    >
-                        <Grid item xs={3}>
-                            <CircularProgress disableShrink/>
+                        <Grid
+                            container
+                            spacing={0}
+                            direction="column"
+                            alignItems="center"
+                            justifyContent="center"
+                            style={{minHeight: '50vh'}}
+                        >
+                            <Grid item xs={3}>
+                                <CircularProgress disableShrink/>
+                            </Grid>
                         </Grid>
-                    </Grid>
                     }
                     {props.open && !state.processing && activeTab === 0 &&
-                    <TaskActions
-                        actions={state.actions}
-                        properties={state.properties}
-                        tags={getBucketTags(props.bucket, accessContext.tags)}
-                        onChange={setActions}
-                        pageSize={null}
-                    />}
+                        <TaskActions
+                            actions={state.actions}
+                            properties={state.properties}
+                            tags={getBucketTags(props.bucket, accessContext.tags)}
+                            onChange={setActions}
+                            pageSize={null}
+                        />}
 
                     {props.open && !state.processing && activeTab === 1 &&
-                    <div>
-                        <Query
-                            {...state.config}
-                            value={state.tree}
-                            onChange={onRulesChange}
-                            renderBuilder={renderBuilder}
-                        />
-                        {renderResult({tree: state.tree, config: state.config})}
-                    </div>
+                        <Box sx={{margin: 0}}>
+                            <Query
+                                {...state.config}
+                                value={state.tree}
+                                onChange={onRulesChange}
+                                renderBuilder={renderBuilder}
+                            />
+                            {renderResult({tree: state.tree, config: state.config})}
+                        </Box>
                     }
 
                     {props.open && !state.processing && activeTab === 2 &&
-                    <PropertiesTable
-                        used={getUsedUuids()}
-                        data={state.properties}
-                        enums={accessContext.enums}
-                        onChange={setProperties}
-                        title={'Class origin and defined properties:'}
-                        pageSize={null}
-                        parentContentRef={dialogContentRef}
-                    />}
+                        <PropertiesTable
+                            used={getUsedUuids()}
+                            data={state.properties}
+                            enums={accessContext.enums}
+                            onChange={setProperties}
+                            title={'Class origin and defined properties:'}
+                            pageSize={null}
+                            parentContentRef={dialogContentRef}
+                        />}
                 </DialogContent>
             </EnumsProvider>
             <DialogActions

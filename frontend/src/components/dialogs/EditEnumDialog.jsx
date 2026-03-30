@@ -23,7 +23,7 @@ import {
     moveDown,
     moveUp
 } from "../../utils/MaterialTableHelper";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import PropTypes from 'prop-types';
 import EditIconDialog from "./SelectIconDialog";
 import {MessageBox} from "../utils/MessageBox";
@@ -146,6 +146,7 @@ export default function EditEnumDialog(props) {
                 <Button
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
+                    color={'inherit'}
                 >
                     {`${data.length}`}
                 </Button>
@@ -176,7 +177,7 @@ export default function EditEnumDialog(props) {
                             paginationType: 'stepped',
                             pageSizeOptions: getPageSizeOptionsOnDialog(),
                             actionsColumnIndex: -1,
-                            sorting: true,
+                            maxColumnSort: 1,
                             selection: false,
                             filtering: false,
                             padding: 'dense',

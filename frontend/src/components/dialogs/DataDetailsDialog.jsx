@@ -15,7 +15,7 @@ import {
     useTheme
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import {Close as CloseIcon} from '@mui/icons-material';
 import {createTagLookup} from "../../utils/JsonHelper";
 import {
@@ -30,7 +30,7 @@ import {MessageBox} from "../utils/MessageBox";
 import jp from "jsonpath";
 import {getDirectDataPath} from "../../route/AppRouter";
 import {debounce} from "../utils/Debouncer";
-import {JsonEditor as Editor} from 'jsoneditor-react';
+import { JsonEditor as Editor } from 'jsoneditor-react18';
 import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
@@ -335,7 +335,7 @@ export default function DataDetailsDialog(props) {
                     paging: false,
                     toolbar: false,
                     actionsColumnIndex: -1,
-                    sorting: false,
+                    maxColumnSort: 0,
                     search: false,
                     filtering: false,
                     padding: 'dense',

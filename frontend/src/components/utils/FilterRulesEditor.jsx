@@ -1,15 +1,14 @@
 import PropTypes from "prop-types";
 import React, {useContext, useEffect, useState} from 'react';
-import {Query, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import EnumsContext from "../../context/enums/EnumsContext";
 import PropertiesTable, {mergeProperties} from "./PropertiesTable";
+import {Query, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import {
     createConfig,
     getInitialTree,
     renderBuilder,
     renderResult
 } from "./QueryBuilderHelper";
-import '@react-awesome-query-builder/mui/css/styles.css';
 import {Box, useTheme} from "@mui/material";
 
 FilterRulesEditor.propTypes = {
@@ -27,8 +26,7 @@ export default function FilterRulesEditor(props) {
     const theme = useTheme();
     const enumsContext = useContext(EnumsContext);
     const {enums, fetchEnums} = enumsContext;
-    const [properties, setFields] = useState(
-        mergeProperties(props.configuration.properties, props.dataClass));
+    const [properties, setFields] = useState(mergeProperties(props.configuration.properties, props.dataClass));
     const [state, setState] = useState({config: {}, tree: {}});
 
     useEffect(() => {

@@ -1,5 +1,5 @@
 import React, {createRef, useContext, useEffect, useState} from 'react';
-import MaterialTable, {MTableToolbar} from 'material-table';
+import MaterialTable, {MTableToolbar} from '@material-table/core';
 import {
     getDeleteOptions,
     getGetOptions,
@@ -86,8 +86,7 @@ const filterIcon = (filtering) => () => filtering
     <FilterList color={'secondary'}/> :
     <FilterList/>;
 
-const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange,
-                      theme) => (props) => {
+const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange, theme) => (props) => {
     return (
         <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
             <Grid container direction="row">
@@ -99,8 +98,7 @@ const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange,
                     }
                     {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView)
                     && <Grid item>
-                        <AvailableTagsDialog
-                            bucketTags={state.bucketTags}/>
+                        <AvailableTagsDialog bucketTags={state.bucketTags}/>
                     </Grid>
                     }
                     <Grid item>
@@ -769,8 +767,7 @@ export default function BucketDataTable() {
                     title={activeBucket.name}
                     tableRef={tableRef}
                     columns={state.tableColumns}
-                    data={query =>
-                        new Promise((resolve) => {
+                    data={query => new Promise((resolve) => {
                             try {
                                 if (pageSize !== query.pageSize) {
                                     setPageSize(query.pageSize);
@@ -817,10 +814,8 @@ export default function BucketDataTable() {
                                 }
 
                                 let payload = {
-                                    columns: getFetchColumns(
-                                        state.tableColumns),
-                                    conditions: consolidateAllConditions(
-                                        searchText, query.filters),
+                                    columns: getFetchColumns(state.tableColumns),
+                                    conditions: consolidateAllConditions(searchText, query.filters),
                                     logic: state.activeLogic
                                 }
 
@@ -855,36 +850,33 @@ export default function BucketDataTable() {
                                     message: error
                                 });
                             }
-                        })
-                    }
+                        })}
                     options={{
                         paging: true,
                         pageSize: pageSize,
                         pageSizeOptions: getPageSizeOptionsOnDialog(),
-                        // actionsColumnIndex: -1,
                         debounceInterval: 700,
-                        sorting: true,
+                        maxColumnSort: 1,
                         selection: false,
                         filtering: filtering,
-                        exportButton: isFeatureEnabled(FEATURE_EXPORT,
-                            state.activeView),
+                        exportButton: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
                         padding: 'dense',
-                        search: isFeatureEnabled(FEATURE_SEARCH,
-                            state.activeView),
+                        search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
                         searchFieldStyle: {width: 350},
                         maxBodyHeight: getTableHeight(),
                         minBodyHeight: getTableHeight(),
                         headerStyle: {
                             position: 'sticky',
                             top: 0,
-                            backgroundColor: getTableHeaderBackgroundColor(
-                                theme)
+                            backgroundColor: getTableHeaderBackgroundColor(theme)
                         },
                         cellStyle: {whiteSpace: 'nowrap'},
                         rowStyle: rowData => ({
-                            backgroundColor: getTableRowBackgroundColor(rowData,
-                                theme)
-                        })
+                            backgroundColor: getTableRowBackgroundColor(rowData, theme)
+                        }),
+                        showTitle: false,
+                        columnsButton: true,
+                        // doubleHorizontalScroll: true
                     }}
                     localization={{
                         body: {
@@ -896,8 +888,7 @@ export default function BucketDataTable() {
                         }
                     }}
                     components={{
-                        Toolbar: tableToolbar(state, onViewSelected,
-                            onDataReserve, handleSearchChange, theme)
+                        Toolbar: tableToolbar(state, onViewSelected, onDataReserve, handleSearchChange, theme)
                     }}
                     onOrderChange={(colId, ord) => {
                         let order = (colId >= 0) ? {colId, ord} : null;

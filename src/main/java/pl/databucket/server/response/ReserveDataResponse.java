@@ -1,7 +1,7 @@
 package pl.databucket.server.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,23 +13,24 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Response object for data reservation operations")
 public class ReserveDataResponse {
 
-    @ApiModelProperty(position = 1, example = "1")
+    @Schema(description = "Maximum number of items to reserve", example = "1")
     private Integer limit;
 
-    @ApiModelProperty(position = 2, example = "id")
+    @Schema(description = "Sort field", example = "id")
     private String sort;
 
-    @ApiModelProperty(position = 3, example = "1")
+    @Schema(description = "Number of items reserved", example = "1")
     private int reserved;
 
-    @ApiModelProperty(position = 4, example = "10")
+    @Schema(description = "Number of available items", example = "10")
     private long available;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true, description = "Response message")
     private String message;
 
-    @ApiModelProperty(position = 6)
+    @Schema(description = "List of reserved data items")
     private List<DataDTO> data;
 }

@@ -5,7 +5,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import pl.databucket.server.entity.User;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 
 @Service
 @AllArgsConstructor

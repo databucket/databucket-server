@@ -23,7 +23,7 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import {
     getLastPageSizeOnDialog,
     setLastPageSizeOnDialog
@@ -147,6 +147,7 @@ export default function SelectSingleDialog(props) {
                     endIcon={<MoreHoriz/>}
                     onClick={handleClickOpen}
                     style={{textTransform: 'none'}}
+                    color={'inherit'}
                 >
                     {getSelectionName()}
                 </Button>
@@ -181,7 +182,7 @@ export default function SelectSingleDialog(props) {
                             paginationType: 'stepped',
                             pageSizeOptions: getPageSizeOptionsOnDialog(),
                             actionsColumnIndex: -1,
-                            sorting: false,
+                            maxColumnSort: 0,
                             selection: false,
                             filtering: false,
                             padding: 'dense',

@@ -23,7 +23,7 @@ import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.mail.MailSenderService;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;

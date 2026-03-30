@@ -1,6 +1,7 @@
 package pl.databucket.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Filter;
@@ -10,7 +11,6 @@ import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.IconDto;
 import pl.databucket.server.tenant.TenantSupport;
 
-import javax.persistence.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Table(name="buckets")
-@FilterDef(name = "projectFilter", parameters=@ParamDef(name="projectId", type="int"))
+@FilterDef(name = "projectFilter", parameters=@ParamDef(name="projectId", type=Integer.class))
 @Filter(name = "projectFilter", condition = "project_id = :projectId")
 public class Bucket extends Auditable<String> implements TenantSupport {
 
