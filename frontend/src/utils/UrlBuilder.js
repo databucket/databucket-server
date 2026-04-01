@@ -1,7 +1,5 @@
 export const getOrigin = () => {
-    const origin = window.location.origin;
-    // const origin = 'http://localhost:8080';
-    return origin + getContextPath();
+    return window.location.origin + getContextPath();
 }
 
 export const getContextPath = () => {
@@ -62,5 +60,5 @@ export const getSessionUrlWithIds = (endpoint, ids) => {
 }
 
 export const getSwaggerDocPath = () => {
-    return `/swagger-ui/#/`;
+    return `/swagger-ui/index.html`;
 }

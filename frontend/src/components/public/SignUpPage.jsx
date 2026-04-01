@@ -3,7 +3,7 @@ import "./SignUpPage.css";
 import Logo from "../../images/databucket-logo.png";
 import {Input, InputLabel, Paper, Button, Typography, FormControl, Link} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
-import {Redirect} from "react-router-dom";
+import {Navigate} from "react-router-dom";
 import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import {handleErrors, handleLoginErrors} from "../../utils/FetchHelper";
@@ -169,7 +169,7 @@ export default function SignUpPage() {
     };
 
     if (back)
-        return (<Redirect to="/login"/>);
+        return (<Navigate to="/login"/>);
     else
         return (
             <div className="ContainerClassSingUp">

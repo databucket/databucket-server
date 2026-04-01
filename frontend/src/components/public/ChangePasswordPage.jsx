@@ -3,7 +3,7 @@ import React, {forwardRef, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
 import {clearToken, getToken, getUsername} from "../../utils/ConfigurationStorage";
 import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
-import {Link, Redirect} from "react-router-dom";
+import {Link, Navigate} from "react-router-dom";
 import {getProjectDataPath} from "../../route/AppRouter";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
@@ -88,7 +88,7 @@ export default function ChangePasswordPage() {
 
     return (
         redirect === true ? (
-            <Redirect to={getProjectDataPath()}/>
+            <Navigate to={getProjectDataPath()} replace />
         ) : (
             <div className="ContainerClass">
                 <Paper className="PaperClass" elevation={3}>

@@ -1,5 +1,6 @@
 package pl.databucket.server.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Hidden
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/session")
 @RestController
