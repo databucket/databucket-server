@@ -14,7 +14,7 @@ import {
     setActiveProjectId,
     setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut, getPathname, setPathname
 } from '../../utils/ConfigurationStorage';
-import {Redirect} from 'react-router-dom';
+import {Navigate} from 'react-router-dom';
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {MessageBox} from "../utils/MessageBox";
 import {sortByKey} from "../../utils/JsonHelper";
@@ -232,7 +232,7 @@ export default function LoginPage() {
     }
 
     const redirectTo = (pagePath) => {
-        return (<Redirect to={pagePath}/>);
+        return (<Navigate to={pagePath} replace />);
     }
 
     const getSwitchParam = () => {
@@ -288,7 +288,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">5.0.0</Typography>
+            <Typography variant="caption">5.0.1</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

@@ -27,7 +27,7 @@ import {
     setDataDetailsDialogSize
 } from "../../utils/ConfigurationStorage";
 import {MessageBox} from "../utils/MessageBox";
-import jp from "jsonpath";
+import { JSONPath } from "jsonpath-plus";
 import {getDirectDataPath} from "../../route/AppRouter";
 import {debounce} from "../utils/Debouncer";
 import { JsonEditor as Editor } from 'jsoneditor-react18';
@@ -274,7 +274,7 @@ export default function DataDetailsDialog(props) {
                     ? state.changedProperties : props.dataRow.properties;
                 let filtered = [];
                 try {
-                    filtered = jp.query(fullJson, jsonPath);
+                    filtered = JSONPath({path: jsonPath, json: fullJson});
                 } catch (err) {
                 }
                 jsonEditor.aceEditor.setReadOnly(true);

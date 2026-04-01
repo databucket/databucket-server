@@ -22,7 +22,7 @@ import {debounce} from "../../utils/Debouncer";
 import {Link, useParams} from "react-router-dom";
 import {getDataByIdUrl2} from "../../../utils/UrlBuilder";
 import {handleErrors} from "../../../utils/FetchHelper";
-import jp from "jsonpath";
+import { JSONPath } from "jsonpath-plus";
 import {MessageBox} from "../../utils/MessageBox";
 import {getDirectDataPath, getProjectDataPath} from "../../../route/AppRouter";
 import { JsonEditor as Editor } from 'jsoneditor-react18';
@@ -144,7 +144,7 @@ export default function DataDetailsPage() {
                 const fullJson = state.changedProperties != null ? state.changedProperties : data.properties;
                 let filtered = [];
                 try {
-                    filtered = jp.query(fullJson, jsonPath);
+                    filtered = JSONPath({path: jsonPath, json: fullJson});
                 } catch (err) {
                 }
                 jsonEditor.aceEditor.setReadOnly(true);

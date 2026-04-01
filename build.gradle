@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'pl.databucket'
-version = '5.0.0'
+version = '5.0.1'
 
 java {
     toolchain {
@@ -25,7 +25,7 @@ repositories {
 }
 
 jar {
-    enabled = true
+    enabled = false
 }
 
 dependencies {

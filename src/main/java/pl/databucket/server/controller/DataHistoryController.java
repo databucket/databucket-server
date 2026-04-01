@@ -1,6 +1,6 @@
 package pl.databucket.server.controller;
 
-//import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +21,7 @@ import pl.databucket.server.service.data.QueryRule;
 
 import java.util.List;
 
+@Hidden
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
 @RequestMapping("/api")

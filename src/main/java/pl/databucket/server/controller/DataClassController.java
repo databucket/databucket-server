@@ -1,5 +1,6 @@
 package pl.databucket.server.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Hidden
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/classes")
 @RestController

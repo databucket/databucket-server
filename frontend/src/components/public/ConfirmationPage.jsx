@@ -6,7 +6,7 @@ import {
     Typography
 } from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
-import {Redirect, useParams} from "react-router-dom";
+import {Navigate, useParams} from "react-router-dom";
 import {getConfirmationUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
@@ -52,7 +52,7 @@ export default function ConfirmationPage() {
     }, [inputParams]);
 
     if (redirect) {
-        return (<Redirect to="/login"/>);
+        return (<Navigate to="/login"/>);
     } else {
         return (
             <Stack direction="column"

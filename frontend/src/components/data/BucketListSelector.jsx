@@ -1,11 +1,10 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Tooltip
-} from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import AccessContext from "../../context/access/AccessContext";
 import StyledIcon from "../utils/StyledIcon";
 
@@ -44,7 +43,7 @@ export default function BucketListSelector(props) {
     }
 
     const getTooltipName = (name, visibleName) => {
-        if (visibleName.endsWith("...")  || !props.open) {
+        if (visibleName.endsWith("...") || !props.open) {
             return <h2>{name}</h2>;
         } else {
             return "";
@@ -53,33 +52,34 @@ export default function BucketListSelector(props) {
     return (
         <List>
             {filteredBuckets
-            .sort((a, b) => {
-                return a.name > b.name ? 1 : -1
-            })
-            .map((bucket) => (
-                <div key={bucket.name}>
-                    <Tooltip placement="right"
-                             title={getTooltipName(bucket.name,
-                                 getBucketVisibleName(bucket.name))}>
-                        <ListItemButton
-                            selected={activeBucket != null ? bucket.id
-                                === activeBucket.id : false}
-                            key={bucket.name}
-                            onClick={() => onClick(bucket)}
-                        >
-                            <ListItemIcon>
-                                <StyledIcon
-                                    iconName={bucket.iconName}
-                                    iconColor={bucket.iconColor}
-                                    iconSvg={bucket.iconSvg}
-                                />
-                            </ListItemIcon>
-                            <ListItemText
-                                primary={getBucketVisibleName(bucket.name)}/>
-                        </ListItemButton>
-                    </Tooltip>
-                </div>
-            ))}
+                .sort((a, b) => {
+                    return a.name > b.name ? 1 : -1
+                })
+                .map((bucket) => (
+                    <div key={bucket.name}>
+                        <Tooltip placement="right"
+                                 title={getTooltipName(bucket.name, getBucketVisibleName(bucket.name))}>
+                            <ListItem disablePadding>
+                                <ListItemButton
+                                    selected={activeBucket != null ? bucket.id
+                                        === activeBucket.id : false}
+                                    key={bucket.name}
+                                    onClick={() => onClick(bucket)}
+                                >
+                                    <ListItemIcon>
+                                        <StyledIcon
+                                            iconName={bucket.iconName}
+                                            iconColor={bucket.iconColor}
+                                            iconSvg={bucket.iconSvg}
+                                        />
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={getBucketVisibleName(bucket.name)}/>
+                                </ListItemButton>
+                            </ListItem>
+                        </Tooltip>
+                    </div>
+                ))}
         </List>
     );
 }
