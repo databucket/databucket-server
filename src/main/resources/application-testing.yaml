@@ -1,0 +1,37 @@
+jwt:
+  secret: SGVsbG9Yb3JsZFRoaXNJc015U2VjcmV0S2V5Rm9xSldUVG9rZW5zMTIzNDU2Nzg5MA==
+  secret.legacy: veryverysecret
+  expire.hours: 24
+
+server:
+  port: 8080
+  servlet.context-path: /
+
+recaptcha:
+  enabled: true
+  siteKey: 6LePbJYjAAAAAN-ggduoEko4TylRpA0nEasI-EFg
+  secretKey: 6LePbJYjAAAAAEd8X-ZmikLPRxHI59aCaw64PfU7
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/databucket
+    username: databucket_user
+    password: databucket_user
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: databucket.info@gmail.com
+    password: tmmldyswcvyizhsg
+    from: admin@email.com
+    properties.mail.smtp.auth: true
+    properties.mail.smtp.starttls.enable: true
+
+logging:
+  level:
+    root: info
+    org.springframework.web: error
+#    org.hibernate: error
+#    org.hibernate.SQL: debug
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    pl.databucket.server.service.data: debug
+    pl.databucket.server.service.BucketService: info

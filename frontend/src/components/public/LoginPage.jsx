@@ -33,16 +33,19 @@ const initialState = {
     showPassword: false
 };
 
-const FancyLink = forwardRef(({navigate, ...props}, ref) => {
+const FancyLink = forwardRef((props, ref) => {
     return (
         <MaterialLink
             ref={ref}
+            component={Link}
+            to={props.to}
             color="inherit"
             variant="caption"
             underline="hover"
-            {...props}
             mb={2}
-        >{props.children}</MaterialLink>
+        >
+            {props.children}
+        </MaterialLink>
     )
 });
 
@@ -74,7 +77,7 @@ export default function LoginPage() {
     };
 
     const signIn = (username, password, projectId) => {
-        fetch(getBaseUrl('public/sign-in'), {
+        fetch(getBaseUrl('public/signin'), {
             method: 'POST',
             body: JSON.stringify(projectId == null ? {username, password} : {username, password, projectId}),
             headers: {'Content-Type': 'application/json'}
@@ -158,7 +161,7 @@ export default function LoginPage() {
                     />
                 </FormControl>
                 <div className="ForgotPasswordLink">
-                    <Link to="/forgot-password" component={FancyLink}>Forgot your password?</Link>
+                    <FancyLink to="/forgot-password">Forgot your password?</FancyLink>
                 </div>
                 <div className="ButtonLogin">
                     <Button
@@ -175,12 +178,7 @@ export default function LoginPage() {
                     </Button>
                 </div>
                 <div className="RegistrationLink" style={{marginBottom: "10px"}}>
-                    <Link to="/sign-up"
-                          component={FancyLink}
-                          mb={2}
-                    >
-                        Don't have an account?
-                    </Link>
+                    <FancyLink to="/sign-up">Don't have an account?</FancyLink>
                 </div>
             </Paper>
         );
@@ -288,7 +286,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">5.0.1</Typography>
+            <Typography variant="caption">5.0.2</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

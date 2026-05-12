@@ -1,0 +1,30 @@
+jwt:
+  secret: SGVsbG9Yb3JsZFRoaXNJc015U2VjcmV0S2V5Rm9xSldUVG9rZW5zMTIzNDU2Nzg5MA==
+  secret.legacy: veryverysecret
+  expire.hours: 24
+
+spring:
+  main:
+    allow-circular-references: true
+    lazy-initialization: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+recaptcha:
+  enabled: false
+  siteKey: test
+  secretKey: test

@@ -1,4 +1,4 @@
-import React, {createRef, useState} from 'react';
+import React, {createRef, useEffect, useState} from 'react';
 import {
     Button,
     Dialog,
@@ -87,12 +87,25 @@ export default function SelectMultiDialog(props) {
 
     const theme = useTheme();
     const [open, setOpen] = useState(false);
-    const [data] = useState(setSelectionItemsByIds(props.data, props.ids));
+    const [data, setData] = useState([]);
     const tableRef = createRef();
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
-    const [selection, setSelection] = useState(data.filter(p => p.tableData != null && p.tableData.checked === true));
+    const [selection, setSelection] = useState([]);
+
+    // Initialize/reset data and selection when dialog opens or when props change while closed
+    useEffect(() => {
+        if (!open) {
+            const updatedData = setSelectionItemsByIds(props.data, props.ids);
+            setData(updatedData);
+            setSelection(updatedData.filter(p => p.tableData != null && p.tableData.checked === true));
+        }
+    }, [props.data, props.ids, open]);
 
     const handleClickOpen = () => {
+        // Refresh data when opening
+        const updatedData = setSelectionItemsByIds(props.data, props.ids);
+        setData(updatedData);
+        setSelection(updatedData.filter(p => p.tableData != null && p.tableData.checked === true));
         setOpen(true);
     };
 
@@ -103,10 +116,29 @@ export default function SelectMultiDialog(props) {
         setOpen(false);
     }
 
+    const handleCancel = () => {
+        setOpen(false);
+    }
+
     const onChangeRowsPerPage = (pageSize) => {
         setPageSize(pageSize);
         setLastPageSizeOnDialog(pageSize);
     }
+
+    const handleSelectionChange = (rows) => {
+        setSelection(rows);
+
+        // Update data to reflect checkbox changes immediately
+        const selectedIds = rows.map(row => row.id);
+        const updatedData = data.map(item => ({
+            ...item,
+            tableData: {
+                ...item.tableData,
+                checked: selectedIds.includes(item.id)
+            }
+        }));
+        setData(updatedData);
+    };
 
     return (
         <Root>
@@ -137,7 +169,7 @@ export default function SelectMultiDialog(props) {
                         columns={props.columns}
                         data={data}
                         onChangeRowsPerPage={onChangeRowsPerPage}
-                        onSelectionChange={rows => setSelection(rows)}
+                        onSelectionChange={handleSelectionChange}
                         options={{
                             paging: true,
                             pageSize: pageSize,
