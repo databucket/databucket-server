@@ -1,7 +1,18 @@
 databucket:
   title: Databucket
 spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: never
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
     properties:
       hibernate:
         session_factory.interceptor: pl.databucket.server.tenant.EntityInterceptor

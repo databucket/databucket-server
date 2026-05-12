@@ -12,7 +12,8 @@ import {
     styled,
     Tab,
     Tabs,
-    Typography
+    Typography,
+    useTheme
 } from '@mui/material';
 import {Close as CloseIcon} from '@mui/icons-material';
 import PropTypes from "prop-types";
@@ -165,6 +166,7 @@ const initialActions = {properties: []};
 
 export default function TaskExecutionDialog(props) {
 
+    const theme = useTheme();
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
     const [activeTab, setActiveTab] = useState(0);
@@ -189,7 +191,7 @@ export default function TaskExecutionDialog(props) {
         if (props.open) {
             setActiveTab(0);
             const properties = getClassProperties();
-            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
+            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums, theme);
             const tree = QbUtils.checkTree(getInitialTree(props.activeLogic, null, config), config);
             setState({
                 ...state,
@@ -207,7 +209,7 @@ export default function TaskExecutionDialog(props) {
         if (task.filterId != null) {
             const filter = accessContext.filters.filter(f => f.id === task.filterId)[0];
             const properties = getMergedProperties(getClassProperties(), task.configuration.properties, filter.configuration.properties);
-            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
+            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums, theme);
             const tree = QbUtils.checkTree(getInitialTree(filter.configuration.logic, filter.configuration.tree, config), config);
             setState({
                 ...state,
@@ -219,7 +221,7 @@ export default function TaskExecutionDialog(props) {
             });
         } else {
             const properties = getMergedProperties(getClassProperties(), task.configuration.properties, []);
-            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
+            const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums, theme);
             const tree = QbUtils.checkTree(getInitialTree(null, null, config), config);
             setState({
                 ...state,
@@ -360,7 +362,7 @@ export default function TaskExecutionDialog(props) {
     const getClassProperties = () => {
         if (props.bucket.classId != null) {
             const dataClass = getClassById(accessContext.classes, props.bucket.classId);
-            return dataClass.configuration;
+            return dataClass.configuration || [];
         } else
             return [];
     }
@@ -398,7 +400,7 @@ export default function TaskExecutionDialog(props) {
     }
 
     const setProperties = (properties) => {
-        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums);
+        const config = createConfig(properties, bucketTags, accessContext.users, accessContext.enums, theme);
         let tree = QbUtils.checkTree(getInitialTree(props.activeLogic, null, config), config);
         setState({...state, properties: properties, logic: props.activeLogic, tree: tree, config: config});
     }

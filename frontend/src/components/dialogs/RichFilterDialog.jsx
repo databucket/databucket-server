@@ -285,7 +285,7 @@ export default function RichFilterDialog(props) {
     const getClassProperties = () => {
         if (props.bucket.classId != null) {
             const dataClass = getClassById(accessContext.classes, props.bucket.classId);
-            return dataClass.configuration;
+            return dataClass.configuration || [];
         } else {
             return [];
         }

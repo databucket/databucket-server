@@ -86,7 +86,7 @@ public class PublicController {
                     description = "Internal server error"
             )
     })
-    @PostMapping(value = {"/sign-in", "/signin"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = {"/signin"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signIn(
             @Parameter(description = "payload - username (required), password (required), projectId (optional)", required = true)
             @RequestBody AuthReqDTO authReqDTO) {
@@ -206,7 +206,8 @@ public class PublicController {
 
     @Operation(
             summary = "Forgot password",
-            description = "Sends a password reset email to the user"
+            description = "Sends a password reset email to the user",
+            hidden = true
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "No Content - email sent successfully"),
@@ -235,7 +236,8 @@ public class PublicController {
 
     @Operation(
             summary = "Forgot password confirmation",
-            description = "Confirms password reset and sends new password to user"
+            description = "Confirms password reset and sends new password to user",
+            hidden = true
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK - password reset successful"),
@@ -261,7 +263,8 @@ public class PublicController {
 
     @Operation(
             summary = "Sign up",
-            description = "Creates a new user account and sends confirmation email"
+            description = "Creates a new user account and sends confirmation email",
+            hidden = true
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created - account created successfully"),
@@ -316,7 +319,8 @@ public class PublicController {
 
     @Operation(
             summary = "Sign up confirmation",
-            description = "Confirms user registration via email token"
+            description = "Confirms user registration via email token",
+            hidden = true
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK - account confirmed successfully"),
@@ -342,7 +346,8 @@ public class PublicController {
 
     @Operation(
             summary = "Get reCAPTCHA site key",
-            description = "Returns the reCAPTCHA site key and enabled status"
+            description = "Returns the reCAPTCHA site key and enabled status",
+            hidden = true
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
