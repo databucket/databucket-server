@@ -11,6 +11,8 @@ public final class LogContext {
     // ECS has no project field; custom fields go under the application's own prefix
     public static final String PROJECT = "databucket.project.id";
     public static final String ACTION = "event.action";
+    // Filter format of a data request: logic, rules, rules-raw, conditions (joined with + when several)
+    public static final String FILTER_FORMAT = "databucket.filter.format";
 
     public static final String HTTP_METHOD = "http.request.method";
     public static final String HTTP_PATH = "url.path";

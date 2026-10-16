@@ -64,7 +64,7 @@ logging:
         # In k8s HOSTNAME is the pod name, so lines of several replicas can be told apart
         node-name: ${HOSTNAME:}
   pattern:
-    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%c{1.}}{yellow}%style{%notEmpty{ req=%X{http.request.id}}%notEmpty{ user=%X{user.name}}%notEmpty{ project=%X{databucket.project.id}}}{cyan}: %m%n%throwable"
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%c{1.}}{yellow}%style{%notEmpty{ req=%X{http.request.id}}%notEmpty{ user=%X{user.name}}%notEmpty{ project=%X{databucket.project.id}}%notEmpty{ filter=%X{databucket.filter.format}}}{cyan}: %m%n%throwable"
   # Levels can be overridden per environment, e.g. LOGGING_LEVEL_PL_DATABUCKET_SERVER_ACCESS=warn
   level:
     root: info
