@@ -1,7 +1,6 @@
 package pl.databucket.server.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,20 +8,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.*;
-import pl.databucket.server.entity.Team;
-import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
 import pl.databucket.server.security.CustomUserDetails;
 import pl.databucket.server.security.TokenProvider;
-import pl.databucket.server.service.TeamService;
 import pl.databucket.server.service.UserService;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Hidden
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -34,12 +28,6 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     private TokenProvider jwtTokenUtil;
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(UserController.class);
@@ -49,16 +37,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> getUsers() {
         try {
-            List<User> users = userService.getUsers(((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId());
-            Set<Short> projectTeams = teamService.getTeams().stream().map(Team::getId).collect(Collectors.toSet());
-            List<UserDtoResponse> usersDto = users.stream().map(item -> modelMapper.map(item, UserDtoResponse.class)).collect(Collectors.toList());
-
-            // filter teams from current project
-            for (UserDtoResponse userDto : usersDto) {
-                if (userDto.getTeamsIds() != null)
-                    userDto.getTeamsIds().retainAll(projectTeams);
-            }
-
+            List<UserDtoResponse> usersDto = userService.getUsers(((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId());
             return new ResponseEntity<>(usersDto, HttpStatus.OK);
         } catch (IllegalArgumentException | ItemNotFoundException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
@@ -69,9 +48,7 @@ public class UserController {
     @PutMapping
     public ResponseEntity<?> modifyUser(@Valid @RequestBody UserDtoRequest userDtoRequest) {
         try {
-            User user = userService.modifyUser(userDtoRequest);
-            UserDtoResponse userDtoResponse = new UserDtoResponse();
-            modelMapper.map(user, userDtoResponse);
+            UserDtoResponse userDtoResponse = userService.modifyUser(userDtoRequest);
             return new ResponseEntity<>(userDtoResponse, HttpStatus.OK);
         } catch (SomeItemsNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);

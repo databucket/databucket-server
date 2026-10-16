@@ -1,5 +1,6 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,9 +9,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.ChangePasswordDtoRequest;
 import pl.databucket.server.dto.UserDtoRequest;
+import pl.databucket.server.dto.UserDtoResponse;
 import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.Team;
 import pl.databucket.server.entity.User;
@@ -25,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service(value = "userService")
@@ -41,6 +45,12 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
+
+    @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     // This method is used every time when authorized user want to do something.
     // This method must be as light as possible, so most of logic is moved into public controller when the user is trying to login
@@ -69,16 +79,29 @@ public class UserService implements UserDetailsService {
         return authorities;
     }
 
-    public List<User> getUsers(int projectId) throws ItemNotFoundException {
+    @Transactional(readOnly = true)
+    public List<UserDtoResponse> getUsers(int projectId) throws ItemNotFoundException {
         Optional<Project> project = projectRepository.findById(projectId);
-        if (project.isPresent())
-            return userRepository.findUsersByProjectsContainsOrderById(project.get());
-        else
+        if (project.isEmpty())
             throw new ItemNotFoundException(Project.class, projectId);
+
+        Set<Short> projectTeams = teamService.getTeams().stream().map(Team::getId).collect(Collectors.toSet());
+        List<UserDtoResponse> usersDto = userRepository.findUsersByProjectsContainsOrderById(project.get()).stream()
+                .map(user -> modelMapper.map(user, UserDtoResponse.class))
+                .collect(Collectors.toList());
+
+        // filter teams from current project
+        for (UserDtoResponse userDto : usersDto) {
+            if (userDto.getTeamsIds() != null)
+                userDto.getTeamsIds().retainAll(projectTeams);
+        }
+
+        return usersDto;
     }
 
 
-    public User modifyUser(UserDtoRequest userDtoRequest) throws SomeItemsNotFoundException {
+    @Transactional
+    public UserDtoResponse modifyUser(UserDtoRequest userDtoRequest) throws SomeItemsNotFoundException {
         User user = userRepository.findByUsername(userDtoRequest.getUsername());
 
         if (userDtoRequest.getTeamsIds() != null) {
@@ -86,7 +109,7 @@ public class UserService implements UserDetailsService {
             user.setTeams(new HashSet<>(teams));
         }
 
-        return userRepository.save(user);
+        return modelMapper.map(userRepository.save(user), UserDtoResponse.class);
     }
 
     public void changePassword(ChangePasswordDtoRequest changePasswordDtoRequest) {
