@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.TenantId;
 import org.hibernate.type.SqlTypes;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.DataClassItemDto;
-import pl.databucket.server.tenant.TenantSupport;
 
 import java.util.List;
 import java.util.Set;
@@ -18,8 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name="data_classes")
-@Filter(name = "projectFilter", condition = "project_id = :projectId")
-public class DataClass extends Auditable<String> implements TenantSupport {
+public class DataClass extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "class_generator")
@@ -27,6 +25,7 @@ public class DataClass extends Auditable<String> implements TenantSupport {
     @Column(name = "class_id", updatable = false, nullable = false)
     private long id;
 
+    @TenantId
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
 

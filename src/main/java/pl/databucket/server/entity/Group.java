@@ -5,9 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.TenantId;
 import pl.databucket.server.configuration.Constants;
-import pl.databucket.server.tenant.TenantSupport;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,8 +16,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Table(name="groups")
-@Filter(name = "projectFilter", condition = "project_id = :projectId")
-public class Group extends Auditable<String> implements TenantSupport {
+public class Group extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_generator")
@@ -26,6 +24,7 @@ public class Group extends Auditable<String> implements TenantSupport {
 	@Column(name = "group_id", updatable = false, nullable = false)
 	private long id;
 
+	@TenantId
 	@Column(name = "project_id", nullable = false)
 	private Integer projectId;
 
