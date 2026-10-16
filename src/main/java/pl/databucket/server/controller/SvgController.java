@@ -11,6 +11,7 @@ import pl.databucket.server.dto.SvgDto;
 import pl.databucket.server.entity.Svg;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
+import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.service.SvgService;
 
@@ -78,6 +79,8 @@ public class SvgController {
         try {
             svgService.deleteSvg(svgId);
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

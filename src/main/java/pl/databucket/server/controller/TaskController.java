@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.TaskDto;
 import pl.databucket.server.exception.ExceptionFormatter;
+import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.service.TaskService;
 
@@ -66,6 +67,8 @@ public class TaskController {
         try {
             taskService.deleteTask(taskId);
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

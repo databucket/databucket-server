@@ -66,6 +66,8 @@ public class ViewController {
     try {
       viewService.deleteView(viewId);
       return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    } catch (ItemNotFoundException e) {
+      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (Exception e) {
       return exceptionFormatter.defaultException(e);
     }
