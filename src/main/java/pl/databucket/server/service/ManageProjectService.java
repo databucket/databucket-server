@@ -1,7 +1,9 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.ManageProjectDto;
 import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
@@ -12,6 +14,7 @@ import pl.databucket.server.repository.UserRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -23,8 +26,12 @@ public class ManageProjectService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ModelMapper modelMapper;
 
-    public Project createProject(ManageProjectDto manageProjectDto) {
+
+    @Transactional
+    public ManageProjectDto createProject(ManageProjectDto manageProjectDto) {
         Project project = new Project();
         project.setName(manageProjectDto.getName());
         project.setDescription(manageProjectDto.getDescription());
@@ -44,14 +51,19 @@ public class ManageProjectService {
             project.setUsers(new HashSet<>(users));
         }
 
-        return projectRepository.save(project);
+        modelMapper.map(projectRepository.save(project), manageProjectDto);
+        return manageProjectDto;
     }
 
-    public List<Project> getProjects() {
-        return projectRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<ManageProjectDto> getProjects() {
+        return projectRepository.findAllByDeletedOrderById(false).stream()
+                .map(project -> modelMapper.map(project, ManageProjectDto.class))
+                .collect(Collectors.toList());
     }
 
-    public Project modifyProject(ManageProjectDto manageProjectDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
+    @Transactional
+    public ManageProjectDto modifyProject(ManageProjectDto manageProjectDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
         if (manageProjectDto.getId() == null)
             throw new ModifyByNullEntityIdException(Project.class);
 
@@ -83,9 +95,11 @@ public class ManageProjectService {
             }
         }
 
-        return projectRepository.save(project);
+        modelMapper.map(projectRepository.save(project), manageProjectDto);
+        return manageProjectDto;
     }
 
+    @Transactional
     public void deleteProject(int projectId) throws ItemNotFoundException {
         Project project = projectRepository.findByIdAndDeleted(projectId, false);
 
