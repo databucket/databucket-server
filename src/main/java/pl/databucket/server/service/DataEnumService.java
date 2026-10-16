@@ -2,6 +2,7 @@ package pl.databucket.server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.DataEnumDto;
 import pl.databucket.server.entity.DataColumns;
 import pl.databucket.server.entity.DataEnum;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 
 @Service
+@Transactional
 public class DataEnumService {
 
     @Autowired

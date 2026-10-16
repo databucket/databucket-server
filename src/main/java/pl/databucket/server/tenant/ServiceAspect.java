@@ -5,8 +5,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.hibernate.Filter;
 import org.hibernate.Session;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import pl.databucket.server.security.CustomUserDetails;
 
 import jakarta.persistence.EntityManager;
@@ -14,6 +16,8 @@ import jakarta.persistence.PersistenceContext;
 
 @Aspect
 @Component
+// Runs inside the transaction (ordered 0 in ApplicationConfiguration), so the filter lands on its session.
+@Order(1)
 public class ServiceAspect {
 
     @PersistenceContext
@@ -34,6 +38,11 @@ public class ServiceAspect {
     )
     // @formatter:on
     public void aroundExecution(JoinPoint pjp) throws Throwable {
+        // Outside a transaction the shared EntityManager hands out a throwaway session, so the filter
+        // would be enabled on nothing and queries would return data of every project. Fail instead.
+        if (!TransactionSynchronizationManager.isActualTransactionActive())
+            throw new IllegalStateException("Tenant filtered service called outside a transaction: " + pjp.getSignature().toShortString());
+
         Filter filter = em.unwrap(Session.class).enableFilter("projectFilter");
         filter.setParameter("projectId", ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProjectId());
         filter.validate();

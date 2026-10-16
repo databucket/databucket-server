@@ -4,9 +4,13 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.databucket.server.mapper.*;
 
 @Configuration
+// Transactions wrap the tenant filter aspect (ServiceAspect, order 1), so the filter is enabled
+// on the session the transaction actually uses.
+@EnableTransactionManagement(order = 0)
 public class ApplicationConfiguration {
 
     @Bean

@@ -2,6 +2,7 @@ package pl.databucket.server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.DataClassDto;
 import pl.databucket.server.entity.*;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 public class DataClassService {
 
     @Autowired
