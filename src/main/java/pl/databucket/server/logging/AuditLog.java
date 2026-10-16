@@ -14,9 +14,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public final class AuditLog {
 
-    // One logger per area (the part of the action before the dot), e.g. pl.databucket.server.audit.data,
-    // so a busy area can be turned down on its own
-    private static final String LOGGER_PREFIX = "pl.databucket.server.audit.";
+    // One logger per area (the part of the action before the dot), e.g. pl.databucket.server.operation.data,
+    // so a busy area can be turned down on its own. Not "audit": abbreviated in the text log it would read
+    // p.d.s.a.data, the same as the access log of bucket data.
+    private static final String LOGGER_PREFIX = "pl.databucket.server.operation.";
 
     private AuditLog() {
     }

@@ -63,9 +63,9 @@ logging:
     # access.data covers bucket data (/api/bucket/**: rows, reservations, history), most of the traffic.
     pl.databucket.server.access: info
     pl.databucket.server.access.data: info
-    # Significant operations, one logger per area: audit.auth, audit.data, audit.bucket, audit.user, ...
-    pl.databucket.server.audit: info
-    pl.databucket.server.audit.data: info
+    # Significant operations, one logger per area: operation.auth, operation.data, operation.bucket, ...
+    pl.databucket.server.operation: info
+    pl.databucket.server.operation.data: info
     # SQL built for bucket data, with its parameters (which include data values); debug to see it
     pl.databucket.server.service.data: info
     pl.databucket.server.service.BucketService: info
