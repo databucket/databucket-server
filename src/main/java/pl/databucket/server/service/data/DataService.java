@@ -293,7 +293,8 @@ public class DataService {
             throw new UnexpectedException(e);
         }
 
-        AuditLog.log("data.reserve", "bucket={} count={} owner={}", bucket.getName(), dataIds.size(), targetOwnerUsername);
+        // dataIds is null when no row was free to reserve
+        AuditLog.log("data.reserve", "bucket={} count={} owner={}", bucket.getName(), dataIds == null ? 0 : dataIds.size(), targetOwnerUsername);
         return dataIds;
     }
 
