@@ -29,6 +29,7 @@ import pl.databucket.server.service.ServiceUtils;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 
@@ -79,11 +80,16 @@ public class DataService {
             @Override
             public void setValues(PreparedStatement ps, int i) {
                 DataCreateDTO dataCreateDTO = dataList.get(i);
-                ps.setLong(1, dataCreateDTO.getTagId());
+                // tagId and reserved are optional, as in the single insert: no tag, and not reserved (the column default)
+                boolean reserved = Boolean.TRUE.equals(dataCreateDTO.getReserved());
+                if (dataCreateDTO.getTagId() != null)
+                    ps.setLong(1, dataCreateDTO.getTagId());
+                else
+                    ps.setNull(1, Types.BIGINT);
                 ps.setString(2, user.getUsername());
                 ps.setString(3, user.getUsername());
-                ps.setBoolean(4, dataCreateDTO.getReserved());
-                ps.setString(5, dataCreateDTO.getReserved() ? dataCreateDTO.getOwner() != null ? dataCreateDTO.getOwner() : user.getUsername() : null);
+                ps.setBoolean(4, reserved);
+                ps.setString(5, reserved ? dataCreateDTO.getOwner() != null ? dataCreateDTO.getOwner() : user.getUsername() : null);
                 ps.setObject(6, serviceUtils.javaObjectToPGObject(dataCreateDTO.getProperties()));
             }
 
