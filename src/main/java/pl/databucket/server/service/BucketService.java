@@ -2,6 +2,7 @@ package pl.databucket.server.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class BucketService {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private BucketRepository bucketRepository;
@@ -56,7 +60,7 @@ public class BucketService {
 
     Logger logger = LoggerFactory.getLogger(BucketService.class);
 
-    public Bucket createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
+    public BucketDto createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
         if (bucketRepository.existsByNameAndDeleted(bucketDto.getName(), false))
             throw new ItemAlreadyExistsException(Bucket.class, bucketDto.getName());
 
@@ -145,7 +149,8 @@ public class BucketService {
             createAfterUpdateTrigger(bucket);
         }
 
-        return bucket;
+        modelMapper.map(bucket, bucketDto);
+        return bucketDto;
     }
 
     public Page<Bucket> getBuckets(Specification<Bucket> specification, Pageable pageable) {
@@ -156,15 +161,18 @@ public class BucketService {
         return bucketRepository.findByNameAndDeleted(bucketName, false);
     }
 
-    public List<Bucket> getBuckets() {
-        return bucketRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<BucketDto> getBuckets() {
+        return bucketRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, BucketDto.class))
+                .collect(Collectors.toList());
     }
 
     public List<Bucket> getBuckets(List<Long> ids) {
         return bucketRepository.findAllByDeletedAndIdIn(false, ids);
     }
 
-    public Bucket modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
+    public BucketDto modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
         if (bucketDto.getId() == null)
             throw new ModifyByNullEntityIdException(Bucket.class);
 
@@ -249,7 +257,8 @@ public class BucketService {
         } else
             bucket.setRole(null);
 
-        return bucketRepository.save(bucket);
+        modelMapper.map(bucketRepository.save(bucket), bucketDto);
+        return bucketDto;
     }
 
     public void deleteBucket(long bucketId) throws ItemNotFoundException {

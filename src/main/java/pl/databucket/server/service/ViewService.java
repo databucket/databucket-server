@@ -1,5 +1,6 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ViewService {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private BucketRepository bucketRepository;
@@ -43,7 +47,7 @@ public class ViewService {
     @Autowired
     private TeamRepository teamRepository;
 
-    public View createView(ViewDto viewDto) throws ItemNotFoundException {
+    public ViewDto createView(ViewDto viewDto) throws ItemNotFoundException {
         View view = new View();
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
@@ -90,18 +94,22 @@ public class ViewService {
             view.setTeams(new HashSet<>(teams));
         }
 
-        return viewRepository.save(view);
+        modelMapper.map(viewRepository.save(view), viewDto);
+        return viewDto;
     }
 
-    public List<View> getViews() {
-        return viewRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<ViewDto> getViews() {
+        return viewRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, ViewDto.class))
+                .collect(Collectors.toList());
     }
 
     public List<View> getViews(List<Long> ids) {
         return viewRepository.findAllByDeletedAndIdIn(false, ids);
     }
 
-    public View modifyView(ViewDto viewDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
+    public ViewDto modifyView(ViewDto viewDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
         if (viewDto.getId() == null)
             throw new ModifyByNullEntityIdException(View.class);
 
@@ -159,7 +167,8 @@ public class ViewService {
         } else
             view.setTeams(null);
 
-        return viewRepository.save(view);
+        modelMapper.map(viewRepository.save(view), viewDto);
+        return viewDto;
     }
 
     public void deleteView(long viewId) throws ItemNotFoundException {
