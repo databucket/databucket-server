@@ -1,3 +1,9 @@
+databucket:
+  # Upper bound on requests served at once. Both the Tomcat worker threads and the Hikari pool are
+  # sized from it: with open-in-view a request holds its connection until the response is written,
+  # so more threads than connections would only block on the pool.
+  max-concurrent-requests: 30
+
 spring:
   jpa:
     generate-ddl: true
@@ -9,6 +15,13 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   datasource:
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${databucket.max-concurrent-requests}
+      minimum-idle: 10
+      # Logs the stack trace of whatever borrowed a connection and did not give it back in time.
+      # Purely diagnostic: nothing is closed or reclaimed. The threshold sits far above a normal
+      # request, which answers in milliseconds, so it stays silent until something is stuck.
+      leak-detection-threshold: 20000
   sql:
     init:
       mode: always
@@ -16,6 +29,12 @@ spring:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
   main:
     allow-circular-references: true
+
+server:
+  tomcat:
+    threads:
+      max: ${databucket.max-concurrent-requests}
+    accept-count: 50
 
 recaptcha:
   enabled: false
@@ -25,7 +44,7 @@ recaptcha:
 logging:
   level:
     root: info
-    org.springframework.web: error
-    org.hibernate: error
-    pl.databucket.service.data.DataService: error
-    pl.databucket.service.BucketService: error
+    org.springframework.web: info
+    org.hibernate: info
+    pl.databucket.server.service.data.DataService: info
+    pl.databucket.server.service.BucketService: info
