@@ -66,7 +66,9 @@ public class WebSecurityConfig {
                                 "/project",
                                 "/project/**",
                                 "/management",
-                                "/management/**"
+                                "/management/**",
+                                // the error dispatch runs without the JWT filter; without this every error turns into 401
+                                "/error"
                         ).permitAll()
                         // Swagger endpoints
                         .requestMatchers(HttpMethod.GET,
