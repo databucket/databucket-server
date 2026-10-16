@@ -6,6 +6,9 @@ databucket:
   max-concurrent-requests: 30
 
 spring:
+  application:
+    # service.name in the ECS (JSON) logs
+    name: databucket
   jpa:
     generate-ddl: true
     hibernate.ddl-auto: update
@@ -49,12 +52,17 @@ recaptcha:
   secretKey: yourSecretKey
 
 logging:
-  # Format and appender are in log4j2-spring.xml; all levels are set here, so an environment can
-  # override them (e.g. LOGGING_LEVEL_PL_DATABUCKET_SERVER_ACCESS=warn).
+  # Text by default. On servers (k8s -> Elastic) set LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs to get one ECS JSON
+  # object per line; the MDC fields (http.request.id, user.name, databucket.project.id, ...) are included.
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%c{1.}}{yellow}%style{%notEmpty{ req=%X{http.request.id}}%notEmpty{ user=%X{user.name}}%notEmpty{ project=%X{databucket.project.id}}}{cyan}: %m%n%throwable"
+  # Levels can be overridden per environment, e.g. LOGGING_LEVEL_PL_DATABUCKET_SERVER_ACCESS=warn
   level:
     root: info
-    # One line per /api request: method, path, status, duration, client
+    # One line per /api request: method, path, status, duration, client.
+    # access.data covers bucket data (/api/bucket/**: rows, reservations, history), most of the traffic.
     pl.databucket.server.access: info
+    pl.databucket.server.access.data: info
     # SQL built for bucket data, with its parameters (which include data values); debug to see it
     pl.databucket.server.service.data: info
     pl.databucket.server.service.BucketService: info

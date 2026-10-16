@@ -27,6 +27,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     public static final String REQUEST_ID_HEADER = "X-Request-Id";
 
     private static final Logger accessLogger = LoggerFactory.getLogger("pl.databucket.server.access");
+    // Bucket data (rows, reservations, history) is most of the traffic, so it has its own logger
+    private static final Logger dataAccessLogger = LoggerFactory.getLogger("pl.databucket.server.access.data");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -52,9 +54,10 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         MDC.put(LogContext.HTTP_METHOD, request.getMethod());
         MDC.put(LogContext.HTTP_PATH, request.getRequestURI());
         MDC.put(LogContext.HTTP_STATUS, String.valueOf(response.getStatus()));
-        MDC.put(LogContext.DURATION_MS, String.valueOf(durationMs));
+        MDC.put(LogContext.DURATION_NANOS, String.valueOf(durationMs * 1_000_000));
         MDC.put(LogContext.CLIENT, request.getRemoteAddr());
-        accessLogger.info("{} {} {} {}ms from {}", request.getMethod(), request.getRequestURI(),
+        Logger logger = request.getRequestURI().startsWith("/api/bucket/") ? dataAccessLogger : accessLogger;
+        logger.info("{} {} {} {}ms from {}", request.getMethod(), request.getRequestURI(),
                 response.getStatus(), durationMs, request.getRemoteAddr());
     }
 }
