@@ -49,9 +49,12 @@ recaptcha:
   secretKey: yourSecretKey
 
 logging:
+  # Format and appender are in log4j2-spring.xml; all levels are set here, so an environment can
+  # override them (e.g. LOGGING_LEVEL_PL_DATABUCKET_SERVER_ACCESS=warn).
   level:
     root: info
-    org.springframework.web: info
-    org.hibernate: info
-    pl.databucket.server.service.data.DataService: info
+    # One line per /api request: method, path, status, duration, client
+    pl.databucket.server.access: info
+    # SQL built for bucket data, with its parameters (which include data values); debug to see it
+    pl.databucket.server.service.data: info
     pl.databucket.server.service.BucketService: info
