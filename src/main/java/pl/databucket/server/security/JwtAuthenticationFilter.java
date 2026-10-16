@@ -5,6 +5,7 @@ import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pl.databucket.server.service.UserService;
@@ -47,13 +48,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                CustomUserDetails customUserDetails = (CustomUserDetails) userService.loadUserByUsername(username);
 
-            CustomUserDetails customUserDetails = (CustomUserDetails) userService.loadUserByUsername(username);
-
-            if (jwtTokenUtil.validateToken(authToken, customUserDetails)) {
-                UsernamePasswordAuthenticationToken authentication = jwtTokenUtil.getAuthentication(authToken, customUserDetails);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (jwtTokenUtil.validateToken(authToken, customUserDetails)) {
+                    UsernamePasswordAuthenticationToken authentication = jwtTokenUtil.getAuthentication(authToken, customUserDetails);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (UsernameNotFoundException e) {
+                // The token is signed correctly but its user no longer exists: leave the request unauthenticated
+                logger.warn("Token for unknown user: " + username);
             }
         }
 

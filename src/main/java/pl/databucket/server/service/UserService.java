@@ -57,6 +57,8 @@ public class UserService implements UserDetailsService {
     // This method must be as light as possible, so most of logic is moved into public controller when the user is trying to login
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
+        if (user == null)
+            throw new UsernameNotFoundException("User not found: " + username);
 
         return new CustomUserDetails(
                 user.getUsername(),
@@ -119,7 +121,7 @@ public class UserService implements UserDetailsService {
         // can not change password of another user except ROBOT
         if (!name.equals(changePasswordDtoRequest.getUsername())) {
             User user = userRepository.findByUsername(changePasswordDtoRequest.getUsername());
-            if (user.getRoles().size() == 1 && user.getRoles().stream().noneMatch(role -> role.getName().equals(Constants.ROLE_ROBOT)))
+            if (user != null && user.getRoles().size() == 1 && user.getRoles().stream().noneMatch(role -> role.getName().equals(Constants.ROLE_ROBOT)))
                 throw new IllegalArgumentException("You cannot change the password of this user!");
         }
 
