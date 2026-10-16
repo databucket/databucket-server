@@ -208,7 +208,7 @@ public class PublicController {
 
         } catch (AuthenticationException e) {
             AuditLog.log("auth.signin-failed", "user={} reason={}", authReqDTO.getUsername(), e.getMessage());
-            return exceptionFormatter.customException(authReqDTO.getUsername(), e, HttpStatus.UNAUTHORIZED);
+            return exceptionFormatter.customException(e, HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -263,7 +263,7 @@ public class PublicController {
             manageUserService.resetAndSendPassword(jwts);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (MessagingException | MailSendException e) {
-            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+            return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (ForbiddenRepetitionException e) {
             return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
@@ -300,7 +300,7 @@ public class PublicController {
             manageUserService.signUpUser(signUpDtoRequest);
             return exceptionFormatter.responseMessage("An account has been created for a new user", HttpStatus.CREATED);
         } catch (MessagingException | MailSendException e) {
-            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+            return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -346,7 +346,7 @@ public class PublicController {
             manageUserService.signUpUserConfirmation(jwts);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (MessagingException | MailSendException e) {
-            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+            return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (ForbiddenRepetitionException e) {
             return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
