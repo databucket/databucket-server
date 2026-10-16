@@ -36,6 +36,13 @@ server:
       max: ${databucket.max-concurrent-requests}
     accept-count: 50
 
+management:
+  health:
+    # The mail indicator logs in to the SMTP server on every health call. With placeholder
+    # credentials that only fails, and repeated failures get the host rate-limited by the provider.
+    mail:
+      enabled: false
+
 recaptcha:
   enabled: false
   siteKey: yourSiteKey
