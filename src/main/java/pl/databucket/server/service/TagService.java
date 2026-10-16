@@ -11,6 +11,7 @@ import pl.databucket.server.entity.Tag;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.BucketRepository;
 import pl.databucket.server.repository.DataClassRepository;
 import pl.databucket.server.repository.TagRepository;
@@ -55,6 +56,7 @@ public class TagService {
         }
 
         modelMapper.map(tagRepository.save(tag), tagDto);
+        AuditLog.log("tag.create", "id={} name={}", tag.getId(), tag.getName());
         return tagDto;
     }
 
@@ -94,6 +96,7 @@ public class TagService {
             tag.setDataClasses(null);
 
         modelMapper.map(tagRepository.save(tag), tagDto);
+        AuditLog.log("tag.modify", "id={} name={}", tag.getId(), tag.getName());
         return tagDto;
     }
 
@@ -108,5 +111,6 @@ public class TagService {
 
         tag.setDeleted(true);
         tagRepository.save(tag);
+        AuditLog.log("tag.delete", "id={} name={}", tag.getId(), tag.getName());
     }
 }

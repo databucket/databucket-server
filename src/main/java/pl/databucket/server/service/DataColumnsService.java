@@ -10,6 +10,7 @@ import pl.databucket.server.entity.View;
 import pl.databucket.server.exception.ItemAlreadyUsedException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.DataClassRepository;
 import pl.databucket.server.repository.DataColumnsRepository;
 import pl.databucket.server.repository.ViewRepository;
@@ -48,7 +49,11 @@ public class DataColumnsService {
                 throw new ItemNotFoundException(DataClass.class, dataColumnsDto.getClassId());
         }
 
-        return columnsRepository.save(dataColumns);
+        DataColumns saved = columnsRepository.save(dataColumns);
+
+        AuditLog.log("columns.create", "id={} name={}", saved.getId(), saved.getName());
+
+        return saved;
     }
 
     public List<DataColumns> getColumns() {
@@ -82,7 +87,11 @@ public class DataColumnsService {
         } else
             dataColumns.setDataClass(null);
 
-        return columnsRepository.save(dataColumns);
+        DataColumns saved = columnsRepository.save(dataColumns);
+
+        AuditLog.log("columns.modify", "id={} name={}", saved.getId(), saved.getName());
+
+        return saved;
     }
 
     public void deleteColumns(long columnsId) throws ItemNotFoundException, ItemAlreadyUsedException {
@@ -101,6 +110,7 @@ public class DataColumnsService {
 
         columns.setDeleted(true);
         columnsRepository.save(columns);
+        AuditLog.log("columns.delete", "id={} name={}", columns.getId(), columns.getName());
     }
 
 }

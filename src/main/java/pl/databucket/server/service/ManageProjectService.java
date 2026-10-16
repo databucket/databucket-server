@@ -9,6 +9,7 @@ import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.ProjectRepository;
 import pl.databucket.server.repository.UserRepository;
 
@@ -52,6 +53,7 @@ public class ManageProjectService {
         }
 
         modelMapper.map(projectRepository.save(project), manageProjectDto);
+        AuditLog.log("project.create", "id={} name={}", project.getId(), project.getName());
         return manageProjectDto;
     }
 
@@ -96,6 +98,7 @@ public class ManageProjectService {
         }
 
         modelMapper.map(projectRepository.save(project), manageProjectDto);
+        AuditLog.log("project.modify", "id={} name={}", project.getId(), project.getName());
         return manageProjectDto;
     }
 
@@ -117,6 +120,7 @@ public class ManageProjectService {
 
         project.setDeleted(true);
         projectRepository.save(project);
+        AuditLog.log("project.delete", "id={} name={}", project.getId(), project.getName());
     }
 
 }

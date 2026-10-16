@@ -15,6 +15,7 @@ import pl.databucket.server.entity.*;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 import pl.databucket.server.service.data.Query;
 
@@ -154,6 +155,7 @@ public class BucketService {
             createAfterUpdateTrigger(bucket);
         }
 
+        AuditLog.log("bucket.create", "id={} name={}", bucket.getId(), bucket.getName());
         modelMapper.map(bucket, bucketDto);
         return bucketDto;
     }
@@ -263,6 +265,7 @@ public class BucketService {
             bucket.setRole(null);
 
         modelMapper.map(bucketRepository.save(bucket), bucketDto);
+        AuditLog.log("bucket.modify", "id={} name={}", bucket.getId(), bucket.getName());
         return bucketDto;
     }
 
@@ -300,6 +303,7 @@ public class BucketService {
         // Drop bucket table
         query = new Query(bucket.getTableName()).dropTable();
         jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
+        AuditLog.log("bucket.delete", "id={} name={}", bucket.getId(), bucket.getName());
     }
 
     private void createBeforeDeleteTrigger(Bucket bucket) {

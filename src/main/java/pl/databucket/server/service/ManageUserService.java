@@ -20,6 +20,7 @@ import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ForbiddenRepetitionException;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.ProjectRepository;
 import pl.databucket.server.repository.RoleRepository;
 import pl.databucket.server.repository.UserRepository;
@@ -85,7 +86,11 @@ public class ManageUserService {
             newUser.setProjects(new HashSet<>(projects));
         }
 
-        return toDto(userRepository.save(newUser));
+        User saved = userRepository.save(newUser);
+
+        AuditLog.log("user.create", "id={} name={}", saved.getId(), saved.getUsername());
+
+        return toDto(saved);
     }
 
     public void signUpUser(SignUpDtoRequest signUpDtoRequest) throws MessagingException {
@@ -100,6 +105,7 @@ public class ManageUserService {
         newUser.setChangePassword(false);
         newUser.setRoles(roles);
         newUser = userRepository.save(newUser);
+        AuditLog.log("auth.signup", "id={} name={}", newUser.getId(), newUser.getUsername());
 
         mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()), appProperties.getMailFrom());
     }
@@ -114,6 +120,7 @@ public class ManageUserService {
 
             user.setEnabled(true);
             userRepository.save(user);
+            AuditLog.log("auth.signup-confirm", "id={} name={}", user.getId(), user.getUsername());
 
             mailSenderService.sendRegistrationConfirmation(user, appProperties.getMailFrom());
         } else
@@ -137,6 +144,7 @@ public class ManageUserService {
         mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()), appProperties.getMailFrom());
         user.setLastSendEmailForgotPasswordLinkDate(new Date());
         userRepository.save(user);
+        AuditLog.log("auth.forgot-password", "id={} name={}", user.getId(), user.getUsername());
     }
 
     @Transactional
@@ -164,7 +172,11 @@ public class ManageUserService {
             user.setProjects(new HashSet<>(projects));
         }
 
-        return toDto(userRepository.save(user));
+        User saved = userRepository.save(user);
+
+        AuditLog.log("user.modify", "id={} name={}", saved.getId(), saved.getUsername());
+
+        return toDto(saved);
     }
 
     public void resetAndSendPassword(AuthReqDTO userDto) {
@@ -173,6 +185,7 @@ public class ManageUserService {
             user.setPassword(bcryptEncoder.encode(userDto.getPassword()));
             user.setChangePassword(true);
             userRepository.save(user);
+            AuditLog.log("user.password-reset", "id={} name={}", user.getId(), user.getUsername());
         } else
             throw new IllegalArgumentException("The given user does not exist.");
     }
@@ -208,6 +221,7 @@ public class ManageUserService {
             user.setChangePassword(true);
             user.setLastSendEmailTempPasswordDate(new Date());
             userRepository.save(user);
+            AuditLog.log("auth.temp-password", "id={} name={}", user.getId(), user.getUsername());
         } else
             throw new AccountExpiredException("The confirmation link is expired!");
     }

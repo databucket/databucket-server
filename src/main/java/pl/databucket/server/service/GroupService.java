@@ -10,6 +10,7 @@ import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 
 import java.util.Collections;
@@ -68,6 +69,7 @@ public class GroupService {
         }
 
         modelMapper.map(groupRepository.save(group), groupDto);
+        AuditLog.log("group.create", "id={} name={}", group.getId(), group.getName());
         return groupDto;
     }
 
@@ -116,6 +118,7 @@ public class GroupService {
             group.setTeams(null);
 
         modelMapper.map(groupRepository.save(group), groupDto);
+        AuditLog.log("group.modify", "id={} name={}", group.getId(), group.getName());
         return groupDto;
     }
 
@@ -131,6 +134,7 @@ public class GroupService {
 
         group.setDeleted(true);
         groupRepository.save(group);
+        AuditLog.log("group.delete", "id={} name={}", group.getId(), group.getName());
     }
 
     public List<Group> getAccessTreeGroups(User user) {

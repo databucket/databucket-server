@@ -10,6 +10,7 @@ public final class LogContext {
     public static final String USER = "user.name";
     // ECS has no project field; custom fields go under the application's own prefix
     public static final String PROJECT = "databucket.project.id";
+    public static final String ACTION = "event.action";
 
     public static final String HTTP_METHOD = "http.request.method";
     public static final String HTTP_PATH = "url.path";

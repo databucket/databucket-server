@@ -12,6 +12,7 @@ import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.NoAccessToProjectException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.security.CustomUserDetails;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.UserService;
@@ -79,8 +80,10 @@ public class UserController {
             userService.checkProjectAccess(SecurityContextHolder.getContext().getAuthentication().getName(), userDto.getProjectId());
             AuthRespDTO authDtoResponse = new AuthRespDTO();
             authDtoResponse.setToken(jwtTokenUtil.generateToken(SecurityContextHolder.getContext().getAuthentication(), userDto.getProjectId()));
+            AuditLog.log("auth.change-project", "project={}", userDto.getProjectId());
             return new ResponseEntity<>(authDtoResponse, HttpStatus.OK);
         } catch (NoAccessToProjectException e) {
+            AuditLog.log("auth.change-project-denied", "project={} reason={}", userDto.getProjectId(), e.getMessage());
             return exceptionFormatter.customException(e, HttpStatus.FORBIDDEN);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);

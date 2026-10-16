@@ -9,6 +9,7 @@ import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemAlreadyUsedException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 
 import java.util.HashMap;
@@ -52,7 +53,9 @@ public class DataClassService {
         dataClass.setDescription(dataClassDto.getDescription());
         if (dataClassDto.getConfiguration() != null && dataClassDto.getConfiguration().size() > 0)
             dataClass.setConfiguration(dataClassDto.getConfiguration());
-        return dataClassRepository.save(dataClass);
+        DataClass saved = dataClassRepository.save(dataClass);
+        AuditLog.log("class.create", "id={} name={}", saved.getId(), saved.getName());
+        return saved;
     }
 
     public List<DataClass> getDataClasses() {
@@ -79,7 +82,9 @@ public class DataClassService {
             dataClass.setConfiguration(dataClassDto.getConfiguration());
         else
             dataClass.setConfiguration(null);
-        return dataClassRepository.save(dataClass);
+        DataClass saved = dataClassRepository.save(dataClass);
+        AuditLog.log("class.modify", "id={} name={}", saved.getId(), saved.getName());
+        return saved;
     }
 
     public void deleteDataClass(long dataClassId) throws ItemNotFoundException, ItemAlreadyUsedException {
@@ -124,6 +129,7 @@ public class DataClassService {
 
         dataClass.setDeleted(true);
         dataClassRepository.save(dataClass);
+        AuditLog.log("class.delete", "id={} name={}", dataClass.getId(), dataClass.getName());
     }
 
 }

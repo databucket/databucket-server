@@ -11,6 +11,7 @@ import pl.databucket.server.entity.DataFilter;
 import pl.databucket.server.entity.Task;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.BucketRepository;
 import pl.databucket.server.repository.DataClassRepository;
 import pl.databucket.server.repository.DataFilterRepository;
@@ -68,6 +69,7 @@ public class TaskService {
         }
 
         modelMapper.map(taskRepository.save(task), taskDto);
+        AuditLog.log("task.create", "id={} name={}", task.getId(), task.getName());
         return taskDto;
     }
 
@@ -123,6 +125,7 @@ public class TaskService {
             task.setDataFilter(null);
 
         modelMapper.map(taskRepository.save(task), taskDto);
+        AuditLog.log("task.modify", "id={} name={}", task.getId(), task.getName());
         return taskDto;
     }
 
@@ -137,6 +140,7 @@ public class TaskService {
 
         task.setDeleted(true);
         taskRepository.save(task);
+        AuditLog.log("task.delete", "id={} name={}", task.getId(), task.getName());
     }
 
 }

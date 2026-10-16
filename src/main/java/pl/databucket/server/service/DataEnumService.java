@@ -12,6 +12,7 @@ import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemAlreadyUsedException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.DataColumnsRepository;
 import pl.databucket.server.repository.DataEnumRepository;
 import pl.databucket.server.repository.DataFilterRepository;
@@ -49,7 +50,9 @@ public class DataEnumService {
         dataEnum.setDescription(dataEnumDto.getDescription());
         dataEnum.setIconsEnabled(dataEnumDto.isIconsEnabled());
         dataEnum.setItems(dataEnumDto.getItems());
-        return dataEnumRepository.save(dataEnum);
+        DataEnum saved = dataEnumRepository.save(dataEnum);
+        AuditLog.log("enum.create", "id={} name={}", saved.getId(), saved.getName());
+        return saved;
     }
 
     public List<DataEnum> getDataEnums() {
@@ -73,7 +76,9 @@ public class DataEnumService {
         dataEnum.setDescription(dataEnumDto.getDescription());
         dataEnum.setIconsEnabled(dataEnumDto.isIconsEnabled());
         dataEnum.setItems(dataEnumDto.getItems());
-        return dataEnumRepository.save(dataEnum);
+        DataEnum saved = dataEnumRepository.save(dataEnum);
+        AuditLog.log("enum.modify", "id={} name={}", saved.getId(), saved.getName());
+        return saved;
     }
 
     public void deleteDataEnum(int dataEnumId) throws ItemNotFoundException, ItemAlreadyUsedException {
@@ -119,6 +124,7 @@ public class DataEnumService {
 
         dataEnum.setDeleted(true);
         dataEnumRepository.save(dataEnum);
+        AuditLog.log("enum.delete", "id={} name={}", dataEnum.getId(), dataEnum.getName());
     }
 
 }

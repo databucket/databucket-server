@@ -21,6 +21,7 @@ import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.NoAccessToProjectException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.ProjectRepository;
 import pl.databucket.server.repository.TeamRepository;
 import pl.databucket.server.repository.UserRepository;
@@ -130,7 +131,9 @@ public class UserService implements UserDetailsService {
             user.setTeams(new HashSet<>(teams));
         }
 
-        return modelMapper.map(userRepository.save(user), UserDtoResponse.class);
+        User saved = userRepository.save(user);
+        AuditLog.log("user.modify-teams", "id={} name={} teams={}", saved.getId(), saved.getUsername(), saved.getTeamsIds());
+        return modelMapper.map(saved, UserDtoResponse.class);
     }
 
     public void changePassword(ChangePasswordDtoRequest changePasswordDtoRequest) {
@@ -152,6 +155,7 @@ public class UserService implements UserDetailsService {
             user.setPassword(bcryptEncoder.encode(changePasswordDtoRequest.getNewPassword()));
             user.setChangePassword(false);
             userRepository.save(user);
+            AuditLog.log("auth.password-change", "user={}", user.getUsername());
         } else
             throw new IllegalArgumentException("The given user does not exist.");
     }

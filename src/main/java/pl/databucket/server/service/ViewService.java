@@ -8,6 +8,7 @@ import pl.databucket.server.dto.ViewDto;
 import pl.databucket.server.entity.*;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 
 import java.util.Collections;
@@ -95,6 +96,7 @@ public class ViewService {
         }
 
         modelMapper.map(viewRepository.save(view), viewDto);
+        AuditLog.log("view.create", "id={} name={}", view.getId(), view.getName());
         return viewDto;
     }
 
@@ -168,6 +170,7 @@ public class ViewService {
             view.setTeams(null);
 
         modelMapper.map(viewRepository.save(view), viewDto);
+        AuditLog.log("view.modify", "id={} name={}", view.getId(), view.getName());
         return viewDto;
     }
 
@@ -184,6 +187,7 @@ public class ViewService {
 
         view.setDeleted(true);
         viewRepository.save(view);
+        AuditLog.log("view.delete", "id={} name={}", view.getId(), view.getName());
     }
 
     public List<View> getAccessTreeViews(User user) {

@@ -10,6 +10,7 @@ import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 
 import java.util.HashSet;
@@ -56,6 +57,7 @@ public class TeamService {
         }
 
         modelMapper.map(teamRepository.save(team), teamDto);
+        AuditLog.log("team.create", "id={} name={}", team.getId(), team.getName());
         return teamDto;
     }
 
@@ -93,6 +95,7 @@ public class TeamService {
         }
 
         modelMapper.map(teamRepository.save(team), teamDto);
+        AuditLog.log("team.modify", "id={} name={}", team.getId(), team.getName());
         return teamDto;
     }
 
@@ -124,5 +127,6 @@ public class TeamService {
 
         team.setDeleted(true);
         teamRepository.save(team);
+        AuditLog.log("team.delete", "id={} name={}", team.getId(), team.getName());
     }
 }

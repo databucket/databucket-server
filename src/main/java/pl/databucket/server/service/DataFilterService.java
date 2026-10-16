@@ -11,6 +11,7 @@ import pl.databucket.server.entity.View;
 import pl.databucket.server.exception.ItemAlreadyUsedException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.DataClassRepository;
 import pl.databucket.server.repository.DataFilterRepository;
 import pl.databucket.server.repository.TaskRepository;
@@ -53,7 +54,11 @@ public class DataFilterService {
                 throw new ItemNotFoundException(DataClass.class, dataFilterDto.getClassId());
         }
 
-        return filterRepository.save(dataFilter);
+        DataFilter saved = filterRepository.save(dataFilter);
+
+        AuditLog.log("filter.create", "id={} name={}", saved.getId(), saved.getName());
+
+        return saved;
     }
 
     public List<DataFilter> getFilters() {
@@ -83,7 +88,11 @@ public class DataFilterService {
         } else
             dataFilter.setDataClass(null);
 
-        return filterRepository.save(dataFilter);
+        DataFilter saved = filterRepository.save(dataFilter);
+
+        AuditLog.log("filter.modify", "id={} name={}", saved.getId(), saved.getName());
+
+        return saved;
     }
 
     public void deleteFilter(long filterId) throws ItemNotFoundException, ItemAlreadyUsedException {
@@ -107,5 +116,6 @@ public class DataFilterService {
 
         dataFilter.setDeleted(true);
         filterRepository.save(dataFilter);
+        AuditLog.log("filter.delete", "id={} name={}", dataFilter.getId(), dataFilter.getName());
     }
 }
