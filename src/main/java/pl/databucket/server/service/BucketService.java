@@ -18,6 +18,8 @@ import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.repository.*;
 import pl.databucket.server.service.data.Query;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +32,9 @@ public class BucketService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private BucketRepository bucketRepository;
@@ -355,10 +360,21 @@ public class BucketService {
     }
 
     public List<Bucket> getAccessTreeBuckets(User user) {
-        return bucketRepository.findAllByDeletedOrderById(false).stream().filter(bucket -> hasUserAccessToBucket(bucket, user)).collect(Collectors.toList());
+        return bucketRepository.findAllByDeletedOrderById(false).stream().filter(bucket -> hasAccess(bucket, user)).collect(Collectors.toList());
     }
 
+    /**
+     * Data controllers pass a bucket and a user loaded in earlier transactions. Their lazy relations
+     * can no longer be read, and the checks below compare entities by identity, which only holds
+     * within one session. So the check runs on copies managed by the current session.
+     */
     public boolean hasUserAccessToBucket(Bucket bucket, User user) {
+        Bucket managedBucket = entityManager.contains(bucket) ? bucket : bucketRepository.getReferenceById(bucket.getId());
+        User managedUser = entityManager.contains(user) ? user : userRepository.getReferenceById(user.getId());
+        return hasAccess(managedBucket, managedUser);
+    }
+
+    private boolean hasAccess(Bucket bucket, User user) {
         boolean accessForUser = bucket.getUsers().size() > 0 && bucket.getUsers().contains(user);
 
         if (accessForUser)
