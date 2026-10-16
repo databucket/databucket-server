@@ -1,7 +1,8 @@
 databucket:
   # Upper bound on requests served at once. Both the Tomcat worker threads and the Hikari pool are
-  # sized from it: with open-in-view a request holds its connection until the response is written,
-  # so more threads than connections would only block on the pool.
+  # sized from it, so threads do not compete for connections: requests over the limit queue in Tomcat
+  # (server.tomcat.accept-count) instead. A request holds a connection only inside a transaction, so
+  # the threads may be raised above the pool later if requests spend time outside the database.
   max-concurrent-requests: 30
 
 spring:
