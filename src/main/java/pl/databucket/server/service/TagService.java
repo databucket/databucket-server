@@ -72,7 +72,7 @@ public class TagService {
         Tag tag = tagRepository.findByIdAndDeleted(tagDto.getId(), false);
 
         if (tag == null)
-            throw new ItemNotFoundException(Tag.class, tag.getId());
+            throw new ItemNotFoundException(Tag.class, tagDto.getId());
 
         if (!tag.getName().equals(tagDto.getName()))
             if (tagRepository.existsByNameAndDeleted(tagDto.getName(), false))
