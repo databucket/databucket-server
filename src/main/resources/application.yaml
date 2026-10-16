@@ -8,7 +8,7 @@ spring:
   jpa:
     generate-ddl: true
     hibernate.ddl-auto: update
-    open-in-view: true
+    open-in-view: false
     properties:
       hibernate:
         session_factory.interceptor: pl.databucket.server.tenant.EntityInterceptor
