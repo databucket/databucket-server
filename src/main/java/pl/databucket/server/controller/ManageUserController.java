@@ -1,7 +1,6 @@
 package pl.databucket.server.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.AuthReqDTO;
 import pl.databucket.server.dto.ManageUserDtoRequest;
 import pl.databucket.server.dto.ManageUserDtoResponse;
-import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
@@ -18,7 +16,6 @@ import pl.databucket.server.service.ManageUserService;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Hidden
 @PreAuthorize("hasRole('SUPER')")
@@ -30,17 +27,12 @@ public class ManageUserController {
     @Autowired
     private ManageUserService manageUserService;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(ManageUserController.class);
 
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody ManageUserDtoRequest manageUserDtoRequest) {
         try {
-            User user = manageUserService.createUser(manageUserDtoRequest);
-            ManageUserDtoResponse manageUserDtoResponse = new ManageUserDtoResponse();
-            modelMapper.map(user, manageUserDtoResponse);
+            ManageUserDtoResponse manageUserDtoResponse = manageUserService.createUser(manageUserDtoRequest);
             return new ResponseEntity<>(manageUserDtoResponse, HttpStatus.CREATED);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
@@ -54,8 +46,7 @@ public class ManageUserController {
     @GetMapping
     public ResponseEntity<?> getUsers() {
         try {
-            List<User> users = manageUserService.getUsers();
-            List<ManageUserDtoResponse> usersDto = users.stream().map(item -> modelMapper.map(item, ManageUserDtoResponse.class)).collect(Collectors.toList());
+            List<ManageUserDtoResponse> usersDto = manageUserService.getUsers();
             return new ResponseEntity<>(usersDto, HttpStatus.OK);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
@@ -65,9 +56,7 @@ public class ManageUserController {
     @PutMapping
     public ResponseEntity<?> modifyUser(@Valid @RequestBody ManageUserDtoRequest userDtoRequest) {
         try {
-            User user = manageUserService.modifyUser(userDtoRequest);
-            ManageUserDtoResponse manageUserDtoResponse = new ManageUserDtoResponse();
-            modelMapper.map(user, manageUserDtoResponse);
+            ManageUserDtoResponse manageUserDtoResponse = manageUserService.modifyUser(userDtoRequest);
             return new ResponseEntity<>(manageUserDtoResponse, HttpStatus.OK);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);

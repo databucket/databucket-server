@@ -1,15 +1,18 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.configuration.AppProperties;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.AuthReqDTO;
 import pl.databucket.server.dto.ForgotPasswordReqDTO;
 import pl.databucket.server.dto.ManageUserDtoRequest;
+import pl.databucket.server.dto.ManageUserDtoResponse;
 import pl.databucket.server.dto.SignUpDtoRequest;
 import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.Role;
@@ -27,6 +30,7 @@ import jakarta.mail.MessagingException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service(value = "manageUserService")
@@ -53,11 +57,16 @@ public class ManageUserService {
     @Autowired
     private AppProperties appProperties;
 
-    public List<User> getUsers() {
-        return userRepository.findAllByOrderById();
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Transactional(readOnly = true)
+    public List<ManageUserDtoResponse> getUsers() {
+        return userRepository.findAllByOrderById().stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    public User createUser(ManageUserDtoRequest manageUserDtoRequest) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
+    @Transactional
+    public ManageUserDtoResponse createUser(ManageUserDtoRequest manageUserDtoRequest) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
         if (userRepository.existsByUsername(manageUserDtoRequest.getUsername()))
             throw new ItemAlreadyExistsException(User.class, manageUserDtoRequest.getUsername());
 
@@ -76,7 +85,7 @@ public class ManageUserService {
             newUser.setProjects(new HashSet<>(projects));
         }
 
-        return userRepository.save(newUser);
+        return toDto(userRepository.save(newUser));
     }
 
     public void signUpUser(SignUpDtoRequest signUpDtoRequest) throws MessagingException {
@@ -130,7 +139,8 @@ public class ManageUserService {
         userRepository.save(user);
     }
 
-    public User modifyUser(ManageUserDtoRequest manageUserDtoRequest) {
+    @Transactional
+    public ManageUserDtoResponse modifyUser(ManageUserDtoRequest manageUserDtoRequest) {
         User user = userRepository.findByUsername(manageUserDtoRequest.getUsername());
 
         // clear last send email dates when changed email address
@@ -154,7 +164,7 @@ public class ManageUserService {
             user.setProjects(new HashSet<>(projects));
         }
 
-        return userRepository.save(user);
+        return toDto(userRepository.save(user));
     }
 
     public void resetAndSendPassword(AuthReqDTO userDto) {
@@ -200,5 +210,9 @@ public class ManageUserService {
             userRepository.save(user);
         } else
             throw new AccountExpiredException("The confirmation link is expired!");
+    }
+
+    private ManageUserDtoResponse toDto(User user) {
+        return modelMapper.map(user, ManageUserDtoResponse.class);
     }
 }
