@@ -80,8 +80,7 @@ public class SessionController {
     @GetMapping(value="/tasks/{ids}")
     public ResponseEntity<?> getUserTasks(@PathVariable List<Long> ids) {
         try {
-            List<Task> tasks = taskService.getTasks(ids);
-            List<TaskDto> tasksDto = tasks.stream().map(item -> modelMapper.map(item, TaskDto.class)).collect(Collectors.toList());
+            List<TaskDto> tasksDto = taskService.getTasks(ids);
             return new ResponseEntity<>(tasksDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);

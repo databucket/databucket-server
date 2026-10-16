@@ -78,8 +78,11 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    public List<Task> getTasks(List<Long> ids) {
-        return taskRepository.findAllByDeletedAndIdIn(false, ids);
+    @Transactional(readOnly = true)
+    public List<TaskDto> getTasks(List<Long> ids) {
+        return taskRepository.findAllByDeletedAndIdIn(false, ids).stream()
+                .map(item -> modelMapper.map(item, TaskDto.class))
+                .collect(Collectors.toList());
     }
 
     public TaskDto modifyTask(TaskDto taskDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
