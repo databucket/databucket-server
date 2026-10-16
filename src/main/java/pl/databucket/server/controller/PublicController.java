@@ -90,7 +90,7 @@ public class PublicController {
     public ResponseEntity<?> signIn(
             @Parameter(description = "payload - username (required), password (required), projectId (optional)", required = true)
             @RequestBody AuthReqDTO authReqDTO) {
-        User user = userRepository.findByUsername(authReqDTO.getUsername());
+        User user = userRepository.findWithProjectsAndRolesByUsername(authReqDTO.getUsername());
         if (user == null)
             return exceptionFormatter.customException(new UsernameNotFoundException("Bad credentials"), HttpStatus.UNAUTHORIZED);
 
