@@ -1,5 +1,6 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 public class GroupService {
 
     @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
     private GroupRepository groupRepository;
 
     @Autowired
@@ -36,7 +40,7 @@ public class GroupService {
     private TeamRepository teamRepository;
 
 
-    public Group createGroup(GroupDto groupDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
+    public GroupDto createGroup(GroupDto groupDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
         Group group = new Group();
         group.setName(groupDto.getName());
         group.setShortName(groupDto.getShortName());
@@ -63,14 +67,18 @@ public class GroupService {
             group.setTeams(new HashSet<>(teams));
         }
 
-        return groupRepository.save(group);
+        modelMapper.map(groupRepository.save(group), groupDto);
+        return groupDto;
     }
 
-    public List<Group> getGroups() {
-        return groupRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<GroupDto> getGroups() {
+        return groupRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, GroupDto.class))
+                .collect(Collectors.toList());
     }
 
-    public Group modifyGroup(GroupDto groupDto) throws ItemNotFoundException, SomeItemsNotFoundException, ModifyByNullEntityIdException {
+    public GroupDto modifyGroup(GroupDto groupDto) throws ItemNotFoundException, SomeItemsNotFoundException, ModifyByNullEntityIdException {
         if (groupDto.getId() == null)
             throw new ModifyByNullEntityIdException(Group.class);
 
@@ -107,7 +115,8 @@ public class GroupService {
         } else
             group.setTeams(null);
 
-        return groupRepository.save(group);
+        modelMapper.map(groupRepository.save(group), groupDto);
+        return groupDto;
     }
 
     public void deleteGroup(Long groupId) throws ItemNotFoundException {

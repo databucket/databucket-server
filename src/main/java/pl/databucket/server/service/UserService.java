@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.ChangePasswordDtoRequest;
 import pl.databucket.server.dto.UserDtoRequest;
+import pl.databucket.server.dto.TeamDto;
 import pl.databucket.server.dto.UserDtoResponse;
 import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.Team;
@@ -85,7 +86,7 @@ public class UserService implements UserDetailsService {
         if (project.isEmpty())
             throw new ItemNotFoundException(Project.class, projectId);
 
-        Set<Short> projectTeams = teamService.getTeams().stream().map(Team::getId).collect(Collectors.toSet());
+        Set<Short> projectTeams = teamService.getTeams().stream().map(TeamDto::getId).collect(Collectors.toSet());
         List<UserDtoResponse> usersDto = userRepository.findUsersByProjectsContainsOrderById(project.get()).stream()
                 .map(user -> modelMapper.map(user, UserDtoResponse.class))
                 .collect(Collectors.toList());
