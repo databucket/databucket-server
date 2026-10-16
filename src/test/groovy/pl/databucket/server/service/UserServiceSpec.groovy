@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import pl.databucket.server.configuration.ApplicationConfiguration
 import pl.databucket.server.configuration.Constants
 import pl.databucket.server.dto.ChangePasswordDtoRequest
 import pl.databucket.server.dto.UserDtoRequest
@@ -30,6 +31,7 @@ class UserServiceSpec extends Specification {
     ProjectRepository projectRepository = Mock()
     TeamRepository teamRepository = Mock()
     BCryptPasswordEncoder bcryptEncoder = Mock()
+    TeamService teamService = Mock()
 
     @Subject
     UserService userService
@@ -40,6 +42,8 @@ class UserServiceSpec extends Specification {
         setField(userService, "projectRepository", projectRepository)
         setField(userService, "teamRepository", teamRepository)
         setField(userService, "bcryptEncoder", bcryptEncoder)
+        setField(userService, "teamService", teamService)
+        setField(userService, "modelMapper", new ApplicationConfiguration().modelMapper())
     }
 
     // ==================== loadUserByUsername Tests ====================
@@ -152,6 +156,7 @@ class UserServiceSpec extends Specification {
         and: "repositories return data"
         projectRepository.findById(1) >> Optional.of(project)
         userRepository.findUsersByProjectsContainsOrderById(project) >> [user1, user2]
+        teamService.getTeams() >> []
 
         when: "getting users for project"
         def result = userService.getUsers(1)
@@ -199,9 +204,7 @@ class UserServiceSpec extends Specification {
 
         then: "user is updated with teams"
         result != null
-        result.teams.size() == 2
-        result.teams.any { it.name == "Team A" }
-        result.teams.any { it.name == "Team B" }
+        result.teamsIds == [1, 2] as Set<Short>
 
         and: "repository save was called and returns the user"
         1 * userRepository.save(user) >> user
@@ -222,7 +225,7 @@ class UserServiceSpec extends Specification {
         def result = userService.modifyUser(userDto)
 
         then: "teams are not modified"
-        result.teams.size() == 1
+        result.teamsIds == [1] as Set<Short>
         0 * teamRepository.findAllByDeletedAndIdIn(_, _)
 
         and: "user is saved"
