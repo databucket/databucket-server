@@ -19,6 +19,7 @@ import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.Team;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ItemNotFoundException;
+import pl.databucket.server.exception.NoAccessToProjectException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
 import pl.databucket.server.repository.ProjectRepository;
 import pl.databucket.server.repository.TeamRepository;
@@ -80,6 +81,23 @@ public class UserService implements UserDetailsService {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName())));
         return authorities;
+    }
+
+    /**
+     * The same conditions as signing in to a project: the user is assigned to it, and it is enabled and not expired.
+     */
+    @Transactional(readOnly = true)
+    public void checkProjectAccess(String username, Integer projectId) throws NoAccessToProjectException {
+        User user = userRepository.findByUsername(username);
+        Project project = user.getProjects().stream()
+                .filter(item -> projectId != null && item.getId() == projectId)
+                .findFirst()
+                .orElseThrow(() -> new NoAccessToProjectException("The user is not assigned to given project!"));
+
+        if (!project.getEnabled())
+            throw new NoAccessToProjectException("The project is disabled!");
+        if (project.isExpired())
+            throw new NoAccessToProjectException("The project expired!");
     }
 
     @Transactional(readOnly = true)

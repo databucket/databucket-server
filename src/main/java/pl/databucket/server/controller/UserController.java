@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.*;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
+import pl.databucket.server.exception.NoAccessToProjectException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
 import pl.databucket.server.security.CustomUserDetails;
 import pl.databucket.server.security.TokenProvider;
@@ -75,9 +76,12 @@ public class UserController {
     @PostMapping(value = "/change-project")
     public ResponseEntity<?> changeProject(@Valid @RequestBody AuthReqDTO userDto) {
         try {
+            userService.checkProjectAccess(SecurityContextHolder.getContext().getAuthentication().getName(), userDto.getProjectId());
             AuthRespDTO authDtoResponse = new AuthRespDTO();
             authDtoResponse.setToken(jwtTokenUtil.generateToken(SecurityContextHolder.getContext().getAuthentication(), userDto.getProjectId()));
             return new ResponseEntity<>(authDtoResponse, HttpStatus.OK);
+        } catch (NoAccessToProjectException e) {
+            return exceptionFormatter.customException(e, HttpStatus.FORBIDDEN);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }
