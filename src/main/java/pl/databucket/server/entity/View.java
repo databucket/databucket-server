@@ -53,11 +53,11 @@ public class View extends Auditable<String> implements TenantSupport {
 			inverseJoinColumns = {@JoinColumn(name = "bucket_id")})
 	private Set<Bucket> buckets;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "columns_id", referencedColumnName = "columns_id")
 	private DataColumns dataColumns;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
 	private DataFilter dataFilter;
 
@@ -74,7 +74,7 @@ public class View extends Auditable<String> implements TenantSupport {
 			inverseJoinColumns = {@JoinColumn(name = "user_id")})
 	private Set<User> users;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
 	private Role role;
 

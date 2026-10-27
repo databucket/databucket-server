@@ -47,7 +47,7 @@ public class Bucket extends Auditable<String> implements TenantSupport {
     @Column(length = Constants.DESCRIPTION_MAX)
     private String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "class_id", referencedColumnName = "class_id")
     private DataClass dataClass;
 
@@ -78,7 +78,7 @@ public class Bucket extends Auditable<String> implements TenantSupport {
             inverseJoinColumns = {@JoinColumn(name = "user_id")})
     private Set<User> users;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "role_id")
     private Role role;
 

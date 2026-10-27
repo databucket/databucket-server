@@ -56,7 +56,7 @@ public class Group extends Auditable<String> implements TenantSupport {
 			inverseJoinColumns = {@JoinColumn(name = "user_id")})
 	private Set<User> users;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
 	private Role role;
 

@@ -38,7 +38,7 @@ public class Task extends Auditable<String> implements TenantSupport {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
 	private DataClass dataClass; // class support
 
@@ -54,7 +54,7 @@ public class Task extends Auditable<String> implements TenantSupport {
 			inverseJoinColumns = {@JoinColumn(name = "class_id")})
 	private Set<DataClass> dataClasses; // visible by classes
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "filter_id", referencedColumnName = "filter_id")
 	private DataFilter dataFilter;
 
