@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Email;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ public class User extends Auditable<String> implements Serializable {
     private String description;
 
     @Email
-    @Column
+    @Column(unique = true)
     private String email;
 
     @Column
@@ -75,6 +76,17 @@ public class User extends Auditable<String> implements Serializable {
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "team_id")})
     private Set<Team> teams;
+
+    // emails are unique case-insensitively, so they are stored lower-cased and a blank one as null
+    public static String normalizeEmail(String email) {
+        if (email == null || email.isBlank())
+            return null;
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    public void setEmail(String email) {
+        this.email = normalizeEmail(email);
+    }
 
     public Set<Short> getRolesIds() {
         if (roles != null && !roles.isEmpty())

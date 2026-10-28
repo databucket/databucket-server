@@ -71,6 +71,10 @@ public class ManageUserService {
         if (userRepository.existsByUsername(manageUserDtoRequest.getUsername()))
             throw new ItemAlreadyExistsException(User.class, manageUserDtoRequest.getUsername());
 
+        String email = User.normalizeEmail(manageUserDtoRequest.getEmail());
+        if (email != null && userRepository.existsByEmailIgnoreCase(email))
+            throw new ItemAlreadyExistsException(User.class, "email", email);
+
         User newUser = new User();
         newUser.setUsername(manageUserDtoRequest.getUsername());
         newUser.setEmail(manageUserDtoRequest.getEmail());
@@ -107,13 +111,13 @@ public class ManageUserService {
         newUser = userRepository.save(newUser);
         AuditLog.log("auth.signup", "id={} name={}", newUser.getId(), newUser.getUsername());
 
-        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(signUpDtoRequest.getEmail()), appProperties.getMailFrom());
+        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(newUser.getEmail()), appProperties.getMailFrom());
     }
 
     public void signUpUserConfirmation(String jwts) throws ForbiddenRepetitionException, MessagingException {
         if (!jwtTokenUtil.isTokenExpired(jwts)) {
             String email = jwtTokenUtil.unpackFromJwts(jwts);
-            User user = userRepository.findByEmail(email);
+            User user = userRepository.findByEmailIgnoreCase(email);
 
             if (user.getEnabled())
                 throw new ForbiddenRepetitionException("The user has been already activated");
@@ -128,10 +132,10 @@ public class ManageUserService {
     }
 
     public void forgotPasswordMessage(ForgotPasswordReqDTO forgotPasswordReqDTO) throws ForbiddenRepetitionException, MessagingException, UsernameNotFoundException {
-        if (!userRepository.existsByEmail(forgotPasswordReqDTO.getEmail()))
+        if (!userRepository.existsByEmailIgnoreCase(User.normalizeEmail(forgotPasswordReqDTO.getEmail())))
             throw new UsernameNotFoundException("User not found! Make sure you have entered the correct email address.");
 
-        User user = userRepository.findByEmail(forgotPasswordReqDTO.getEmail());
+        User user = userRepository.findByEmailIgnoreCase(User.normalizeEmail(forgotPasswordReqDTO.getEmail()));
 
         if (user.getLastSendEmailForgotPasswordLinkDate() != null) {
             Instant lastSendEmailTime = user.getLastSendEmailForgotPasswordLinkDate().toInstant();
@@ -141,18 +145,22 @@ public class ManageUserService {
                 throw new ForbiddenRepetitionException("The confirmation link has been send within last 48 hours. Search it in your email inbox.");
         }
 
-        mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(forgotPasswordReqDTO.getEmail()), appProperties.getMailFrom());
+        mailSenderService.sendForgotPasswordLink(user, forgotPasswordReqDTO.getUrl() + jwtTokenUtil.packToJwts(user.getEmail()), appProperties.getMailFrom());
         user.setLastSendEmailForgotPasswordLinkDate(new Date());
         userRepository.save(user);
         AuditLog.log("auth.forgot-password", "id={} name={}", user.getId(), user.getUsername());
     }
 
     @Transactional
-    public ManageUserDtoResponse modifyUser(ManageUserDtoRequest manageUserDtoRequest) {
+    public ManageUserDtoResponse modifyUser(ManageUserDtoRequest manageUserDtoRequest) throws ItemAlreadyExistsException {
         User user = userRepository.findByUsername(manageUserDtoRequest.getUsername());
 
+        String email = User.normalizeEmail(manageUserDtoRequest.getEmail());
+        if (email != null && userRepository.existsByEmailIgnoreCaseAndIdNot(email, user.getId()))
+            throw new ItemAlreadyExistsException(User.class, "email", email);
+
         // clear last send email dates when changed email address
-        if (user.getEmail() != null && !user.getEmail().equals(manageUserDtoRequest.getEmail())) {
+        if (user.getEmail() != null && !user.getEmail().equals(email)) {
             user.setLastSendEmailForgotPasswordLinkDate(null);
             user.setLastSendEmailTempPasswordDate(null);
         }
@@ -193,7 +201,7 @@ public class ManageUserService {
     public void resetAndSendPassword(String jwts) throws ForbiddenRepetitionException, MessagingException {
         if (!jwtTokenUtil.isTokenExpired(jwts)) {
             String email = jwtTokenUtil.unpackFromJwts(jwts);
-            User user = userRepository.findByEmail(email);
+            User user = userRepository.findByEmailIgnoreCase(email);
 
             if (user.getLastSendEmailTempPasswordDate() != null) {
                 Instant lastSendEmailTime = user.getLastSendEmailTempPasswordDate().toInstant();
