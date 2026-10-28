@@ -13,9 +13,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String name);
     @EntityGraph(attributePaths = {"projects", "roles"})
     User findWithProjectsAndRolesByUsername(String name);
-    User findByEmail(String email);
+    User findByEmailIgnoreCase(String email);
     boolean existsByUsername(String name);
-    boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, long id);
     List<User> findAllByIdIn(Iterable<Long> ids);
     List<User> findAllByOrderById();
     List<User> findUsersByProjectsContainsOrderById(Project project);

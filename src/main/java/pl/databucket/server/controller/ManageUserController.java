@@ -58,6 +58,8 @@ public class ManageUserController {
         try {
             ManageUserDtoResponse manageUserDtoResponse = manageUserService.modifyUser(userDtoRequest);
             return new ResponseEntity<>(manageUserDtoResponse, HttpStatus.OK);
+        } catch (ItemAlreadyExistsException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

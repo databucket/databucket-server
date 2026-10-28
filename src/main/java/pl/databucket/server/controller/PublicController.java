@@ -294,7 +294,7 @@ public class PublicController {
             if (userRepository.existsByUsername(signUpDtoRequest.getUsername()))
                 return exceptionFormatter.customPublicException("Given username already exists", HttpStatus.CONFLICT);
 
-            if (userRepository.existsByEmail(signUpDtoRequest.getEmail()))
+            if (userRepository.existsByEmailIgnoreCase(User.normalizeEmail(signUpDtoRequest.getEmail())))
                 return exceptionFormatter.customPublicException("Given email already exists", HttpStatus.CONFLICT);
 
             manageUserService.signUpUser(signUpDtoRequest);
