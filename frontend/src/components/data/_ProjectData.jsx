@@ -33,7 +33,7 @@ import {
 } from "../../utils/ConfigurationStorage";
 import {Link, Navigate} from 'react-router-dom';
 import BucketDataTable from "./BucketDataTable";
-import {getProjectSettingsPath} from "../../route/AppRouter";
+import {getProjectDataPath, getProjectSettingsPath} from "../../route/AppRouter";
 import GroupMenuSelector from "./GroupMenuSelector";
 import BucketListSelector from "./BucketListSelector";
 import InfoDialog from "../dialogs/InfoDialog";
@@ -41,8 +41,8 @@ import BucketTabSelector from "./BucketTabSelector";
 import UserProjects from "./UserProjects";
 import {MessageBox} from "../utils/MessageBox";
 import {handleErrors} from "../../utils/FetchHelper";
-import {getButtonColor, getPutOptions} from "../../utils/MaterialTableHelper";
-import {getBaseUrl, getSwaggerDocPath} from "../../utils/UrlBuilder";
+import {getButtonColor, getPostOptions} from "../../utils/MaterialTableHelper";
+import {getBaseUrl, getContextPath, getSwaggerDocPath} from "../../utils/UrlBuilder";
 import AccessContext from "../../context/access/AccessContext";
 import {
     CenteredWaitingCircularProgress
@@ -182,9 +182,14 @@ export default function ProjectData() {
     }
 
     const onChangeProject = (projectId) => {
-        const options = getPutOptions({projectId});
+        const options = getPostOptions({projectId});
         fetch(getBaseUrl('users/change-project'), options)
             .then(handleErrors)
+            .then(data => {
+                setToken(data.token);
+                setActiveProjectId(projectId);
+                window.location.assign(getContextPath() + getProjectDataPath());
+            })
             .catch(error => {
                 setMessageBox({
                     open: true,
@@ -192,11 +197,6 @@ export default function ProjectData() {
                     title: 'Error',
                     message: error
                 });
-            })
-            .then(data => {
-                setToken(data.token);
-                setActiveProjectId(projectId);
-                window.location.reload();
             });
     };
 
