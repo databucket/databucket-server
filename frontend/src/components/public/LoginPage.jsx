@@ -22,6 +22,7 @@ import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRout
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import ReactGA from 'react-ga';
 import {Link} from "react-router-dom";
+import {version} from "../../../package.json";
 
 const initialState = {
     username: "",
@@ -286,7 +287,7 @@ export default function LoginPage() {
         <div className="ContainerClass">
             {<img src={Logo} alt=''/>}
             {paper()}
-            <Typography variant="caption">5.0.2</Typography>
+            <Typography variant="caption">{version}</Typography>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
