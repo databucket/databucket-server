@@ -18,7 +18,9 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    all*.exclude module: 'spring-boot-starter-logging'
+    configureEach {
+        exclude module: 'spring-boot-starter-logging'
+    }
 }
 
 repositories {
@@ -60,15 +62,20 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    afterSuite { desc, result ->
-        if (!desc.parent) {
-            println("${result.resultType} " +
-                    "(${result.testCount} tests, " +
-                    "${result.successfulTestCount} successes, " +
-                    "${result.failedTestCount} failures, " +
-                    "${result.skippedTestCount} skipped)")
+    addTestListener(new TestListener() {
+        void beforeSuite(TestDescriptor desc) {}
+        void beforeTest(TestDescriptor desc) {}
+        void afterTest(TestDescriptor desc, TestResult result) {}
+        void afterSuite(TestDescriptor desc, TestResult result) {
+            if (!desc.parent) {
+                println("${result.resultType} " +
+                        "(${result.testCount} tests, " +
+                        "${result.successfulTestCount} successes, " +
+                        "${result.failedTestCount} failures, " +
+                        "${result.skippedTestCount} skipped)")
+            }
         }
-    }
+    })
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -79,24 +86,17 @@ tasks.register('deleteStatic') {
     }
 }
 
-tasks.register('buildFrontend') {
-    inputs.dir("frontend")
-    doLast {
-        String npm = 'npm'
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            npm = 'npm.cmd'
-        }
+String npm = Os.isFamily(Os.FAMILY_WINDOWS) ? 'npm.cmd' : 'npm'
 
-        exec {
-            workingDir 'frontend'
-            commandLine npm, 'install'
-        }
+tasks.register('installFrontend', Exec) {
+    workingDir 'frontend'
+    commandLine npm, 'install'
+}
 
-        exec {
-            workingDir 'frontend'
-            commandLine npm, 'run', 'build'
-        }
-    }
+tasks.register('buildFrontend', Exec) {
+    dependsOn tasks.named('installFrontend')
+    workingDir 'frontend'
+    commandLine npm, 'run', 'build'
 }
 
 tasks.register('copyFrontend') {
