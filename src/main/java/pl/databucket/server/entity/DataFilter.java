@@ -34,7 +34,7 @@ public class DataFilter extends Auditable<String> {
 	@Column(length = Constants.DESCRIPTION_MAX)
 	private String description;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "class_id", referencedColumnName = "class_id")
 	private DataClass dataClass;
 

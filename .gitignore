@@ -45,3 +45,4 @@ out
 bin
 src/main/resources/static
 /.claude/
+/src/main/resources/application-kslysz.yaml
