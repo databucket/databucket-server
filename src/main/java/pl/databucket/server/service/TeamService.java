@@ -1,20 +1,28 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.TeamDto;
 import pl.databucket.server.entity.*;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class TeamService {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -33,7 +41,7 @@ public class TeamService {
 
     private final Misc misc = new Misc();
 
-    public Team createTeam(TeamDto teamDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
+    public TeamDto createTeam(TeamDto teamDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
         Team team = new Team();
         team.setName(teamDto.getName());
         team.setDescription(teamDto.getDescription());
@@ -48,14 +56,19 @@ public class TeamService {
             team.setUsers(new HashSet<>(users));
         }
 
-        return teamRepository.save(team);
+        modelMapper.map(teamRepository.save(team), teamDto);
+        AuditLog.log("team.create", "id={} name={}", team.getId(), team.getName());
+        return teamDto;
     }
 
-    public List<Team> getTeams() {
-        return teamRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<TeamDto> getTeams() {
+        return teamRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, TeamDto.class))
+                .collect(Collectors.toList());
     }
 
-    public Team modifyTeam(TeamDto teamDto) throws ItemNotFoundException, SomeItemsNotFoundException, ModifyByNullEntityIdException {
+    public TeamDto modifyTeam(TeamDto teamDto) throws ItemNotFoundException, SomeItemsNotFoundException, ModifyByNullEntityIdException {
         if (teamDto.getId() == null)
             throw new ModifyByNullEntityIdException(Team.class);
 
@@ -81,7 +94,9 @@ public class TeamService {
             team.setUsers(new HashSet<>(users));
         }
 
-        return teamRepository.save(team);
+        modelMapper.map(teamRepository.save(team), teamDto);
+        AuditLog.log("team.modify", "id={} name={}", team.getId(), team.getName());
+        return teamDto;
     }
 
     public void deleteTeam(short teamId) throws ItemNotFoundException {
@@ -112,5 +127,6 @@ public class TeamService {
 
         team.setDeleted(true);
         teamRepository.save(team);
+        AuditLog.log("team.delete", "id={} name={}", team.getId(), team.getName());
     }
 }

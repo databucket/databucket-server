@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.DataFilterDto;
 import pl.databucket.server.entity.DataFilter;
 import pl.databucket.server.exception.ExceptionFormatter;
+import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.service.DataFilterService;
 
@@ -75,6 +76,8 @@ public class DataFilterController {
         try {
             filterService.deleteFilter(filterId);
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

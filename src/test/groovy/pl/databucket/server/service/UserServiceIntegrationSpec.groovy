@@ -74,10 +74,10 @@ class UserServiceIntegrationSpec extends Specification {
         testProject = new Project(name: "Test Project")
         testProject = projectRepository.save(testProject)
 
-        // Create test team with project
+        // Create test team. Its project comes from @TenantId: the tenant of the test transaction,
+        // which is also the tenant the service sees, so the project id is not set by hand.
         testTeam = new Team(
                 name: "Test Team",
-                projectId: testProject.id,
                 deleted: false
         )
         testTeam = teamRepository.save(testTeam)
@@ -113,9 +113,7 @@ class UserServiceIntegrationSpec extends Specification {
         userService.loadUserByUsername("nonexistent")
 
         then: "exception is thrown"
-        // NOTE: This is a bug in UserService.loadUserByUsername() - it should throw UsernameNotFoundException
-        // but instead throws NullPointerException because it doesn't check if user is null
-        thrown(NullPointerException)
+        thrown(UsernameNotFoundException)
     }
 
     def "should get user by username"() {
@@ -197,8 +195,7 @@ class UserServiceIntegrationSpec extends Specification {
 
         then: "user is updated with teams"
         result.username == "modifyuser"
-        result.teams.size() == 1
-        result.teams.first().name == "Test Team"
+        result.teamsIds == [testTeam.id] as Set
     }
 
     def "should change password successfully with correct current password"() {
@@ -406,7 +403,6 @@ class UserServiceIntegrationSpec extends Specification {
         def result = userService.modifyUser(userDto)
 
         then: "teams remain unchanged"
-        result.teams.size() == 1
-        result.teams.first().name == "Test Team"
+        result.teamsIds == [testTeam.id] as Set
     }
 }

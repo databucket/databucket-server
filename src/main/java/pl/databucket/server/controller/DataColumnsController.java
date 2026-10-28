@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.DataColumnsDto;
 import pl.databucket.server.entity.DataColumns;
 import pl.databucket.server.exception.ExceptionFormatter;
+import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.service.DataColumnsService;
 
@@ -74,6 +75,8 @@ public class DataColumnsController {
             columnsService.deleteColumns(columnsId);
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);

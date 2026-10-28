@@ -26,6 +26,7 @@ import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ForbiddenRepetitionException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.ManageUserService;
@@ -90,9 +91,11 @@ public class PublicController {
     public ResponseEntity<?> signIn(
             @Parameter(description = "payload - username (required), password (required), projectId (optional)", required = true)
             @RequestBody AuthReqDTO authReqDTO) {
-        User user = userRepository.findByUsername(authReqDTO.getUsername());
-        if (user == null)
+        User user = userRepository.findWithProjectsAndRolesByUsername(authReqDTO.getUsername());
+        if (user == null) {
+            AuditLog.log("auth.signin-failed", "user={} reason=unknown user", authReqDTO.getUsername());
             return exceptionFormatter.customException(new UsernameNotFoundException("Bad credentials"), HttpStatus.UNAUTHORIZED);
+        }
 
         try {
             AuthRespDTO authDtoResponse = new AuthRespDTO();
@@ -103,6 +106,7 @@ public class PublicController {
 
             if (user.isExpired()) {
                 authDtoResponse.setMessage("User access has expired!");
+                AuditLog.log("auth.signin-refused", "user={} reason={}", user.getUsername(), authDtoResponse.getMessage());
                 return new ResponseEntity<>(authDtoResponse, HttpStatus.FORBIDDEN);
             }
 
@@ -195,10 +199,16 @@ public class PublicController {
                 status = HttpStatus.FORBIDDEN;
             }
 
+            if (status == HttpStatus.OK)
+                AuditLog.log("auth.signin", "user={} project={}", user.getUsername(),
+                        authDtoResponse.getProject() != null ? authDtoResponse.getProject().getId() : null);
+            else
+                AuditLog.log("auth.signin-refused", "user={} reason={}", user.getUsername(), authDtoResponse.getMessage());
             return new ResponseEntity<>(authDtoResponse, status);
 
         } catch (AuthenticationException e) {
-            return exceptionFormatter.customException(authReqDTO.getUsername(), e, HttpStatus.UNAUTHORIZED);
+            AuditLog.log("auth.signin-failed", "user={} reason={}", authReqDTO.getUsername(), e.getMessage());
+            return exceptionFormatter.customException(e, HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -253,7 +263,7 @@ public class PublicController {
             manageUserService.resetAndSendPassword(jwts);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (MessagingException | MailSendException e) {
-            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+            return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (ForbiddenRepetitionException e) {
             return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
@@ -290,7 +300,7 @@ public class PublicController {
             manageUserService.signUpUser(signUpDtoRequest);
             return exceptionFormatter.responseMessage("An account has been created for a new user", HttpStatus.CREATED);
         } catch (MessagingException | MailSendException e) {
-            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+            return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -336,7 +346,7 @@ public class PublicController {
             manageUserService.signUpUserConfirmation(jwts);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (MessagingException | MailSendException e) {
-            return exceptionFormatter.customException("Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
+            return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
         } catch (ForbiddenRepetitionException e) {
             return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {

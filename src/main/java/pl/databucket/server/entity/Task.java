@@ -5,12 +5,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.TenantId;
 import org.hibernate.type.SqlTypes;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.TaskConfigDto;
-import pl.databucket.server.tenant.TenantSupport;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,8 +19,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Table(name="tasks")
-@Filter(name = "projectFilter", condition = "project_id = :projectId")
-public class Task extends Auditable<String> implements TenantSupport {
+public class Task extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_generator")
@@ -29,6 +27,7 @@ public class Task extends Auditable<String> implements TenantSupport {
 	@Column(name = "task_id", updatable = false, nullable = false)
 	private long id;
 
+	@TenantId
 	@Column(name = "project_id", nullable = false)
 	private Integer projectId;
 

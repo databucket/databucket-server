@@ -15,7 +15,6 @@ spring:
       ddl-auto: create-drop
     properties:
       hibernate:
-        session_factory.interceptor: pl.databucket.server.tenant.EntityInterceptor
         dialect: org.hibernate.dialect.H2Dialect
 #  security:
 #    oauth2:

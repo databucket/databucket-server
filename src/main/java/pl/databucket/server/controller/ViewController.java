@@ -1,14 +1,12 @@
 package pl.databucket.server.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.ViewDto;
-import pl.databucket.server.entity.View;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
@@ -16,7 +14,6 @@ import pl.databucket.server.service.ViewService;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Hidden
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -30,14 +27,10 @@ public class ViewController {
   @Autowired
   private ViewService viewService;
 
-  @Autowired
-  private ModelMapper modelMapper;
-
   @PostMapping
   public ResponseEntity<?> createView(@Valid @RequestBody ViewDto viewDto) {
     try {
-      View view = viewService.createView(viewDto);
-      modelMapper.map(view, viewDto);
+      viewDto = viewService.createView(viewDto);
       return new ResponseEntity<>(viewDto, HttpStatus.CREATED);
     } catch (ItemNotFoundException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
@@ -49,8 +42,7 @@ public class ViewController {
   @GetMapping
   public ResponseEntity<?> getViews() {
     try {
-      List<View> views = viewService.getViews();
-      List<ViewDto> viewsDto = views.stream().map(item -> modelMapper.map(item, ViewDto.class)).collect(Collectors.toList());
+      List<ViewDto> viewsDto = viewService.getViews();
       return new ResponseEntity<>(viewsDto, HttpStatus.OK);
     } catch (Exception ee) {
       return exceptionFormatter.defaultException(ee);
@@ -60,8 +52,7 @@ public class ViewController {
   @PutMapping
   public ResponseEntity<?> modifyView(@Valid @RequestBody ViewDto viewDto) {
     try {
-      View view = viewService.modifyView(viewDto);
-      modelMapper.map(view, viewDto);
+      viewDto = viewService.modifyView(viewDto);
       return new ResponseEntity<>(viewDto, HttpStatus.OK);
     } catch (ItemNotFoundException | ModifyByNullEntityIdException e) {
       return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
@@ -75,6 +66,8 @@ public class ViewController {
     try {
       viewService.deleteView(viewId);
       return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    } catch (ItemNotFoundException e) {
+      return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
     } catch (Exception e) {
       return exceptionFormatter.defaultException(e);
     }

@@ -2,20 +2,25 @@ package pl.databucket.server.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.BucketDto;
 import pl.databucket.server.entity.*;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 import pl.databucket.server.service.data.Query;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +28,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class BucketService {
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private BucketRepository bucketRepository;
@@ -54,7 +66,7 @@ public class BucketService {
 
     Logger logger = LoggerFactory.getLogger(BucketService.class);
 
-    public Bucket createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
+    public BucketDto createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
         if (bucketRepository.existsByNameAndDeleted(bucketDto.getName(), false))
             throw new ItemAlreadyExistsException(Bucket.class, bucketDto.getName());
 
@@ -143,7 +155,9 @@ public class BucketService {
             createAfterUpdateTrigger(bucket);
         }
 
-        return bucket;
+        AuditLog.log("bucket.create", "id={} name={}", bucket.getId(), bucket.getName());
+        modelMapper.map(bucket, bucketDto);
+        return bucketDto;
     }
 
     public Page<Bucket> getBuckets(Specification<Bucket> specification, Pageable pageable) {
@@ -154,15 +168,18 @@ public class BucketService {
         return bucketRepository.findByNameAndDeleted(bucketName, false);
     }
 
-    public List<Bucket> getBuckets() {
-        return bucketRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<BucketDto> getBuckets() {
+        return bucketRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, BucketDto.class))
+                .collect(Collectors.toList());
     }
 
     public List<Bucket> getBuckets(List<Long> ids) {
         return bucketRepository.findAllByDeletedAndIdIn(false, ids);
     }
 
-    public Bucket modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
+    public BucketDto modifyBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException, ModifyByNullEntityIdException {
         if (bucketDto.getId() == null)
             throw new ModifyByNullEntityIdException(Bucket.class);
 
@@ -247,7 +264,9 @@ public class BucketService {
         } else
             bucket.setRole(null);
 
-        return bucketRepository.save(bucket);
+        modelMapper.map(bucketRepository.save(bucket), bucketDto);
+        AuditLog.log("bucket.modify", "id={} name={}", bucket.getId(), bucket.getName());
+        return bucketDto;
     }
 
     public void deleteBucket(long bucketId) throws ItemNotFoundException {
@@ -284,6 +303,7 @@ public class BucketService {
         // Drop bucket table
         query = new Query(bucket.getTableName()).dropTable();
         jdbcTemplate.getJdbcTemplate().execute(query.toString(logger, null));
+        AuditLog.log("bucket.delete", "id={} name={}", bucket.getId(), bucket.getName());
     }
 
     private void createBeforeDeleteTrigger(Bucket bucket) {
@@ -344,10 +364,21 @@ public class BucketService {
     }
 
     public List<Bucket> getAccessTreeBuckets(User user) {
-        return bucketRepository.findAllByDeletedOrderById(false).stream().filter(bucket -> hasUserAccessToBucket(bucket, user)).collect(Collectors.toList());
+        return bucketRepository.findAllByDeletedOrderById(false).stream().filter(bucket -> hasAccess(bucket, user)).collect(Collectors.toList());
     }
 
+    /**
+     * Data controllers pass a bucket and a user loaded in earlier transactions. Their lazy relations
+     * can no longer be read, and the checks below compare entities by identity, which only holds
+     * within one session. So the check runs on copies managed by the current session.
+     */
     public boolean hasUserAccessToBucket(Bucket bucket, User user) {
+        Bucket managedBucket = entityManager.contains(bucket) ? bucket : bucketRepository.getReferenceById(bucket.getId());
+        User managedUser = entityManager.contains(user) ? user : userRepository.getReferenceById(user.getId());
+        return hasAccess(managedBucket, managedUser);
+    }
+
+    private boolean hasAccess(Bucket bucket, User user) {
         boolean accessForUser = bucket.getUsers().size() > 0 && bucket.getUsers().contains(user);
 
         if (accessForUser)

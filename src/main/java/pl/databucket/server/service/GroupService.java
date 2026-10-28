@@ -1,13 +1,16 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.GroupDto;
 import pl.databucket.server.entity.*;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.exception.SomeItemsNotFoundException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.*;
 
 import java.util.Collections;
@@ -16,7 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class GroupService {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private GroupRepository groupRepository;
@@ -34,7 +41,7 @@ public class GroupService {
     private TeamRepository teamRepository;
 
 
-    public Group createGroup(GroupDto groupDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
+    public GroupDto createGroup(GroupDto groupDto) throws ItemAlreadyExistsException, SomeItemsNotFoundException {
         Group group = new Group();
         group.setName(groupDto.getName());
         group.setShortName(groupDto.getShortName());
@@ -61,14 +68,19 @@ public class GroupService {
             group.setTeams(new HashSet<>(teams));
         }
 
-        return groupRepository.save(group);
+        modelMapper.map(groupRepository.save(group), groupDto);
+        AuditLog.log("group.create", "id={} name={}", group.getId(), group.getName());
+        return groupDto;
     }
 
-    public List<Group> getGroups() {
-        return groupRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<GroupDto> getGroups() {
+        return groupRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, GroupDto.class))
+                .collect(Collectors.toList());
     }
 
-    public Group modifyGroup(GroupDto groupDto) throws ItemNotFoundException, SomeItemsNotFoundException, ModifyByNullEntityIdException {
+    public GroupDto modifyGroup(GroupDto groupDto) throws ItemNotFoundException, SomeItemsNotFoundException, ModifyByNullEntityIdException {
         if (groupDto.getId() == null)
             throw new ModifyByNullEntityIdException(Group.class);
 
@@ -105,7 +117,9 @@ public class GroupService {
         } else
             group.setTeams(null);
 
-        return groupRepository.save(group);
+        modelMapper.map(groupRepository.save(group), groupDto);
+        AuditLog.log("group.modify", "id={} name={}", group.getId(), group.getName());
+        return groupDto;
     }
 
     public void deleteGroup(Long groupId) throws ItemNotFoundException {
@@ -120,6 +134,7 @@ public class GroupService {
 
         group.setDeleted(true);
         groupRepository.save(group);
+        AuditLog.log("group.delete", "id={} name={}", group.getId(), group.getName());
     }
 
     public List<Group> getAccessTreeGroups(User user) {

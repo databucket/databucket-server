@@ -1,7 +1,9 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.TaskDto;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.DataClass;
@@ -9,6 +11,7 @@ import pl.databucket.server.entity.DataFilter;
 import pl.databucket.server.entity.Task;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.BucketRepository;
 import pl.databucket.server.repository.DataClassRepository;
 import pl.databucket.server.repository.DataFilterRepository;
@@ -16,10 +19,15 @@ import pl.databucket.server.repository.TaskRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 public class TaskService {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -34,7 +42,7 @@ public class TaskService {
     private DataFilterRepository dataFilterRepository;
 
 
-    public Task createTask(TaskDto taskDto) throws ItemNotFoundException {
+    public TaskDto createTask(TaskDto taskDto) throws ItemNotFoundException {
         Task task = new Task();
         task.setName(taskDto.getName());
         task.setDescription(taskDto.getDescription());
@@ -60,18 +68,26 @@ public class TaskService {
             task.setDataFilter(dataFilter);
         }
 
-        return taskRepository.save(task);
+        modelMapper.map(taskRepository.save(task), taskDto);
+        AuditLog.log("task.create", "id={} name={}", task.getId(), task.getName());
+        return taskDto;
     }
 
-    public List<Task> getTasks() {
-        return taskRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<TaskDto> getTasks() {
+        return taskRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, TaskDto.class))
+                .collect(Collectors.toList());
     }
 
-    public List<Task> getTasks(List<Long> ids) {
-        return taskRepository.findAllByDeletedAndIdIn(false, ids);
+    @Transactional(readOnly = true)
+    public List<TaskDto> getTasks(List<Long> ids) {
+        return taskRepository.findAllByDeletedAndIdIn(false, ids).stream()
+                .map(item -> modelMapper.map(item, TaskDto.class))
+                .collect(Collectors.toList());
     }
 
-    public Task modifyTask(TaskDto taskDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
+    public TaskDto modifyTask(TaskDto taskDto) throws ItemNotFoundException, ModifyByNullEntityIdException {
         if (taskDto.getId() == null)
             throw new ModifyByNullEntityIdException(Task.class);
 
@@ -108,7 +124,9 @@ public class TaskService {
         } else
             task.setDataFilter(null);
 
-        return taskRepository.save(task);
+        modelMapper.map(taskRepository.save(task), taskDto);
+        AuditLog.log("task.modify", "id={} name={}", task.getId(), task.getName());
+        return taskDto;
     }
 
     public void deleteTask(long taskId) throws ItemNotFoundException {
@@ -122,6 +140,7 @@ public class TaskService {
 
         task.setDeleted(true);
         taskRepository.save(task);
+        AuditLog.log("task.delete", "id={} name={}", task.getId(), task.getName());
     }
 
 }

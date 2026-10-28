@@ -2,11 +2,13 @@ package pl.databucket.server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.SvgDto;
 import pl.databucket.server.entity.Svg;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.SvgRepository;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.Optional;
 
 
 @Service
+@Transactional
 public class SvgService {
 
     @Autowired
@@ -23,7 +26,9 @@ public class SvgService {
         Svg svg = new Svg();
         svg.setName(svgDto.getName());
         svg.setStructure(svgDto.getStructure());
-        return svgRepository.save(svg);
+        Svg saved = svgRepository.save(svg);
+        AuditLog.log("svg.create", "id={} name={}", saved.getId(), saved.getName());
+        return saved;
     }
 
     public Svg modifySvg(SvgDto svgDto) throws ModifyByNullEntityIdException {
@@ -34,7 +39,11 @@ public class SvgService {
         svg.setName(svgDto.getName());
         svg.setStructure(svgDto.getStructure());
 
-        return svgRepository.save(svg);
+        Svg saved = svgRepository.save(svg);
+
+        AuditLog.log("svg.modify", "id={} name={}", saved.getId(), saved.getName());
+
+        return saved;
     }
 
     public List<Svg> getSvgList() {
@@ -48,5 +57,6 @@ public class SvgService {
             throw new ItemNotFoundException(Svg.class, svgId);
 
         svgRepository.delete(svgOptional.get());
+        AuditLog.log("svg.delete", "id={} name={}", svgOptional.get().getId(), svgOptional.get().getName());
     }
 }

@@ -13,9 +13,7 @@ import pl.databucket.server.entity.*;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.service.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Hidden
@@ -25,16 +23,7 @@ import java.util.stream.Collectors;
 public class SessionController {
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private GroupService groupService;
-
-    @Autowired
-    private BucketService bucketService;
-
-    @Autowired
-    private ViewService viewService;
+    private AccessTreeService accessTreeService;
 
     @Autowired
     private DataColumnsService columnsService;
@@ -56,57 +45,11 @@ public class SessionController {
     @GetMapping(value="/access-tree")
     public ResponseEntity<?> getAccessTree() {
         try {
-            AccessTreeDto accessTreeDto = new AccessTreeDto();
-
-            User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            List<AuthProjectDTO> projects = user.getProjects().stream().map(item -> modelMapper.map(item, AuthProjectDTO.class)).collect(Collectors.toList());
-            accessTreeDto.setProjects(projects.stream().filter(project -> project.isEnabled() && !project.isExpired()).collect(Collectors.toList()));
-
-            List<Group> groups = groupService.getAccessTreeGroups(user);
-            accessTreeDto.setGroups(groups.stream().map(item -> modelMapper.map(item, AccessTreeGroupDto.class)).collect(Collectors.toList()));
-
-            List<Bucket> buckets = bucketService.getAccessTreeBuckets(user);
-            accessTreeDto.setBuckets(buckets.stream().map(item -> modelMapper.map(item, AccessTreeBucketDto.class)).collect(Collectors.toList()));
-
-            List<View> views = viewService.getAccessTreeViews(user);
-            accessTreeDto.setViews(views.stream().map(item -> modelMapper.map(item, AccessTreeViewDto.class)).collect(Collectors.toList()));
-
-            return new ResponseEntity<>(cleanAccessTree(accessTreeDto), HttpStatus.OK);
+            AccessTreeDto accessTreeDto = accessTreeService.getAccessTree(SecurityContextHolder.getContext().getAuthentication().getName());
+            return new ResponseEntity<>(accessTreeDto, HttpStatus.OK);
         } catch (IllegalArgumentException e1) {
             return exceptionFormatter.customException(e1, HttpStatus.NOT_ACCEPTABLE);
         }
-    }
-
-    /**
-     * Remove items from group.bucketsIds that not exist in buckets array
-     * Create orphaned buckets group if there is some orphaned buckets and number of groups is more than 0
-     */
-    private AccessTreeDto cleanAccessTree(AccessTreeDto accessTreeDto) {
-        if (accessTreeDto.getGroups().size() > 0) {
-            Set<Long> allUserBucketsIds = accessTreeDto.getBuckets().stream().map(AccessTreeBucketDto::getId).collect(Collectors.toSet());
-            Set<Long> allGroupsBucketsIds = new HashSet<>();
-
-            accessTreeDto.getGroups().stream().forEach(group -> {
-                if (group.getBucketsIds() != null) {
-                    Set<Long> checkedIds = group.getBucketsIds().stream().filter(allUserBucketsIds::contains).collect(Collectors.toSet());
-                    group.setBucketsIds(checkedIds);
-                    allGroupsBucketsIds.addAll(group.getBucketsIds());
-                }
-            });
-
-            allUserBucketsIds.removeAll(allGroupsBucketsIds);
-            if (allUserBucketsIds.size() > 0) {
-                AccessTreeGroupDto orphanedBucketsGroupDto = new AccessTreeGroupDto();
-                orphanedBucketsGroupDto.setId(0L);
-                orphanedBucketsGroupDto.setShortName("ORP");
-                orphanedBucketsGroupDto.setName("Orphaned");
-                orphanedBucketsGroupDto.setBucketsIds(allUserBucketsIds);
-                accessTreeDto.getGroups().add(orphanedBucketsGroupDto);
-            }
-        }
-
-        return accessTreeDto;
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
@@ -137,8 +80,7 @@ public class SessionController {
     @GetMapping(value="/tasks/{ids}")
     public ResponseEntity<?> getUserTasks(@PathVariable List<Long> ids) {
         try {
-            List<Task> tasks = taskService.getTasks(ids);
-            List<TaskDto> tasksDto = tasks.stream().map(item -> modelMapper.map(item, TaskDto.class)).collect(Collectors.toList());
+            List<TaskDto> tasksDto = taskService.getTasks(ids);
             return new ResponseEntity<>(tasksDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);

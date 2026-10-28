@@ -4,16 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Filter;
-import pl.databucket.server.tenant.TenantSupport;
+import org.hibernate.annotations.TenantId;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "svg")
-@Filter(name = "projectFilter", condition = "project_id = :projectId")
-public class Svg extends Auditable<String> implements TenantSupport {
+public class Svg extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "svg_generator")
@@ -24,6 +22,7 @@ public class Svg extends Auditable<String> implements TenantSupport {
     @Column(name = "svg_name", nullable = false, length = 200)
     private String name;
 
+    @TenantId
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
 

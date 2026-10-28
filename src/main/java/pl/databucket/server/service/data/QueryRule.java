@@ -1,9 +1,12 @@
 package pl.databucket.server.service.data;
 
+import io.micrometer.core.instrument.Metrics;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.slf4j.MDC;
 import pl.databucket.server.exception.InvalidRuleException;
+import pl.databucket.server.logging.LogContext;
 
 import java.io.InvalidObjectException;
 import java.util.*;
@@ -36,6 +39,33 @@ public class QueryRule {
 
         if (errorMessage != null)
             throw new InvalidRuleException(errorMessage);
+
+        recordFilterFormat(searchRules);
+    }
+
+    /**
+     * Records which filter formats a request used, in the access log (MDC) and as a metric, to find out
+     * whether the raw SQL text rules ("rules-raw") are used by anyone.
+     */
+    private void recordFilterFormat(SearchRules searchRules) {
+        List<String> formats = new ArrayList<>();
+        if (searchRules.getLogic() != null)
+            formats.add("logic");
+        if (searchRules.getRules() != null)
+            formats.add(hasRawRules(this) ? "rules-raw" : "rules");
+        if (searchRules.getConditions() != null)
+            formats.add("conditions");
+
+        String format = formats.isEmpty() ? "none" : String.join("+", formats);
+        MDC.put(LogContext.FILTER_FORMAT, format);
+        Metrics.counter("databucket.filter.format", "format", format).increment();
+    }
+
+    // Raw text rules can also be nested in sub-rules
+    private static boolean hasRawRules(QueryRule queryRule) {
+        if (!queryRule.getStrRules().isEmpty())
+            return true;
+        return queryRule.getQueryRules().stream().anyMatch(QueryRule::hasRawRules);
     }
 
     private void getQueryRulesFromLogic(String localCurrentUser, List<QueryRule> localQueryRule, List<Condition> localConditions, Object inputLogic) {

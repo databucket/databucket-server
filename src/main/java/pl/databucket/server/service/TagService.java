@@ -1,7 +1,9 @@
 package pl.databucket.server.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.TagDto;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.DataClass;
@@ -9,16 +11,22 @@ import pl.databucket.server.entity.Tag;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.BucketRepository;
 import pl.databucket.server.repository.DataClassRepository;
 import pl.databucket.server.repository.TagRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 public class TagService {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private TagRepository tagRepository;
@@ -29,7 +37,7 @@ public class TagService {
     @Autowired
     private DataClassRepository dataClassRepository;
 
-    public Tag createTag(TagDto tagDto) throws ItemAlreadyExistsException {
+    public TagDto createTag(TagDto tagDto) throws ItemAlreadyExistsException {
         if (tagRepository.existsByNameAndDeleted(tagDto.getName(), false))
             throw new ItemAlreadyExistsException(Tag.class, tagDto.getName());
 
@@ -47,21 +55,26 @@ public class TagService {
             tag.setDataClasses(new HashSet<>(dataClasses));
         }
 
-        return tagRepository.save(tag);
+        modelMapper.map(tagRepository.save(tag), tagDto);
+        AuditLog.log("tag.create", "id={} name={}", tag.getId(), tag.getName());
+        return tagDto;
     }
 
-    public List<Tag> getTags() {
-        return tagRepository.findAllByDeletedOrderById(false);
+    @Transactional(readOnly = true)
+    public List<TagDto> getTags() {
+        return tagRepository.findAllByDeletedOrderById(false).stream()
+                .map(item -> modelMapper.map(item, TagDto.class))
+                .collect(Collectors.toList());
     }
 
-    public Tag modifyTag(TagDto tagDto) throws ItemNotFoundException, ItemAlreadyExistsException, ModifyByNullEntityIdException {
+    public TagDto modifyTag(TagDto tagDto) throws ItemNotFoundException, ItemAlreadyExistsException, ModifyByNullEntityIdException {
         if (tagDto.getId() == null)
             throw new ModifyByNullEntityIdException(Tag.class);
 
         Tag tag = tagRepository.findByIdAndDeleted(tagDto.getId(), false);
 
         if (tag == null)
-            throw new ItemNotFoundException(Tag.class, tag.getId());
+            throw new ItemNotFoundException(Tag.class, tagDto.getId());
 
         if (!tag.getName().equals(tagDto.getName()))
             if (tagRepository.existsByNameAndDeleted(tagDto.getName(), false))
@@ -82,7 +95,9 @@ public class TagService {
         } else
             tag.setDataClasses(null);
 
-        return tagRepository.save(tag);
+        modelMapper.map(tagRepository.save(tag), tagDto);
+        AuditLog.log("tag.modify", "id={} name={}", tag.getId(), tag.getName());
+        return tagDto;
     }
 
     public void deleteTag(long tagId) throws ItemNotFoundException {
@@ -96,5 +111,6 @@ public class TagService {
 
         tag.setDeleted(true);
         tagRepository.save(tag);
+        AuditLog.log("tag.delete", "id={} name={}", tag.getId(), tag.getName());
     }
 }

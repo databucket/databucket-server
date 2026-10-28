@@ -23,12 +23,14 @@ import pl.databucket.server.exception.ConditionNotAllowedException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.UnexpectedException;
 import pl.databucket.server.exception.UnknownColumnException;
+import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.mapper.DataRowMapper;
 import pl.databucket.server.service.ServiceUtils;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 
@@ -66,6 +68,7 @@ public class DataService {
         Query query = new Query(bucket.getTableName()).insertIntoValues(paramMap);
         jdbcTemplate.update(query.toString(logger, paramMap.getValues()), paramMap, keyHolder, new String[]{COL.DATA_ID});
         long id = Objects.requireNonNull(keyHolder.getKey()).intValue();
+        AuditLog.log("data.create", "bucket={} id={}", bucket.getName(), id);
         return getData(user, bucket, id);
     }
 
@@ -79,11 +82,16 @@ public class DataService {
             @Override
             public void setValues(PreparedStatement ps, int i) {
                 DataCreateDTO dataCreateDTO = dataList.get(i);
-                ps.setLong(1, dataCreateDTO.getTagId());
+                // tagId and reserved are optional, as in the single insert: no tag, and not reserved (the column default)
+                boolean reserved = Boolean.TRUE.equals(dataCreateDTO.getReserved());
+                if (dataCreateDTO.getTagId() != null)
+                    ps.setLong(1, dataCreateDTO.getTagId());
+                else
+                    ps.setNull(1, Types.BIGINT);
                 ps.setString(2, user.getUsername());
                 ps.setString(3, user.getUsername());
-                ps.setBoolean(4, dataCreateDTO.getReserved());
-                ps.setString(5, dataCreateDTO.getReserved() ? dataCreateDTO.getOwner() != null ? dataCreateDTO.getOwner() : user.getUsername() : null);
+                ps.setBoolean(4, reserved);
+                ps.setString(5, reserved ? dataCreateDTO.getOwner() != null ? dataCreateDTO.getOwner() : user.getUsername() : null);
                 ps.setObject(6, serviceUtils.javaObjectToPGObject(dataCreateDTO.getProperties()));
             }
 
@@ -92,6 +100,7 @@ public class DataService {
                 return dataList.size();
             }
         });
+        AuditLog.log("data.create", "bucket={} count={}", bucket.getName(), dataList.size());
     }
 
     public DataDTO getData(User user, Bucket bucket, long id) throws UnknownColumnException, ConditionNotAllowedException {
@@ -233,7 +242,9 @@ public class DataService {
                 .removeAndSetProperties(!properties, dataModifyDto)
                 .where(queryRule, paramMap);
 
-        return this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        int count = this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        AuditLog.log("data.modify", "bucket={} count={}", bucket.getName(), count);
+        return count;
     }
 
     public List<Long> reserveData(User user, Bucket bucket, QueryRule queryRule, Integer limit, String sort, String targetOwnerUsername) throws UnknownColumnException, ConditionNotAllowedException, UnexpectedException {
@@ -282,6 +293,8 @@ public class DataService {
             throw new UnexpectedException(e);
         }
 
+        // dataIds is null when no row was free to reserve
+        AuditLog.log("data.reserve", "bucket={} count={} owner={}", bucket.getName(), dataIds == null ? 0 : dataIds.size(), targetOwnerUsername);
         return dataIds;
     }
 
@@ -298,7 +311,9 @@ public class DataService {
                 .from()
                 .where(conditions, paramMap);
 
-        return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        int count = jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        AuditLog.log("data.delete", "bucket={} count={}", bucket.getName(), count);
+        return count;
     }
 
     public int deleteDataByRules(User user, Bucket bucket, QueryRule queryRule) throws UnknownColumnException, ConditionNotAllowedException {
@@ -312,7 +327,9 @@ public class DataService {
                 .from()
                 .where(queryRule, paramMap);
 
-        return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        int count = jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        AuditLog.log("data.delete", "bucket={} count={}", bucket.getName(), count);
+        return count;
     }
 
     public List<Map<String, Object>> getDataHistory(Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException {
@@ -388,7 +405,9 @@ public class DataService {
                     .from()
                     .where(conditions, paramMap);
 
-            return jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+            int count = jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+            AuditLog.log("data.history-clear", "bucket={} id={} count={}", bucket.getName(), dataId, count);
+            return count;
         } else
             throw new AccessDeniedException("Data reserved by another user!");
     }
@@ -413,6 +432,7 @@ public class DataService {
                     .where(condition, paramMap);
 
             jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+            AuditLog.log("data.history-clear", "bucket={} count={}", bucket.getName(), listOfIds.size());
             return listOfIds.size();
         }
         return 0;

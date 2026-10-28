@@ -1,14 +1,12 @@
 package pl.databucket.server.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.BucketDto;
-import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
@@ -17,7 +15,6 @@ import pl.databucket.server.service.BucketService;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Hidden
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -29,16 +26,12 @@ public class BucketController {
     @Autowired
     private BucketService bucketService;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(BucketController.class);
 
     @PostMapping
     public ResponseEntity<?> createBucket(@Valid @RequestBody BucketDto bucketDto) {
         try {
-            Bucket bucket = bucketService.createBucket(bucketDto);
-            modelMapper.map(bucket, bucketDto);
+            bucketDto = bucketService.createBucket(bucketDto);
             return new ResponseEntity<>(bucketDto, HttpStatus.CREATED);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
@@ -52,8 +45,7 @@ public class BucketController {
     @GetMapping
     public ResponseEntity<?> getBuckets() {
         try {
-            List<Bucket> buckets = bucketService.getBuckets();
-            List<BucketDto> bucketsDto = buckets.stream().map(item -> modelMapper.map(item, BucketDto.class)).collect(Collectors.toList());
+            List<BucketDto> bucketsDto = bucketService.getBuckets();
             return new ResponseEntity<>(bucketsDto, HttpStatus.OK);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
@@ -63,8 +55,7 @@ public class BucketController {
     @PutMapping
     public ResponseEntity<?> modifyBucket(@Valid @RequestBody BucketDto bucketDto) {
         try {
-            Bucket bucket = bucketService.modifyBucket(bucketDto);
-            modelMapper.map(bucket, bucketDto);
+            bucketDto = bucketService.modifyBucket(bucketDto);
             return new ResponseEntity<>(bucketDto, HttpStatus.OK);
         } catch (ItemNotFoundException | ModifyByNullEntityIdException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
