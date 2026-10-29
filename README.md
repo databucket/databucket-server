@@ -15,6 +15,18 @@
 * First you can read about key features on [databucket.pl](https://databucket.pl)
 * Next, you can dive deeper in the [Wiki page](https://github.com/databucket/databucket-server/wiki).
 
+# Upgrading
+New tables and columns are added automatically on startup. Changes that can't be done that way come
+as SQL scripts in [`upgrade/`](upgrade), named after the version that needs them. When upgrading an
+existing database, run the scripts of the versions you skip, in order, e.g.:
+
+```
+psql -h <host> -U <user> -d <database> -f upgrade/3.7.0.sql
+```
+
+* **3.7.0** — user emails must be unique (single sign-on matches users by email). The script normalizes
+  the emails and adds the unique constraint; when several users share an email it lists them and changes nothing.
+
 # Contribution rules
 
 1. During development, we are following GitHub flow. In order to provide change or fix in project, one has to:
