@@ -25,6 +25,7 @@ export default function AppRouter() {
             <Routes>
                 <Route path='/' element={<Navigate to={getProjectDataPath()} replace />} />
                 <Route path="/login" element={<PublicRoute restricted={true}><LoginPage /></PublicRoute>} />
+                <Route path="/login/sso" element={<PublicRoute restricted={true}><LoginPage /></PublicRoute>} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/sign-up" element={<SignUpPage />} />
                 <Route path="/confirmation/*" element={<ConfirmationPage />} />

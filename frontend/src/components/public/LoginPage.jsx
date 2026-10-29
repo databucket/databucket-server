@@ -1,8 +1,8 @@
-import React, {forwardRef, useState} from "react";
+import React, {forwardRef, useEffect, useState} from "react";
 import "./LoginPage.css";
 import {
     Button, Avatar, Input, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemText,
-    Paper, Tooltip, IconButton, FormControl, Typography, Grid, Link as MaterialLink
+    Paper, Tooltip, IconButton, FormControl, Typography, Grid, Divider, Link as MaterialLink
 } from "@mui/material";
 import Logo from "../../images/databucket-logo.png";
 import ActiveProjectIcon from "@mui/icons-material/FolderSpecial";
@@ -12,17 +12,17 @@ import {handleLoginErrors} from "../../utils/FetchHelper";
 import {
     setToken,
     setActiveProjectId,
-    setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut, getPathname, setPathname
+    setRoles, setUsername, hasSuperRole, hasMemberRole, hasAdminRole, hasToken, hasProject, logOut, setSsoLogin, getPathname, setPathname
 } from '../../utils/ConfigurationStorage';
-import {Navigate} from 'react-router-dom';
+import {Navigate, useNavigate, useSearchParams} from 'react-router-dom';
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {MessageBox} from "../utils/MessageBox";
-import {sortByKey} from "../../utils/JsonHelper";
 import {getManagementProjectsPath, getProjectDataPath} from "../../route/AppRouter";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import ReactGA from 'react-ga';
 import {Link} from "react-router-dom";
 import {version} from "../../../package.json";
+import SsoButton from "./SsoButton";
 
 const initialState = {
     username: "",
@@ -32,6 +32,16 @@ const initialState = {
     changePassword: false,
     register: false,
     showPassword: false
+};
+
+// reasons sent by the server as ?sso_error=
+const SSO_ERRORS = {
+    no_email: 'The identity provider did not send your email address.',
+    email_not_verified: 'Your email address is not verified at the identity provider.',
+    unknown_user: 'There is no Databucket account for your email address. Ask your administrator to create one.',
+    user_disabled: 'Your Databucket account is disabled.',
+    sso_unavailable: 'Single sign-on is not available at the moment. Try again later or sign in with your password.',
+    idp_error: 'Signing in with the identity provider failed. Please try again.'
 };
 
 const FancyLink = forwardRef((props, ref) => {
@@ -54,6 +64,10 @@ export default function LoginPage() {
 
     const [{username, password, projects, resetPassword, changePassword, register, showPassword}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
+    const [ssoConfig, setSsoConfig] = useState(null);
+    const [ssoCode, setSsoCode] = useState(null);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const onChange = e => {
         const {name, value} = e.target;
@@ -77,16 +91,45 @@ export default function LoginPage() {
             handleSignIn();
     };
 
+    // After an SSO login the server redirects to /login/sso?code=... or to /login?sso_error=...
+    useEffect(() => {
+        fetch(getBaseUrl('public/sso/config'))
+            .then(handleLoginErrors)
+            .then(config => setSsoConfig(config))
+            .catch(() => setSsoConfig(null));
+
+        const code = searchParams.get('code');
+        const ssoError = searchParams.get('sso_error');
+        if (code != null || ssoError != null)
+            navigate({search: ''}, {replace: true}); // keep the code out of the address bar and history
+        if (code != null) {
+            setSsoCode(code);
+            ssoSignIn(code, null);
+        } else if (ssoError != null) {
+            setMessageBox({open: true, severity: 'error', title: 'Login failed', message: SSO_ERRORS[ssoError] || SSO_ERRORS.idp_error});
+        }
+    }, []);
+
     const signIn = (username, password, projectId) => {
-        fetch(getBaseUrl('public/signin'), {
+        authenticate('public/signin', projectId == null ? {username, password} : {username, password, projectId});
+    };
+
+    const ssoSignIn = (code, projectId) => {
+        authenticate('public/sso/token', projectId == null ? {code} : {code, projectId}, true);
+    };
+
+    const authenticate = (endpoint, body, sso = false) => {
+        fetch(getBaseUrl(endpoint), {
             method: 'POST',
-            body: JSON.stringify(projectId == null ? {username, password} : {username, password, projectId}),
+            body: JSON.stringify(body),
             headers: {'Content-Type': 'application/json'}
         })
             .then(handleLoginErrors)
             .then(data => {
                 logOut();
-                setUsername(username);
+                if (sso)
+                    setSsoLogin();
+                setUsername(data.username || body.username);
                 if (data.changePassword != null && data.changePassword === true) {
                     setToken(data.token);
                     setState(prevState => ({...prevState, changePassword: true}));
@@ -96,8 +139,8 @@ export default function LoginPage() {
                     if (hasSuperRole())
                         setToken(data.token);
 
-                    let sortedProjects = sortByKey(data.projects, 'id');
-                    setState(prevState => ({...prevState, projects: sortedProjects, changePassword: false}));
+                    // sorted by name on the server
+                    setState(prevState => ({...prevState, projects: data.projects, changePassword: false}));
                 } else if (data.token != null) {
                     setRoles(data.roles);
                     setToken(data.token);
@@ -119,7 +162,10 @@ export default function LoginPage() {
 
 
     const selectProject = (id) => {
-        signIn(username, password, id);
+        if (ssoCode != null)
+            ssoSignIn(ssoCode, id);
+        else
+            signIn(username, password, id);
     }
 
     const getLoginPaper = () => {
@@ -178,6 +224,14 @@ export default function LoginPage() {
                         Login
                     </Button>
                 </div>
+                {ssoConfig != null && ssoConfig.enabled === true && (
+                    <div className="ButtonLogin">
+                        <Divider sx={{mb: 2}}>
+                            <Typography variant="caption" color="textSecondary">or</Typography>
+                        </Divider>
+                        <SsoButton provider={ssoConfig.provider} name={ssoConfig.name}/>
+                    </div>
+                )}
                 <div className="RegistrationLink" style={{marginBottom: "10px"}}>
                     <FancyLink to="/sign-up">Don't have an account?</FancyLink>
                 </div>

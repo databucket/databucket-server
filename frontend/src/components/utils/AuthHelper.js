@@ -2,12 +2,14 @@ import {
     hasAdminRole,
     hasMemberRole,
     hasSuperRole,
+    isSsoLogin,
     logOut,
     setActiveProjectId,
     setRoles,
     setToken,
     setUsername
 } from "../../utils/ConfigurationStorage";
+import {getBaseUrl} from "../../utils/UrlBuilder";
 
 export const handleSuccessfulLogin = (data, state) => {
     logOut();
@@ -42,3 +44,15 @@ export const handleSuccessfulLogin = (data, state) => {
     }
     return null;
 };
+
+// After an SSO login the server decides whether to also end the session at the identity provider.
+// Returns false when the browser is being redirected there.
+export const signOut = () => {
+    const ssoLogin = isSsoLogin();
+    logOut();
+    if (ssoLogin) {
+        window.location.assign(getBaseUrl('public/sso/logout'));
+        return false;
+    }
+    return true;
+}

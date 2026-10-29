@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +21,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import pl.databucket.server.configuration.AppProperties;
 import pl.databucket.server.dto.*;
-import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ForbiddenRepetitionException;
 import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.UserRepository;
+import pl.databucket.server.security.AuthResponseBuilder;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.ManageUserService;
 
 import jakarta.mail.MessagingException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Tag(name = "PUBLIC", description = "Public endpoints for authentication and user registration")
 @CrossOrigin(origins = "*")
@@ -53,13 +51,13 @@ public class PublicController {
     private ManageUserService manageUserService;
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     private AppProperties appProperties;
 
     @Autowired
     private TokenProvider jwtTokenUtil;
+
+    @Autowired
+    private AuthResponseBuilder authResponseBuilder;
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
 
@@ -98,114 +96,9 @@ public class PublicController {
         }
 
         try {
-            AuthRespDTO authDtoResponse = new AuthRespDTO();
-            HttpStatus status = HttpStatus.OK;
-
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authReqDTO.getUsername(), authReqDTO.getPassword()));
-
-            if (user.isExpired()) {
-                authDtoResponse.setMessage("User access has expired!");
-                AuditLog.log("auth.signin-refused", "user={} reason={}", user.getUsername(), authDtoResponse.getMessage());
-                return new ResponseEntity<>(authDtoResponse, HttpStatus.FORBIDDEN);
-            }
-
-            // The user has to change password. We force this action.
-            if (user.isChangePassword()) {
-                authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, authReqDTO.getProjectId() != null ? authReqDTO.getProjectId() : 0));
-                authDtoResponse.setChangePassword(true);
-
-                // We've got the projectId that user want to sign into
-            } else if (authReqDTO.getProjectId() != null) {
-
-                // User is assigned to given project
-                if (user.getProjects().stream().anyMatch(o -> o.getId() == authReqDTO.getProjectId())) {
-                    Project project = user.getProjects().stream().filter(o -> o.getId() == authReqDTO.getProjectId()).findFirst().get();
-
-                    if (!project.getEnabled()) {
-                        authDtoResponse.setMessage("The project is disabled!");
-                        status = HttpStatus.FORBIDDEN;
-
-                        // The project is expired
-                    } else if (project.isExpired()) {
-                        authDtoResponse.setMessage("The project expired!");
-                        status = HttpStatus.FORBIDDEN;
-
-                        // The project is enabled and not expired
-                    } else {
-                        AuthProjectDTO authProjectDto = new AuthProjectDTO();
-                        modelMapper.map(project, authProjectDto);
-                        List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
-
-                        authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, authReqDTO.getProjectId()));
-                        authDtoResponse.setProject(authProjectDto);
-                        authDtoResponse.setRoles(roles);
-                    }
-
-                    // The user is not assigned to requested project
-                } else {
-                    authDtoResponse.setMessage("The user is not assigned to given project!");
-                    status = HttpStatus.FORBIDDEN;
-                }
-
-                // We haven't got the projectId but the user is assigned to one project.
-            } else if (user.getProjects().size() == 1) {
-                Project project = user.getProjects().iterator().next();
-
-                // The project is disabled
-                if (!project.getEnabled()) {
-                    authDtoResponse.setMessage("The project is disabled!");
-                    status = HttpStatus.FORBIDDEN;
-
-                    // The project is expired
-                } else if (project.isExpired()) {
-                    authDtoResponse.setMessage("The project expired!");
-                    status = HttpStatus.FORBIDDEN;
-
-                    // The project is enabled and not expired
-                } else {
-                    List<AuthProjectDTO> projects = user.getProjects().stream().map(item -> modelMapper.map(item, AuthProjectDTO.class)).collect(Collectors.toList());
-                    List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
-                    AuthProjectDTO authProjectDto = new AuthProjectDTO();
-                    modelMapper.map(project, authProjectDto);
-
-                    authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, projects.get(0).getId()));
-                    authDtoResponse.setProject(authProjectDto);
-                    authDtoResponse.setRoles(roles);
-                }
-
-                // We haven't got the projectId, and the user is assigned to more then one project. We return all projects to which the user is assigned.
-            } else if (authReqDTO.getProjectId() == null && user.getProjects().size() > 1) {
-                List<AuthProjectDTO> projects = user.getProjects().stream().map(item -> modelMapper.map(item, AuthProjectDTO.class)).collect(Collectors.toList());
-                List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
-
-                authDtoResponse.setProjects(projects);
-                authDtoResponse.setRoles(roles);
-
-                if (user.isSuperUser())
-                    authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, 0));
-
-                // We haven't got he projectId, and the user is not assigned to any project, but the user is the SUPER user.
-            } else if (authReqDTO.getProjectId() == null && user.getProjects().size() == 0 && user.isSuperUser()) {
-                List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
-
-                authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, 0));
-                authDtoResponse.setProjects(new ArrayList<>());
-                authDtoResponse.setRoles(roles);
-
-                // We haven't got the projectId, and the user is not assigned to any project and this user is not SUPER user.
-            } else {
-                authDtoResponse.setMessage("The user is not assigned to any project!");
-                status = HttpStatus.FORBIDDEN;
-            }
-
-            if (status == HttpStatus.OK)
-                AuditLog.log("auth.signin", "user={} project={}", user.getUsername(),
-                        authDtoResponse.getProject() != null ? authDtoResponse.getProject().getId() : null);
-            else
-                AuditLog.log("auth.signin-refused", "user={} reason={}", user.getUsername(), authDtoResponse.getMessage());
-            return new ResponseEntity<>(authDtoResponse, status);
-
+            return authResponseBuilder.build(user, authentication, authReqDTO.getProjectId(), true, "auth.signin");
         } catch (AuthenticationException e) {
             AuditLog.log("auth.signin-failed", "user={} reason={}", authReqDTO.getUsername(), e.getMessage());
             return exceptionFormatter.customException(e, HttpStatus.UNAUTHORIZED);

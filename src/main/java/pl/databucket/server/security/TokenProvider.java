@@ -29,6 +29,7 @@ public class TokenProvider implements Serializable {
     public static final String AUTHORITIES_KEY = "a-key";
     public static final String PROJECT_ID = "p-id";
     public static final String CONTENT = "content";
+    public static final String SSO_USER = "sso-user";
 
     @Value("${jwt.secret}")
     private String signingKey;
@@ -106,6 +107,36 @@ public class TokenProvider implements Serializable {
                 .expiration(new Date(now + 48 * 60 * 60 * 1000)) // 48 godzin
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
+    }
+
+    /**
+     * Short-lived code handed to the browser after an SSO login and exchanged for a token.
+     * It has no subject, so the JWT filter never accepts it as a token, and no content claim,
+     * so it can't be used as a confirmation link either.
+     */
+    public String generateSsoCode(String username, long ttlSeconds) {
+        long now = System.currentTimeMillis();
+        return Jwts.builder()
+                .claim(SSO_USER, username)
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + ttlSeconds * 1000))
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .compact();
+    }
+
+    /**
+     * @return the username the code was issued for
+     * @throws IllegalArgumentException when the code is invalid, expired or not an SSO code
+     */
+    public String getUsernameFromSsoCode(String code) {
+        try {
+            String username = getAllClaimsFromToken(code).get(SSO_USER, String.class);
+            if (username == null)
+                throw new IllegalArgumentException("Not an SSO code");
+            return username;
+        } catch (JwtException e) {
+            throw new IllegalArgumentException("Invalid SSO code", e);
+        }
     }
 
     public String unpackFromJwts(String jwts) {

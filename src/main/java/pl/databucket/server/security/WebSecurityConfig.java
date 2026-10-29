@@ -59,6 +59,7 @@ public class WebSecurityConfig {
                                 "/api/public/**",
                                 "/actuator/**",
                                 "/login",
+                                "/login/sso",
                                 "/confirmation/**",
                                 "/forgot-password",
                                 "/sign-up",
