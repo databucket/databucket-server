@@ -59,7 +59,10 @@ psql -h <host> -U <user> -d <database> -f upgrade/3.7.0.sql
 Installed below dependencies:
 
 - Java 17
-- NodeJS 18
+- NodeJS 22 (or 20.19+, required by Vite)
+
+To try Databucket without installing anything but Docker, `docker/docker-compose.yaml` starts it together with
+PostgreSQL and Keycloak (single sign-on): `cd docker && docker compose up --build`, then open http://databucket.localhost.
 
 ## Useful commands
 

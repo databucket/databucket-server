@@ -3,3 +3,6 @@ docker/*
 .idea/*
 frontend/build/*
 frontend/node_modules/*
+.git
+build/*
+src/main/resources/static/*

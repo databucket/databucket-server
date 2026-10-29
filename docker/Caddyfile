@@ -1,5 +1,4 @@
 {
-  debug
   auto_https off
 }
 
@@ -8,6 +7,5 @@ http://databucket.localhost {
 }
 
 http://auth.localhost {
-  reverse_proxy auth:8080
+  reverse_proxy keycloak:8080
 }
-

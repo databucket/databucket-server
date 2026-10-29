@@ -1,0 +1,38 @@
+{
+  "realm": "databucket",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "databucket",
+      "name": "Databucket",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "databucket-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://databucket.localhost/login/oauth2/code/oidc"],
+      "webOrigins": ["http://databucket.localhost"],
+      "attributes": {
+        "post.logout.redirect.uris": "http://databucket.localhost/login"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "email": "demo@databucket.localhost",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "User",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

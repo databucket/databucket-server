@@ -1,8 +1,10 @@
-FROM node:16-alpine as builder
+# Builds the jar from the sources (Node for the Vite frontend, JDK for the backend), then runs it.
+FROM node:22-alpine AS builder
 WORKDIR /app
-RUN apk add openjdk17 git
+RUN apk add --no-cache openjdk17
 COPY . .
-RUN ./gradlew clean build
+# a Windows checkout may have CRLF line endings
+RUN sed -i 's/\r$//' gradlew && sh ./gradlew clean assemble --no-daemon
 
 FROM amazoncorretto:17
 
