@@ -1,5 +1,6 @@
 package pl.databucket.server.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -119,6 +120,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @PostMapping(value = "/forgot-password", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> forgotPassword(
             @Parameter(description = "Forgot password request payload", required = true)
@@ -148,6 +150,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @GetMapping(value = {"/confirmation/forgot-password/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> forgotPasswordConfirmation(
             @Parameter(description = "JWT token for password reset", required = true)
@@ -176,6 +179,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @PostMapping(value = {"/sign-up"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signUp(
             @Parameter(description = "Sign up request payload", required = true)
@@ -231,6 +235,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @GetMapping(value = {"/confirmation/sign-up/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signUpConfirmation(
             @Parameter(description = "JWT token for sign up confirmation", required = true)
@@ -256,6 +261,7 @@ public class PublicController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @GetMapping(value = {"/recaptcha-site-key"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getReCaptchaSiteKey() {
         try {

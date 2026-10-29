@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pl.databucket.server.configuration.OpenApiConfiguration;
 import pl.databucket.server.dto.*;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
@@ -32,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Tag(name = "SECURED", description = "Secured data operations")
+@SecurityRequirement(name = OpenApiConfiguration.BEARER)
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/bucket/{bucketName}")
 @RestController
