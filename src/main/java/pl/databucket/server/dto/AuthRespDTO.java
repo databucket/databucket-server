@@ -23,13 +23,14 @@ public class AuthRespDTO {
     @Schema(description = "Name of the signed-in user", example = "john")
     private String username;
 
-    @Schema(hidden = true, description = "Flag indicating if password change is required")
+    @Schema(description = "True when the user must change the password first (in the web application); "
+            + "the token then doesn't give access to any project")
     private Boolean changePassword;
 
-    @Schema(hidden = true, description = "Response message")
+    @Schema(description = "Why the user can't sign in", example = "The user is not assigned to given project!")
     private String message;
 
-    @Schema(hidden = true, description = "List of available projects")
+    @Schema(description = "The user's projects to choose from, when the projectId was left out and the user has several")
     private List<AuthProjectDTO> projects;
 
     @Schema(description = "Selected project details")

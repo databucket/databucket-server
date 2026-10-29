@@ -14,10 +14,10 @@ public class DataCreateDTO {
     @Schema(description = "Tag ID", example = "1")
     private Long tagId;
 
-    @Schema(description = "Reserved flag", example = "false")
+    @Schema(description = "True reserves the new row for the signed-in user", example = "false")
     private Boolean reserved;
 
-    @Schema(description = "Owner username", example = "username")
+    @Schema(description = "Not used: a reserved row is always owned by the signed-in user", example = "username")
     private String owner;
 
     @Schema(description = "Data properties", example = "{\"name\": \"John\", \"age\": 34}")

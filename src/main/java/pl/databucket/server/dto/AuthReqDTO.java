@@ -16,7 +16,7 @@ public class AuthReqDTO {
     @Schema(description = "Password", example = "example password", requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 
-    @Schema(description = "Project ID", example = "1")
+    @Schema(description = "Project to sign in to; may be left out when the user has only one project", example = "1")
     private Integer projectId;
 
 }
