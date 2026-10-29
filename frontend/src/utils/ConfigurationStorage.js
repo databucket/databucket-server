@@ -2,6 +2,7 @@ const THEME_NAME = "theme-name";
 const USER_NAME = "user-name";
 const PATHNAME = "href";
 const TOKEN = 'token';
+const SSO_LOGIN = 'sso-login';
 const PROJECT_ID = 'project-id';
 const PROJECT_CONTEXT = 'project-context';
 const ROLES = 'roles';
@@ -25,6 +26,15 @@ export const logOut = () => {
     clearToken();
     clearRoles();
     clearActiveProjectId();
+    localStorage.removeItem(SSO_LOGIN);
+}
+
+export const setSsoLogin = () => {
+    localStorage.setItem(SSO_LOGIN, 'true');
+}
+
+export const isSsoLogin = () => {
+    return localStorage.getItem(SSO_LOGIN) === 'true';
 }
 
 export const setPathname = (pathname) => {

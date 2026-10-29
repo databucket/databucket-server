@@ -11,10 +11,10 @@ import {
     getLastManagementPageName,
     hasProject,
     hasToken,
-    logOut,
     setLastManagementPageName,
     setPathname
 } from "../../utils/ConfigurationStorage";
+import {signOut} from "../utils/AuthHelper";
 import NotFoundPage from "../NotFoundPage";
 import ProjectsProvider from "../../context/projects/ProjectsProvider";
 import ManageUsersProvider from "../../context/users/ManageUsersProvider";
@@ -46,8 +46,8 @@ export default function _ManagementTabs() {
     }
 
     const handleLogout = () => {
-        logOut();
-        setLogged(hasToken());
+        if (signOut())
+            setLogged(hasToken());
     }
 
     if (!logged) {

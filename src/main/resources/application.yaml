@@ -49,6 +49,26 @@ management:
     mail:
       enabled: false
 
+# Single sign-on through any OpenID Connect provider (Entra ID, Google, Okta, Keycloak, ...), next to the form login.
+# SSO only authenticates: a person can sign in only if a Databucket user with the same email exists, and
+# roles and projects are still managed in Databucket. Register Databucket at the provider as a confidential
+# client with the redirect URI <databucket url>/login/oauth2/code/oidc.
+sso:
+  enabled: false
+  # Login button style: microsoft, google, okta, keycloak or generic
+  provider: generic
+  # "Sign in with <name>"; empty = the provider's name
+  name:
+  # e.g. https://login.microsoftonline.com/<tenant id>/v2.0 or https://<keycloak host>/realms/<realm>
+  issuer-uri:
+  client-id:
+  client-secret:
+  # Claim matched against the users' email
+  email-claim: email
+  # Logging out of Databucket also logs out of the provider (Microsoft/Google: of the whole account).
+  # <base url>/login must be allowed as the client's post logout redirect URI at the provider.
+  provider-logout: false
+
 recaptcha:
   enabled: false
   siteKey: yourSiteKey

@@ -25,12 +25,12 @@ import {
     hasSuperRole,
     hasToken,
     isLeftPanelOpen,
-    logOut,
     setActiveProjectId,
     setLeftPanelOpen,
     setPathname,
     setToken
 } from "../../utils/ConfigurationStorage";
+import {signOut} from "../utils/AuthHelper";
 import {Link, Navigate} from 'react-router-dom';
 import BucketDataTable from "./BucketDataTable";
 import {getProjectDataPath, getProjectSettingsPath} from "../../route/AppRouter";
@@ -177,8 +177,8 @@ export default function ProjectData() {
     };
 
     const handleLogout = () => {
-        logOut();
-        setLogged(hasToken());
+        if (signOut())
+            setLogged(hasToken());
     }
 
     const onChangeProject = (projectId) => {

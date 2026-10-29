@@ -20,6 +20,9 @@ public class AuthRespDTO {
     )
     private String token;
 
+    @Schema(description = "Name of the signed-in user", example = "john")
+    private String username;
+
     @Schema(hidden = true, description = "Flag indicating if password change is required")
     private Boolean changePassword;
 
