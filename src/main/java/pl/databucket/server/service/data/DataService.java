@@ -91,7 +91,7 @@ public class DataService {
                 ps.setString(2, user.getUsername());
                 ps.setString(3, user.getUsername());
                 ps.setBoolean(4, reserved);
-                ps.setString(5, reserved ? dataCreateDTO.getOwner() != null ? dataCreateDTO.getOwner() : user.getUsername() : null);
+                ps.setString(5, reserved ? user.getUsername() : null);
                 ps.setObject(6, serviceUtils.javaObjectToPGObject(dataCreateDTO.getProperties()));
             }
 
