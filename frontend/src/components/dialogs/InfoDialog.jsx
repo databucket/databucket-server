@@ -66,7 +66,6 @@ export default function InfoDialog() {
                     <Link target='_blank' href='https://github.com/databucket/databucket-server' color="textSecondary">Source code</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server/wiki' color="textSecondary">Documentation</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server/issues/new' color="textSecondary">Report a bug, propose a new feature, ask a question...</Link><br/>
-                    <Link target='_blank' href='https://databucketworkspace.slack.com/archives/C024LBQ4PQU' color="textSecondary">Let's talk on Slack</Link><br/>
                     <Link target='_blank' href='https://github.com/databucket/databucket-server/blob/master/LICENSE' color="textSecondary">Licence: MIT License</Link><br/>
                 </div>
 
