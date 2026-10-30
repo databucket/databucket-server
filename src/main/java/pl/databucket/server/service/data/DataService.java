@@ -173,10 +173,10 @@ public class DataService {
 
         if (limit > 0) {
             Query queryData = new Query(bucket.getTableName())
-                    .selectData(columns)
+                    .selectData(columns, paramMap)
                     .from()
                     .where(queryRule, paramMap)
-                    .orderBy(sort)
+                    .orderBy(sort, paramMap)
                     .limitPage(paramMap, limit, page);
 
             if (inColumns.isPresent()) {
@@ -239,7 +239,7 @@ public class DataService {
         Query query = new Query(bucket.getTableName())
                 .update()
                 .set(paramMap)
-                .removeAndSetProperties(!properties, dataModifyDto)
+                .removeAndSetProperties(!properties, dataModifyDto, paramMap)
                 .where(queryRule, paramMap);
 
         int count = this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
@@ -256,7 +256,7 @@ public class DataService {
                 .select(COL.DATA_ID)
                 .from()
                 .where(queryRule, paramMap)
-                .orderBy(sort)
+                .orderBy(sort, paramMap)
                 .limitPage(paramMap, limit, 1)
                 .forUpdateSkipLocked();
 
