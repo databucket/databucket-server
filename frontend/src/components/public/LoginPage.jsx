@@ -169,6 +169,7 @@ export default function LoginPage() {
     }
 
     const getLoginPaper = () => {
+        const ssoEnabled = ssoConfig != null && ssoConfig.enabled === true;
         return (
             <Paper className="PaperClass" elevation={3}>
                 <Typography className="Title" variant="h5">
@@ -210,7 +211,7 @@ export default function LoginPage() {
                 <div className="ForgotPasswordLink">
                     <FancyLink to="/forgot-password">Forgot your password?</FancyLink>
                 </div>
-                <div className="ButtonLogin">
+                <div className="ButtonLogin PasswordLogin">
                     <Button
                         fullWidth={true}
                         variant="contained"
@@ -224,15 +225,15 @@ export default function LoginPage() {
                         Login
                     </Button>
                 </div>
-                {ssoConfig != null && ssoConfig.enabled === true && (
-                    <div className="ButtonLogin">
+                {ssoEnabled && (
+                    <div className="ButtonLogin SsoLogin">
                         <Divider sx={{mb: 2}}>
                             <Typography variant="caption" color="textSecondary">or</Typography>
                         </Divider>
                         <SsoButton provider={ssoConfig.provider} name={ssoConfig.name}/>
                     </div>
                 )}
-                <div className="RegistrationLink" style={{marginBottom: "10px"}}>
+                <div className={ssoEnabled ? "RegistrationLink AfterSso" : "RegistrationLink"} style={{marginBottom: "10px"}}>
                     <FancyLink to="/sign-up">Don't have an account?</FancyLink>
                 </div>
             </Paper>

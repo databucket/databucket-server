@@ -9,8 +9,8 @@
 .PaperClassSingUp {
     margin-top: 40px;
     display: flex;
-    min-width: 400px;
-    max-width: 400px;
+    min-width: 440px;
+    max-width: 440px;
     min-height: 500px;
     max-height: 700px;
     flex-direction: column;
