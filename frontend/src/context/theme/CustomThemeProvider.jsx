@@ -3,6 +3,24 @@ import {getThemeName, saveThemeName} from "../../utils/ConfigurationStorage";
 import CustomThemeContext from "./CustomThemeContext";
 import {createTheme, ThemeProvider} from "@mui/material";
 import {getTheme} from "../../utils/Themes";
+import DraggablePaper from "../../components/utils/DraggablePaper";
+
+const draggableDialogs = {
+    components: {
+        MuiDialog: {
+            defaultProps: {
+                PaperComponent: DraggablePaper
+            }
+        },
+        MuiDialogTitle: {
+            styleOverrides: {
+                root: {
+                    cursor: 'move'
+                }
+            }
+        }
+    }
+};
 
 const CustomThemeProvider = props => {
     const [mode, setMode] = useState(getThemeName());
@@ -16,7 +34,7 @@ const CustomThemeProvider = props => {
             },
         }), [],
     );
-    const theme = useMemo(() => createTheme(getTheme(mode)), [mode]);
+    const theme = useMemo(() => createTheme(getTheme(mode), draggableDialogs), [mode]);
     return (
         <CustomThemeContext.Provider value={colorMode}>
             <ThemeProvider theme={theme}>
