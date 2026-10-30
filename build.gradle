@@ -81,7 +81,6 @@ test {
 }
 
 import com.github.gradle.node.npm.task.NpmTask
-import com.github.gradle.node.util.Platform
 
 tasks.register('deleteStatic') {
     doLast {
@@ -97,14 +96,6 @@ node {
     npmVersion = '11.19.1'
     download = true
     nodeProjectDir = file('frontend')
-    // Official Node.js builds need glibc. On Alpine (musl), even with a glibc compatibility layer, the native
-    // bindings of the frontend build tools (rolldown, lightningcss) don't load, so use the musl build of Node.js.
-    if (file('/etc/alpine-release').exists()) {
-        distBaseUrl = 'https://unofficial-builds.nodejs.org/download/release'
-        resolvedPlatform.set(new Platform('linux', 'x64-musl'))
-        // the plugin computes the node directory from the platform it detected, before this block runs
-        resolvedNodeDir.set(workDir.dir(version.map { "node-v${it}-linux-x64-musl" }))
-    }
 }
 
 tasks.register('installFrontend', NpmTask) {

@@ -1,10 +1,13 @@
 # Builds the jar from the sources, then runs it. Gradle downloads Node.js for the frontend itself;
 # it is built for glibc, so the builder must not be an Alpine (musl) image.
+# Also a build environment for CI agents that can't run the frontend tools (e.g. an old Alpine):
+#   docker build --target builder --build-arg GRADLE_TASKS="clean build" -f docker/Dockerfile.build .
 FROM eclipse-temurin:17-jdk AS builder
+ARG GRADLE_TASKS="clean assemble"
 WORKDIR /app
 COPY . .
 # a Windows checkout may have CRLF line endings
-RUN sed -i 's/\r$//' gradlew && sh ./gradlew clean assemble --no-daemon
+RUN sed -i 's/\r$//' gradlew && sh ./gradlew $GRADLE_TASKS --no-daemon
 
 FROM amazoncorretto:17
 
