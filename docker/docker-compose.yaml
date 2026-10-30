@@ -1,77 +1,73 @@
-version: '3.3'
+# Local Databucket with single sign-on through Keycloak, behind a Caddy reverse proxy.
+#
+#   cd docker && docker compose up --build
+#
+# Databucket: http://databucket.localhost   (user super / super)
+# Keycloak:   http://auth.localhost         (admin / admin, realm "databucket")
+#
+# *.localhost resolves to this machine in the browser. Inside the compose network both names resolve to
+# Caddy, so Databucket reaches Keycloak at the same address as the browser (the OIDC issuer must match).
+#
+# To try SSO: sign in to Databucket as super, give a user the email demo@databucket.localhost and
+# assign a project, then use "Sign in with Keycloak" as demo / demo.
 services:
   postgres:
-    image: postgres:12.2-alpine
-    container_name: databucket_postgres
-    expose:
-      - "5432"
-    ports:
-      - "5432:5432"
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-    network_mode: host
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: databucket_user
       POSTGRES_PASSWORD: databucket_user
       POSTGRES_DB: databucket
-#    networks:
-#      - server
+    # not published, so it doesn't clash with a local PostgreSQL; use: docker compose exec postgres psql -U databucket_user databucket
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U databucket_user -d databucket"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   databucket:
     build:
       context: ..
       dockerfile: docker/Dockerfile.build
-    container_name: databucket
-    hostname: databucket.localhost
-#    ports:
-#      - "8080:8080"
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/databucket
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/databucket
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/databucket
       SPRING_DATASOURCE_USERNAME: databucket_user
       SPRING_DATASOURCE_PASSWORD: databucket_user
-      SPRING_MAIL_HOST: smtp.gmail.com
-      SPRING_MAIL_PORT: 587
-      SPRING_MAIL_USERNAME: username
-      SPRING_MAIL_PASSWORD: password
-      SPRING_MAIL_FROM: admin@email.io
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_DOPAUTH_ISSUER-URI: http://auth.localhost/auth/realms/databucket
-#    networks:
-#      - server
+      SSO_ENABLED: "true"
+      SSO_PROVIDER: keycloak
+      SSO_ISSUER_URI: http://auth.localhost/realms/databucket
+      SSO_CLIENT_ID: databucket
+      SSO_CLIENT_SECRET: databucket-secret
 
-  auth:
-    image: quay.io/keycloak/keycloak:12.0.4
-    expose:
-      - "8080"
-    hostname: auth.localhost
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    command: start-dev --import-realm
     environment:
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
-      KC_HOSTNAME: auth.localhost
-      DB_VENDOR: h2
-    networks:
-      - auth
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: http://auth.localhost
+      KC_PROXY_HEADERS: xforwarded
+    volumes:
+      - ./keycloak/databucket-realm.json:/opt/keycloak/data/import/databucket-realm.json:ro
 
-  reverse-proxy:
-    image: caddy:alpine
+  caddy:
+    image: caddy:2-alpine
     ports:
       - "80:80"
-      - "443:443"
-    #      - "2015:2015"
-    #      - "2019:2019"
     volumes:
-      - "./Caddyfile:/etc/caddy/Caddyfile"
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - databucket
+      - keycloak
     networks:
-      - auth
-#      - server
-      - default
+      default:
+        aliases:
+          - databucket.localhost
+          - auth.localhost
 
-networks:
-  auth:
-    internal: true
-#  server:
-#    internal: true
+volumes:
+  postgres-data:

@@ -1,8 +1,10 @@
-FROM node:16-alpine as builder
+# Builds the jar from the sources, then runs it. Gradle downloads Node.js for the frontend itself;
+# it is built for glibc, so the builder must not be an Alpine (musl) image.
+FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /app
-RUN apk add openjdk17 git
 COPY . .
-RUN ./gradlew clean build
+# a Windows checkout may have CRLF line endings
+RUN sed -i 's/\r$//' gradlew && sh ./gradlew clean assemble --no-daemon
 
 FROM amazoncorretto:17
 

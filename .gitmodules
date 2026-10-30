@@ -1,4 +1,0 @@
-[submodule "frontend/material-table"]
-	path = frontend/material-table
-	url = https://github.com/databucket/material-table.git
-	shallow = true

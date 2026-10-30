@@ -61,6 +61,9 @@ Installed below dependencies:
 - Java 17
 - NodeJS 22 — only for the Vite dev server (`npm run dev`). The Gradle build downloads its own Node.js.
 
+To try Databucket without installing anything but Docker, `docker/docker-compose.yaml` starts it together with
+PostgreSQL and Keycloak (single sign-on): `cd docker && docker compose up --build`, then open http://databucket.localhost.
+
 ## Useful commands
 
 | command                                                  | what it does                                                                            |
