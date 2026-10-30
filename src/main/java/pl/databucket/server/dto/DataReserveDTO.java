@@ -13,10 +13,8 @@ import java.util.Map;
 @Schema(description = "Data transfer object for reserving data with filtering rules")
 public class DataReserveDTO implements SearchRules {
 
-    @Schema(
-            hidden = true,
-            description = "Target owner username for reservation"
-    )
+    @Schema(description = "Reserve the rows for this user instead of the signed-in one (ADMIN role only, ignored otherwise)",
+            example = "john")
     private String targetOwnerUsername;
 
     @Schema(

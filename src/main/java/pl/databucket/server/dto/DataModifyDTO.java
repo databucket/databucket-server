@@ -16,16 +16,18 @@ public class DataModifyDTO implements SearchRules {
     @Schema(description = "Tag ID", example = "1")
     private Long tagId;
 
-    @Schema(description = "Reserved flag", example = "false")
+    @Schema(description = "True reserves the rows for the signed-in user, false releases them", example = "false")
     private Boolean reserved;
 
-    @Schema(description = "Data properties", example = "{\"name\": \"John\", \"age\": 34}")
+    @Schema(description = "Replaces all the properties. To change only some of them, use propertiesToSet and propertiesToRemove instead.",
+            example = "{\"name\": \"John\", \"age\": 34}")
     private Map<String, Object> properties;
 
-    @Schema(hidden = true)
+    @Schema(description = "Properties to set, by JSON path; the other properties stay unchanged",
+            example = "{\"$.address.city\": \"Paris\", \"$.age\": 35}")
     private Map<String, Object> propertiesToSet;
 
-    @Schema(hidden = true)
+    @Schema(description = "Properties to remove, by JSON path", example = "[\"$.phone\"]")
     private List<String> propertiesToRemove;
 
     @Schema(
@@ -42,7 +44,7 @@ public class DataModifyDTO implements SearchRules {
     private Map<String, Object> logic;
 
     @Schema(
-            description = "Search rules",
+            description = "Rules selecting the rows to modify (ignored when modifying by ids)",
             example = "[[\"$.firstName\",\"like\",\"S%a\"],[\"id\", \">\", 10],[\"tagId\",\">\", 0],{\"or\": [[\"owner\", \"!=\", null],[\"createdBy\", \"=\", \"@currentUser\"]]}]"
     )
     private List<Object> rules;

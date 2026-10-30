@@ -1,5 +1,6 @@
 package pl.databucket.server.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +34,7 @@ import pl.databucket.server.service.ManageUserService;
 import jakarta.mail.MessagingException;
 import java.util.*;
 
-@Tag(name = "PUBLIC", description = "Public endpoints for authentication and user registration")
+@Tag(name = "Authentication", description = "Signing in. The token from the response authorizes the other calls (click Authorize).")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/public")
@@ -63,22 +64,32 @@ public class PublicController {
 
 
     @Operation(
-            summary = "Authenticate",
-            description = "Returns the token required to authorize the user, user's roles, project details if given projectId, or list of user's projects if the projectId is not given."
+            summary = "Sign in",
+            description = """
+                    Signs in with a user name and password and returns the token for one project, with the user's roles.
+
+                    * With **projectId**: signs in to that project.
+                    * Without projectId, when the user has **one project**: signs in to it.
+                    * Without projectId, when the user has **several projects**: returns the list of `projects` and no \
+                    token; sign in again with the chosen projectId.
+
+                    The token expires after 24 hours by default; then sign in again. Accounts that sign in through \
+                    single sign-on can't use the API; use an account with a password, e.g. with the ROBOT role."""
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK",
+                    description = "OK - the token, or the list of projects to choose from",
                     content = @Content(schema = @Schema(implementation = AuthRespDTO.class))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "Unauthorized - the given credentials are not correct"
+                    description = "Unauthorized - wrong user name or password, or the user is disabled"
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Forbidden - user access has expired | the project is disabled | the project is expired | the user is not assign to given project | the user is not assign to any project"
+                    description = "Forbidden - the user's access has expired, the project is disabled or expired, "
+                            + "or the user is not assigned to the project (or to any project)"
             ),
             @ApiResponse(
                     responseCode = "500",
@@ -87,7 +98,7 @@ public class PublicController {
     })
     @PostMapping(value = {"/signin"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signIn(
-            @Parameter(description = "payload - username (required), password (required), projectId (optional)", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The credentials and, optionally, the project", required = true)
             @RequestBody AuthReqDTO authReqDTO) {
         User user = userRepository.findWithProjectsAndRolesByUsername(authReqDTO.getUsername());
         if (user == null) {
@@ -119,6 +130,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @PostMapping(value = "/forgot-password", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> forgotPassword(
             @Parameter(description = "Forgot password request payload", required = true)
@@ -148,6 +160,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @GetMapping(value = {"/confirmation/forgot-password/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> forgotPasswordConfirmation(
             @Parameter(description = "JWT token for password reset", required = true)
@@ -176,6 +189,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @PostMapping(value = {"/sign-up"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signUp(
             @Parameter(description = "Sign up request payload", required = true)
@@ -231,6 +245,7 @@ public class PublicController {
             @ApiResponse(responseCode = "503", description = "Service Unavailable - mail service exception"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @GetMapping(value = {"/confirmation/sign-up/{jwts}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signUpConfirmation(
             @Parameter(description = "JWT token for sign up confirmation", required = true)
@@ -256,6 +271,7 @@ public class PublicController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @Hidden
     @GetMapping(value = {"/recaptcha-site-key"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getReCaptchaSiteKey() {
         try {

@@ -1,5 +1,6 @@
 package pl.databucket.server.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,7 @@ import pl.databucket.server.service.UserService;
 
 import java.net.URI;
 
+@Hidden // used only by the web application
 @Tag(name = "PUBLIC", description = "Public endpoints for authentication and user registration")
 @RestController
 @RequestMapping("/api/public/sso")

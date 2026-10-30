@@ -36,7 +36,7 @@ public class GetDataResponse {
     @Schema(description = "List of data items")
     private List<DataDTO> data;
 
-    @Schema(hidden = true, description = "Response message")
+    @Schema(description = "Set when no data matches the rules", example = "No data matches the rules!")
     private String message;
 
     @Schema(

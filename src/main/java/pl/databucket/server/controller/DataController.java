@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pl.databucket.server.configuration.OpenApiConfiguration;
 import pl.databucket.server.dto.*;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
@@ -31,11 +33,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@Tag(name = "SECURED", description = "Secured data operations")
+@Tag(name = "Data", description = "Creating, reading, reserving, modifying and removing data in a bucket. "
+        + "Requires the MEMBER or ROBOT role and access to the bucket.")
+@SecurityRequirement(name = OpenApiConfiguration.BEARER)
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/bucket/{bucketName}")
 @RestController
 public class DataController {
+
+    // Swagger descriptions shared by the operations
+    private static final String BUCKET_NAME = "Bucket name, as in the project settings";
+    private static final String IDS = "Data ids, comma-separated";
+    private static final String NOT_FOUND = "Not found - the bucket doesn't exist or the user has no access to it";
+    private static final String INVALID_RULES = "Bad request - invalid rules, see https://github.com/databucket/databucket-server/wiki/Rules";
+    private static final String LIMIT_GET = "Number of data rows per page. 0 returns only the total number of matching rows.";
+    private static final String SORT = "Sort order: a field or property, e.g. id, desc(id), asc($.name), or random";
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(DataController.class);
 
@@ -50,18 +62,20 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @Operation(summary = "Insert data", description = "Inserts one data set into the selected bucket.")
+    @Operation(summary = "Insert a data row", description = "Inserts one data row and returns it with its id. "
+            + "With reserved = true the row is reserved by the signed-in user.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created"),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "201", description = "Created - the inserted data row",
+                    content = @Content(schema = @Schema(implementation = DataDTO.class))),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - the tagId doesn't exist"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> insertData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "payload - data", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The data row", required = true)
             @RequestBody DataCreateDTO dataCreateDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -86,18 +100,19 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @Operation(summary = "Insert multi data", description = "Inserts multiple data sets into the selected bucket.")
+    @Operation(summary = "Insert many data rows", description = "Inserts a list of data rows in one call. "
+            + "The response has no body; to get the rows, search for them by rules.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created"),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - a tagId doesn't exist"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = {"/multi"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> insertMultiData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "payload - a list of data", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The data rows", required = true)
             @RequestBody List<DataCreateDTO> dataList) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -120,28 +135,29 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @Operation(summary = "Modify data by data ids", description = "Makes changes on data based on data ids.")
+    @Operation(summary = "Modify data rows by ids", description = "Changes the given items of the data rows; "
+            + "items left out stay unchanged. 'rules' are ignored here.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK",
+                    description = "OK - the number of modified rows",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = MessageResponse.class),
                             examples = @ExampleObject(value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}")
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId"),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - the tagId doesn't exist, or a property to change is empty"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "ids", example = "1,2,3", required = true)
+            @Parameter(description = IDS, example = "1,2,3", required = true)
             @PathVariable Optional<List<Long>> ids,
-            @Parameter(description = "payload - data details (rules are ignored in this endpoint)", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The changes", required = true)
             @RequestBody DataModifyDTO dataModifyDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -168,26 +184,28 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @Operation(summary = "Modify data by rules", description = "Makes changes on data based on data rules.")
+    @Operation(summary = "Modify data rows by rules", description = "Changes the given items of all data rows "
+            + "matching the rules; items left out stay unchanged. At least one rule is required.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK",
+                    description = "OK - the number of modified rows",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = MessageResponse.class),
                             examples = @ExampleObject(value = "{\n\t\"message\": \"Modified 3 data row(s)\"\n}")
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - used not existing tagId or rules contain not existing property"),
+            @ApiResponse(responseCode = "400", description = INVALID_RULES),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - no rules, the tagId doesn't exist, or a property to change is empty"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "payload - data details and rules", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The changes and the rules", required = true)
             @RequestBody DataModifyDTO dataModifyDTO) {
 
         if ((dataModifyDTO.getConditions() == null || dataModifyDTO.getConditions().size() == 0)
@@ -221,22 +239,23 @@ public class DataController {
     }
 
 
-    @Operation(summary = "Get data by data ids", description = "Retrieves data based on data ids.")
+    @Operation(summary = "Get data rows by ids", description = "Returns the data rows with the given ids. "
+            + "For a single id that exists the response is one object, otherwise a list (ids that don't exist are skipped).")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK",
+                    description = "OK - one data row, or a list of data rows",
                     content = @Content(schema = @Schema(implementation = DataDTO.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @GetMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "ids", example = "1,2,3", required = true)
+            @Parameter(description = IDS, example = "1,2,3", required = true)
             @PathVariable List<Long> ids) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -259,26 +278,27 @@ public class DataController {
     }
 
 
-    @Operation(summary = "Remove data by data ids", description = "Removes data based on data ids.")
+    @Operation(summary = "Remove data rows by ids", description = "Removes the data rows with the given ids, "
+            + "together with their history.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK",
+                    description = "OK - the number of removed rows",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = MessageResponse.class),
                             examples = @ExampleObject(value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}")
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @DeleteMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "ids", example = "1,2,3", required = true)
+            @Parameter(description = IDS, example = "1,2,3", required = true)
             @PathVariable List<Long> ids) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -298,28 +318,31 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @Operation(summary = "Get data by rules", description = "Retrieves data based on data rules. Define 'columns' to limit the retrieved data sets. Search for 'data' if columns are not defined and 'customData' if columns are defined.")
+    @Operation(summary = "Get data rows by rules", description = "Returns the data rows matching the rules, one page "
+            + "at a time (by default only 1 row). Without rules all rows match. Without 'columns' the rows are in 'data'; "
+            + "with 'columns' only the chosen fields and properties are returned, in 'customData'.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "OK",
                     content = @Content(schema = @Schema(implementation = GetDataResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not existing property"),
+            @ApiResponse(responseCode = "400", description = INVALID_RULES),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - a property in the rules can't be compared (e.g. it is empty)"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "page", example = "1")
+            @Parameter(description = "Page number, starting from 1", example = "1")
             @RequestParam(required = false, defaultValue = "1") Integer page,
-            @Parameter(description = "limit", example = "1")
+            @Parameter(description = LIMIT_GET, example = "10")
             @RequestParam(required = false, defaultValue = "1") Integer limit,
-            @Parameter(description = "sort", example = "id")
+            @Parameter(description = SORT, example = "desc(id)")
             @RequestParam(required = false, defaultValue = "id") String sort,
-            @Parameter(description = "payload - rules (required), columns (optional)", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules and, optionally, the columns", required = true)
             @RequestBody DataGetDTO dataGetDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -367,26 +390,29 @@ public class DataController {
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @Operation(summary = "Reserve data by rules", description = "Reserves data based on data rules.")
+    @Operation(summary = "Reserve data rows by rules", description = "Reserves free (not reserved) data rows matching "
+            + "the rules and returns them. Rows taken at the same moment by another client are skipped, so parallel "
+            + "tests never get the same row. When nothing is free, 'reserved' is 0 and there is a message.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "OK",
                     content = @Content(schema = @Schema(implementation = ReserveDataResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not existing property"),
+            @ApiResponse(responseCode = "400", description = INVALID_RULES),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - the limit is less than 1, or a property in the rules can't be compared"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = {"/reserve"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reserveData(
-            @Parameter(description = "bucket name", example = "bucket", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "limit", example = "1")
+            @Parameter(description = "Number of data rows to reserve", example = "1")
             @RequestParam(required = false, defaultValue = "1") Integer limit,
-            @Parameter(description = "sort", example = "random")
+            @Parameter(description = SORT, example = "random")
             @RequestParam(required = false, defaultValue = "id") String sort,
-            @Parameter(description = "payload - rules (required)", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules", required = true)
             @RequestBody DataReserveDTO dataReserveDTO) {
 
         Bucket bucket = bucketService.getBucket(bucketName);
@@ -441,26 +467,28 @@ public class DataController {
 
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
-    @Operation(summary = "Remove data by rules", description = "Removes data based on data rules.")
+    @Operation(summary = "Remove data rows by rules", description = "Removes all data rows matching the rules, "
+            + "together with their history. At least one rule is required.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "OK",
+                    description = "OK - the number of removed rows",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = MessageResponse.class),
                             examples = @ExampleObject(value = "{\n\t\"message\": \"Removed 3 data row(s)\"\n}")
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "Not found - the user doesn't have access to the bucket or the bucket was not found"),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - rules contain not existing property"),
+            @ApiResponse(responseCode = "400", description = INVALID_RULES),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - no rules, or a property in the rules can't be compared"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteData(
-            @Parameter(description = "bucket name", required = true)
+            @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "payload - rules (required)", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules", required = true)
             @RequestBody DataRemoveDTO dataRemoveDTO) {
 
         if ((dataRemoveDTO.getConditions() == null || dataRemoveDTO.getConditions().size() == 0)

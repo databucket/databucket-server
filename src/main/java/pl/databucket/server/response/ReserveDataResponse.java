@@ -28,7 +28,7 @@ public class ReserveDataResponse {
     @Schema(description = "Number of available items", example = "10")
     private long available;
 
-    @Schema(hidden = true, description = "Response message")
+    @Schema(description = "Set when no free data matches the rules", example = "No data matches the rules!")
     private String message;
 
     @Schema(description = "List of reserved data items")
