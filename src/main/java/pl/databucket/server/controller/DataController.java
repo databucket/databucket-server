@@ -231,7 +231,7 @@ public class DataController {
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
                 return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (InvalidRuleException e) {
+        } catch (InvalidRuleException | UnknownColumnException e) {
             return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
@@ -382,7 +382,7 @@ public class DataController {
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
                 return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (InvalidRuleException e) {
+        } catch (InvalidRuleException | UnknownColumnException e) {
             return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
@@ -458,7 +458,7 @@ public class DataController {
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
                 return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (InvalidRuleException e) {
+        } catch (InvalidRuleException | UnknownColumnException e) {
             return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);
@@ -512,7 +512,7 @@ public class DataController {
                 return exceptionFormatter.customException("Failed to operate on an empty property!", HttpStatus.NOT_ACCEPTABLE);
             else
                 return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
-        } catch (InvalidRuleException e) {
+        } catch (InvalidRuleException | UnknownColumnException e) {
             return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception ee) {
             return exceptionFormatter.defaultException(ee);

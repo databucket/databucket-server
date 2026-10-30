@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class BucketService {
 
+    private static final String DEFAULT_ICON_NAME = "trip_origin";
+
     @Autowired
     private ModelMapper modelMapper;
 
@@ -75,9 +77,12 @@ public class BucketService {
         bucket.setDescription(bucketDto.getDescription());
         bucket.setHistory(bucketDto.isHistory());
         bucket.setProtectedData(bucketDto.isProtectedData());
-        bucket.setIconName(bucketDto.getIcon().getName());
-        bucket.setIconColor(bucketDto.getIcon().getColor());
-        bucket.setIconSvg(bucketDto.getIcon().getSvg());
+        if (bucketDto.getIcon() != null) {
+            bucket.setIconName(bucketDto.getIcon().getName());
+            bucket.setIconColor(bucketDto.getIcon().getColor());
+            bucket.setIconSvg(bucketDto.getIcon().getSvg());
+        } else
+            bucket.setIconName(DEFAULT_ICON_NAME);
         bucket = bucketRepository.saveAndFlush(bucket);
 
         if (bucketDto.getRoleId() != null) {
@@ -195,9 +200,11 @@ public class BucketService {
 
         bucket.setName(bucketDto.getName());
         bucket.setDescription(bucketDto.getDescription());
-        bucket.setIconName(bucketDto.getIcon().getName());
-        bucket.setIconColor(bucketDto.getIcon().getColor());
-        bucket.setIconSvg(bucketDto.getIcon().getSvg());
+        if (bucketDto.getIcon() != null) {
+            bucket.setIconName(bucketDto.getIcon().getName());
+            bucket.setIconColor(bucketDto.getIcon().getColor());
+            bucket.setIconSvg(bucketDto.getIcon().getSvg());
+        }
 
         if (bucketDto.getClassId() != null) {
             DataClass dataClass = dataClassRepository.findByIdAndDeleted(bucketDto.getClassId(), false);
@@ -207,7 +214,7 @@ public class BucketService {
 
         // Modify groups
         Set<Long> currentGroupsIds = bucket.getGroups().stream().map(Group::getId).collect(Collectors.toSet());
-        Set<Long> newGroupsIds = bucketDto.getGroupsIds();
+        Set<Long> newGroupsIds = bucketDto.getGroupsIds() != null ? bucketDto.getGroupsIds() : Collections.emptySet();
         if (!(currentGroupsIds.containsAll(newGroupsIds) && newGroupsIds.size() == currentGroupsIds.size())) {
             Set<Long> toAdd = newGroupsIds.stream().filter(element -> !currentGroupsIds.contains(element)).collect(Collectors.toSet());
             if (toAdd.size() > 0) {
@@ -228,7 +235,7 @@ public class BucketService {
             }
 
             // Just to send proper response
-            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, bucketDto.getGroupsIds());
+            List<Group> groups = groupRepository.findAllByDeletedAndIdIn(false, newGroupsIds);
             bucket.setGroups(new HashSet<>(groups));
         }
 
