@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 public class Query {
 
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Set<String> COLUMNS = Set.of(COL.ID, COL.DATA_ID, COL.TAG_ID, COL.RESERVED, COL.RESERVED_BY,
+            COL.PROPERTIES, COL.CREATED_BY, COL.CREATED_AT, COL.MODIFIED_BY, COL.MODIFIED_AT);
     String query;
     String table;
 
@@ -36,9 +38,9 @@ public class Query {
         return this;
     }
 
-    public Query selectData(List<CustomColumnDto> columns) throws UnknownColumnException {
+    public Query selectData(List<CustomColumnDto> columns, Map<String, Object> paramMap) throws UnknownColumnException {
         if (columns != null)
-            query = "SELECT " + columnsToString(columns);
+            query = "SELECT " + columnsToString(columns, paramMap);
         else
             query = "SELECT *";
 
@@ -61,43 +63,58 @@ public class Query {
         return this;
     }
 
-    public Query removeAndSetProperties(boolean execute, DataModifyDTO dataModifyDto) throws JsonProcessingException {
+    /**
+     * Removes and sets single properties instead of replacing all of them. The paths and values come from the
+     * client, so they go into the statement only as parameters (added to paramMap), never as SQL text.
+     */
+    public Query removeAndSetProperties(boolean execute, DataModifyDTO dataModifyDto, Map<String, Object> paramMap) throws JsonProcessingException {
         if (execute) {
             List<String> propertiesToRemove = dataModifyDto.getPropertiesToRemove();
             Map<String, Object> propertiesToUpdate = dataModifyDto.getPropertiesToSet();
-            if (propertiesToRemove != null && propertiesToRemove.size() > 0 || propertiesToUpdate != null && propertiesToUpdate.size() > 0) {
-                if (query.contains("SET"))
-                    query += ", properties = ";
-                else
-                    query += " properties = ";
-
-                if (propertiesToRemove != null && propertiesToRemove.size() > 0 && propertiesToUpdate != null && propertiesToUpdate.size() > 0) {
-                    String remove = "properties ";
-                    for (String prop : propertiesToRemove)
-                        remove += "#- '{" + prop.replace("$.", "").replace(".", ",") + "}' ";
-
-                    Map<String, Object> jsonMap = new HashMap<>();
-                    for (Map.Entry<String, Object> prop : propertiesToUpdate.entrySet()) {
-                        String[] pathNodes = prop.getKey().replace("$.", "").split("\\.");
-                        updateJson(jsonMap, pathNodes, prop.getValue());
-                    }
-                    query += "jsonb_merge(" + remove + ", '" + mapper.writer().writeValueAsString(jsonMap) + "'::jsonb)";
-                } else if (propertiesToRemove != null && propertiesToRemove.size() > 0) {
-                    query += "properties ";
-                    for (String prop : propertiesToRemove)
-                        query += "#- '{" + prop.replace("$.", "").replace(".", ",") + "}' ";
-                } else if (propertiesToUpdate != null && propertiesToUpdate.size() > 0) {
-                    Map<String, Object> jsonMap = new HashMap<>();
-                    for (Map.Entry<String, Object> prop : propertiesToUpdate.entrySet()) {
-                        String[] pathNodes = prop.getKey().replace("$.", "").split("\\.");
-                        updateJson(jsonMap, pathNodes, prop.getValue());
-                    }
-                    query += "jsonb_merge(properties, '" + mapper.writer().writeValueAsString(jsonMap) + "'::jsonb)";
+            boolean remove = propertiesToRemove != null && !propertiesToRemove.isEmpty();
+            boolean update = propertiesToUpdate != null && !propertiesToUpdate.isEmpty();
+            if (remove || update) {
+                String properties = "properties";
+                if (remove) {
+                    for (int i = 0; i < propertiesToRemove.size(); i++)
+                        properties += " #- " + jsonPathArray(propertiesToRemove.get(i), "propertyToRemove" + i, paramMap);
                 }
+                if (update) {
+                    Map<String, Object> jsonMap = new HashMap<>();
+                    for (Map.Entry<String, Object> prop : propertiesToUpdate.entrySet())
+                        updateJson(jsonMap, jsonPathNodes(prop.getKey()), prop.getValue());
+                    paramMap.put("propertiesToSet", mapper.writer().writeValueAsString(jsonMap));
+                    properties = "jsonb_merge(" + properties + ", CAST(:propertiesToSet AS jsonb))";
+                }
+                query += (query.contains(" SET ") ? ", " : " SET ") + "properties = " + properties;
             }
         }
 
         return this;
+    }
+
+    // "$.address.city" -> ["address", "city"]
+    private static String[] jsonPathNodes(String jsonPath) {
+        return (jsonPath.startsWith("$.") ? jsonPath.substring(2) : jsonPath).split("\\.");
+    }
+
+    // A path used in a condition, a column or a sort, under the first free parameter name
+    private static String jsonPathArray(String jsonPath, Map<String, Object> paramMap) {
+        int i = 0;
+        while (paramMap.containsKey("path" + i + "_0"))
+            i++;
+        return jsonPathArray(jsonPath, "path" + i, paramMap);
+    }
+
+    // A PostgreSQL text[] of the path nodes, each node a parameter: ARRAY[CAST(:name_0 AS text), ...]
+    private static String jsonPathArray(String jsonPath, String name, Map<String, Object> paramMap) {
+        String[] nodes = jsonPathNodes(jsonPath);
+        List<String> elements = new ArrayList<>();
+        for (int i = 0; i < nodes.length; i++) {
+            paramMap.put(name + "_" + i, nodes[i]);
+            elements.add("CAST(:" + name + "_" + i + " AS text)");
+        }
+        return "ARRAY[" + String.join(", ", elements) + "]";
     }
 
     public void updateJson(Map<String, Object> map, String[] pathNodes, Object value) {
@@ -165,60 +182,61 @@ public class Query {
         return this;
     }
 
-    private String getConditionStringValue(String uniqueName, SourceType sourceType, Object value, Map<String, Object> paramMap) {
+    private String getConditionStringValue(String uniqueName, SourceType sourceType, Object value, Map<String, Object> paramMap) throws UnknownColumnException {
         if (sourceType.equals(SourceType.s_function)) {
             String sValue = (String) value;
-            if (sValue.startsWith("$.") && sValue.endsWith(")")) {
+            if (sValue.startsWith("$.")) {
                 int lastDot = sValue.lastIndexOf('.');
                 String fName = sValue.substring(0, lastDot);
                 String functionName = sValue.substring(lastDot + 1);
                 switch (functionName) {
                     case "length()":
-                        return "jsonb_array_length(properties #> '{" + getPGPropertyArray(fName) + "}')";
+                        return "jsonb_array_length(properties #> " + jsonPathArray(fName, paramMap) + ")";
                     case "isNotNull()":
-                        return "(properties #>> '{" + getPGPropertyArray(fName) + "}' is not null)";
+                        return "(properties #>> " + jsonPathArray(fName, paramMap) + " is not null)";
                     case "isNull()":
-                        return "(properties #>> '{" + getPGPropertyArray(fName) + "}' is null)";
+                        return "(properties #>> " + jsonPathArray(fName, paramMap) + " is null)";
                     case "notExists()":
-                        return "(properties #> '{" + getPGPropertyArray(fName) + "}' is null)";
+                        return "(properties #> " + jsonPathArray(fName, paramMap) + " is null)";
                     case "exists()":
-                        return "(properties #> '{" + getPGPropertyArray(fName) + "}' is not null)";
+                        return "(properties #> " + jsonPathArray(fName, paramMap) + " is not null)";
                     default:
-                        return sValue;
+                        throw new UnknownColumnException(sValue);
                 }
             } else
-                return sValue;
+                return sValue; // SQL given with the "#func:" prefix in the rules
         } else if (sourceType.equals(SourceType.s_property)) {
             String sValue = (String) value;
             if (sValue.startsWith("$."))
-                return "properties #> '{" + getPGPropertyArray(sValue) + "}'";
+                return "properties #> " + jsonPathArray(sValue, paramMap);
             else
-                return sValue;
+                throw new UnknownColumnException(sValue);
         } else if (sourceType.equals(SourceType.s_field)) {
-            return (String) value;
+            return checkColumn((String) value);
         } else if (sourceType.equals(SourceType.s_const)) {
-            if (value == null) {
+            if (value == null)
                 return "null";
-            } else if (paramMap != null) {
-                if (value instanceof String) {
-                    Timestamp date = isValidDate((String) value);
-                    if (date != null)
-                        paramMap.put(uniqueName, date);
-                    else
-                        paramMap.put(uniqueName, value);
-                } else
-                    paramMap.put(uniqueName, value);
 
-                return ":" + uniqueName;
-            } else {
-                if (value instanceof String) {
-                    return "'" + value + "'";
-                } else
-                    return "" + value;
-            }
+            if (value instanceof String) {
+                Timestamp date = isValidDate((String) value);
+                if (date != null)
+                    paramMap.put(uniqueName, date);
+                else
+                    paramMap.put(uniqueName, value);
+            } else
+                paramMap.put(uniqueName, value);
+
+            return ":" + uniqueName;
         }
 
         return null;
+    }
+
+    // JSON array of the value(s) as a jsonb parameter
+    private static String jsonbArrayParam(String uniqueName, Object value, Map<String, Object> paramMap) {
+        Collection<?> values = value instanceof Collection ? (Collection<?>) value : Collections.singletonList(value);
+        paramMap.put(uniqueName, mapper.valueToTree(values).toString());
+        return "CAST(:" + uniqueName + " AS jsonb)";
     }
 
     private String generateQueryRulesString(String uniqueName, QueryRule queryRule, Map<String, Object> paramMap) throws ConditionNotAllowedException, UnknownColumnException {
@@ -278,28 +296,15 @@ public class Query {
                 // eg.: 5 in $.jsonArray   >>> v1 @> '[v2]'
             } else if (condition.getRightSource().equals(SourceType.s_property)) {
                 // COALESCE - avoid situation when missing property used in the condition
-                v1 = "COALESCE(properties #> '{" + getPGPropertyArray(condition.getRightValue().toString()) + "}', '[]'::jsonb)";
+                v1 = "COALESCE(properties #> " + jsonPathArray(condition.getRightValue().toString(), paramMap) + ", '[]'::jsonb)";
                 op = "@>";
-                if (condition.getLeftValue() instanceof String) {
-                    v2 = "'[\"" + condition.getLeftValue() + "\"]'::jsonb";
-                } else if (condition.getLeftValue() instanceof ArrayList<?>) {
-                    v2 = "'[" + getPGStringArray((ArrayList<?>) condition.getLeftValue()) + "]'::jsonb";
-                } else
-                    v2 = "'[" + condition.getLeftValue() + "]'::jsonb";
+                v2 = jsonbArrayParam(uniqueName + "l", condition.getLeftValue(), paramMap);
 
                 // eg.: $.prop in [1, 2, 3]   >>> v1 in 'v2
             } else if (condition.getLeftSource().equals(SourceType.s_property)) {
-                if (condition.getRightValue() instanceof ArrayList)
-                    v1 = "'[" + getPGStringArray((ArrayList<?>) condition.getRightValue()) + "]'";
-                else {
-                    if (condition.getRightValue() instanceof String) {
-                        v1 = "'[\"" + condition.getRightValue() + "\"]'";
-                    } else {
-                        v1 = "'[" + condition.getRightValue() + "]'";
-                    }
-                }
+                v1 = jsonbArrayParam(uniqueName + "r", condition.getRightValue(), paramMap);
                 op = "@>";
-                v2 = "(properties #> '{" + getPGPropertyArray(condition.getLeftValue().toString()) + "}')";
+                v2 = "(properties #> " + jsonPathArray(condition.getLeftValue().toString(), paramMap) + ")";
 
                 // property not used in this condition
             } else {
@@ -319,22 +324,17 @@ public class Query {
                 || condition.getOperator().equals(Operator.matchesCS)
                 || condition.getOperator().equals(Operator.notMatchCS)) {
 
-            String leftValue, rightValue;
-
             if (condition.getLeftSource().equals(SourceType.s_property))
-                leftValue = "properties #>> '{" + getPGPropertyArray((String) condition.getLeftValue()) + "}'";
+                v1 = "properties #>> " + jsonPathArray((String) condition.getLeftValue(), paramMap);
             else
-                leftValue = "(" + condition.getLeftValue() + ")::varchar";
+                v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::varchar";
+
+            op = condition.getOperator().toString();
 
             if (condition.getRightSource().equals(SourceType.s_property))
-                rightValue = "properties #>> '{" + getPGPropertyArray((String) condition.getRightValue()) + "}'";
+                v2 = "properties #>> " + jsonPathArray((String) condition.getRightValue(), paramMap);
             else
-                rightValue = "" + condition.getRightValue();
-
-
-            v1 = getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap);
-            op = condition.getOperator().toString();
-            v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), rightValue, paramMap);
+                v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "" + condition.getRightValue(), paramMap);
 
         } else {
             boolean convertToDateTime = false;
@@ -360,7 +360,9 @@ public class Query {
                         v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text";
                 }
             } else if (condition.getLeftSource().equals(SourceType.s_function)) {
-                v1 = "(" + getField((String) condition.getLeftValue()) + ")";
+                String leftValue = (String) condition.getLeftValue();
+                // without "$." it is SQL given with the "#func:" prefix in the rules
+                v1 = "(" + (leftValue.startsWith("$.") ? getProperty(leftValue, true, paramMap) : leftValue) + ")";
             } else
                 v1 = getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap);
 
@@ -383,99 +385,48 @@ public class Query {
         return String.format(sFormat, v1, op, v2);
     }
 
-    // returns PGObjects instead of strings
-    private String getField4Select(String fieldName) throws UnknownColumnException {
-        if (fieldName.startsWith("$.")) {
-            if (fieldName.endsWith("()")) {
-                int lastDot = fieldName.lastIndexOf('.');
-                String filedJsonPath = fieldName.substring(0, lastDot);
-                String functionName = fieldName.substring(lastDot + 1);
-                String resultFiled;
+    // "$.path" or "$.path.function()"; asText returns the property as text, otherwise as jsonb
+    private String getProperty(String fieldName, boolean asText, Map<String, Object> paramMap) throws UnknownColumnException {
+        if (fieldName.endsWith("()")) {
+            int lastDot = fieldName.lastIndexOf('.');
+            String filedJsonPath = fieldName.substring(0, lastDot);
+            String functionName = fieldName.substring(lastDot + 1);
 
-                switch (functionName) {
-                    case "length()":
-                        resultFiled = "coalesce(jsonb_array_length(properties #> '{" + getPGPropertyArray(filedJsonPath) + "}'), 0)";
-                        break;
+            switch (functionName) {
+                case "length()":
+                    return "coalesce(jsonb_array_length(properties #> " + jsonPathArray(filedJsonPath, paramMap) + "), 0)";
 
-                    case "isNotNull()":
-                    case "exists()":
-                    case "isNotEmpty()":
-                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is not null";
-                        break;
+                case "isNotNull()":
+                case "exists()":
+                case "isNotEmpty()":
+                    return "properties #>> " + jsonPathArray(filedJsonPath, paramMap) + " is not null";
 
-                    case "isNull()":
-                    case "notExists()":
-                    case "isEmpty()":
-                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is null";
-                        break;
+                case "isNull()":
+                case "notExists()":
+                case "isEmpty()":
+                    return "properties #>> " + jsonPathArray(filedJsonPath, paramMap) + " is null";
 
-                    default:
-                        throw new UnknownColumnException(fieldName);
-                }
-
-                return resultFiled;
-
-            } else
-                return "properties #> '{" + getPGPropertyArray(fieldName) + "}'";
-
+                default:
+                    throw new UnknownColumnException(fieldName);
+            }
         } else
-            return fieldName;
+            return "properties " + (asText ? "#>> " : "#> ") + jsonPathArray(fieldName, paramMap);
     }
 
-    private String getField(String fieldName) throws UnknownColumnException {
-        if (fieldName.startsWith("$.")) {
-            if (fieldName.endsWith("()")) {
-                int lastDot = fieldName.lastIndexOf('.');
-                String filedJsonPath = fieldName.substring(0, lastDot);
-                String functionName = fieldName.substring(lastDot + 1);
-                String resultFiled;
-
-                switch (functionName) {
-                    case "length()":
-                        resultFiled = "coalesce(jsonb_array_length(properties #> '{" + getPGPropertyArray(filedJsonPath) + "}'), 0)";
-                        break;
-
-                    case "isNotNull()":
-                    case "exists()":
-                    case "isNotEmpty()":
-                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is not null";
-                        break;
-
-                    case "isNull()":
-                    case "notExists()":
-                    case "isEmpty()":
-                        resultFiled = "properties #>> '{" + getPGPropertyArray(filedJsonPath) + "}' is null";
-                        break;
-
-                    default:
-                        throw new UnknownColumnException(fieldName);
-                }
-
-                return resultFiled;
-
-            } else
-                return "properties #>> '{" + getPGPropertyArray(fieldName) + "}'";
-
-        } else
-            return fieldName;
+    // A property, or a column the client may refer to by its API name (e.g. "tagId") or its column name
+    private String getField(String fieldName, boolean asText, Map<String, Object> paramMap) throws UnknownColumnException {
+        if (fieldName.startsWith("$."))
+            return getProperty(fieldName, asText, paramMap);
+        else
+            return checkColumn(convertField(fieldName));
     }
 
-    private String getPGPropertyArray(String jsonPath) {
-        // $.group.subgroup.item 	>>>>  group,subgroup,item
-        String result = jsonPath.substring(2);
-        result = result.replace(".", ",");
-        return result;
-    }
-
-    // returns eg.: "text1","text2","text3"
-    private String getPGStringArray(ArrayList<?> list) {
-        StringBuilder result = new StringBuilder();
-        for (Object item : list)
-            if (item instanceof String)
-                result.append(",\"").append(item).append("\"");
-            else
-                result.append(",").append(item);
-        return result.substring(1); // cut first comma character
+    // Column names come from the client too, so only the bucket table columns get into the SQL
+    private static String checkColumn(String column) throws UnknownColumnException {
+        if (COLUMNS.contains(column))
+            return column;
+        else
+            throw new UnknownColumnException(column);
     }
 
     private Timestamp isValidDate(String inDate) {
@@ -488,14 +439,7 @@ public class Query {
         }
     }
 
-    public Query orderBy(Optional<String> sort) throws UnknownColumnException {
-        if (sort.isPresent())
-            return orderBy(sort.get());
-        else
-            return this;
-    }
-
-    public Query orderBy(String sort) throws UnknownColumnException {
+    public Query orderBy(String sort, Map<String, Object> paramMap) throws UnknownColumnException {
         boolean asc = true;
         String column = sort;
 
@@ -511,21 +455,22 @@ public class Query {
         if (column.toUpperCase().startsWith("RANDOM"))
             orderBy("RANDOM()", true);
         else
-            orderBy(getField(column), asc);
+            orderBy(getField(column, true, paramMap), asc);
 
         return this;
     }
 
+    // columnName is SQL, never a value from the client
     public Query orderBy(String columnName, boolean asc) {
         if (asc) {
-            query += " ORDER BY " + convertField(columnName);
+            query += " ORDER BY " + columnName;
         } else {
-            query += " ORDER BY " + convertField(columnName) + " desc";
+            query += " ORDER BY " + columnName + " desc";
         }
         return this;
     }
 
-    private String convertField(String field) {
+    private static String convertField(String field) {
         switch (field) {
             case "id":
                 return COL.DATA_ID;
@@ -592,20 +537,17 @@ public class Query {
         return " (" + columns.substring(2) + ") VALUES (" + values.substring(2) + ")";
     }
 
-    private String columnsToString(String[] columns) throws UnknownColumnException {
-        String result = "";
-        for (String col : columns)
-            result += ", " + getField4Select(col);
-        return result.substring(2);
+    private String columnsToString(String[] columns) {
+        return String.join(", ", columns);
     }
 
-    private String columnsToString(List<CustomColumnDto> columns) throws UnknownColumnException {
+    private String columnsToString(List<CustomColumnDto> columns, Map<String, Object> paramMap) throws UnknownColumnException {
         String result = "";
         for (CustomColumnDto col : columns)
             if (col.getTitle() != null)
-                result += ", " + getField4Select(col.getField()) + " as \"" + col.getTitle() + "\"";
+                result += ", " + getField(col.getField(), false, paramMap) + " as \"" + col.getTitle().replace("\"", "\"\"") + "\"";
             else
-                result += ", " + getField4Select(col.getField());
+                result += ", " + getField(col.getField(), false, paramMap);
         return result.substring(2);
     }
 
