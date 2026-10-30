@@ -9,8 +9,8 @@
 .PaperClass {
     margin-top: 40px;
     display: flex;
-    min-width: 400px;
-    max-width: 400px;
+    min-width: 440px;
+    max-width: 440px;
     min-height: 500px;
     max-height: 700px;
     flex-direction: column;
@@ -48,6 +48,19 @@
 
 .RegistrationLink {
     padding-top: 70px;
+}
+
+/* login window only: ButtonLogin and RegistrationLink are shared with other public pages */
+.PasswordLogin {
+    margin-top: 14px;
+}
+
+.SsoLogin {
+    margin-top: 13px;
+}
+
+.RegistrationLink.AfterSso {
+    padding-top: 41px;
 }
 
 .ProjectsList {
