@@ -17,8 +17,11 @@ import ConfirmationPage from "../components/public/ConfirmationPage";
 
 export default function AppRouter() {
 
-    // initial browser url without context path
-    setPathname(window.location.pathname.replace(getContextPath(), ""));
+    // initial browser url without context path, opened after signing in; the return from single sign-on
+    // (/login/sso) loads the app again and must not replace the page a link led to
+    const pathname = window.location.pathname.replace(getContextPath(), "");
+    if (pathname !== "/login/sso")
+        setPathname(pathname);
 
     return (
         <BrowserRouter basename={getContextPath()}>
