@@ -2,6 +2,7 @@ import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
 import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
+import {selectCellText} from "../../utils/TableCellSelect";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {
@@ -62,7 +63,7 @@ export default function ClassesTab() {
     }, [classes, fetchClasses]);
 
     return (
-        <div>
+        <div onDoubleClick={selectCellText}>
             <MaterialTable
                 title='Classes'
                 tableRef={tableRef}

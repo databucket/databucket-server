@@ -76,6 +76,7 @@ import SettingsBackupRestore from "@mui/icons-material/SettingsBackupRestore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import SaveAlt from "@mui/icons-material/SaveAlt";
 import {exportCsv} from "../../utils/CsvExport";
+import {selectCellText} from "../../utils/TableCellSelect";
 import "./BucketDataTable.css";
 import {
     getDataByIdUrl,
@@ -972,6 +973,7 @@ export default function BucketDataTable() {
                     exportEnabled: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
                     onExport: exportRows
                 }}>
+                <div onDoubleClick={selectCellText}>
                 <MaterialTable
                     // a new table for each bucket and view, so it starts with the state saved for them
                     key={`${state.bucketId}-${state.activeView.id}-${columnsVersion}`}
@@ -1083,6 +1085,7 @@ export default function BucketDataTable() {
                     actions={getActions()}
                     editable={getEditable()}
                 />
+                </div>
                 </DataTableContext.Provider>
 
                 <MessageBox
