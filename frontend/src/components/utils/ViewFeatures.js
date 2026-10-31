@@ -12,6 +12,7 @@ export const FEATURE_RESERVATION = 'Reservation';
 export const FEATURE_IMPORT = 'Import';
 export const FEATURE_EXPORT = 'Export';
 export const FEATURE_AVAILABLE_TAGS = 'Available tags';
+export const FEATURE_COMPACT_ROW_ACTIONS = 'Compact row actions';
 
 export const features = [
     {id: 1, name: FEATURE_SEARCH},
@@ -27,7 +28,8 @@ export const features = [
     {id: 11, name: FEATURE_DUPLICATE},
     {id: 12, name: FEATURE_FILTER},
     {id: 13, name: FEATURE_RICH_FILTER},
-    {id: 14, name: FEATURE_AVAILABLE_TAGS}
+    {id: 14, name: FEATURE_AVAILABLE_TAGS},
+    {id: 15, name: FEATURE_COMPACT_ROW_ACTIONS}
 ];
 
 export const isFeatureEnabled = (name, activeView) => {

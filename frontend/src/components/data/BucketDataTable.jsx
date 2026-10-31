@@ -42,6 +42,7 @@ import AccessContext from "../../context/access/AccessContext";
 import MissingBucketTable from "./MissingBucketTable";
 import {
     FEATURE_AVAILABLE_TAGS,
+    FEATURE_COMPACT_ROW_ACTIONS,
     FEATURE_CREATION,
     FEATURE_DETAILS,
     FEATURE_DUPLICATE,
@@ -74,6 +75,7 @@ import FilterList from "@mui/icons-material/FilterList";
 import DuplicateIcon from '@mui/icons-material/ViewStream'
 import SettingsBackupRestore from "@mui/icons-material/SettingsBackupRestore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
+import MoreVert from "@mui/icons-material/MoreVert";
 import SaveAlt from "@mui/icons-material/SaveAlt";
 import {exportCsv} from "../../utils/CsvExport";
 import {selectCellText} from "../../utils/TableCellSelect";
@@ -156,15 +158,69 @@ const ExportMenu = ({onExport}) => {
     );
 }
 
+// the icon of a table action, as the table renders it
+const actionIcon = (action) => {
+    switch (typeof action.icon) {
+        case 'string':
+            return <Icon {...action.iconProps}>{action.icon}</Icon>;
+        case 'function':
+            return action.icon({...action.iconProps});
+        case 'undefined':
+            return null;
+        default:
+            return <action.icon {...action.iconProps}/>;
+    }
+}
+
+// The actions of a row under one button (the view's Compact row actions feature)
+const RowActionsMenu = ({actions, data, disabled}) => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    // an action may be a function of the row (the table's edit and delete actions)
+    const rowActions = actions
+        .map(action => typeof action === 'function' ? action(data) : action)
+        .filter(action => action != null && !action.hidden);
+    return (
+        <>
+            <Tooltip title='Actions'>
+                <span>
+                    <IconButton size="small" color="inherit" disabled={disabled}
+                                onClick={event => setAnchorEl(event.currentTarget)}>
+                        <MoreVert/>
+                    </IconButton>
+                </span>
+            </Tooltip>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+                {rowActions.map((action, index) =>
+                    <MenuItem
+                        key={index}
+                        disabled={action.disabled}
+                        onClick={event => {
+                            setAnchorEl(null);
+                            action.onClick(event, data);
+                        }}
+                    >
+                        <ListItemIcon>{actionIcon(action)}</ListItemIcon>
+                        {action.tooltip}
+                    </MenuItem>
+                )}
+            </Menu>
+        </>
+    );
+}
+
 // The toolbar and its actions get the state of BucketDataTable from this context. They are components declared once,
 // so that a render of BucketDataTable doesn't create them anew (which would close an open menu).
 const DataTableContext = createContext(null);
 
 // toolbar actions come with the columns, row actions without them
 const TableActions = (props) => {
-    const {columnsArranged, onResetColumns, exportEnabled, onExport} = useContext(DataTableContext);
-    if (props.columns == null)
+    const {columnsArranged, onResetColumns, exportEnabled, onExport, compactRowActions} = useContext(DataTableContext);
+    if (props.columns == null) {
+        // a row being edited (its save and cancel actions) comes without "disabled", and keeps its buttons
+        if (compactRowActions && props.disabled !== undefined)
+            return <RowActionsMenu actions={props.actions} data={props.data} disabled={props.disabled}/>;
         return <MTableActions {...props}/>;
+    }
     const refresh = props.actions.filter(action => action.tooltip === 'Refresh');
     const others = props.actions.filter(action => action.tooltip !== 'Refresh');
     return (
@@ -971,9 +1027,12 @@ export default function BucketDataTable() {
                     columnsArranged,
                     onResetColumns: resetColumns,
                     exportEnabled: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
-                    onExport: exportRows
+                    onExport: exportRows,
+                    compactRowActions: isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView)
                 }}>
-                <div onDoubleClick={selectCellText} className="bucket-data-table">
+                <div onDoubleClick={selectCellText}
+                     className={isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView)
+                         ? 'bucket-data-table compact-row-actions' : 'bucket-data-table'}>
                 <MaterialTable
                     // a new table for each bucket and view, so it starts with the state saved for them
                     key={`${state.bucketId}-${state.activeView.id}-${columnsVersion}`}
@@ -1057,7 +1116,7 @@ export default function BucketDataTable() {
                         showTitle: false,
                         columnsButton: false,   // see TableActions
                         // the table sizes the actions cells for all actions, also the toolbar ones; the header has
-                        // the width of the row actions
+                        // the width of the row actions (with compact row actions one button, see BucketDataTable.css)
                         actionsCellStyle: {width: '1px'},
                         // doubleHorizontalScroll: true
                     }}
