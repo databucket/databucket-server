@@ -49,6 +49,7 @@ import {
     FEATURE_EXPORT,
     FEATURE_FILTER,
     FEATURE_HISTORY,
+    FEATURE_IMPORT,
     FEATURE_MODIFYING,
     FEATURE_REMOVAL,
     FEATURE_RESERVATION,
@@ -77,6 +78,7 @@ import SettingsBackupRestore from "@mui/icons-material/SettingsBackupRestore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import MoreVert from "@mui/icons-material/MoreVert";
 import SaveAlt from "@mui/icons-material/SaveAlt";
+import FileUpload from "@mui/icons-material/FileUpload";
 import {exportCsv} from "../../utils/CsvExport";
 import {selectCellText} from "../../utils/TableCellSelect";
 import "./BucketDataTable.css";
@@ -94,6 +96,7 @@ import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
 import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
+import ImportDataDialog from "../dialogs/ImportDataDialog";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
@@ -214,7 +217,9 @@ const DataTableContext = createContext(null);
 
 // toolbar actions come with the columns, row actions without them
 const TableActions = (props) => {
-    const {columnsArranged, onResetColumns, exportEnabled, onExport, compactRowActions} = useContext(DataTableContext);
+    const {
+        columnsArranged, onResetColumns, exportEnabled, onExport, importEnabled, onImport, compactRowActions
+    } = useContext(DataTableContext);
     if (props.columns == null) {
         // a row being edited (its save and cancel actions) comes without "disabled", and keeps its buttons
         if (compactRowActions && props.disabled !== undefined)
@@ -233,6 +238,13 @@ const TableActions = (props) => {
                 onResetColumns={onResetColumns}
             />
             {exportEnabled && <ExportMenu onExport={onExport}/>}
+            {importEnabled &&
+                <Tooltip title='Import CSV'>
+                    <IconButton color="inherit" onClick={onImport}>
+                        <FileUpload/>
+                    </IconButton>
+                </Tooltip>
+            }
             <MTableActions {...props} actions={others}/>
         </div>
     );
@@ -321,6 +333,7 @@ export default function BucketDataTable() {
     const [richFilterState, setRichFilterState] = useState({
         open: false
     });
+    const [importOpen, setImportOpen] = useState(false);
     const [state, setState] = useState({
         bucketId: null,     // the bucket the state below was prepared for
         bucketViews: [],    // all views available for active bucket that user has access
@@ -1028,6 +1041,8 @@ export default function BucketDataTable() {
                     onResetColumns: resetColumns,
                     exportEnabled: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
                     onExport: exportRows,
+                    importEnabled: isFeatureEnabled(FEATURE_IMPORT, state.activeView),
+                    onImport: () => setImportOpen(true),
                     compactRowActions: isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView)
                 }}>
                 <div onDoubleClick={selectCellText}
@@ -1153,6 +1168,23 @@ export default function BucketDataTable() {
                 <MessageBox
                     config={messageBox}
                     onClose={() => setMessageBox({...messageBox, open: false})}
+                />
+
+                <ImportDataDialog
+                    open={importOpen}
+                    bucket={activeBucket}
+                    columns={state.tableColumns}
+                    onClose={() => setImportOpen(false)}
+                    onImported={count => {
+                        setImportOpen(false);
+                        reloadData();
+                        setMessageBox({
+                            open: true,
+                            severity: 'success',
+                            title: 'Import',
+                            message: `Imported ${count} rows.`
+                        });
+                    }}
                 />
 
                 <DataDetailsDialog
