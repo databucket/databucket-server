@@ -1,10 +1,11 @@
 package pl.databucket.server.exception;
 
-// a project is deleted only when it holds nothing: it has to be cleared first
+// deleting a project, or importing a dataset into it, needs an empty project: it has to be cleared first
 public class ProjectNotEmptyException extends Exception {
 
-    public ProjectNotEmptyException(String name) {
-        super("The project '" + name + "' is not empty. Clear it before deleting it.");
+    // action: e.g. "deleting it", "importing a dataset"
+    public ProjectNotEmptyException(String name, String action) {
+        super("The project '" + name + "' is not empty. Clear it before " + action + ".");
     }
 
 }

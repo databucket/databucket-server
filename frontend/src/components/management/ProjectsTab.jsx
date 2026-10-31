@@ -19,7 +19,7 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {DeleteSweep, FilterList, Refresh} from "@mui/icons-material";
+import {DeleteSweep, FilterList, Input, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
@@ -39,19 +39,20 @@ import SelectUsersDialog from "../dialogs/SelectUsersDialog";
 import RolesContext from "../../context/roles/RolesContext";
 import {getManageProjectMapper} from "../../utils/NullValueMappers";
 import ProjectContentDialog from "./ProjectContentDialog";
+import DatasetImportDialog from "./DatasetImportDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
-// The table puts its Edit and Delete after the other row actions; here the order is Edit | Clear project | Delete
+// The table puts its Edit and Delete after the other row actions; here the order is
+// Edit | Import dataset | Clear project | Delete
 const RowActions = (props) => {
     if (props.data == null)
         return <MTableActions {...props}/>;
-    const actions = [...props.actions];
-    const clear = actions.findIndex(action => action.tooltip === 'Clear project');
-    if (clear >= 0) {
-        const [clearAction] = actions.splice(clear, 1);
-        const remove = actions.findIndex(action => typeof action === 'function' && action(props.data).tooltip === 'Delete');
-        actions.splice(remove >= 0 ? remove : actions.length, 0, clearAction);
-    }
+    // the table's Edit and Delete are functions of the row; a row action given as a function comes as {action: fn}
+    const tooltip = action => typeof action === 'function' ? action(props.data).tooltip
+        : typeof action.action === 'function' ? action.action(props.data).tooltip
+        : action.tooltip;
+    const order = ['Edit', 'Import dataset', 'Clear project', 'Delete'];
+    const actions = [...props.actions].sort((a, b) => order.indexOf(tooltip(a)) - order.indexOf(tooltip(b)));
     return <MTableActions {...props} actions={actions}/>;
 }
 
@@ -60,6 +61,7 @@ export default function ProjectsTab() {
     const theme = useTheme();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [contentDialog, setContentDialog] = useState({project: null, mode: null});
+    const [datasetProject, setDatasetProject] = useState(null);
     const tableState = useTableState('management-projects');
     const tableRef = createRef();
     const {projects, fetchProjects, addProject, editProject, removeProject} = useContext(ProjectsContext);
@@ -88,6 +90,17 @@ export default function ProjectsTab() {
             fetchRoles();
         }
     }, [roles, fetchRoles]);
+    const onDatasetImported = (project, dataset, rows) => {
+        setDatasetProject(null);
+        editProject({...project, empty: false});
+        setMessageBox({
+            open: true,
+            severity: 'success',
+            title: `Dataset ${dataset.name} imported into "${project.name}"`,
+            message: `${rows.toLocaleString()} data rows`
+        });
+    }
+
     // clearing or deleting a project, confirmed in ProjectContentDialog
     const onContentRemoved = (project) => {
         const deleted = contentDialog.mode === 'delete';
@@ -180,6 +193,13 @@ export default function ProjectsTab() {
                         onClick: tableState.toggleFiltering
 
                     },
+                    rowData => ({
+                        icon: () => <Input/>,
+                        tooltip: 'Import dataset',
+                        // only into an empty project
+                        disabled: rowData.empty !== true,
+                        onClick: (event, rowData) => setDatasetProject(rowData)
+                    }),
                     {
                         icon: () => <DeleteSweep/>,
                         tooltip: 'Clear project',
@@ -279,6 +299,11 @@ export default function ProjectsTab() {
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
+            />
+            <DatasetImportDialog
+                project={datasetProject}
+                onClose={() => setDatasetProject(null)}
+                onDone={onDatasetImported}
             />
             <ProjectContentDialog
                 project={contentDialog.project}
