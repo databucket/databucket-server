@@ -8,9 +8,9 @@ server:
   servlet.context-path: /
 
 recaptcha:
-  enabled: true
-  siteKey: 6LePbJYjAAAAAN-ggduoEko4TylRpA0nEasI-EFg
-  secretKey: 6LePbJYjAAAAAEd8X-ZmikLPRxHI59aCaw64PfU7
+  enabled: false
+  siteKey: yourSiteKey
+  secretKey: yourSecretKey
 
 spring:
   datasource:
@@ -20,9 +20,9 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: databucket.info@gmail.com
-    password: tmmldyswcvyizhsg
-    from: admin@email.com
+    username: username
+    password: password
+    from: admin@email.io
     properties.mail.smtp.auth: true
     properties.mail.smtp.starttls.enable: true
 
