@@ -38,3 +38,20 @@
     display: none;
 }
 
+
+/* JSON colors, the same as in the data history (utils/JsonHighlight.jsx) */
+.jsoneditor .ace_editor .ace_variable {
+    color: #9cdcfe;
+}
+
+.jsoneditor .ace_editor .ace_string {
+    color: #ce9178;
+}
+
+.jsoneditor .ace_editor .ace_constant.ace_numeric {
+    color: #b5cea8;
+}
+
+.jsoneditor .ace_editor .ace_constant.ace_language {
+    color: #569cd6;
+}
