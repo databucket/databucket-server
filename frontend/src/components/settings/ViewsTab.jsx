@@ -1,11 +1,9 @@
 import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -55,8 +53,7 @@ export default function ViewsTab() {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-views'));
     const usersContext = useContext(UsersContext);
     const {users, fetchUsers, notifyUsers} = usersContext;
     const rolesContext = useContext(RolesContext);
@@ -119,12 +116,6 @@ export default function ViewsTab() {
         if (teams == null)
             fetchTeams();
     }, [teams, fetchTeams]);
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     const cloneItem = (rowData) => {
         fetch(getBaseUrl('views'), getPostOptions(rowData))
             .then(handleErrors)
@@ -143,7 +134,7 @@ export default function ViewsTab() {
             <MaterialTable
                 title='Views'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     getColumnName("20%"),
                     getColumnDescription("20%"),
                     getColumnColumns(columns),
@@ -161,17 +152,18 @@ export default function ViewsTab() {
                     },
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={views != null ? views : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(views != null ? views : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -198,7 +190,7 @@ export default function ViewsTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
                     },
                     {
                         icon: () => <CloneIcon/>,

@@ -1,0 +1,10 @@
+/* Header cells are sticky (headerStyle), so each one is a stacking context and a header being dragged would go under
+   the cells after it. The cell of the dragged header (position: fixed while dragging) goes above the others. */
+th:has(> [data-rfd-draggable-id][style*="position: fixed"]) {
+    z-index: 1;
+}
+
+/* the dragged header covers the headers it passes */
+th > [data-rfd-draggable-id][style*="position: fixed"] {
+    background-color: inherit;
+}

@@ -1,11 +1,9 @@
 import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -45,8 +43,7 @@ export default function TagsTab() {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-tags'));
     const tagsContext = useContext(TagsContext);
     const {tags, fetchTags, addTag, editTag, removeTag} = tagsContext;
     const bucketsContext = useContext(BucketsContext);
@@ -74,18 +71,12 @@ export default function TagsTab() {
             fetchBuckets();
     }, [buckets, fetchBuckets]);
 
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     return (
         <div>
             <MaterialTable
                 title='Tags'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     getColumnId(),
                     getColumnName(),
                     getColumnDescription(),
@@ -95,17 +86,18 @@ export default function TagsTab() {
                     getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={tags != null ? tags : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(tags != null ? tags : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -132,7 +124,7 @@ export default function TagsTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
                     }
                 ]}
                 editable={{

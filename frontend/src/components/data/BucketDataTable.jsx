@@ -1,5 +1,5 @@
-import React, {createRef, useContext, useEffect, useState} from 'react';
-import MaterialTable, {MTableToolbar} from '@material-table/core';
+import React, {createContext, createRef, useContext, useEffect, useState} from 'react';
+import MaterialTable, {MTableActions, MTableToolbar} from '@material-table/core';
 import {
     getDeleteOptions,
     getGetOptions,
@@ -12,17 +12,31 @@ import {
     getTableToolbarBackgroundColor
 } from "../../utils/MaterialTableHelper";
 import {
+    clearBucketColumns,
+    clearBucketTableState,
+    getBucketColumns,
+    getBucketPageSize,
+    getBucketTableState,
     getLastActiveView,
-    getLastBucketOrder,
-    getLastBucketSearchedText,
     getLastPageSize,
     getUsername,
-    setLastActiveView,
-    setLastBucketOrder,
-    setLastBucketSearchedText,
-    setLastPageSize
+    setBucketColumns,
+    setBucketPageSize,
+    setBucketTableState,
+    setLastActiveView
 } from "../../utils/ConfigurationStorage";
-import {Grid, Icon, useTheme} from "@mui/material";
+import {
+    Checkbox,
+    Divider,
+    Grid,
+    Icon,
+    IconButton,
+    ListItemIcon,
+    Menu,
+    MenuItem,
+    Tooltip,
+    useTheme
+} from "@mui/material";
 import ViewMenuSelector from "./ViewMenuSelector";
 import AccessContext from "../../context/access/AccessContext";
 import MissingBucketTable from "./MissingBucketTable";
@@ -49,6 +63,7 @@ import prepareTableColumns, {
     getBucketTags,
     getBucketTasks,
     getBucketViews,
+    getColumnsLayout,
     getFetchColumns
 } from "./BucketDataTableHelper";
 import MissingActiveView from "./MissingActiveView";
@@ -57,6 +72,11 @@ import RateReviewOutlined from "@mui/icons-material/RateReviewOutlined";
 import History from "@mui/icons-material/History";
 import FilterList from "@mui/icons-material/FilterList";
 import DuplicateIcon from '@mui/icons-material/ViewStream'
+import SettingsBackupRestore from "@mui/icons-material/SettingsBackupRestore";
+import ViewColumn from "@mui/icons-material/ViewColumn";
+import SaveAlt from "@mui/icons-material/SaveAlt";
+import {exportCsv} from "../../utils/CsvExport";
+import "./BucketDataTable.css";
 import {
     getDataByIdUrl,
     getDataHistoryUrl,
@@ -75,18 +95,106 @@ import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
 
+// the maximum number of rows exported at once
+const EXPORT_LIMIT = 10000;
+
+// the table's columns and export buttons are always the first toolbar buttons, so they are rendered here, after Refresh
+const ColumnsMenu = ({columns, onColumnsChanged, columnsArranged, onResetColumns}) => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    return (
+        <span>
+            <Tooltip title='Show columns'>
+                <IconButton color="inherit" onClick={event => setAnchorEl(event.currentTarget)}>
+                    <ViewColumn/>
+                </IconButton>
+            </Tooltip>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+                <MenuItem disabled style={{opacity: 1, fontWeight: 600, fontSize: 12}}>
+                    Add or remove columns
+                </MenuItem>
+                {[...columns].sort((a, b) => a.tableData.columnOrder - b.tableData.columnOrder).map(column =>
+                    <MenuItem key={column.tableData.id} onClick={() => onColumnsChanged(column, !column.hidden)}>
+                        <Checkbox checked={!column.hidden}/>
+                        <span>{column.title}</span>
+                    </MenuItem>
+                )}
+                <Divider/>
+                <MenuItem
+                    disabled={!columnsArranged}
+                    onClick={() => {
+                        setAnchorEl(null);
+                        onResetColumns();
+                    }}
+                >
+                    <ListItemIcon><SettingsBackupRestore fontSize="small"/></ListItemIcon>
+                    Reset columns
+                </MenuItem>
+            </Menu>
+        </span>
+    );
+}
+
+const ExportMenu = ({onExport}) => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const exportRows = (allRows) => {
+        setAnchorEl(null);
+        onExport(allRows);
+    }
+    return (
+        <span>
+            <Tooltip title='Export'>
+                <IconButton color="inherit" onClick={event => setAnchorEl(event.currentTarget)}>
+                    <SaveAlt/>
+                </IconButton>
+            </Tooltip>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+                <MenuItem onClick={() => exportRows(false)}>Export CSV - current page</MenuItem>
+                <MenuItem onClick={() => exportRows(true)}>Export CSV - all matching rows</MenuItem>
+            </Menu>
+        </span>
+    );
+}
+
+// The toolbar and its actions get the state of BucketDataTable from this context. They are components declared once,
+// so that a render of BucketDataTable doesn't create them anew (which would close an open menu).
+const DataTableContext = createContext(null);
+
+// toolbar actions come with the columns, row actions without them
+const TableActions = (props) => {
+    const {columnsArranged, onResetColumns, exportEnabled, onExport} = useContext(DataTableContext);
+    if (props.columns == null)
+        return <MTableActions {...props}/>;
+    const refresh = props.actions.filter(action => action.tooltip === 'Refresh');
+    const others = props.actions.filter(action => action.tooltip !== 'Refresh');
+    return (
+        <div style={{display: 'flex'}}>
+            <MTableActions {...props} actions={refresh}/>
+            <ColumnsMenu
+                columns={props.columns}
+                onColumnsChanged={props.onColumnsChanged}
+                columnsArranged={columnsArranged}
+                onResetColumns={onResetColumns}
+            />
+            {exportEnabled && <ExportMenu onExport={onExport}/>}
+            <MTableActions {...props} actions={others}/>
+        </div>
+    );
+}
+
 const richFilterIcon = (activeLogic) => () => activeLogic != null ?
     <Icon color={'secondary'}><span className="material-icons">filter_alt</span></Icon>
     :
     <span className="material-icons">filter_alt</span>;
 
 const taskActionIcon = () => <span className="material-icons">edit_note</span>;
+// tableRef is empty while a new table (another bucket or view) is being created
 const filterIcon = (filtering) => () => filtering
-&& tableRef.current.state.query.filters.length > 0 ?
+&& tableRef.current != null && tableRef.current.state.query.filters.length > 0 ?
     <FilterList color={'secondary'}/> :
     <FilterList/>;
 
-const tableToolbar = (state, onViewSelected, onDataReserve, handleSearchChange, theme) => (props) => {
+const TableToolbar = (props) => {
+    const {state, onViewSelected, onDataReserve, handleSearchChange, theme} = useContext(DataTableContext);
     return (
         <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
             <Grid container direction="row">
@@ -157,6 +265,7 @@ export default function BucketDataTable() {
         open: false
     });
     const [state, setState] = useState({
+        bucketId: null,     // the bucket the state below was prepared for
         bucketViews: [],    // all views available for active bucket that user has access
         bucketTags: [],
         bucketTasks: [],
@@ -166,35 +275,47 @@ export default function BucketDataTable() {
         tableColumns: [],   // columns prepared for material table,
         resetPage: false
     });
-    let searchText = activeBucket != null ? getLastBucketSearchedText(activeBucket.id) : "";
-    const [changedBucket, setChangedBucket] = useState(false);
+    // the table restored for the active bucket: search text, page, sort and filters it starts with
+    const [tableState, setTableState] = useState({});
+    // columns arranged by the user (order, visibility) are saved; a new version recreates the table with the view's columns
+    const [columnsArranged, setColumnsArranged] = useState(false);
+    const [columnsVersion, setColumnsVersion] = useState(0);
 
-    // fix: set search text when back from settings
-    useEffect(() => {
-        updateTableDataManager();
-    }, [tableRef.current]);
+    const getViewLogic = (view) => {
+        const filteredFilters = filters.filter(f => f.id === view.filterId);
+        return filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
+    }
 
     // active bucket has been changed
     useEffect(() => {
-        setChangedBucket(true);
-        setFiltering(false);
         const bucketViews = getBucketViews(activeBucket, views);
         if (bucketViews.length > 0 && tags != null && enums != null && views
             != null && columns != null) {
-            const orderBy = getLastBucketOrder(activeBucket.id);
-            updateTableDataManager();
-
             const bucketTags = getBucketTags(activeBucket, tags);
             const bucketTasks = getBucketTasks(activeBucket, tasks);
             const lastActiveViewId = getLastActiveView(activeBucket.id);
             const activeView = getActiveView(bucketViews, lastActiveViewId);
-            const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
-            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, users, orderBy);
-            const filteredFilters = filters.filter(f => f.id === activeView.filterId);
-            const activeLogic = filteredFilters.length > 0 ? filteredFilters[0].configuration.logic : null;
 
+            // the saved state belongs to one view; another view starts clean
+            let savedState = getBucketTableState(activeBucket.id);
+            if (savedState.viewId !== activeView.id) {
+                clearBucketTableState(activeBucket.id);
+                setBucketTableState(activeBucket.id, {viewId: activeView.id});
+                savedState = {viewId: activeView.id};
+            }
+
+            const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
+            const columnsLayout = getBucketColumns(activeBucket.id, activeView.id);
+            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, users, savedState.order, savedState.filters, columnsLayout);
+            const activeLogic = savedState.logic !== undefined ? savedState.logic : getViewLogic(activeView);
+
+            setFiltering(savedState.filtering === true);
+            setColumnsArranged(columnsLayout != null);
+            setPageSize(getBucketPageSize(activeBucket.id));
+            setTableState(savedState);
             setState({
                 ...state,
+                bucketId: activeBucket.id,
                 bucketViews: bucketViews,
                 bucketTags: bucketTags,
                 bucketTasks: bucketTasks,
@@ -202,12 +323,16 @@ export default function BucketDataTable() {
                 columnsDef: columnsDef,
                 activeLogic: activeLogic,
                 tableColumns: tableColumns,
-                resetPage: true
+                resetPage: false
             });
-            reloadData();
+            // another bucket gets a new table (see key), which loads its data itself
+            if (state.bucketId === activeBucket.id)
+                reloadData();
         } else {
+            setFiltering(false);
             setState({
                 ...state,
+                bucketId: activeBucket != null ? activeBucket.id : null,
                 bucketViews: [],
                 bucketTags: [],
                 bucketTasks: [],
@@ -221,21 +346,8 @@ export default function BucketDataTable() {
 
     }, [activeBucket, enums, tags, views, columns, filters]);
 
-    const updateTableDataManager = () => {
-        // console.log("updateTableDataManager - in");
-        if (tableRef !== null && tableRef.current !== null) {
-            // console.log("updateTableDataManager - update");
-            tableRef.current.dataManager.changeSearchText(searchText);
-            tableRef.current.dataManager.orderBy = -1;
-            tableRef.current.dataManager.orderDirection = "";
-            tableRef.current.setState({searchText: searchText});
-            tableRef.current.setState(tableRef.current.dataManager.getRenderState());
-        }
-    }
-
     const handleSearchChange = (text) => {
-        searchText = text;
-        setLastBucketSearchedText(activeBucket.id, text);
+        setBucketTableState(activeBucket.id, {searchText: text});
     }
 
     const resetPageAndReload = () => {
@@ -244,30 +356,114 @@ export default function BucketDataTable() {
     }
 
     const setActiveLogic = (logic) => {
+        setBucketTableState(activeBucket.id, {logic: logic});
         setState({...state, activeLogic: logic, resetPage: true});
         reloadData();
     }
 
-    // active view has been changed
+    // active view has been changed: the table starts clean with the view's filter
     const onViewSelected = (view) => {
         setFiltering(false);
         setLastActiveView(activeBucket.id, view.id);
+        clearBucketTableState(activeBucket.id);
+        setBucketTableState(activeBucket.id, {viewId: view.id});
         const columnsDef = columns.filter(col => col.id === view.columnsId)[0];
-        const filteredFilters = filters.filter(f => f.id === view.filterId);
-        const activeLogic = filteredFilters.length > 0
-            ? filteredFilters[0].configuration.logic : null;
-        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags,
-            enums, users, getLastBucketOrder(activeBucket.id));
+        const columnsLayout = getBucketColumns(activeBucket.id, view.id);
+        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, users, null, null, columnsLayout);
 
+        setColumnsArranged(columnsLayout != null);
+        setTableState({viewId: view.id});
         setState({
             ...state,
             activeView: view,
             columnsDef: columnsDef,
-            activeLogic: activeLogic,
+            activeLogic: getViewLogic(view),
             tableColumns: tableColumns,
             resetPage: true
         });
-        reloadData();
+    }
+
+    // the request for the data matching the query of the table: search, filters, sort and the rich filter
+    const getDataRequest = (query, limit) => {
+        let url = getDataUrl(activeBucket) + '/get?';
+        url += 'limit=' + limit;
+
+        // orderByCollection also holds the saved sort the table starts with
+        const sorted = (query.orderByCollection || []).find(c => c.orderDirection);
+        const sortColumn = sorted != null ? state.tableColumns.find(c => c.tableData != null && c.tableData.id === sorted.orderBy) : null;
+        if (sortColumn != null) {
+            if (sorted.orderDirection === 'desc') {
+                url += '&sort=desc('
+                    + sortColumn.source + ')';
+            } else {
+                url += '&sort='
+                    + sortColumn.source;
+            }
+        }
+
+        const payload = {
+            columns: getFetchColumns(state.tableColumns),
+            conditions: consolidateAllConditions(query.search, query.filters),
+            logic: state.activeLogic
+        }
+        return {url, payload};
+    }
+
+    const getExportFileName = () => `${activeBucket.name}-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}`;
+
+    // the visible columns in the order of the table; values as shown (tag and enum names instead of ids)
+    const exportRows = (allRows) => {
+        const columns = tableRef.current.dataManager.columns
+            .filter(column => !column.hidden && column.field)
+            .sort((a, b) => a.tableData.columnOrder - b.tableData.columnOrder);
+        const toCsvRows = data => data.map(rowData => {
+            const row = {};
+            columns.forEach(column => row[column.field] = tableRef.current.dataManager.getFieldValue(rowData, column));
+            return row;
+        });
+
+        if (!allRows) {
+            exportCsv(getExportFileName(), columns, toCsvRows(tableRef.current.state.renderData));
+            return;
+        }
+
+        const {url, payload} = getDataRequest(tableRef.current.state.query, EXPORT_LIMIT);
+        fetch(url + '&page=1', getPostOptions(payload))
+            .then(handleErrors)
+            .then(result => {
+                exportCsv(getExportFileName(), columns, toCsvRows(result.customData));
+                if (result.total > EXPORT_LIMIT)
+                    setMessageBox({
+                        open: true,
+                        severity: 'warning',
+                        title: 'Export',
+                        message: `Exported the first ${EXPORT_LIMIT} of ${result.total} rows.`
+                    });
+            })
+            .catch(error => {
+                setMessageBox({
+                    open: true,
+                    severity: 'error',
+                    title: 'Error',
+                    message: error
+                });
+            });
+    }
+
+    const saveColumnsLayout = () => {
+        setBucketColumns(activeBucket.id, state.activeView.id, getColumnsLayout(tableRef.current.dataManager.columns));
+        setColumnsArranged(true);
+    }
+
+    // a new table with the view's columns; search, sort, filters and page stay
+    const resetColumns = () => {
+        clearBucketColumns(activeBucket.id, state.activeView.id);
+        const savedState = getBucketTableState(activeBucket.id);
+        const tableColumns = prepareTableColumns(state.columnsDef, state.bucketTags, enums, users, savedState.order, savedState.filters, null);
+        setColumnsArranged(false);
+        setTableState(savedState);
+        setState({...state, tableColumns: tableColumns});
+        setColumnsVersion(columnsVersion + 1);
     }
 
     const onOpenTaskExecutionEditorDialog = () => {
@@ -594,6 +790,7 @@ export default function BucketDataTable() {
         tooltip: 'Enable/disable filter',
         isFreeAction: true,
         onClick: () => {
+            setBucketTableState(activeBucket.id, {filtering: !filtering});
             setFiltering(!filtering);
             tableRef.current.state.query.filters.length > 0 && reloadData();
         }
@@ -756,14 +953,28 @@ export default function BucketDataTable() {
 
     if (activeBucket == null && buckets.length === 0) {
         return <MissingBucketTable/>
-    } else if (activeBucket == null && buckets.length > 0) {
+    } else if ((activeBucket == null && buckets.length > 0) || state.bucketId !== activeBucket.id) {
+        // the state of another bucket must not be used to load this one's data
         return <div/>
     } else if (state.activeView == null) {
         return <MissingActiveView/>
     } else {
         return (
             <React.StrictMode>
+                <DataTableContext.Provider value={{
+                    state,
+                    onViewSelected,
+                    onDataReserve,
+                    handleSearchChange,
+                    theme,
+                    columnsArranged,
+                    onResetColumns: resetColumns,
+                    exportEnabled: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
+                    onExport: exportRows
+                }}>
                 <MaterialTable
+                    // a new table for each bucket and view, so it starts with the state saved for them
+                    key={`${state.bucketId}-${state.activeView.id}-${columnsVersion}`}
                     title={activeBucket.name}
                     tableRef={tableRef}
                     columns={state.tableColumns}
@@ -771,57 +982,22 @@ export default function BucketDataTable() {
                             try {
                                 if (pageSize !== query.pageSize) {
                                     setPageSize(query.pageSize);
-                                    setLastPageSize(query.pageSize);
+                                    setBucketPageSize(activeBucket.id, query.pageSize);
                                 }
 
-                                let url = getDataUrl(activeBucket) + '/get?';
-                                url += 'limit=' + query.pageSize;
+                                let page = query.page + 1;
                                 if (state.resetPage) {
-                                    url += '&page=1';
+                                    page = 1;
                                     setState({...state, resetPage: false});
-                                } else {
-                                    url += '&page=' + (query.page + 1);
                                 }
 
-                                // take sorting from parameter
-                                if (changedBucket === true) {
-                                    setChangedBucket(false);
-                                    const orderBy = getLastBucketOrder(
-                                        activeBucket.id);
-                                    if (orderBy != null
-                                        && state.tableColumns.length > 0) {
-                                        let source = state.tableColumns[0].source;
-                                        if (state.tableColumns.length
-                                            > orderBy.colId) {
-                                            source = state.tableColumns[orderBy.colId].source;
-                                        }
-                                        if (orderBy.ord === 'desc') {
-                                            url += '&sort=desc(' + source + ')';
-                                        } else {
-                                            url += '&sort=' + source;
-                                        }
-                                    }
-                                } else {
-                                    if (query.orderBy != null) {
-                                        if (query.orderDirection === 'desc') {
-                                            url += '&sort=desc('
-                                                + query.orderBy.source + ')';
-                                        } else {
-                                            url += '&sort='
-                                                + query.orderBy.source;
-                                        }
-                                    }
-                                }
-
-                                let payload = {
-                                    columns: getFetchColumns(state.tableColumns),
-                                    conditions: consolidateAllConditions(searchText, query.filters),
-                                    logic: state.activeLogic
-                                }
+                                const {url, payload} = getDataRequest(query, query.pageSize);
+                                const getPage = page => fetch(url + '&page=' + page, getPostOptions(payload)).then(handleErrors);
 
                                 let resultOk = true;
-                                fetch(url, getPostOptions(payload))
-                                    .then(handleErrors)
+                                getPage(page)
+                                    // the page may not exist any more (rows removed in the meantime): show the last one
+                                    .then(result => result.page > result.totalPages && result.totalPages > 0 ? getPage(result.totalPages) : result)
                                     .catch(error => {
                                         setMessageBox({
                                             open: true,
@@ -833,6 +1009,7 @@ export default function BucketDataTable() {
                                     })
                                     .then(result => {
                                         if (resultOk) {
+                                            setBucketTableState(activeBucket.id, {page: result.page - 1});
                                             resolve({
                                                 data: result.customData,
                                                 page: result.page - 1,
@@ -854,12 +1031,13 @@ export default function BucketDataTable() {
                     options={{
                         paging: true,
                         pageSize: pageSize,
+                        initialPage: tableState.page || 0,
+                        searchText: tableState.searchText || '',
                         pageSizeOptions: getPageSizeOptionsOnDialog(),
                         debounceInterval: 700,
                         maxColumnSort: 1,
                         selection: false,
                         filtering: filtering,
-                        exportButton: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
                         padding: 'dense',
                         search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
                         searchFieldStyle: {width: 350},
@@ -875,7 +1053,7 @@ export default function BucketDataTable() {
                             backgroundColor: getTableRowBackgroundColor(rowData, theme)
                         }),
                         showTitle: false,
-                        columnsButton: true,
+                        columnsButton: false,   // see TableActions
                         // doubleHorizontalScroll: true
                     }}
                     localization={{
@@ -888,15 +1066,24 @@ export default function BucketDataTable() {
                         }
                     }}
                     components={{
-                        Toolbar: tableToolbar(state, onViewSelected, onDataReserve, handleSearchChange, theme)
+                        Toolbar: TableToolbar,
+                        Actions: TableActions
                     }}
                     onOrderChange={(colId, ord) => {
                         let order = (colId >= 0) ? {colId, ord} : null;
-                        setLastBucketOrder(activeBucket.id, order);
+                        setBucketTableState(activeBucket.id, {order: order});
                     }}
+                    onFilterChange={appliedFilters => {
+                        const savedFilters = {};
+                        appliedFilters.forEach(filter => savedFilters[filter.column.field] = filter.value);
+                        setBucketTableState(activeBucket.id, {filters: savedFilters});
+                    }}
+                    onColumnDragged={saveColumnsLayout}
+                    onChangeColumnHidden={saveColumnsLayout}
                     actions={getActions()}
                     editable={getEditable()}
                 />
+                </DataTableContext.Provider>
 
                 <MessageBox
                     config={messageBox}

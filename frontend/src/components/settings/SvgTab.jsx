@@ -1,11 +1,9 @@
 import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useRef, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {IconButton, useTheme} from "@mui/material";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     getButtonColor,
     getDeleteOptions,
@@ -37,8 +35,7 @@ export default function SvgTab() {
     const inputRef = useRef(null);
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-svg'));
     const svgContext = useContext(SvgContext);
     const {svgs, fetchSvgs, editSvg, removeSvg} = svgContext;
     const changeableFields = ['name', 'structure'];
@@ -51,12 +48,6 @@ export default function SvgTab() {
         if (svgs == null)
             fetchSvgs();
     }, [svgs, fetchSvgs]);
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     const onLoadSvgFromFile = () => {
         inputRef.current.click();
     }
@@ -124,7 +115,7 @@ export default function SvgTab() {
             <MaterialTable
                 title='Svg icons'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     {
                         title: 'Image',
                         sorting: false,
@@ -139,17 +130,18 @@ export default function SvgTab() {
                     getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={svgs != null ? svgs : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(svgs != null ? svgs : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -176,7 +168,7 @@ export default function SvgTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
                     },
                     {
                         icon: () => <span className="material-icons">file_open</span>,

@@ -3,18 +3,50 @@ import {createEnumLookup, createTagLookup, createUserLookup} from "../../utils/J
 import LookupIconDialog from "./EditLookupIconDialog";
 import TableDynamicIcon from "../utils/TableDynamicIcon";
 
-export default function prepareTableColumns(columns, tags, enums, users, sort) {
+// sort: {colId, ord} and filters: {field: value} restore the saved state of the table,
+// layout: {order: [field], hidden: {field: hidden}} the columns arranged by the user
+export default function prepareTableColumns(columns, tags, enums, users, sort, filters, layout) {
     let colId = -1;
     if (columns != null) {
-        return columns.configuration.columns.filter(col => col.enabled).map(col => {
+        const tableColumns = columns.configuration.columns.filter(col => col.enabled).map(col => {
             colId += 1;
-            if (sort != null && colId === sort.colId)
-                return prepareColumn(col, columns.configuration.properties, tags, enums, users, sort.ord);
-            else
-                return prepareColumn(col, columns.configuration.properties, tags, enums, users,null);
+            const ord = sort != null && colId === sort.colId ? sort.ord : null;
+            let column = prepareColumn(col, columns.configuration.properties, tags, enums, users, ord);
+            const filter = filters != null ? filters[column.field] : undefined;
+            if (filter !== undefined)
+                column = {...column, defaultFilter: filter};
+            if (layout != null && layout.hidden != null && layout.hidden[column.field] !== undefined)
+                column = {...column, hidden: layout.hidden[column.field]};
+            return column;
         });
+        return layout != null && layout.order != null ? arrangeColumns(tableColumns, layout.order) : tableColumns;
     } else
         return [];
+}
+
+// The table shows columns by tableData.columnOrder; the array keeps the order of the view, so column ids
+// (and the saved sort) don't change. Columns added to the view since the order was saved go at the end.
+const arrangeColumns = (tableColumns, order) => {
+    const position = (column, index) => {
+        const savedIndex = order.indexOf(column.field);
+        return savedIndex >= 0 ? savedIndex : order.length + index;
+    }
+    const arranged = tableColumns.map((column, index) => ({column, index, position: position(column, index)}))
+        .sort((a, b) => a.position - b.position);
+    return tableColumns.map((column, index) => ({
+        ...column,
+        tableData: {columnOrder: arranged.findIndex(a => a.index === index)}
+    }));
+}
+
+// the columns as the user arranged them in the table (dataManager.columns)
+export const getColumnsLayout = (tableColumns) => {
+    const hidden = {};
+    tableColumns.forEach(column => hidden[column.field] = column.hidden === true);
+    return {
+        order: [...tableColumns].sort((a, b) => a.tableData.columnOrder - b.tableData.columnOrder).map(column => column.field),
+        hidden: hidden
+    };
 }
 
 const prepareColumn = (column, properties, tags, enums, users, ord) => {

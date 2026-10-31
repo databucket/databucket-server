@@ -1,11 +1,9 @@
 import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -46,8 +44,7 @@ export default function ColumnsTab() {
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState(
         {open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-columns'));
     const classesContext = useContext(ClassesContext);
     const {classes, fetchClasses, classesLookup} = classesContext;
     const columnsContext = useContext(ColumnsContext);
@@ -76,12 +73,6 @@ export default function ColumnsTab() {
             fetchColumns();
         }
     }, [columns, fetchColumns]);
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     const cloneItem = (rowData) => {
         fetch(getBaseUrl('columns'), getPostOptions(rowData))
         .then(handleErrors)
@@ -107,7 +98,7 @@ export default function ColumnsTab() {
 
                 title='Columns'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     getColumnName(),
                     getColumnDescription(),
                     getColumnClass(classesLookup, 'Class support'),
@@ -139,17 +130,18 @@ export default function ColumnsTab() {
                     getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={columns != null ? columns : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(columns != null ? columns : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -179,7 +171,7 @@ export default function ColumnsTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
                     },
                     {
                         icon: () => <CloneIcon/>,

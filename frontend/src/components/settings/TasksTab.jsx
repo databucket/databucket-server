@@ -1,15 +1,13 @@
 import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {
     FilterList,
     Refresh,
     ViewStream as CloneIcon
 } from "@mui/icons-material";
 import {useTheme} from "@mui/material";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -53,8 +51,7 @@ export default function TasksTab() {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-tasks'));
     const classesContext = useContext(ClassesContext);
     const {classes, fetchClasses, classesLookup} = classesContext;
     const bucketsContext = useContext(BucketsContext);
@@ -95,12 +92,6 @@ export default function TasksTab() {
         if (filters == null)
             fetchFilters();
     }, [filters, fetchFilters]);
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     const cloneItem = (rowData) => {
         fetch(getBaseUrl('tasks'), getPostOptions(rowData))
             .then(handleErrors)
@@ -119,7 +110,7 @@ export default function TasksTab() {
             <MaterialTable
                 title='Tasks'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     getColumnName("20%"),
                     getColumnDescription("20%"),
                     getColumnClass(classesLookup, 'Class support'),
@@ -156,17 +147,18 @@ export default function TasksTab() {
                     },
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={tasks != null ? tasks : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(tasks != null ? tasks : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -193,7 +185,7 @@ export default function TasksTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
                     },
                     {
                         icon: () => <CloneIcon/>,
