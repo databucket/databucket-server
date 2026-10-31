@@ -5,6 +5,8 @@ export default defineConfig({
     plugins: [react()],
     build: {
         outDir: 'build',
+        // the Gradle build turns it off where lightningcss can't load (Alpine), see build.gradle
+        cssMinify: process.env.DATABUCKET_CSS_MINIFY !== 'false',
     },
     server: {
         port: 3000,

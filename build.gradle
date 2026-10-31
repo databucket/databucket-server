@@ -81,7 +81,7 @@ test {
 }
 
 import com.github.gradle.node.npm.task.NpmTask
-import com.github.gradle.node.util.Platform
+import groovy.json.JsonSlurper
 
 tasks.register('deleteStatic') {
     doLast {
@@ -97,23 +97,37 @@ node {
     npmVersion = '11.19.1'
     download = true
     nodeProjectDir = file('frontend')
-    // Official Node.js builds need glibc. On Alpine (musl), even with a glibc compatibility layer, the native
-    // bindings of the frontend build tools (rolldown, lightningcss) don't load, so use the musl build of Node.js.
-    if (file('/etc/alpine-release').exists()) {
-        distBaseUrl = 'https://unofficial-builds.nodejs.org/download/release'
-        resolvedPlatform.set(new Platform('linux', 'x64-musl'))
-        // the plugin computes the node directory from the platform it detected, before this block runs
-        resolvedNodeDir.set(workDir.dir(version.map { "node-v${it}-linux-x64-musl" }))
-    }
 }
+
+// On Alpine (musl), even with a glibc compatibility layer, the native bindings of the frontend build tools
+// (rolldown, lightningcss) don't load with the Node.js above. There rolldown runs as WebAssembly and CSS is not
+// minified (Vite minifies it with lightningcss, which has no WebAssembly build). Slower build, the same application.
+boolean wasmFrontend = file('/etc/alpine-release').exists()
 
 tasks.register('installFrontend', NpmTask) {
     args = ['install']
 }
 
-tasks.register('buildFrontend', NpmTask) {
+tasks.register('installRolldownWasm', NpmTask) {
     dependsOn tasks.named('installFrontend')
+    onlyIf { wasmFrontend }
+    // One install (another one would remove these packages again): the binding of the same version as rolldown and
+    // its dependencies in their lowest allowed versions, because a newer @napi-rs/wasm-runtime doesn't work with
+    // the @emnapi version the binding uses. --force: the binding is meant for another platform (wasm32);
+    // --no-save: package.json and package-lock.json stay unchanged.
+    args.set(providers.provider {
+        def version = new JsonSlurper().parse(file('frontend/node_modules/rolldown/package.json')).version
+        def binding = new JsonSlurper().parse(new URL("https://registry.npmjs.org/@rolldown%2Fbinding-wasm32-wasi/${version}"))
+        ['install', '--no-save', '--force', "@rolldown/binding-wasm32-wasi@${version}".toString()] +
+                binding.dependencies.collect { name, range -> "${name}@${range.replaceAll(/^[\^~]/, '')}".toString() }
+    })
+}
+
+tasks.register('buildFrontend', NpmTask) {
+    dependsOn tasks.named('installRolldownWasm')
     args = ['run', 'build']
+    if (wasmFrontend)
+        environment = ['NAPI_RS_FORCE_WASI': '1', 'DATABUCKET_CSS_MINIFY': 'false']
 }
 
 tasks.register('copyFrontend') {
