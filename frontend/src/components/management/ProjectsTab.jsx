@@ -1,5 +1,6 @@
 import MaterialTable from "@material-table/core";
 import React, {createRef, useContext, useEffect, useState} from "react";
+import useTableState from "../../utils/TableState";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getDeleteOptions,
@@ -10,7 +11,6 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../utils/MaterialTableHelper";
-import {getLastPageSize, setLastPageSize} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
     convertNullValuesInObject,
@@ -46,8 +46,7 @@ export default function ProjectsTab() {
     const theme = useTheme();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState('management-projects');
     const tableRef = createRef();
     const {projects, fetchProjects, addProject, editProject, removeProject} = useContext(ProjectsContext);
     const {users, fetchUsers, notifyUsers} = useContext(ManageUsersContext);
@@ -75,12 +74,6 @@ export default function ProjectsTab() {
             fetchRoles();
         }
     }, [roles, fetchRoles]);
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     const onRemove = (remove) => {
         if (remove) {
             setConfirmRemove({open: false, id: 0, name: ''});
@@ -110,7 +103,7 @@ export default function ProjectsTab() {
             <MaterialTable
                 title='Projects'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     getColumnId(),
                     {
                         title: 'Public',
@@ -139,17 +132,18 @@ export default function ProjectsTab() {
                     getColumnCreatedBy(),
                     getColumnModifiedAt(),
                     getColumnModifiedBy()
-                ]}
-                data={projects != null ? projects : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(projects != null ? projects : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     cellStyle: {whiteSpace: 'nowrap'},
@@ -176,7 +170,7 @@ export default function ProjectsTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
 
                     }
                 ]}

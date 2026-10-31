@@ -1,15 +1,13 @@
 import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {
     FilterList,
     Refresh,
     ViewStream as CloneIcon
 } from "@mui/icons-material";
 import {useTheme} from "@mui/material";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -51,8 +49,7 @@ export default function FiltersTab() {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-filters'));
     const classesContext = useContext(ClassesContext);
     const {classes, fetchClasses, classesLookup} = classesContext;
     const tagsContext = useContext(TagsContext);
@@ -93,12 +90,6 @@ export default function FiltersTab() {
         if (users == null)
             fetchUsers();
     }, [users, fetchUsers]);
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     const cloneItem = (rowData) => {
         fetch(getBaseUrl('filters'), getPostOptions(rowData))
             .then(handleErrors)
@@ -117,7 +108,7 @@ export default function FiltersTab() {
             <MaterialTable
                 title='Filters'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     getColumnName(),
                     getColumnDescription(),
                     getColumnClass(classesLookup, 'Class support'),
@@ -144,17 +135,18 @@ export default function FiltersTab() {
                     getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={filters != null ? filters : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(filters != null ? filters : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -181,7 +173,7 @@ export default function FiltersTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
                     },
                     {
                         icon: () => <CloneIcon/>,

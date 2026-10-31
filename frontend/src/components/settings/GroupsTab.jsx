@@ -1,11 +1,9 @@
 import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -47,8 +45,7 @@ export default function GroupsTab() {
     const theme = useTheme();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-groups'));
     const rolesContext = useContext(RolesContext);
     const {roles, fetchRoles} = rolesContext;
     const groupContext = useContext(GroupsContext);
@@ -91,18 +88,13 @@ export default function GroupsTab() {
             fetchTeams();
     }, [teams, fetchTeams]);
 
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     return (
         <div>
             <MaterialTable
 
                 title='Groups'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     getColumnShortName(),
                     getColumnName(),
                     getColumnDescription(),
@@ -114,17 +106,18 @@ export default function GroupsTab() {
                     // getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={groups != null ? groups : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(groups != null ? groups : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -151,7 +144,7 @@ export default function GroupsTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
                     }
                 ]}
                 editable={{

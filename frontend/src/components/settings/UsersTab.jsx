@@ -1,5 +1,7 @@
 import MaterialTable from '@material-table/core';
 import React, {createRef, useContext, useEffect, useState} from "react";
+import {getProjectTableKey} from "../../utils/ConfigurationStorage";
+import useTableState from "../../utils/TableState";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getPageSizeOptions,
@@ -9,10 +11,6 @@ import {
     getTableRowBackgroundColor,
     getUserIcon
 } from "../../utils/MaterialTableHelper";
-import {
-    getLastPageSize,
-    setLastPageSize
-} from "../../utils/ConfigurationStorage";
 import {
     arraysEquals,
     convertNullValuesInObject,
@@ -42,8 +40,7 @@ export default function UsersTab() {
 
     const theme = useTheme();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [pageSize, setPageSize] = useState(getLastPageSize);
-    const [filtering, setFiltering] = useState(false);
+    const tableState = useTableState(getProjectTableKey('settings-users'));
     const tableRef = createRef();
     const usersContext = useContext(UsersContext);
     const {users, fetchUsers, editUser} = usersContext;
@@ -72,18 +69,12 @@ export default function UsersTab() {
             fetchTeams();
     }, [teams, fetchTeams]);
 
-
-    const onChangeRowsPerPage = (pageSize) => {
-        setPageSize(pageSize);
-        setLastPageSize(pageSize);
-    }
-
     return (
         <div>
             <MaterialTable
                 title='Users'
                 tableRef={tableRef}
-                columns={[
+                columns={tableState.columns([
                     {
                         filtering: false,
                         cellStyle: {width: '1%'},
@@ -112,17 +103,18 @@ export default function UsersTab() {
                     getColumnCreatedAt(),
                     getColumnModifiedBy(),
                     getColumnModifiedAt()
-                ]}
-                data={users != null ? users : []}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                ])}
+                data={tableState.data(users != null ? users : [])}
+                key={tableState.key}
+                {...tableState.callbacks}
                 options={{
-                    pageSize: pageSize,
+                    ...tableState.options,
                     pageSizeOptions: getPageSizeOptions(),
                     paginationType: 'stepped',
                     actionsColumnIndex: -1,
                     maxColumnSort: 1,
                     search: true,
-                    filtering: filtering,
+                    filtering: tableState.filtering,
                     debounceInterval: 700,
                     padding: 'dense',
                     headerStyle: {
@@ -149,7 +141,7 @@ export default function UsersTab() {
                         icon: () => <FilterList/>,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
-                        onClick: () => setFiltering(!filtering)
+                        onClick: tableState.toggleFiltering
 
                     }
                 ]}

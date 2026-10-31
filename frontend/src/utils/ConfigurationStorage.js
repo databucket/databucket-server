@@ -15,8 +15,9 @@ const LAST_ACTIVE_GROUP = 'last-active-group';
 const LAST_ACTIVE_BUCKET = 'last-active-bucket';
 const LAST_OPENED_BUCKETS = 'last-opened-buckets';
 const LAST_ACTIVE_VIEW = 'last-active-view';
-const LAST_SEARCHED_TEXT = 'last-searched-text';
-const LAST_ORDER = 'last-order';
+const TABLE_STATE = 'table-state';
+const TABLE_PAGE_SIZES = 'table-page-sizes';
+const TABLE_COLUMNS = 'table-columns';
 const DATA_DETAILS_DIALOG_SIZE = 'data-details-dialog-size';
 const DATA_FILTER_DIALOG_SIZE = 'data-filter-dialog-size';
 const TASK_EXECUTION_DIALOG_SIZE = 'task-execution-dialog-size';
@@ -27,6 +28,7 @@ export const logOut = () => {
     clearRoles();
     clearActiveProjectId();
     localStorage.removeItem(SSO_LOGIN);
+    sessionStorage.removeItem(TABLE_STATE);
 }
 
 export const setSsoLogin = () => {
@@ -261,53 +263,83 @@ export const setLastActiveView = (bucketId, viewId) => {
     setActiveProjectContextProperty(LAST_ACTIVE_VIEW, lastActiveView);
 }
 
-export const getLastBucketSearchedText = (bucketId) => {
-    const lastSearchedText = getActiveProjectContextProperty(LAST_SEARCHED_TEXT);
+// ********************************  TABLE STATE  ********************************
+// State of a table: searchText, order {colId, ord}, page, filters {field: value}, filtering (filter row shown);
+// the data table of a bucket also viewId and logic (rich filter; undefined = the view's filter).
+// Kept in sessionStorage: it survives switching pages and reloading, until the browser tab is closed.
+// Rows per page are kept permanently in localStorage. Table keys: getProjectTableKey(name) for tables of a project.
 
-    if (lastSearchedText != null) {
-        const text = lastSearchedText[`${bucketId}`];
-        if (text != null)
-            return text;
+const readJson = (storage, name) => {
+    try {
+        return JSON.parse(storage.getItem(name)) || {};
+    } catch (e) {
+        return {};
     }
-    return "";
 }
 
-export const setLastBucketSearchedText = (bucketId, searchedText) => {
-    let lastSearchedText = getActiveProjectContextProperty(LAST_SEARCHED_TEXT);
-    if (lastSearchedText == null)
-        lastSearchedText = {};
-
-    lastSearchedText[`${bucketId}`] = searchedText;
-    setActiveProjectContextProperty(LAST_SEARCHED_TEXT, lastSearchedText);
+export const getProjectTableKey = (name) => {
+    return `${getActiveProjectKey()}-${name}`;
 }
 
-export const clearAllSearchedText = () => {
-    setActiveProjectContextProperty(LAST_SEARCHED_TEXT, null);
+export const getTableState = (tableKey) => {
+    return readJson(sessionStorage, TABLE_STATE)[tableKey] || {};
 }
 
-export const getLastBucketOrder = (bucketId) => {
-    const lastOrder = getActiveProjectContextProperty(LAST_ORDER);
-    let result = null;
-
-    if (lastOrder != null) {
-        const order = lastOrder[`${bucketId}`];
-        if (order != null)
-            result = order;
-    }
-    return result;
+export const setTableState = (tableKey, changes) => {
+    const tableStates = readJson(sessionStorage, TABLE_STATE);
+    tableStates[tableKey] = {...tableStates[tableKey], ...changes};
+    sessionStorage.setItem(TABLE_STATE, JSON.stringify(tableStates));
 }
 
-export const setLastBucketOrder = (bucketId, order) => {
-    let orderList = getActiveProjectContextProperty(LAST_ORDER);
-    if (orderList == null)
-        orderList = {};
-
-    orderList[`${bucketId}`] = order;
-    setActiveProjectContextProperty(LAST_ORDER, orderList);
+export const clearTableState = (tableKey) => {
+    const tableStates = readJson(sessionStorage, TABLE_STATE);
+    delete tableStates[tableKey];
+    sessionStorage.setItem(TABLE_STATE, JSON.stringify(tableStates));
 }
 
-export const clearAllOrders = () => {
-    setActiveProjectContextProperty(LAST_ORDER, null);
+// a table without its own rows per page starts with the number last chosen in any table
+export const getTablePageSize = (tableKey) => {
+    const pageSize = readJson(localStorage, TABLE_PAGE_SIZES)[tableKey];
+    return pageSize != null ? pageSize : getLastPageSize();
+}
+
+export const setTablePageSize = (tableKey, pageSize) => {
+    const pageSizes = readJson(localStorage, TABLE_PAGE_SIZES);
+    pageSizes[tableKey] = pageSize;
+    localStorage.setItem(TABLE_PAGE_SIZES, JSON.stringify(pageSizes));
+    setLastPageSize(pageSize);
+}
+
+const getBucketTableKey = (bucketId) => getProjectTableKey(`B-${bucketId}`);
+
+export const getBucketTableState = (bucketId) => getTableState(getBucketTableKey(bucketId));
+
+export const setBucketTableState = (bucketId, changes) => setTableState(getBucketTableKey(bucketId), changes);
+
+export const clearBucketTableState = (bucketId) => clearTableState(getBucketTableKey(bucketId));
+
+export const getBucketPageSize = (bucketId) => getTablePageSize(getBucketTableKey(bucketId));
+
+export const setBucketPageSize = (bucketId, pageSize) => setTablePageSize(getBucketTableKey(bucketId), pageSize);
+
+// Columns of the data table arranged by the user, permanently per bucket and view:
+// {order: [field, ...], hidden: {field: true/false}}; undefined = as defined in the view's columns.
+const getBucketColumnsKey = (bucketId, viewId) => getProjectTableKey(`B-${bucketId}-V-${viewId}`);
+
+export const getBucketColumns = (bucketId, viewId) => {
+    return readJson(localStorage, TABLE_COLUMNS)[getBucketColumnsKey(bucketId, viewId)];
+}
+
+export const setBucketColumns = (bucketId, viewId, layout) => {
+    const tableColumns = readJson(localStorage, TABLE_COLUMNS);
+    tableColumns[getBucketColumnsKey(bucketId, viewId)] = layout;
+    localStorage.setItem(TABLE_COLUMNS, JSON.stringify(tableColumns));
+}
+
+export const clearBucketColumns = (bucketId, viewId) => {
+    const tableColumns = readJson(localStorage, TABLE_COLUMNS);
+    delete tableColumns[getBucketColumnsKey(bucketId, viewId)];
+    localStorage.setItem(TABLE_COLUMNS, JSON.stringify(tableColumns));
 }
 
 export const getDataDetailsDialogSize = () => {
