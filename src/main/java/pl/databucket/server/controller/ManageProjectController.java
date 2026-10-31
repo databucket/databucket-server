@@ -11,9 +11,11 @@ import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.exception.ProjectNotEmptyException;
+import pl.databucket.server.service.DatasetService;
 import pl.databucket.server.service.ManageProjectService;
 
 import jakarta.validation.Valid;
+import java.util.Map;
 
 @Hidden
 @PreAuthorize("hasRole('SUPER')")
@@ -26,6 +28,9 @@ public class ManageProjectController {
 
     @Autowired
     private ManageProjectService manageProjectService;
+
+    @Autowired
+    private DatasetService datasetService;
 
 
     @PostMapping
@@ -64,6 +69,29 @@ public class ManageProjectController {
             return new ResponseEntity<>(manageProjectService.getProjectContent(projectId), HttpStatus.OK);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    // the datasets that can be imported into an empty project (e.g. DEMO)
+    @GetMapping(value = "/datasets")
+    public ResponseEntity<?> getDatasets() {
+        try {
+            return new ResponseEntity<>(datasetService.getDatasets(), HttpStatus.OK);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    @PostMapping(value = "/{projectId}/datasets/{datasetId}")
+    public ResponseEntity<?> importDataset(@PathVariable Integer projectId, @PathVariable String datasetId) {
+        try {
+            return new ResponseEntity<>(Map.of("rows", datasetService.importDataset(projectId, datasetId)), HttpStatus.OK);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (ProjectNotEmptyException e) {
+            return exceptionFormatter.customException(e, HttpStatus.CONFLICT);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

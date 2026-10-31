@@ -118,7 +118,7 @@ public class ManageProjectService {
 
         // only an empty project: clearing it is a separate, confirmed step
         if (!projectContentService.isEmpty(projectId))
-            throw new ProjectNotEmptyException(project.getName());
+            throw new ProjectNotEmptyException(project.getName(), "deleting it");
 
         for (User user : project.getUsers()) {
             user.getProjects().remove(project);
