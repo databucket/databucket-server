@@ -8,3 +8,8 @@ th:has(> [data-rfd-draggable-id][style*="position: fixed"]) {
 th > [data-rfd-draggable-id][style*="position: fixed"] {
     background-color: inherit;
 }
+
+/* Compact row actions: the table sets the width of the actions header from the number of actions */
+.compact-row-actions thead tr:first-child th:first-child {
+    width: 40px !important;
+}
