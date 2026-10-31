@@ -1031,7 +1031,8 @@ export default function BucketDataTable() {
                     compactRowActions: isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView)
                 }}>
                 <div onDoubleClick={selectCellText}
-                     className={isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView) ? 'compact-row-actions' : undefined}>
+                     className={isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView)
+                         ? 'bucket-data-table compact-row-actions' : 'bucket-data-table'}>
                 <MaterialTable
                     // a new table for each bucket and view, so it starts with the state saved for them
                     key={`${state.bucketId}-${state.activeView.id}-${columnsVersion}`}
@@ -1114,8 +1115,9 @@ export default function BucketDataTable() {
                         }),
                         showTitle: false,
                         columnsButton: false,   // see TableActions
-                        // one button in the actions column (the width of its header: BucketDataTable.css)
-                        actionsCellStyle: isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView) ? {width: 40} : undefined,
+                        // the table sizes the actions cells for all actions, also the toolbar ones; the header has
+                        // the width of the row actions (with compact row actions one button, see BucketDataTable.css)
+                        actionsCellStyle: {width: '1px'},
                         // doubleHorizontalScroll: true
                     }}
                     localization={{
