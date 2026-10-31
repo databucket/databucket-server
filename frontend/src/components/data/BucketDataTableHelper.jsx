@@ -49,6 +49,16 @@ export const getColumnsLayout = (tableColumns) => {
     };
 }
 
+// The width from the columns definition (a CSS width, a number = pixels) is the minimum width of the column.
+// No width: as wide as the content (an empty width made the table give each cell its full width, spreading the spare
+// space over all columns); the last column takes the rest, see BucketDataTable.css.
+const columnWidth = (width) => {
+    const text = width != null ? `${width}`.trim() : '';
+    if (text === '')
+        return '1px';
+    return /^\d+(\.\d+)?$/.test(text) ? `${text}px` : text;
+}
+
 const prepareColumn = (column, properties, tags, enums, users, ord) => {
     const userLookup = createUserLookup(users);
 
@@ -56,9 +66,7 @@ const prepareColumn = (column, properties, tags, enums, users, ord) => {
         editable: column.editable,
         filtering: column.filtering,
         hidden: column.hidden != null ? column.hidden : false,
-        // no width defined: as wide as the content (an empty width made the table give each cell its full width,
-        // spreading the spare space over all columns); the last column takes the rest, see BucketDataTable.css
-        width: column.width != null && column.width !== "" ? column.width : "1px"
+        width: columnWidth(column.width)
     };
 
     if (ord != null)
