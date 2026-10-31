@@ -9,12 +9,14 @@ import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.exception.ProjectNotEmptyException;
 import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.ProjectRepository;
 import pl.databucket.server.repository.UserRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -29,6 +31,9 @@ public class ManageProjectService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private ProjectContentService projectContentService;
 
 
     @Transactional
@@ -53,6 +58,7 @@ public class ManageProjectService {
         }
 
         modelMapper.map(projectRepository.save(project), manageProjectDto);
+        manageProjectDto.setEmpty(true);
         AuditLog.log("project.create", "id={} name={}", project.getId(), project.getName());
         return manageProjectDto;
     }
@@ -60,7 +66,7 @@ public class ManageProjectService {
     @Transactional(readOnly = true)
     public List<ManageProjectDto> getProjects() {
         return projectRepository.findAllByDeletedOrderById(false).stream()
-                .map(project -> modelMapper.map(project, ManageProjectDto.class))
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -98,29 +104,56 @@ public class ManageProjectService {
         }
 
         modelMapper.map(projectRepository.save(project), manageProjectDto);
+        manageProjectDto.setEmpty(projectContentService.isEmpty(project.getId()));
         AuditLog.log("project.modify", "id={} name={}", project.getId(), project.getName());
         return manageProjectDto;
     }
 
     @Transactional
-    public void deleteProject(int projectId) throws ItemNotFoundException {
+    public void deleteProject(int projectId) throws ItemNotFoundException, ProjectNotEmptyException {
         Project project = projectRepository.findByIdAndDeleted(projectId, false);
 
         if (project == null)
             throw new ItemNotFoundException(Project.class, projectId);
+
+        // only an empty project: clearing it is a separate, confirmed step
+        if (!projectContentService.isEmpty(projectId))
+            throw new ProjectNotEmptyException(project.getName());
 
         for (User user : project.getUsers()) {
             user.getProjects().remove(project);
             userRepository.save(user);
         }
 
-        // TODO Remove all artefacts and links between them
-        // Teams, Classes, Enums, Groups, Buckets, Tags, Columns, Filters, Views, Tasks
-
+        // what is left: objects deleted before (only marked as deleted) and their bucket tables
+        projectContentService.clearProject(projectId);
 
         project.setDeleted(true);
         projectRepository.save(project);
         AuditLog.log("project.delete", "id={} name={}", project.getId(), project.getName());
+    }
+
+    private ManageProjectDto toDto(Project project) {
+        ManageProjectDto dto = modelMapper.map(project, ManageProjectDto.class);
+        dto.setEmpty(projectContentService.isEmpty(project.getId()));
+        return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> getProjectContent(int projectId) throws ItemNotFoundException {
+        if (projectRepository.findByIdAndDeleted(projectId, false) == null)
+            throw new ItemNotFoundException(Project.class, projectId);
+        return projectContentService.getContent(projectId);
+    }
+
+    // removes everything in the project except the project itself and its users
+    @Transactional
+    public void clearProject(int projectId) throws ItemNotFoundException {
+        Project project = projectRepository.findByIdAndDeleted(projectId, false);
+        if (project == null)
+            throw new ItemNotFoundException(Project.class, projectId);
+        projectContentService.clearProject(projectId);
+        AuditLog.log("project.clear", "id={} name={}", project.getId(), project.getName());
     }
 
 }

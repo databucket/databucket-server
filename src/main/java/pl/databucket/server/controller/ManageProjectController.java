@@ -10,6 +10,7 @@ import pl.databucket.server.dto.ManageProjectDto;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.exception.ProjectNotEmptyException;
 import pl.databucket.server.service.ManageProjectService;
 
 import jakarta.validation.Valid;
@@ -56,6 +57,31 @@ public class ManageProjectController {
         }
     }
 
+    // what clearing (or deleting) the project removes
+    @GetMapping(value = "/{projectId}/content")
+    public ResponseEntity<?> getProjectContent(@PathVariable Integer projectId) {
+        try {
+            return new ResponseEntity<>(manageProjectService.getProjectContent(projectId), HttpStatus.OK);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    // removes everything in the project except the project itself and its users
+    @PostMapping(value = "/{projectId}/clear")
+    public ResponseEntity<?> clearProject(@PathVariable Integer projectId) {
+        try {
+            manageProjectService.clearProject(projectId);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
     @DeleteMapping(value = "/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable Integer projectId) {
         try {
@@ -63,6 +89,8 @@ public class ManageProjectController {
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (ProjectNotEmptyException e) {
+            return exceptionFormatter.customException(e, HttpStatus.CONFLICT);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

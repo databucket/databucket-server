@@ -1,10 +1,9 @@
-import MaterialTable from "@material-table/core";
+import MaterialTable, {MTableActions} from "@material-table/core";
 import React, {createRef, useContext, useEffect, useState} from "react";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
 import {MessageBox} from "../utils/MessageBox";
 import {
-    getDeleteOptions,
     getManagementTableHeight,
     getPageSizeOptions,
     getPostOptions,
@@ -20,7 +19,7 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {FilterList, Refresh} from "@mui/icons-material";
+import {DeleteSweep, FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
@@ -39,14 +38,28 @@ import ManageUsersContext from "../../context/users/ManageUsersContext";
 import SelectUsersDialog from "../dialogs/SelectUsersDialog";
 import RolesContext from "../../context/roles/RolesContext";
 import {getManageProjectMapper} from "../../utils/NullValueMappers";
-import ConfirmRemovingDialog from "../utils/ConfirmRemovingDialog";
+import ProjectContentDialog from "./ProjectContentDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+
+// The table puts its Edit and Delete after the other row actions; here the order is Edit | Clear project | Delete
+const RowActions = (props) => {
+    if (props.data == null)
+        return <MTableActions {...props}/>;
+    const actions = [...props.actions];
+    const clear = actions.findIndex(action => action.tooltip === 'Clear project');
+    if (clear >= 0) {
+        const [clearAction] = actions.splice(clear, 1);
+        const remove = actions.findIndex(action => typeof action === 'function' && action(props.data).tooltip === 'Delete');
+        actions.splice(remove >= 0 ? remove : actions.length, 0, clearAction);
+    }
+    return <MTableActions {...props} actions={actions}/>;
+}
 
 export default function ProjectsTab() {
 
     const theme = useTheme();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
-    const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
+    const [contentDialog, setContentDialog] = useState({project: null, mode: null});
     const tableState = useTableState('management-projects');
     const tableRef = createRef();
     const {projects, fetchProjects, addProject, editProject, removeProject} = useContext(ProjectsContext);
@@ -75,28 +88,20 @@ export default function ProjectsTab() {
             fetchRoles();
         }
     }, [roles, fetchRoles]);
-    const onRemove = (remove) => {
-        if (remove) {
-            setConfirmRemove({open: false, id: 0, name: ''});
-            setMessageBox({open: true, severity: 'info', title: 'This action is under development!', message: ''});
-
-            setTimeout(() => {
-                let e = false;
-                fetch(getBaseUrl(`manage/projects/${confirmRemove.id}`), getDeleteOptions())
-                .then(handleErrors)
-                .catch(error => {
-                    e = true;
-                    setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-                })
-                .then(() => {
-                    if (!e) {
-                        removeProject(confirmRemove.id);
-                    }
-                });
-            }, 100);
-        }
-
-        setConfirmRemove({open: false, id: 0, name: ''});
+    // clearing or deleting a project, confirmed in ProjectContentDialog
+    const onContentRemoved = (project) => {
+        const deleted = contentDialog.mode === 'delete';
+        setContentDialog({project: null, mode: null});
+        if (deleted)
+            removeProject(project.id);
+        else
+            editProject({...project, empty: true});
+        setMessageBox({
+            open: true,
+            severity: 'success',
+            title: deleted ? `Project "${project.name}" deleted` : `Project "${project.name}" cleared`,
+            message: ''
+        });
     }
 
     return (
@@ -158,7 +163,8 @@ export default function ProjectsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: props => <div {...props} />,
+                    Actions: RowActions
                 }}
                 actions={[
                     {
@@ -173,6 +179,11 @@ export default function ProjectsTab() {
                         isFreeAction: true,
                         onClick: tableState.toggleFiltering
 
+                    },
+                    {
+                        icon: () => <DeleteSweep/>,
+                        tooltip: 'Clear project',
+                        onClick: (event, rowData) => setContentDialog({project: rowData, mode: 'clear'})
                     }
                 ]}
                 editable={{
@@ -250,22 +261,30 @@ export default function ProjectsTab() {
                             });
                         }),
 
-                    // onRowDelete: oldData =>
-                    //     new Promise((resolve) => {
-                    //         setConfirmRemove({open: true, id: oldData.id, name: oldData.name});
-                    //         resolve();
-                    //     }),
+                    // only an empty project can be deleted: clear it first (the row action next to it)
+                    isDeletable: rowData => rowData.empty === true,
+                    // the table only opens the dialog, which asks for the name and deletes
+                    onRowDelete: oldData =>
+                        new Promise((resolve) => {
+                            setContentDialog({project: oldData, mode: 'delete'});
+                            resolve();
+                        }),
+                }}
+                localization={{
+                    body: {
+                        editRow: {deleteText: 'Delete this empty project?'}
+                    }
                 }}
             />
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-            <ConfirmRemovingDialog
-                open={confirmRemove.open}
-                name={confirmRemove.name}
-                message={'Remove project:'}
-                onClose={(remove) => onRemove(remove)}
+            <ProjectContentDialog
+                project={contentDialog.project}
+                mode={contentDialog.mode}
+                onClose={() => setContentDialog({project: null, mode: null})}
+                onDone={onContentRemoved}
             />
         </div>
     )
