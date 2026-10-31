@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -72,6 +73,8 @@ public class DataService {
         return getData(user, bucket, id);
     }
 
+    // all rows or none: a failed row rolls back the ones before it (e.g. a CSV import)
+    @Transactional
     public void createData(User user, Bucket bucket, List<DataCreateDTO> dataList) {
 
         String sql = "INSERT INTO \"" + bucket.getTableName() + "\" (\"tag_id\", \"created_by\", \"modified_by\", \"reserved\", \"reserved_by\", \"properties\") VALUES (?, ?, ?, ?, ?, ?)";
