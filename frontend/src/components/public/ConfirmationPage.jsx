@@ -26,19 +26,23 @@ export default function ConfirmationPage() {
     const [messageBox, setMessageBox] = useState(
         {open: false, severity: 'error', title: '', message: ''});
     const [done, setDone] = useState(false);
+    const [failed, setFailed] = useState(false);
     const [redirect, setRedirect] = useState(false);
 
     useEffect(() => {
         let resultOk = true;
-        fetch(getConfirmationUrl(inputParams[0]), getGetOptions())
+        // the rest of the path after /confirmation/, e.g. "sign-up/<token>" (route "/confirmation/*")
+        fetch(getConfirmationUrl(inputParams['*']), getGetOptions())
         .then(handleErrors)
         .catch(error => {
             setMessageBox({
                 open: true,
                 severity: 'error',
                 title: 'Error',
-                message: error
+                // handleErrors rejects with the server's message; anything else (e.g. a network error) is an Error
+                message: typeof error === 'string' ? error : error.message
             });
+            setFailed(true);
             resultOk = false;
         })
         .then(response => {
@@ -71,7 +75,8 @@ export default function ConfirmationPage() {
                         </Typography>
                         <div style={{height: '100px'}}/>
                         <Typography className="Description">
-                            {!done ? "Processing..."
+                            {failed ? "The confirmation failed."
+                                : !done ? "Processing..."
                                 : "Check your email inbox."}
                         </Typography>
                     </Stack>

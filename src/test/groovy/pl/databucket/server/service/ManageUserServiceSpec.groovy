@@ -7,6 +7,8 @@ import pl.databucket.server.exception.ItemAlreadyExistsException
 import pl.databucket.server.repository.ProjectRepository
 import pl.databucket.server.repository.RoleRepository
 import pl.databucket.server.repository.UserRepository
+import org.springframework.security.authentication.AccountExpiredException
+import pl.databucket.server.security.TokenProvider
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
@@ -121,6 +123,53 @@ class ManageUserServiceSpec extends Specification {
         "   "                 || null
         "John@Example.COM"    || "john@example.com"
         "  john@example.com " || "john@example.com"
+    }
+
+    // ==================== confirmation links ====================
+
+    @Unroll
+    def "should refuse a sign-up confirmation link that #reason"() {
+        given:
+        TokenProvider tokenProvider = Mock()
+        setField(manageUserService, "jwtTokenUtil", tokenProvider)
+        tokenProvider.isTokenExpired("link") >> expired
+        tokenProvider.unpackFromJwts("link") >> "john@example.com"
+        userRepository.findByEmailIgnoreCase("john@example.com") >> null
+
+        when:
+        manageUserService.signUpUserConfirmation("link")
+
+        then:
+        def e = thrown(AccountExpiredException)
+        e.message == "The confirmation link is invalid or expired!"
+        0 * userRepository.save(_)
+
+        where:
+        reason                          | expired
+        "is expired or invalid"         | true
+        "belongs to a removed user"     | false
+    }
+
+    @Unroll
+    def "should refuse a forgot-password confirmation link that #reason"() {
+        given:
+        TokenProvider tokenProvider = Mock()
+        setField(manageUserService, "jwtTokenUtil", tokenProvider)
+        tokenProvider.isTokenExpired("link") >> expired
+        tokenProvider.unpackFromJwts("link") >> "john@example.com"
+        userRepository.findByEmailIgnoreCase("john@example.com") >> null
+
+        when:
+        manageUserService.resetAndSendPassword("link")
+
+        then:
+        thrown(AccountExpiredException)
+        0 * userRepository.save(_)
+
+        where:
+        reason                          | expired
+        "is expired or invalid"         | true
+        "belongs to a removed user"     | false
     }
 
     private void setField(Object target, String fieldName, Object value) {

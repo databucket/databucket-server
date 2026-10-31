@@ -114,21 +114,28 @@ public class ManageUserService {
         mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(newUser.getEmail()), appProperties.getMailFrom());
     }
 
+    // The user of a confirmation link; an expired or invalid link, or one of a removed user, is refused
+    private User confirmationUser(String jwts) {
+        User user = null;
+        if (!jwtTokenUtil.isTokenExpired(jwts))
+            user = userRepository.findByEmailIgnoreCase(jwtTokenUtil.unpackFromJwts(jwts));
+
+        if (user == null)
+            throw new AccountExpiredException("The confirmation link is invalid or expired!");
+        return user;
+    }
+
     public void signUpUserConfirmation(String jwts) throws ForbiddenRepetitionException, MessagingException {
-        if (!jwtTokenUtil.isTokenExpired(jwts)) {
-            String email = jwtTokenUtil.unpackFromJwts(jwts);
-            User user = userRepository.findByEmailIgnoreCase(email);
+        User user = confirmationUser(jwts);
 
-            if (user.getEnabled())
-                throw new ForbiddenRepetitionException("The user has been already activated");
+        if (user.getEnabled())
+            throw new ForbiddenRepetitionException("The user has been already activated");
 
-            user.setEnabled(true);
-            userRepository.save(user);
-            AuditLog.log("auth.signup-confirm", "id={} name={}", user.getId(), user.getUsername());
+        user.setEnabled(true);
+        userRepository.save(user);
+        AuditLog.log("auth.signup-confirm", "id={} name={}", user.getId(), user.getUsername());
 
-            mailSenderService.sendRegistrationConfirmation(user, appProperties.getMailFrom());
-        } else
-            throw new AccountExpiredException("The confirmation link is expired!");
+        mailSenderService.sendRegistrationConfirmation(user, appProperties.getMailFrom());
     }
 
     public void forgotPasswordMessage(ForgotPasswordReqDTO forgotPasswordReqDTO) throws ForbiddenRepetitionException, MessagingException, UsernameNotFoundException {
@@ -199,39 +206,35 @@ public class ManageUserService {
     }
 
     public void resetAndSendPassword(String jwts) throws ForbiddenRepetitionException, MessagingException {
-        if (!jwtTokenUtil.isTokenExpired(jwts)) {
-            String email = jwtTokenUtil.unpackFromJwts(jwts);
-            User user = userRepository.findByEmailIgnoreCase(email);
+        User user = confirmationUser(jwts);
 
-            if (user.getLastSendEmailTempPasswordDate() != null) {
-                Instant lastSendEmailTime = user.getLastSendEmailTempPasswordDate().toInstant();
-                Instant currentTime = Instant.now();
+        if (user.getLastSendEmailTempPasswordDate() != null) {
+            Instant lastSendEmailTime = user.getLastSendEmailTempPasswordDate().toInstant();
+            Instant currentTime = Instant.now();
 
-                if (ChronoUnit.HOURS.between(lastSendEmailTime, currentTime) < 48)
-                    throw new ForbiddenRepetitionException("The temporary password has been send within last 48 hours. Search it in your email inbox.");
-            }
+            if (ChronoUnit.HOURS.between(lastSendEmailTime, currentTime) < 48)
+                throw new ForbiddenRepetitionException("The temporary password has been send within last 48 hours. Search it in your email inbox.");
+        }
 
-            int length = 11;
-            String small_letter = "abcdefghijklmnopqrstuvwxyz";
-            String numbers = "0123456789";
+        int length = 11;
+        String small_letter = "abcdefghijklmnopqrstuvwxyz";
+        String numbers = "0123456789";
 
-            String finalString = small_letter + numbers;
-            Random random = new Random();
-            char[] password = new char[length];
-            for (int i = 0; i < length; i++)
-                password[i] = finalString.charAt(random.nextInt(finalString.length()));
+        String finalString = small_letter + numbers;
+        Random random = new Random();
+        char[] password = new char[length];
+        for (int i = 0; i < length; i++)
+            password[i] = finalString.charAt(random.nextInt(finalString.length()));
 
-            String newPassword = new String(password);
+        String newPassword = new String(password);
 
-            mailSenderService.sendNewPassword(user, newPassword, appProperties.getMailFrom());
+        mailSenderService.sendNewPassword(user, newPassword, appProperties.getMailFrom());
 
-            user.setPassword(bcryptEncoder.encode(newPassword));
-            user.setChangePassword(true);
-            user.setLastSendEmailTempPasswordDate(new Date());
-            userRepository.save(user);
-            AuditLog.log("auth.temp-password", "id={} name={}", user.getId(), user.getUsername());
-        } else
-            throw new AccountExpiredException("The confirmation link is expired!");
+        user.setPassword(bcryptEncoder.encode(newPassword));
+        user.setChangePassword(true);
+        user.setLastSendEmailTempPasswordDate(new Date());
+        userRepository.save(user);
+        AuditLog.log("auth.temp-password", "id={} name={}", user.getId(), user.getUsername());
     }
 
     private ManageUserDtoResponse toDto(User user) {
