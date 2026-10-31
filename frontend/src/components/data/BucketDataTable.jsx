@@ -973,7 +973,7 @@ export default function BucketDataTable() {
                     exportEnabled: isFeatureEnabled(FEATURE_EXPORT, state.activeView),
                     onExport: exportRows
                 }}>
-                <div onDoubleClick={selectCellText}>
+                <div onDoubleClick={selectCellText} className="bucket-data-table">
                 <MaterialTable
                     // a new table for each bucket and view, so it starts with the state saved for them
                     key={`${state.bucketId}-${state.activeView.id}-${columnsVersion}`}
@@ -1056,6 +1056,9 @@ export default function BucketDataTable() {
                         }),
                         showTitle: false,
                         columnsButton: false,   // see TableActions
+                        // the table sizes the actions cells for all actions, also the toolbar ones; the header has
+                        // the width of the row actions
+                        actionsCellStyle: {width: '1px'},
                         // doubleHorizontalScroll: true
                     }}
                     localization={{
