@@ -56,7 +56,9 @@ const prepareColumn = (column, properties, tags, enums, users, ord) => {
         editable: column.editable,
         filtering: column.filtering,
         hidden: column.hidden != null ? column.hidden : false,
-        width: column.width != null ? column.width : ""
+        // no width defined: as wide as the content (an empty width made the table give each cell its full width,
+        // spreading the spare space over all columns); the last column takes the rest, see BucketDataTable.css
+        width: column.width != null && column.width !== "" ? column.width : "1px"
     };
 
     if (ord != null)

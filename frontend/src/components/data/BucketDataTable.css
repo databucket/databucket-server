@@ -8,3 +8,20 @@ th:has(> [data-rfd-draggable-id][style*="position: fixed"]) {
 th > [data-rfd-draggable-id][style*="position: fixed"] {
     background-color: inherit;
 }
+
+/* Columns are as wide as their content (BucketDataTableHelper), the last one takes the rest of the table width */
+.bucket-data-table th {
+    white-space: nowrap;
+}
+
+/* smaller cell padding than the default 16px + 24px (not the actions column, which sets its own) */
+.bucket-data-table th,
+.bucket-data-table td {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.bucket-data-table thead tr:first-child th:last-child,
+.bucket-data-table tbody td:last-child {
+    width: auto !important;
+}
