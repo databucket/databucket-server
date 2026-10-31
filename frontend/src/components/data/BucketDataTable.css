@@ -9,7 +9,7 @@ th > [data-rfd-draggable-id][style*="position: fixed"] {
     background-color: inherit;
 }
 
-/* Columns are as wide as their content (BucketDataTableHelper), the last one takes the rest of the table width */
+/* Columns are as wide as their content (BucketDataTableHelper); spare width is shared out in proportion to it */
 .bucket-data-table th {
     white-space: nowrap;
 }
@@ -19,9 +19,4 @@ th > [data-rfd-draggable-id][style*="position: fixed"] {
 .bucket-data-table td {
     padding-left: 16px;
     padding-right: 16px;
-}
-
-.bucket-data-table thead tr:first-child th:last-child,
-.bucket-data-table tbody td:last-child {
-    width: auto !important;
 }
