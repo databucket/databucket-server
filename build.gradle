@@ -115,10 +115,11 @@ tasks.register('installRolldownWasm', NpmTask) {
     // its dependencies in their lowest allowed versions, because a newer @napi-rs/wasm-runtime doesn't work with
     // the @emnapi version the binding uses. --force: the binding is meant for another platform (wasm32);
     // --no-save: package.json and package-lock.json stay unchanged.
+    // (the variable is not called just "version": the CI pipeline greps the application version line of this file)
     args.set(providers.provider {
-        def version = new JsonSlurper().parse(file('frontend/node_modules/rolldown/package.json')).version
-        def binding = new JsonSlurper().parse(new URL("https://registry.npmjs.org/@rolldown%2Fbinding-wasm32-wasi/${version}"))
-        ['install', '--no-save', '--force', "@rolldown/binding-wasm32-wasi@${version}".toString()] +
+        def rolldownVersion = new JsonSlurper().parse(file('frontend/node_modules/rolldown/package.json')).version
+        def binding = new JsonSlurper().parse(new URL("https://registry.npmjs.org/@rolldown%2Fbinding-wasm32-wasi/${rolldownVersion}"))
+        ['install', '--no-save', '--force', "@rolldown/binding-wasm32-wasi@${rolldownVersion}".toString()] +
                 binding.dependencies.collect { name, range -> "${name}@${range.replaceAll(/^[\^~]/, '')}".toString() }
     })
 }
