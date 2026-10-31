@@ -454,6 +454,10 @@ public class Query {
 
         if (column.toUpperCase().startsWith("RANDOM"))
             orderBy("RANDOM()", true);
+        else if (column.startsWith("$.") && !column.endsWith("()"))
+            // a property sorted as jsonb: numbers by value (not 9 after 87 as in text), strings as text; a JSON null
+            // as SQL NULL, like a missing property
+            orderBy("nullif(" + getProperty(column, false, paramMap) + ", 'null'::jsonb)", asc);
         else
             orderBy(getField(column, true, paramMap), asc);
 

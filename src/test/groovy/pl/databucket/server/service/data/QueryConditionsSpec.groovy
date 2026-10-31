@@ -132,7 +132,8 @@ class QueryConditionsSpec extends Specification {
         "tagId"                | "tag_id"
         "desc(modifiedAt)"     | "modified_at desc"
         "reserved"             | "reserved"
-        "desc(\$.address.city)" | "properties #>> " + CITY_PATH + " desc"
+        "desc(\$.address.city)" | "nullif(properties #> " + CITY_PATH + ", 'null'::jsonb) desc"
+        "\$.address.city"       | "nullif(properties #> " + CITY_PATH + ", 'null'::jsonb)"
         "random"               | "RANDOM()"
     }
 
