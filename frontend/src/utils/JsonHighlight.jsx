@@ -1,7 +1,7 @@
 import React from "react";
 
 // Colors of JSON tokens (as in VS Code), for the light and the dark theme; also in the JSON editor of the data details
-// (components/styles/json-editor-styles-*.css)
+// (components/styles/json-editor-styles.css)
 const COLORS = {
     light: {key: '#0451a5', string: '#a31515', number: '#098658', literal: '#0000ff'},
     dark: {key: '#9cdcfe', string: '#ce9178', number: '#b5cea8', literal: '#569cd6'}

@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, {useLayoutEffect, useMemo, useState} from "react";
 import {getThemeName, saveThemeName} from "../../utils/ConfigurationStorage";
 import CustomThemeContext from "./CustomThemeContext";
 import {createTheme, ThemeProvider} from "@mui/material";
@@ -35,6 +35,10 @@ const CustomThemeProvider = props => {
         }), [],
     );
     const theme = useMemo(() => createTheme(getTheme(mode), draggableDialogs), [mode]);
+    // global styles that depend on the theme (components/styles/json-editor-styles.css) select by this attribute
+    useLayoutEffect(() => {
+        document.documentElement.dataset.theme = mode;
+    }, [mode]);
     return (
         <CustomThemeContext.Provider value={colorMode}>
             <ThemeProvider theme={theme}>
