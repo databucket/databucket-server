@@ -16,7 +16,8 @@ import {getDataHistoryPropertiesUrl} from "../../utils/UrlBuilder";
 import {getGetOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
-import ReactDiffViewer from "react-diff-viewer-continued";
+import ReactDiffViewer, {DiffMethod} from "react-diff-viewer-continued";
+import {highlightJson} from "../../utils/JsonHighlight";
 
 const PREFIX = 'DataHistoryPropertiesDiffDialog';
 
@@ -166,6 +167,9 @@ export default function DataHistoryPropertiesDiffDialog(props) {
                         newValue={state.newValue}
                         splitView={true}
                         disableWordDiff={false}
+                        // whole words (a changed value at once), so that their JSON colors stay readable
+                        compareMethod={DiffMethod.WORDS}
+                        renderContent={text => highlightJson(text, theme.palette.mode === 'dark')}
                     />
                 </StyledDialogContent>
                 <MessageBox
