@@ -22,6 +22,8 @@ public class ManageProjectDto {
     private Date expirationDate;
     private Set<Long> usersIds;
     private Set<Integer> templatesIds;
+    // read only: the project holds nothing (no buckets, classes, views...), so it can be deleted
+    private boolean empty;
 
     private String createdBy;
     private Date createdAt;
