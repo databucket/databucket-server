@@ -26,6 +26,8 @@ psql -h <host> -U <user> -d <database> -f upgrade/3.7.0.sql
 
 * **3.7.0** — user emails must be unique (single sign-on matches users by email). The script normalizes
   the emails and adds the unique constraint; when several users share an email it lists them and changes nothing.
+* **3.7.3** — indexes on the tables of existing buckets (data by tag and reservation, history by data row) and
+  the tag of a history entry as bigint. Run it while Databucket is stopped: changing the type rewrites the history tables.
 
 # Contribution rules
 

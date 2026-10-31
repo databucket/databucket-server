@@ -141,7 +141,7 @@ public class BucketService {
         sql = "CREATE TABLE \"" + bucket.getTableHistoryName() + "\" ("
                 + "id bigserial NOT NULL,"
                 + "data_id bigint NOT NULL,"
-                + "tag_id smallint DEFAULT NULL,"
+                + "tag_id bigint DEFAULT NULL,"
                 + "reserved boolean DEFAULT NULL,"
                 + "properties jsonb DEFAULT NULL,"
                 + "modified_at timestamp without time zone NOT NULL DEFAULT current_timestamp,"
@@ -149,6 +149,16 @@ public class BucketService {
                 + "PRIMARY KEY (id),"
                 + "CONSTRAINT fk_tag_h_id FOREIGN KEY(data_id) REFERENCES \"" + bucket.getTableName() + "\"(data_id))";
 
+        logger.debug(sql);
+        jdbcTemplate.getJdbcTemplate().execute(sql);
+
+        // Indexes (PostgreSQL doesn't index foreign keys): data by tag and reservation, history by data row
+        // (the history of a row, and the foreign key check when data is removed). Names as upgrade/3.7.3.sql creates them.
+        sql = "CREATE INDEX \"" + bucket.getTableName() + "_tag_id_reserved_idx\" ON \"" + bucket.getTableName() + "\" (tag_id, reserved)";
+        logger.debug(sql);
+        jdbcTemplate.getJdbcTemplate().execute(sql);
+
+        sql = "CREATE INDEX \"" + bucket.getTableHistoryName() + "_data_id_idx\" ON \"" + bucket.getTableHistoryName() + "\" (data_id)";
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
 

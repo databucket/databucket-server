@@ -31,7 +31,7 @@ OR REPLACE FUNCTION after_insert() RETURNS trigger AS '
 DECLARE
     this_query text;
 BEGIN
-    EXECUTE format(''INSERT INTO "%s-h" (data_id, tag_id, reserved, properties, modified_by) VALUES (%s, %L::integer, %L::boolean, %L, %L)'', TG_TABLE_NAME, NEW.data_id, NEW.tag_id, NEW.reserved, NEW.properties, NEW.created_by);
+    EXECUTE format(''INSERT INTO "%s-h" (data_id, tag_id, reserved, properties, modified_by) VALUES (%s, %L::bigint, %L::boolean, %L, %L)'', TG_TABLE_NAME, NEW.data_id, NEW.tag_id, NEW.reserved, NEW.properties, NEW.created_by);
     RETURN NULL;
 END;
 ' LANGUAGE plpgsql;
@@ -42,7 +42,7 @@ OR REPLACE FUNCTION after_update() RETURNS trigger AS '
 DECLARE
     this_query text;
 	insert_changes boolean;
-	tagId integer;
+	tagId bigint;
 	reserved boolean;
 	properties text;
 BEGIN
@@ -66,7 +66,7 @@ BEGIN
     END IF;
 
     IF insert_changes = true THEN
-		EXECUTE format(''INSERT INTO "%s-h" (data_id, tag_id, reserved, properties, modified_by) VALUES (%s, %L::integer, %L::boolean, %L::jsonb, %L)'', TG_TABLE_NAME, NEW.data_id, tagId, reserved, properties, NEW.modified_by);
+		EXECUTE format(''INSERT INTO "%s-h" (data_id, tag_id, reserved, properties, modified_by) VALUES (%s, %L::bigint, %L::boolean, %L::jsonb, %L)'', TG_TABLE_NAME, NEW.data_id, tagId, reserved, properties, NEW.modified_by);
     END IF;
 
     RETURN NULL;
