@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.mail.MailSendException;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -170,7 +171,7 @@ public class PublicController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (MessagingException | MailSendException e) {
             return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
-        } catch (ForbiddenRepetitionException e) {
+        } catch (ForbiddenRepetitionException | AccountExpiredException e) {
             return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
@@ -255,7 +256,7 @@ public class PublicController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (MessagingException | MailSendException e) {
             return exceptionFormatter.customException(e, "Mail service exception!", HttpStatus.SERVICE_UNAVAILABLE);
-        } catch (ForbiddenRepetitionException e) {
+        } catch (ForbiddenRepetitionException | AccountExpiredException e) {
             return exceptionFormatter.customPublicException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);

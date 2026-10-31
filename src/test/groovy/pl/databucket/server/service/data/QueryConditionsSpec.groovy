@@ -26,6 +26,25 @@ class QueryConditionsSpec extends Specification {
         paramMap == [path0_0: "address", path0_1: "city", nr: '"Paris"']
     }
 
+    @Unroll
+    def "should compare with '#operator' and the value #value"() {
+        given:
+        def paramMap = [:]
+
+        expect:
+        where(new Condition(field, operator, value), paramMap) == ' WHERE ' + sql
+
+        where:
+        field     | operator          | value || sql
+        '$.n'     | Operator.is       | 5     || '(properties #> ARRAY[CAST(:path0_0 AS text)])::int is not distinct from :nr'
+        '$.n'     | Operator.isNot    | 5     || '(properties #> ARRAY[CAST(:path0_0 AS text)])::int is distinct from :nr'
+        '$.a'     | Operator.is       | true  || '(properties #> ARRAY[CAST(:path0_0 AS text)])::bool is not distinct from :nr'
+        '$.s'     | Operator.isNot    | "x"   || '(properties #> ARRAY[CAST(:path0_0 AS text)])::text is distinct from :nr'
+        'reserved' | Operator.is      | true  || 'reserved is not distinct from :nr'
+        '$.n'     | Operator.equal    | null  || 'properties #> ARRAY[CAST(:path0_0 AS text)] is null'
+        'reserved' | Operator.notEqual | null || 'reserved is not null'
+    }
+
     def "should not put an injected property path into the SQL"() {
         given:
         def paramMap = [:]

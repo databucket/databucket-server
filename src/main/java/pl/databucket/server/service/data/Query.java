@@ -380,6 +380,14 @@ public class Query {
                     v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), condition.getRightValue(), paramMap);
             } else
                 v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), condition.getRightValue(), paramMap);
+
+            // SQL allows only NULL, TRUE, FALSE or UNKNOWN after IS, not a parameter or an expression; IS [NOT] DISTINCT
+            // FROM compares any values, and treats null as a value, just like IS
+            boolean nullValue = v2 == null || v2.equalsIgnoreCase("null");
+            if (!nullValue && condition.getOperator().equals(Operator.is))
+                op = "is not distinct from";
+            else if (!nullValue && condition.getOperator().equals(Operator.isNot))
+                op = "is distinct from";
         }
 
         return String.format(sFormat, v1, op, v2);
