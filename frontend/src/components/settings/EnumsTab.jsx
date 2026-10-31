@@ -2,6 +2,7 @@ import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
 import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
+import {selectCellText} from "../../utils/TableCellSelect";
 import {FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {
@@ -64,7 +65,7 @@ export default function EnumsTab() {
     }, [enums, fetchEnums]);
 
     return (
-        <>
+        <div onDoubleClick={selectCellText}>
             <MaterialTable
                 title='Enums'
                 tableRef={tableRef}
@@ -234,6 +235,6 @@ export default function EnumsTab() {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
-        </>
+        </div>
     );
 }

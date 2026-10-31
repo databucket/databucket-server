@@ -2,6 +2,7 @@ import MaterialTable from '@material-table/core';
 import React, {createRef, useContext, useEffect, useState} from "react";
 import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
+import {selectCellText} from "../../utils/TableCellSelect";
 import {MessageBox} from "../utils/MessageBox";
 import {
     getPageSizeOptions,
@@ -70,7 +71,7 @@ export default function UsersTab() {
     }, [teams, fetchTeams]);
 
     return (
-        <div>
+        <div onDoubleClick={selectCellText}>
             <MaterialTable
                 title='Users'
                 tableRef={tableRef}

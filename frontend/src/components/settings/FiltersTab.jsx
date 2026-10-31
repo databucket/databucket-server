@@ -2,6 +2,7 @@ import MaterialTable from '@material-table/core';
 import React, {useContext, useEffect, useState} from "react";
 import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
+import {selectCellText} from "../../utils/TableCellSelect";
 import {
     FilterList,
     Refresh,
@@ -104,7 +105,7 @@ export default function FiltersTab() {
     }
 
     return (
-        <div>
+        <div onDoubleClick={selectCellText}>
             <MaterialTable
                 title='Filters'
                 tableRef={tableRef}
