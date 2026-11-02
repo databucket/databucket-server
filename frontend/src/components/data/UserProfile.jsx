@@ -2,12 +2,16 @@ import React, {useContext, useState} from 'react';
 import {
     AccountCircle,
     Brightness4 as SetDarkTheme,
-    Brightness7 as SetLightTheme
+    Brightness7 as SetLightTheme,
+    Logout
 } from '@mui/icons-material';
-import {getUsername} from "../../utils/ConfigurationStorage";
+import {getActiveProjectId, getRoles, getUsername} from "../../utils/ConfigurationStorage";
 import {
-    Button,
+    Box,
+    Divider,
     IconButton,
+    ListItemIcon,
+    ListItemText,
     Menu,
     MenuItem,
     Tooltip,
@@ -15,14 +19,26 @@ import {
     useTheme
 } from "@mui/material";
 import CustomThemeContext from "../../context/theme/CustomThemeContext";
+import AccessContext from "../../context/access/AccessContext";
+
+// "MEMBER,ADMIN" -> "Member, Admin"
+const formatRoles = (roles) => (roles ?? '').split(',')
+    .map(role => role.trim())
+    .filter(role => role !== '')
+    .map(role => role.charAt(0) + role.slice(1).toLowerCase())
+    .join(', ');
 
 export default function UserProfile(props) {
     let currentMode = useTheme().palette.mode;
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const {toggleColorMode} = useContext(CustomThemeContext);
+    const {projects} = useContext(AccessContext);
+    const project = projects?.find(project => project.id === getActiveProjectId());
+    const roles = formatRoles(getRoles());
 
     const handleLogout = () => {
+        setAnchorEl(null);
         props.onLogout();
     }
 
@@ -56,27 +72,27 @@ export default function UserProfile(props) {
                 open={open}
                 onClose={handleClose}
             >
-                <MenuItem sx={{cursor: "default"}}>
-                    <AccountCircle/>
-                    <Typography color="secondary" style={{marginLeft: "10px"}}>{getUsername()}</Typography>
+                {/* who is signed in and where: not an action, so not a menu item */}
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, px: 2, pt: 0.5, pb: 1.5, minWidth: 200}}>
+                    <AccountCircle color="action" fontSize="large"/>
+                    <Box>
+                        <Typography color="secondary" fontWeight={500}>{getUsername()}</Typography>
+                        {project != null && <Typography variant="body2" color="text.secondary">{project.name}</Typography>}
+                        {roles !== '' && <Typography variant="caption" color="text.secondary">{roles}</Typography>}
+                    </Box>
+                </Box>
+                <Divider/>
+                <MenuItem onClick={toggleColorMode}>
+                    <ListItemIcon>
+                        {currentMode === 'light' ? <SetDarkTheme fontSize="small"/> : <SetLightTheme fontSize="small"/>}
+                    </ListItemIcon>
+                    <ListItemText>{currentMode === 'light' ? "Dark mode" : "Light mode"}</ListItemText>
                 </MenuItem>
-                <MenuItem>
-                    <Button
-                        startIcon={currentMode === 'light' ? <SetDarkTheme/> : <SetLightTheme/>}
-                        onClick={toggleColorMode}
-                        color="inherit"
-                    >
-                        {currentMode === 'light' ? "Dark" : "Light"}
-                    </Button>
-                </MenuItem>
-                <MenuItem>
-                    <Button
-                        variant="contained"
-                        onClick={handleLogout}
-                        color="primary"
-                    >
-                        Logout
-                    </Button>
+                <MenuItem onClick={handleLogout}>
+                    <ListItemIcon>
+                        <Logout fontSize="small"/>
+                    </ListItemIcon>
+                    <ListItemText>Logout</ListItemText>
                 </MenuItem>
             </Menu>
         </div>

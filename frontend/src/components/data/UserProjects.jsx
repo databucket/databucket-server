@@ -1,5 +1,6 @@
 import React, {useContext, useState} from 'react';
 import {IconButton, Menu, MenuItem, Tooltip} from '@mui/material';
+import SwapHoriz from '@mui/icons-material/SwapHoriz';
 import AccessContext from "../../context/access/AccessContext";
 import {getActiveProjectId} from "../../utils/ConfigurationStorage";
 import {Link} from "react-router-dom";
@@ -31,9 +32,9 @@ export default function UserProjects(props) {
     if (projects != null && projects.length > 1)
         return (
             <div>
-                <Tooltip title={'Open project'}>
+                <Tooltip title={'Switch project'}>
                     <IconButton onClick={handleMenu} color={'inherit'} size="large">
-                        <span className="material-icons">exit_to_app</span>
+                        <SwapHoriz/>
                     </IconButton>
                 </Tooltip>
                 <Menu

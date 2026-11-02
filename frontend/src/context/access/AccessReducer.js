@@ -111,6 +111,20 @@ const AccessReducer = (state, action) => {
                     ...state,
                     activeBucket: newBucket
                 };
+        case "MOVE_TAB": {
+            // the tab at 'from' goes to the place 'to' (counted before it is taken out)
+            const {from, to} = action.payload;
+            if (from === to || from + 1 === to || from < 0 || from >= state.bucketsTabs.length)
+                return state;
+            const movedTabs = [...state.bucketsTabs];
+            const [moved] = movedTabs.splice(from, 1);
+            movedTabs.splice(to > from ? to - 1 : to, 0, moved);
+            setLastOpenedBuckets(movedTabs);
+            return {
+                ...state,
+                bucketsTabs: movedTabs
+            };
+        }
         case "REMOVE_TAB":
             const activeTabIndex = state.bucketsTabs.indexOf(state.activeBucket);
             const updatedTabs = state.bucketsTabs.filter(bucket => bucket.id !== action.payload.id);
