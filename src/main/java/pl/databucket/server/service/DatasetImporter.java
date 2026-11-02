@@ -31,6 +31,7 @@ public class DatasetImporter {
     @Autowired private ViewService viewService;
     @Autowired private TaskService taskService;
     @Autowired private DataService dataService;
+    @Autowired private SvgService svgService;
 
     // the new ids of the dataset's objects, by the ids in the dataset
     private static class Ids {
@@ -47,6 +48,12 @@ public class DatasetImporter {
     @Transactional
     public int importDataset(DatasetDto dataset, User user) throws Exception {
         Ids ids = new Ids();
+
+        // nothing refers to an icon by its id: the objects keep a copy of the icon they use
+        for (SvgDto icon : dataset.getIcons()) {
+            icon.setId(null);
+            svgService.createSvg(icon);
+        }
 
         // the importing user joins the teams, so that what the teams give access to is visible to them
         for (TeamDto team : dataset.getTeams()) {

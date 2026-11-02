@@ -4,6 +4,7 @@ import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
 import {MessageBox} from "../utils/MessageBox";
 import {
+    getGetOptions,
     getManagementTableHeight,
     getPageSizeOptions,
     getPostOptions,
@@ -19,7 +20,7 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {DeleteSweep, FilterList, Input, Refresh} from "@mui/icons-material";
+import {DeleteSweep, FilterList, Input, Output, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
@@ -43,7 +44,7 @@ import DatasetImportDialog from "./DatasetImportDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 // The table puts its Edit and Delete after the other row actions; here the order is
-// Edit | Import dataset | Clear project | Delete
+// Edit | Import dataset | Export dataset | Clear project | Delete
 const RowActions = (props) => {
     if (props.data == null)
         return <MTableActions {...props}/>;
@@ -51,7 +52,7 @@ const RowActions = (props) => {
     const tooltip = action => typeof action === 'function' ? action(props.data).tooltip
         : typeof action.action === 'function' ? action.action(props.data).tooltip
         : action.tooltip;
-    const order = ['Edit', 'Import dataset', 'Clear project', 'Delete'];
+    const order = ['Edit', 'Import dataset', 'Export dataset', 'Clear project', 'Delete'];
     const actions = [...props.actions].sort((a, b) => order.indexOf(tooltip(a)) - order.indexOf(tooltip(b)));
     return <MTableActions {...props} actions={actions}/>;
 }
@@ -99,6 +100,20 @@ export default function ProjectsTab() {
             title: `Dataset ${dataset.name} imported into "${project.name}"`,
             message: `${rows.toLocaleString()} data rows`
         });
+    }
+
+    // the project as a dataset file (the format of the datasets shipped with Databucket), saved as <name>.json
+    const exportDataset = (project) => {
+        fetch(getBaseUrl(`manage/projects/${project.id}/dataset`), getGetOptions())
+            .then(response => response.ok ? response.text() : handleErrors(response))
+            .then(text => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+                link.download = `${project.name.replace(/[\\/:*?"<>|]/g, '_')}.json`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            })
+            .catch(error => setMessageBox({open: true, severity: 'error', title: 'Error', message: error}));
     }
 
     // clearing or deleting a project, confirmed in ProjectContentDialog
@@ -199,6 +214,12 @@ export default function ProjectsTab() {
                         // only into an empty project
                         disabled: rowData.empty !== true,
                         onClick: (event, rowData) => setDatasetProject(rowData)
+                    }),
+                    rowData => ({
+                        icon: () => <Output/>,
+                        tooltip: 'Export dataset',
+                        disabled: rowData.empty === true,
+                        onClick: (event, rowData) => exportDataset(rowData)
                     }),
                     {
                         icon: () => <DeleteSweep/>,

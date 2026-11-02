@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * The datasets shipped with Databucket (src/main/resources/datasets/*.json, e.g. DEMO) and their import into an
- * empty project, from the super-admin area.
+ * The datasets shipped with Databucket (src/main/resources/datasets/*.json, e.g. DEMO), their import into an
+ * empty project and the export of a project as a dataset, from the super-admin area.
  */
 @Service
 public class DatasetService {
@@ -42,6 +42,7 @@ public class DatasetService {
     @Autowired private ProjectContentService projectContentService;
     @Autowired private UserService userService;
     @Autowired private DatasetImporter datasetImporter;
+    @Autowired private DatasetExporter datasetExporter;
 
     public List<DatasetInfoDto> getDatasets() throws IOException {
         List<DatasetInfoDto> datasets = new ArrayList<>();
@@ -83,6 +84,28 @@ public class DatasetService {
             AuditLog.log("project.dataset-import", "id={} name={} dataset={} rows={}",
                     project.getId(), project.getName(), dataset.getName(), rows);
             return rows;
+        } finally {
+            SecurityContextHolder.setContext(original);
+        }
+    }
+
+    /**
+     * The content of the project as a dataset file, in the format of the shipped ones, e.g. to build a new dataset
+     * in the UI and add it to src/main/resources/datasets. The dataset is named after the project.
+     */
+    public String exportDataset(int projectId) throws Exception {
+        Project project = projectRepository.findByIdAndDeleted(projectId, false);
+        if (project == null)
+            throw new ItemNotFoundException(Project.class, projectId);
+
+        // read in the project, like the import (the project of the security context is the tenant)
+        SecurityContext original = SecurityContextHolder.getContext();
+        try {
+            SecurityContextHolder.setContext(contextOfProject(original, projectId));
+            DatasetDto dataset = datasetExporter.exportDataset(project.getName(), project.getDescription());
+            int rows = dataset.getData().values().stream().mapToInt(List::size).sum();
+            AuditLog.log("project.dataset-export", "id={} name={} rows={}", project.getId(), project.getName(), rows);
+            return new DatasetWriter(objectMapper).write(dataset);
         } finally {
             SecurityContextHolder.setContext(original);
         }
