@@ -14,7 +14,8 @@ const PURIFY = {
     RETURN_DOM_FRAGMENT: true
 };
 
-const EXTERNAL_URL = /url\(\s*['"]?(?!#)/i;
+// url(...) that doesn't point into the icon itself (url(#gradient), url('#gradient'))
+const EXTERNAL_URL = /url\((?!\s*['"]?#)/i;
 
 DOMPurify.addHook('afterSanitizeAttributes', node => {
     if (node.attributes == null)
@@ -50,6 +51,36 @@ export const toSvgElement = (markup) => {
 // rendered icons by color and markup (tables render the same icons over and over)
 const rendered = new Map();
 
+// in the cached markup the ids of an icon start with ID_PREFIX, replaced by a prefix unique for each shown icon
+const ID_PREFIX = '__svg-id__';
+let shownIcons = 0;
+
+/**
+ * Icons are put into the page as they are, so their ids (id="g" of a gradient, a clipPath, a <symbol>…) would be
+ * shared by the whole page: url(#g) of one icon would draw the gradient of another, and of the same icon
+ * hidden elsewhere (display: none) draw nothing. The ids and the references to them get the ID_PREFIX.
+ */
+const prefixIds = (svg) => {
+    const elements = [svg, ...svg.getElementsByTagName('*')];
+    const ids = new Set(elements.map(element => element.getAttribute('id')).filter(id => id != null && id !== ''));
+    if (ids.size === 0)
+        return;
+    const prefixed = id => ids.has(id) ? ID_PREFIX + id : id;
+    for (const element of elements)
+        for (const attribute of [...element.attributes]) {
+            const name = attribute.name.toLowerCase();
+            let value = attribute.value;
+            if (name === 'id')
+                value = prefixed(value);
+            else if ((name === 'href' || name.endsWith(':href')) && value.trim().startsWith('#'))
+                value = '#' + prefixed(value.trim().slice(1));
+            else
+                value = value.replace(/url\(\s*(['"]?)#([^'")\s]+)\1\s*\)/gi, (match, quote, id) => `url(#${prefixed(id)})`);
+            if (value !== attribute.value)
+                element.setAttributeNS(attribute.namespaceURI, attribute.name, value);
+        }
+}
+
 export const parseCustomSvg = (markup, color) => {
     const key = `${color}\n${markup}`;
     let html = rendered.get(key);
@@ -64,6 +95,7 @@ export const parseCustomSvg = (markup, color) => {
                     svg.setAttribute('fill', color);
                 svg.style.color = color;
             }
+            prefixIds(svg);
             html = svg.outerHTML;
         } else
             html = '';
@@ -71,7 +103,9 @@ export const parseCustomSvg = (markup, color) => {
             rendered.clear();
         rendered.set(key, html);
     }
-    return html !== '' ? parse(html) : null;
+    if (html === '')
+        return null;
+    return parse(html.includes(ID_PREFIX) ? html.replaceAll(ID_PREFIX, `svg${++shownIcons}-`) : html);
 };
 
 // what a class rule of a <style> may set on a shape; no url() other than into the icon (url(#gradient))
