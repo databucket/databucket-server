@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,7 @@ public class DataEnumDto {
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;
     private boolean iconsEnabled;
+    @Valid
     private List<DataEnumItemDto> items;
 
     private String createdBy;

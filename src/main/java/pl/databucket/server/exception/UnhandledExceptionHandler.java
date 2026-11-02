@@ -6,12 +6,14 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Answers exceptions that controllers do not catch themselves. Without it they are forwarded to /error,
@@ -32,6 +34,19 @@ public class UnhandledExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleUnhandledException(Exception e) {
         return exceptionFormatter.defaultException(e);
+    }
+
+    // A readable message: the fields and what is wrong with them (e.g. "icon.svg: The icon contains a forbidden element: style")
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,
+                                                                  HttpStatusCode status, WebRequest request) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        if (message.isEmpty())
+            return super.handleMethodArgumentNotValid(ex, headers, status, request);
+        ResponseEntity<Map<String, Object>> response = exceptionFormatter.customException(message, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response.getBody(), headers, HttpStatus.BAD_REQUEST);
     }
 
     // Same {"message": ...} body as the rest of the API instead of the base class ProblemDetail

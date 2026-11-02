@@ -27,8 +27,7 @@ import {
 } from "../utils/StandardColumns";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
-import parse from "html-react-parser";
-import {parseCustomSvg} from "../utils/SvgHelper";
+import {parseCustomSvg, prepareSvgIcon} from "../utils/SvgHelper";
 
 export default function SvgTab() {
 
@@ -53,61 +52,33 @@ export default function SvgTab() {
         inputRef.current.click();
     }
 
-    const onFileInputChange = () => {
-        if (window.File && window.FileReader && window.FileList && window.Blob) {
-            const file = document.querySelector('input[type=file]').files[0];
-            const reader = new FileReader();
-            const svgFile = /svg.*/;
+    // any number of SVG files of any size; each becomes an icon named after its file
+    const onFileInputChange = async (event) => {
+        const files = [...event.target.files];
+        // the same file can be chosen again
+        event.target.value = '';
 
-            if (file.type.match(svgFile)) {
-                reader.onload = function (event) {
-                    insertSvg(file.name, event.target.result);
-                }
-            } else
-                setMessageBox({
-                    open: true,
-                    severity: 'error',
-                    title: 'Error',
-                    message: "It doesn't seem to be an svg file!"
-                });
-
-            reader.readAsText(file);
+        const failed = [];
+        let added = 0;
+        for (const file of files) {
+            try {
+                const structure = prepareSvgIcon(await file.text());
+                const name = file.name.replace(/\.svg$/i, '');
+                await fetch(getBaseUrl('svg'), getPostOptions({name, structure})).then(handleErrors);
+                added++;
+            } catch (error) {
+                failed.push(`${file.name}: ${typeof error === 'string' ? error : error.message}`);
+            }
         }
-    }
 
-    const insertSvg = (name, svgContent) => {
-        const size = ['24', '24px'];
-        const svgObj = parse(svgContent.trim());
-        if (svgObj.type !== "svg") {
+        if (added > 0)
+            fetchSvgs();
+        if (failed.length > 0)
             setMessageBox({
                 open: true,
-                severity: 'error',
-                title: 'Error',
-                message: "It seems, the file content isn't an svg object!"
-            });
-            return;
-        }
-        if ((svgObj.props.height != null && !size.includes(svgObj.props.height))
-            || (svgObj.props.width != null && !size.includes(svgObj.props.width))
-            || (svgObj.props.viewBox != null && svgObj.props.viewBox !== "0 0 24 24")) {
-            setMessageBox({
-                open: true,
-                severity: 'error',
-                title: 'Error',
-                message: "The SVG object is expected to be configured with viewBox=\"0 0 24 24\" height=\"24px\" width=\"24px\"!"
-            });
-            return;
-        }
-
-        const childrenContent = svgContent.substring(svgContent.indexOf(">") + 1).replace("</svg>", "");
-        const payload = {name: name, structure: childrenContent};
-        fetch(getBaseUrl('svg'), getPostOptions(payload))
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
-            })
-            .then(() => {
-                fetchSvgs();
+                severity: added > 0 ? 'warning' : 'error',
+                title: added > 0 ? `${added} of ${files.length} icons added` : 'No icon added',
+                message: failed.join('\n')
             });
     }
 
@@ -246,6 +217,7 @@ export default function SvgTab() {
                                 });
                         }),
 
+                    // objects that use the icon keep their copy of it
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
@@ -254,20 +226,7 @@ export default function SvgTab() {
                                     .then(handleErrors)
                                     .catch(error => {
                                         e = true;
-                                        if (error.includes('already used by items'))
-                                            setMessageBox({
-                                                open: true,
-                                                severity: 'warning',
-                                                title: 'Item can not be removed',
-                                                message: error
-                                            });
-                                        else
-                                            setMessageBox({
-                                                open: true,
-                                                severity: 'error',
-                                                title: 'Error',
-                                                message: error
-                                            });
+                                        setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                         reject();
                                     })
                                     .then(() => {
@@ -287,7 +246,8 @@ export default function SvgTab() {
             />
             <input
                 ref={inputRef}
-                accept="image/svg+xml"
+                accept="image/svg+xml,.svg"
+                multiple
                 type="file"
                 onChange={onFileInputChange}
                 id="icon-button-file"
