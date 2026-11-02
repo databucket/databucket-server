@@ -28,8 +28,8 @@ public final class SvgCheck {
             "text", "tspan", "textpath",
             "lineargradient", "radialgradient", "stop", "pattern", "clippath", "mask", "marker", "filter");
 
-    // url(...) that doesn't point into the icon itself (url(#gradient))
-    private static final Pattern EXTERNAL_URL = Pattern.compile("url\\(\\s*['\"]?(?!#)", Pattern.CASE_INSENSITIVE);
+    // url(...) that doesn't point into the icon itself (url(#gradient), url('#gradient'))
+    private static final Pattern EXTERNAL_URL = Pattern.compile("url\\((?!\\s*['\"]?#)", Pattern.CASE_INSENSITIVE);
 
     private SvgCheck() {
     }

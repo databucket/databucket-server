@@ -25,7 +25,8 @@ class SvgCheckSpec extends Specification {
         "of any size"               | '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M1 1"/></svg>'
         "drawn with strokes"        | '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="9" y2="9"/></svg>'
         "with a gradient"           | '<svg viewBox="0 0 16 16"><defs><linearGradient id="g"><stop offset="0"/></linearGradient></defs><rect width="9" height="9" fill="url(#g)"/></svg>'
-        "with an inner reference"   | '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><symbol id="s"/><use xlink:href="#s"/></svg>'
+        "with a quoted inner url()" | '<svg><defs><linearGradient id="g"/></defs><rect style="fill: url(\'#g\')" clip-path="url( &quot;#g&quot; )"/></svg>'
+        "with an inner reference"   |'<svg xmlns:xlink="http://www.w3.org/1999/xlink"><symbol id="s"/><use xlink:href="#s"/></svg>'
         "with a title"              | '<svg><title>Star</title><path d="M1 1"/></svg>'
     }
 
@@ -44,7 +45,8 @@ class SvgCheckSpec extends Specification {
         "with an event handler"     | '<path onclick="alert(1)" d="M1 1"/>'                                  || "The icon contains a forbidden attribute: onclick"
         "with an external use"      | '<use href="https://example.com/i.svg#x"/>'                            || "The icon refers to an external resource: href"
         "with an external url()"    | '<path style="fill:url(https://example.com/x)" d="M1 1"/>'             || "The icon refers to an external resource: style"
-        "with javascript in a value"| '<path fill="java&#10;script:x" d="M1 1"/>'                            || "The icon refers to an external resource: fill"
+        "with a quoted external url()" | '<path style="fill:url(\'https://example.com/x\')" d="M1 1"/>'       || "The icon refers to an external resource: style"
+        "with javascript in a value"|'<path fill="java&#10;script:x" d="M1 1"/>'                            || "The icon refers to an external resource: fill"
         "with a DOCTYPE (entities)" | '<!DOCTYPE svg [<!ENTITY x "y">]><svg>&x;</svg>'                       || "The icon is not valid SVG"
         "that is not XML"           | '<path d="M1 1">'                                                      || "The icon is not valid SVG"
         "that is not SVG"           | '<svg:html xmlns:svg="x"/>'                                            || "The icon is not"
