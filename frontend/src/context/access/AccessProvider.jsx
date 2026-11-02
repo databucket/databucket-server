@@ -121,6 +121,13 @@ const AccessProvider = props => {
         });
     };
 
+    const moveTab = (from, to) => {
+        dispatch({
+            type: "MOVE_TAB",
+            payload: {from, to}
+        });
+    };
+
     const removeTab = (bucket) => {
         dispatch({
             type: "REMOVE_TAB",
@@ -150,6 +157,7 @@ const AccessProvider = props => {
                 setActiveGroup,
                 setActiveBucket,
                 addTab,
+                moveTab,
                 removeTab,
                 fetchSessionColumns,
                 fetchSessionFilters,
