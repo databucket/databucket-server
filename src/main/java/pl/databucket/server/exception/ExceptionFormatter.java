@@ -2,8 +2,10 @@ package pl.databucket.server.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import pl.databucket.server.logging.LogContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,15 +23,29 @@ public class ExceptionFormatter {
         this.logger = LoggerFactory.getLogger(clazz);
     }
 
-    // An unexpected exception: 500, logged with its stack trace
+    // An unexpected exception: 500, logged with its stack trace; a database error caused by the request answers 400/409
     public ResponseEntity<Map<String, Object>> defaultException(Exception e) {
-        logger.error(e.getMessage(), e);
-        return response(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        ApiError error = ApiError.of(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        if (error.status().is5xxServerError())
+            logger.error(e.getMessage(), e);
+        else
+            logger.info(error.message() + " (" + e.getMessage() + ")");
+        return response(withRequestId(error), error.status());
     }
 
+    // The client gets the message of the exception; a database error without its SQL statement
     public ResponseEntity<Map<String, Object>> customException(Exception e, HttpStatus status) {
-        log(status, e.getMessage(), null);
-        return response(e.getMessage(), status);
+        ApiError error = ApiError.of(e, status);
+        log(error.status(), e.getMessage(), null);
+        return response(withRequestId(error), error.status());
+    }
+
+    // an error of the server points to its log entry (the id is also in the X-Request-Id header)
+    private static String withRequestId(ApiError error) {
+        String requestId = MDC.get(LogContext.REQUEST_ID);
+        return error.status().is5xxServerError() && requestId != null
+                ? error.message() + " (request " + requestId + ", see the server log)"
+                : error.message();
     }
 
     public ResponseEntity<Map<String, Object>> customException(String message, HttpStatus status) {
