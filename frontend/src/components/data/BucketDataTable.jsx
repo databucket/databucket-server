@@ -77,8 +77,7 @@ import DuplicateIcon from '@mui/icons-material/ViewStream'
 import SettingsBackupRestore from "@mui/icons-material/SettingsBackupRestore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import MoreVert from "@mui/icons-material/MoreVert";
-import FileDownload from "@mui/icons-material/FileDownload";
-import FileUpload from "@mui/icons-material/FileUpload";
+import ImportExport from "@mui/icons-material/ImportExport";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import LocalOffer from "@mui/icons-material/LocalOffer";
 import Lock from "@mui/icons-material/Lock";
@@ -146,22 +145,25 @@ const ColumnsMenu = ({columns, onColumnsChanged, columnsArranged, onResetColumns
     );
 }
 
-const ExportMenu = ({onExport}) => {
+// Export and import under one button, as a menu with their names (an icon alone doesn't say which way data goes)
+const ImportExportMenu = ({exportEnabled, onExport, importEnabled, onImport}) => {
     const [anchorEl, setAnchorEl] = useState(null);
-    const exportRows = (allRows) => {
+    const choose = (action) => {
         setAnchorEl(null);
-        onExport(allRows);
+        action();
     }
     return (
         <span>
-            <Tooltip title='Export'>
+            <Tooltip title={exportEnabled && importEnabled ? 'Import / Export' : exportEnabled ? 'Export' : 'Import'}>
                 <IconButton color="inherit" onClick={event => setAnchorEl(event.currentTarget)}>
-                    <FileDownload/>
+                    <ImportExport/>
                 </IconButton>
             </Tooltip>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-                <MenuItem onClick={() => exportRows(false)}>Export CSV - current page</MenuItem>
-                <MenuItem onClick={() => exportRows(true)}>Export CSV - all matching rows</MenuItem>
+                {exportEnabled && <MenuItem onClick={() => choose(() => onExport(false))}>Export CSV - current page</MenuItem>}
+                {exportEnabled && <MenuItem onClick={() => choose(() => onExport(true))}>Export CSV - all matching rows</MenuItem>}
+                {exportEnabled && importEnabled && <Divider/>}
+                {importEnabled && <MenuItem onClick={() => choose(onImport)}>Import CSV…</MenuItem>}
             </Menu>
         </span>
     );
@@ -246,14 +248,9 @@ const TableActions = (props) => {
                 columnsArranged={columnsArranged}
                 onResetColumns={onResetColumns}
             />
-            {exportEnabled && <ExportMenu onExport={onExport}/>}
-            {importEnabled &&
-                <Tooltip title='Import CSV'>
-                    <IconButton color="inherit" onClick={onImport}>
-                        <FileUpload/>
-                    </IconButton>
-                </Tooltip>
-            }
+            {(exportEnabled || importEnabled) &&
+                <ImportExportMenu exportEnabled={exportEnabled} onExport={onExport}
+                                  importEnabled={importEnabled} onImport={onImport}/>}
             <MTableActions {...props} actions={others}/>
         </div>
     );

@@ -20,8 +20,8 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {DeleteSweep, FileDownload, FileUpload, FilterList, Refresh} from "@mui/icons-material";
-import {useTheme} from "@mui/material";
+import {DeleteSweep, FilterList, ImportExport, Refresh} from "@mui/icons-material";
+import {Menu, MenuItem, useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
 import {
@@ -44,7 +44,7 @@ import DatasetImportDialog from "./DatasetImportDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 
 // The table puts its Edit and Delete after the other row actions; here the order is
-// Edit | Import dataset | Export dataset | Clear project | Delete
+// Edit | Import / Export dataset | Clear project | Delete
 const RowActions = (props) => {
     if (props.data == null)
         return <MTableActions {...props}/>;
@@ -52,7 +52,7 @@ const RowActions = (props) => {
     const tooltip = action => typeof action === 'function' ? action(props.data).tooltip
         : typeof action.action === 'function' ? action.action(props.data).tooltip
         : action.tooltip;
-    const order = ['Edit', 'Import dataset', 'Export dataset', 'Clear project', 'Delete'];
+    const order = ['Edit', 'Import / Export dataset', 'Clear project', 'Delete'];
     const actions = [...props.actions].sort((a, b) => order.indexOf(tooltip(a)) - order.indexOf(tooltip(b)));
     return <MTableActions {...props} actions={actions}/>;
 }
@@ -63,6 +63,8 @@ export default function ProjectsTab() {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [contentDialog, setContentDialog] = useState({project: null, mode: null});
     const [datasetProject, setDatasetProject] = useState(null);
+    // the import / export menu of a row: {position, project}
+    const [datasetMenu, setDatasetMenu] = useState(null);
     const tableState = useTableState('management-projects');
     const tableRef = createRef();
     const {projects, fetchProjects, addProject, editProject, removeProject} = useContext(ProjectsContext);
@@ -208,19 +210,15 @@ export default function ProjectsTab() {
                         onClick: tableState.toggleFiltering
 
                     },
-                    rowData => ({
-                        icon: () => <FileUpload/>,
-                        tooltip: 'Import dataset',
-                        // only into an empty project
-                        disabled: rowData.empty !== true,
-                        onClick: (event, rowData) => setDatasetProject(rowData)
-                    }),
-                    rowData => ({
-                        icon: () => <FileDownload/>,
-                        tooltip: 'Export dataset',
-                        disabled: rowData.empty === true,
-                        onClick: (event, rowData) => exportDataset(rowData)
-                    }),
+                    {
+                        icon: () => <ImportExport/>,
+                        tooltip: 'Import / Export dataset',
+                        // the menu is placed by the position of the button: the table renders its actions anew
+                        onClick: (event, rowData) => {
+                            const button = event.currentTarget.getBoundingClientRect();
+                            setDatasetMenu({position: {top: button.bottom, left: button.left}, project: rowData});
+                        }
+                    },
                     {
                         icon: () => <DeleteSweep/>,
                         tooltip: 'Clear project',
@@ -321,6 +319,18 @@ export default function ProjectsTab() {
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}
             />
+            {/* import only into an empty project, export only of a project with content */}
+            <Menu anchorReference="anchorPosition" anchorPosition={datasetMenu?.position}
+                  open={datasetMenu != null} onClose={() => setDatasetMenu(null)}>
+                <MenuItem disabled={datasetMenu?.project.empty !== true}
+                          onClick={() => { setDatasetProject(datasetMenu.project); setDatasetMenu(null); }}>
+                    Import dataset…
+                </MenuItem>
+                <MenuItem disabled={datasetMenu?.project.empty === true}
+                          onClick={() => { exportDataset(datasetMenu.project); setDatasetMenu(null); }}>
+                    Export dataset
+                </MenuItem>
+            </Menu>
             <DatasetImportDialog
                 project={datasetProject}
                 onClose={() => setDatasetProject(null)}
