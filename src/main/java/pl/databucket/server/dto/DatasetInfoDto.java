@@ -14,10 +14,19 @@ public class DatasetInfoDto {
 
     // the file name without .json, e.g. "demo"
     private String id;
+    // "built-in" (in the jar) or "server" (in the folder databucket.datasets-dir)
+    private String source;
     private String name;
     private String description;
     private int buckets;
     private int views;
     private int rows;
+    private int icons;
+
+    public static DatasetInfoDto of(String id, String source, DatasetDto dataset) {
+        int rows = dataset.getData().values().stream().mapToInt(java.util.List::size).sum();
+        return new DatasetInfoDto(id, source, dataset.getName(), dataset.getDescription(),
+                dataset.getBuckets().size(), dataset.getViews().size(), rows, dataset.getIcons().size());
+    }
 
 }

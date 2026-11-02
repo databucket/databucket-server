@@ -44,6 +44,7 @@ public class DatasetExporter {
     @Transactional(readOnly = true)
     public DatasetDto exportDataset(String name, String description) {
         DatasetDto dataset = new DatasetDto();
+        dataset.setFormat(DatasetCheck.FORMAT);
         dataset.setName(name);
         dataset.setDescription(description);
 

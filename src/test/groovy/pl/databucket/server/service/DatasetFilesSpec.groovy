@@ -41,7 +41,10 @@ class DatasetFilesSpec extends Specification {
         def known = { Set ids, id -> id == null || ids.contains(id) }
         def allKnown = { Set ids, Collection list -> list == null || ids.containsAll(list) }
 
-        expect: "names and ids are unique"
+        expect: "the check before an import passes"
+        DatasetCheck.problems(d, jakarta.validation.Validation.buildDefaultValidatorFactory().validator).isEmpty()
+
+        and: "names and ids are unique"
         d.name
         d.buckets*.name.unique().size() == d.buckets.size()
         [d.teams, d.enums, d.classes, d.groups, d.buckets, d.tags, d.columns, d.filters, d.views, d.tasks]

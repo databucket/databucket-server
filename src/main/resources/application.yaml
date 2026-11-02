@@ -4,6 +4,9 @@ databucket:
   # (server.tomcat.accept-count) instead. A request holds a connection only inside a transaction, so
   # the threads may be raised above the pool later if requests spend time outside the database.
   max-concurrent-requests: 30
+  # A folder of dataset files (*.json, e.g. exported from a project) listed in Management > Projects >
+  # Import dataset next to the built-in ones, e.g. projects for trainings; empty = only the built-in ones
+  datasets-dir:
 
 spring:
   application:

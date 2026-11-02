@@ -18,6 +18,8 @@ import java.util.Map;
 @Setter
 public class DatasetDto {
 
+    // the version of the file format (DatasetCheck.FORMAT); a file without it is of the first one
+    private Integer format;
     private String name;
     private String description;
 
