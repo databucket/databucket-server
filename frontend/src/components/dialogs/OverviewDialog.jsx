@@ -206,11 +206,18 @@ export default function OverviewDialog() {
     const history = (bucket) => {
         if (!bucket.access)
             return '—';
-        if (!bucket.history && bucket.historyEntries === 0)
-            return <Typography variant="body2" color="text.secondary">off</Typography>;
+        // not collected: just "off" (entries left from before are told in the tooltip; they can still be cleared)
+        if (!bucket.history)
+            return bucket.historyEntries > 0
+                ? <Tooltip title={`Not collected; ${formatNumber(bucket.historyEntries)} entries (${formatSize(bucket.historySize)}) are left from before`}>
+                    <Typography variant="body2" color="text.secondary" component="span">off</Typography>
+                </Tooltip>
+                : <Typography variant="body2" color="text.secondary">off</Typography>;
         return (
             <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, whiteSpace: 'nowrap'}}>
-                <span>{bucket.history ? 'on' : 'off'} · {formatNumber(bucket.historyEntries)} · {formatSize(bucket.historySize)}</span>
+                <Tooltip title="Entries of all data rows (each version of a row is an entry) · size on disk">
+                    <span>{formatNumber(bucket.historyEntries)} entries · {formatSize(bucket.historySize)}</span>
+                </Tooltip>
                 {bucket.historyLimit != null &&
                     <Tooltip title={`The latest ${bucket.historyLimit} entries of each row are kept (and the entry of its creation); older ones are removed every night`}>
                         <Typography component="span" variant="body2" color="text.secondary">· keep {formatNumber(bucket.historyLimit)}</Typography>
@@ -328,8 +335,8 @@ export default function OverviewDialog() {
                                         <TableCell>Description</TableCell>
                                         {header('rows', 'Rows', 'right')}
                                         {header('reserved', 'Reserved', 'right')}
-                                        {header('history', 'History')}
                                         {header('lastModifiedAt', 'Last change')}
+                                        {header('history', 'History')}
                                         <TableCell/>
                                     </TableRow>
                                 </TableHead>
@@ -340,10 +347,10 @@ export default function OverviewDialog() {
                                             <TableCell sx={{color: 'text.secondary'}}>{bucket.description}</TableCell>
                                             <TableCell align="right">{formatNumber(bucket.rows)}</TableCell>
                                             <TableCell align="right">{formatNumber(bucket.reserved)}</TableCell>
-                                            <TableCell>{history(bucket)}</TableCell>
                                             <TableCell sx={{whiteSpace: 'nowrap'}}>
                                                 {bucket.access ? formatDate(bucket.lastModifiedAt) : '—'}
                                             </TableCell>
+                                            <TableCell>{history(bucket)}</TableCell>
                                             <TableCell align="right">{action(bucket)}</TableCell>
                                         </TableRow>
                                     ))}
