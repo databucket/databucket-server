@@ -518,6 +518,12 @@ div.tooltip-inner {
 .qb-lite .rule_group:not(:hover) .group--actions {
   opacity: 0;
 }
+
+/* The actions of the top group (Add rule, Add group) are always visible: with no rules yet the builder would show
+   only an empty box, the buttons appearing on hover. Nested groups and rules keep the lite look. */
+.qb-lite > .group-container > .group > .group--header > .group--actions {
+  opacity: 1;
+}
 .qb-lite .rule--fieldsrc, .qb-lite .widget--valuesrc, .qb-lite .rule--drag-handler, .qb-lite .rule--header {
   transition: opacity 0.2s;
 }
