@@ -16,5 +16,6 @@ public class AccessTreeViewPropertyMap extends PropertyMap<View, AccessTreeViewD
         map().setColumnsId(source.getDataColumns().getId());
         map().setFilterId(source.getDataFilter().getId());
         map().setFeaturesIds(source.getFeaturesIds());
+        map().setSort(source.getSort());
     }
 }

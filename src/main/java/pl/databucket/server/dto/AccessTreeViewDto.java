@@ -16,4 +16,6 @@ public class AccessTreeViewDto {
     private long columnsId;
     private Long filterId;
     private Short[] featuresIds;
+    // the sort the data table starts with (asc(<field>) or desc(<field>)); null = by id
+    private String sort;
 }

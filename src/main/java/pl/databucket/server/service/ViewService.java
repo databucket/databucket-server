@@ -53,6 +53,7 @@ public class ViewService {
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
         view.setFeaturesIds(viewDto.getFeaturesIds());
+        view.setSort(viewDto.getSort());
 
         if (viewDto.getRoleId() != null) {
             Role role = roleRepository.getById(viewDto.getRoleId());
@@ -123,6 +124,7 @@ public class ViewService {
         view.setName(viewDto.getName());
         view.setDescription(viewDto.getDescription());
         view.setFeaturesIds(viewDto.getFeaturesIds());
+        view.setSort(viewDto.getSort());
 
         if (viewDto.getRoleId() != null) {
             Role role = roleRepository.getOne(viewDto.getRoleId());
