@@ -40,6 +40,10 @@ public class View extends Auditable<String> {
 	@JdbcTypeCode(SqlTypes.ARRAY)
 	private Short[] featuresIds;
 
+	// the sort the data table starts with, as the sort parameter of the API: asc(<field>) or desc(<field>); null = by id
+	@Column(name = "sort", length = 250)
+	private String sort;
+
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "views_classes",
 			joinColumns = {@JoinColumn(name = "view_id")},

@@ -4,7 +4,7 @@ import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
 import {FilterList, Refresh} from "@mui/icons-material";
-import {useTheme} from "@mui/material";
+import {MenuItem, Select, useTheme} from "@mui/material";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -48,6 +48,31 @@ import {getBaseUrl} from "../../utils/UrlBuilder";
 import SelectMultiViewFeaturesLookup
     from "../lookup/SelectMultiViewFeaturesLookup";
 import CloneIcon from "@mui/icons-material/ViewStream";
+import {describeViewSort, formatViewSort, getSortableColumns, parseViewSort} from "../../utils/ViewSort";
+
+// the default sort of a view: one of the sortable columns of its columns definition and a direction; none = by id
+const ViewSortEditor = ({value, sortableColumns, onChange}) => {
+    const parsed = parseViewSort(value);
+    const source = parsed?.source ?? '';
+    const ord = parsed?.ord ?? 'asc';
+    const known = sortableColumns.some(c => c.source === source);
+    return (
+        <div style={{display: 'flex', gap: 8}}>
+            <Select variant="standard" size="small" value={source} displayEmpty sx={{minWidth: 120}}
+                    onChange={e => onChange(formatViewSort(e.target.value, ord))}>
+                <MenuItem value=""><em>none (id)</em></MenuItem>
+                {/* a column no longer in the columns definition stays visible until it is changed */}
+                {source !== '' && !known && <MenuItem value={source}>{source}</MenuItem>}
+                {sortableColumns.map(c => <MenuItem key={c.source} value={c.source}>{c.title}</MenuItem>)}
+            </Select>
+            <Select variant="standard" size="small" value={ord} disabled={source === ''}
+                    onChange={e => onChange(formatViewSort(source, e.target.value))}>
+                <MenuItem value="asc">ascending</MenuItem>
+                <MenuItem value="desc">descending</MenuItem>
+            </Select>
+        </div>
+    );
+}
 
 export default function ViewsTab() {
 
@@ -71,7 +96,7 @@ export default function ViewsTab() {
     const {teams, fetchTeams} = teamsContext;
     const viewsContext = useContext(ViewsContext);
     const {views, fetchViews, addView, editView, removeView} = viewsContext;
-    const changeableFields = ['name', 'description', 'classesIds', 'bucketsIds', 'usersIds', 'columnsId', 'filterId', 'featuresIds', 'grantAccess', 'roleId', 'teamsIds'];
+    const changeableFields = ['name', 'description', 'classesIds', 'bucketsIds', 'usersIds', 'columnsId', 'filterId', 'featuresIds', 'grantAccess', 'roleId', 'teamsIds', 'sort'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']},
@@ -117,6 +142,9 @@ export default function ViewsTab() {
         if (teams == null)
             fetchTeams();
     }, [teams, fetchTeams]);
+    // the columns definition chosen for a view
+    const getViewColumns = (rowData) => (columns ?? []).find(c => c.id === rowData.columnsId);
+
     const cloneItem = (rowData) => {
         fetch(getBaseUrl('views'), getPostOptions(rowData))
             .then(handleErrors)
@@ -140,6 +168,14 @@ export default function ViewsTab() {
                     getColumnDescription("20%"),
                     getColumnColumns(columns),
                     getColumnFilter(filters),
+                    {
+                        title: 'Default sort', field: 'sort', filtering: false, sorting: false,
+                        render: rowData => describeViewSort(rowData.sort, getViewColumns(rowData)),
+                        editComponent: props => <ViewSortEditor
+                            value={props.value}
+                            sortableColumns={getSortableColumns(getViewColumns(props.rowData))}
+                            onChange={props.onChange}/>
+                    },
                     getColumnBuckets(buckets, 'Show in buckets'),
                     getColumnClasses(classes, 'Show by classes'),
                     getColumnUsers(users, roles, 'Access for user'),

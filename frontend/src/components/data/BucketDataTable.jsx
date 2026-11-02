@@ -97,6 +97,7 @@ import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
 import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 import ImportDataDialog from "../dialogs/ImportDataDialog";
+import {getStartOrder} from "../../utils/ViewSort";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
 const tableRef = createRef();
@@ -376,7 +377,7 @@ export default function BucketDataTable() {
 
             const columnsDef = columns.filter(c => c.id === activeView.columnsId)[0];
             const columnsLayout = getBucketColumns(activeBucket.id, activeView.id);
-            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, users, savedState.order, savedState.filters, columnsLayout);
+            const tableColumns = prepareTableColumns(columnsDef, bucketTags, enums, users, getStartOrder(savedState, activeView, columnsDef), savedState.filters, columnsLayout);
             const activeLogic = savedState.logic !== undefined ? savedState.logic : getViewLogic(activeView);
 
             setFiltering(savedState.filtering === true);
@@ -431,7 +432,7 @@ export default function BucketDataTable() {
         reloadData();
     }
 
-    // active view has been changed: the table starts clean with the view's filter
+    // active view has been changed: the table starts clean with the view's filter and sort
     const onViewSelected = (view) => {
         setFiltering(false);
         setLastActiveView(activeBucket.id, view.id);
@@ -439,7 +440,7 @@ export default function BucketDataTable() {
         setBucketTableState(activeBucket.id, {viewId: view.id});
         const columnsDef = columns.filter(col => col.id === view.columnsId)[0];
         const columnsLayout = getBucketColumns(activeBucket.id, view.id);
-        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, users, null, null, columnsLayout);
+        const tableColumns = prepareTableColumns(columnsDef, state.bucketTags, enums, users, getStartOrder(null, view, columnsDef), null, columnsLayout);
 
         setColumnsArranged(columnsLayout != null);
         setTableState({viewId: view.id});
@@ -529,7 +530,7 @@ export default function BucketDataTable() {
     const resetColumns = () => {
         clearBucketColumns(activeBucket.id, state.activeView.id);
         const savedState = getBucketTableState(activeBucket.id);
-        const tableColumns = prepareTableColumns(state.columnsDef, state.bucketTags, enums, users, savedState.order, savedState.filters, null);
+        const tableColumns = prepareTableColumns(state.columnsDef, state.bucketTags, enums, users, getStartOrder(savedState, state.activeView, state.columnsDef), savedState.filters, null);
         setColumnsArranged(false);
         setTableState(savedState);
         setState({...state, tableColumns: tableColumns});
