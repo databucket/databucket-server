@@ -339,7 +339,7 @@ export default function OverviewDialog() {
                                         {header('rows', 'Rows', 'right')}
                                         {header('reserved', 'Reserved', 'right')}
                                         {header('lastModifiedAt', 'Last change')}
-                                        {header('history', 'History', undefined, SEPARATOR)}
+                                        {header('history', 'Data history', undefined, SEPARATOR)}
                                         <TableCell/>
                                     </TableRow>
                                 </TableHead>
