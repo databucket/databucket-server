@@ -50,6 +50,9 @@ const formatSize = (bytes) => {
 
 const formatNumber = (value) => value.toLocaleString();
 
+// a vertical line before the History column: the data on the left, its history on the right
+const SEPARATOR = {borderLeft: 1, borderLeftColor: 'divider'};
+
 const formatDate = (value) => value != null ? new Date(value).toLocaleString() : '—';
 
 const formatDay = (value) => new Date(value).toLocaleDateString();
@@ -174,8 +177,8 @@ export default function OverviewDialog() {
         return (va < vb ? -1 : va > vb ? 1 : 0) * (sort.asc ? 1 : -1);
     });
 
-    const header = (by, label, align) => (
-        <TableCell align={align} sortDirection={sort.by === by ? (sort.asc ? 'asc' : 'desc') : false}>
+    const header = (by, label, align, sx) => (
+        <TableCell align={align} sx={sx} sortDirection={sort.by === by ? (sort.asc ? 'asc' : 'desc') : false}>
             <TableSortLabel active={sort.by === by} direction={sort.by === by && !sort.asc ? 'desc' : 'asc'}
                             onClick={() => sortBy(by)}>
                 {label}
@@ -336,7 +339,7 @@ export default function OverviewDialog() {
                                         {header('rows', 'Rows', 'right')}
                                         {header('reserved', 'Reserved', 'right')}
                                         {header('lastModifiedAt', 'Last change')}
-                                        {header('history', 'History')}
+                                        {header('history', 'History', undefined, SEPARATOR)}
                                         <TableCell/>
                                     </TableRow>
                                 </TableHead>
@@ -350,7 +353,7 @@ export default function OverviewDialog() {
                                             <TableCell sx={{whiteSpace: 'nowrap'}}>
                                                 {bucket.access ? formatDate(bucket.lastModifiedAt) : '—'}
                                             </TableCell>
-                                            <TableCell>{history(bucket)}</TableCell>
+                                            <TableCell sx={SEPARATOR}>{history(bucket)}</TableCell>
                                             <TableCell align="right">{action(bucket)}</TableCell>
                                         </TableRow>
                                     ))}
