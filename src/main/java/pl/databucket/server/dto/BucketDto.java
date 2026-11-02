@@ -5,6 +5,7 @@ import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
 import java.util.Set;
@@ -28,6 +29,9 @@ public class BucketDto {
     private boolean protectedData;
     // listed on the Overview page for users without access (true when left out)
     private boolean overviewVisible = true;
+    // the latest history entries kept for each data row, null: all
+    @Min(1)
+    private Integer historyLimit;
     private Short roleId;
 
     private String createdBy;

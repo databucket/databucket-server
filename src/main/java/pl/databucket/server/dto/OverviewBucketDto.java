@@ -37,6 +37,8 @@ public class OverviewBucketDto {
     private Date lastModifiedAt;
     // whether the changes of the data are kept
     private Boolean history;
+    // the latest history entries kept for each data row (removed every night), null: all
+    private Integer historyLimit;
     // entries of the history table; an estimate for big tables
     private Long historyEntries;
     // bytes on disk, with indexes

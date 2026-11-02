@@ -7,6 +7,17 @@ databucket:
   # A folder of dataset files (*.json, e.g. exported from a project) listed in Management > Projects >
   # Import dataset next to the built-in ones, e.g. projects for trainings; empty = only the built-in ones
   datasets-dir:
+  # Overview: the history of a bucket is marked as large above this size, or above the ratio x the size of
+  # its data (the ratio only from the min size on, small buckets don't count)
+  overview:
+    history-warning-size: 500MB
+    history-warning-ratio: 5
+    history-warning-ratio-min-size: 50MB
+  # Removes the history entries beyond the history limit of a bucket (Settings > Buckets) every night;
+  # the entry of the creation of a row always stays
+  history-cleanup:
+    enabled: true
+    cron: "0 30 2 * * *"
 
 spring:
   application:

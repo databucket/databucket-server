@@ -27,7 +27,7 @@ import {
     Typography,
     useTheme
 } from "@mui/material";
-import {Close, DeleteSweep, Inventory2, Lock, Refresh, WarningAmber} from "@mui/icons-material";
+import {Close, ContentCut, DeleteSweep, Inventory2, Lock, Refresh, WarningAmber} from "@mui/icons-material";
 import AccessContext from "../../context/access/AccessContext";
 import StyledIcon from "../utils/StyledIcon";
 import {getBaseUrl} from "../../utils/UrlBuilder";
@@ -168,6 +168,16 @@ export default function OverviewDialog() {
             .catch(showError);
     };
 
+    const applyHistoryLimit = (bucket) => {
+        fetch(getBaseUrl(`overview/bucket/${encodeURIComponent(bucket.name)}/history/limit`), getPostOptions({}))
+            .then(handleErrors)
+            .then(result => {
+                setMessageBox({open: true, severity: 'success', title: bucket.name, message: result.message});
+                load();
+            })
+            .catch(showError);
+    };
+
     const sortBy = (by) => setSort({by, asc: sort.by === by ? !sort.asc : true});
 
     const sorted = overview == null ? [] : [...overview].sort((a, b) => {
@@ -212,6 +222,10 @@ export default function OverviewDialog() {
         return (
             <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, whiteSpace: 'nowrap'}}>
                 <span>{bucket.history ? 'on' : 'off'} · {formatNumber(bucket.historyEntries)} · {formatSize(bucket.historySize)}</span>
+                {bucket.historyLimit != null &&
+                    <Tooltip title={`The latest ${bucket.historyLimit} entries of each row are kept (and the entry of its creation); older ones are removed every night`}>
+                        <Typography component="span" variant="body2" color="text.secondary">· keep {formatNumber(bucket.historyLimit)}</Typography>
+                    </Tooltip>}
                 {bucket.historyLarge &&
                     <Tooltip title={admin
                         ? 'The history is large. Clear it to free the space.'
@@ -226,11 +240,19 @@ export default function OverviewDialog() {
     const action = (bucket) => {
         if (bucket.access)
             return admin && bucket.historyEntries > 0 &&
-                <Tooltip title="Clear the whole history">
-                    <IconButton size="small" onClick={() => setClearing(bucket)}>
-                        <DeleteSweep fontSize="small"/>
-                    </IconButton>
-                </Tooltip>;
+                <Box sx={{display: 'inline-flex', whiteSpace: 'nowrap'}}>
+                    {bucket.historyLimit != null &&
+                        <Tooltip title={`Apply the history limit now: keep the latest ${bucket.historyLimit} entries of each row`}>
+                            <IconButton size="small" onClick={() => applyHistoryLimit(bucket)}>
+                                <ContentCut fontSize="small"/>
+                            </IconButton>
+                        </Tooltip>}
+                    <Tooltip title="Clear the whole history">
+                        <IconButton size="small" onClick={() => setClearing(bucket)}>
+                            <DeleteSweep fontSize="small"/>
+                        </IconButton>
+                    </Tooltip>
+                </Box>;
         if (bucket.requestStatus === 'PENDING')
             return <Tooltip title="Waiting for an admin of the project">
                 <Chip size="small" label={`Requested · ${formatDay(bucket.requestedAt)}`}/>

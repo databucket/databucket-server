@@ -107,6 +107,7 @@ public class OverviewService {
         OverviewBucketDto dto = identity(bucket);
         dto.setAccess(true);
         dto.setHistory(bucket.isHistory());
+        dto.setHistoryLimit(bucket.getHistoryLimit());
 
         // table names come from the bucket id, not from the user
         String data = quote(bucket.getTableName());

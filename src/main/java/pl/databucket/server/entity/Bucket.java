@@ -58,6 +58,11 @@ public class Bucket extends Auditable<String> {
     @Column(name = "overview_visible", nullable = false, columnDefinition = "boolean default true")
     private boolean overviewVisible = true;
 
+    // how many of the latest history entries of each data row are kept (the entry of its creation always stays);
+    // null: all; older entries are removed every night (HistoryCleanupService)
+    @Column(name = "history_limit")
+    private Integer historyLimit;
+
     @ManyToMany(mappedBy = "buckets")
     private Set<Group> groups;
 
