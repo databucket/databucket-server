@@ -4,7 +4,7 @@ import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
 import {FilterList, Refresh} from "@mui/icons-material";
-import {useTheme} from "@mui/material";
+import {Tooltip, useTheme} from "@mui/material";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -69,7 +69,7 @@ export default function BucketsTab() {
     const {teams, fetchTeams} = teamsContext;
     const svgContext = useContext(SvgContext);
     const {svgs, fetchSvgs} = svgContext;
-    const changeableFields = ['name', 'icon', 'history', 'protectedData', 'overviewVisible', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
+    const changeableFields = ['name', 'icon', 'history', 'protectedData', 'overviewVisible', 'historyLimit', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -163,6 +163,10 @@ export default function BucketsTab() {
                     getColumnGroups(groups, 'Show in groups'),
                     {title: 'Protect orphaned data', field: 'protectedData', type: 'boolean'},
                     {title: 'Collect data history', field: 'history', type: 'boolean'},
+                    // the latest history entries kept for each data row, older ones are removed every night; empty: all
+                    {title: <Tooltip title="The latest history entries kept for each data row; older ones are removed every night (the entry of the creation of the row stays). Empty: all."><span>Limit data history</span></Tooltip>,
+                        field: 'historyLimit', type: 'numeric',
+                        validate: rowData => rowData.historyLimit == null || rowData.historyLimit === '' || rowData.historyLimit >= 1},
                     // listed on the Overview page also for users without access, who can ask for it
                     {title: 'Visible in Overview', field: 'overviewVisible', type: 'boolean', initialEditValue: true},
                     getColumnUsers(users, roles, 'Access for users'),

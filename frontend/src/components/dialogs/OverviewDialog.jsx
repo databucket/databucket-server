@@ -50,6 +50,9 @@ const formatSize = (bytes) => {
 
 const formatNumber = (value) => value.toLocaleString();
 
+// a vertical line before the History column: the data on the left, its history on the right
+const SEPARATOR = {borderLeft: 1, borderLeftColor: 'divider'};
+
 const formatDate = (value) => value != null ? new Date(value).toLocaleString() : '—';
 
 const formatDay = (value) => new Date(value).toLocaleDateString();
@@ -58,15 +61,14 @@ const formatDay = (value) => new Date(value).toLocaleDateString();
 const SORT = {
     name: bucket => bucket.name.toLowerCase(),
     rows: bucket => bucket.rows,
-    free: bucket => bucket.free,
-    reserved: bucket => (bucket.reservedByMe ?? -1) + (bucket.reservedByOthers ?? 0),
+    reserved: bucket => bucket.reserved,
     history: bucket => bucket.historySize ?? -1,
     lastModifiedAt: bucket => bucket.lastModifiedAt ?? '',
 };
 
 /**
  * The Overview of the project, opened from the side panel as a dialog (movable by its title, over the data):
- * the buckets the user has access to, what they hold, how much is free, and how big their history is; and the
+ * the buckets the user has access to, how many rows they hold and how many are reserved, and how big their history is; and the
  * buckets visible on the Overview page the user has no access to, where the access can be asked for. The admins of
  * the project see the pending requests (also as a counter in the side panel) and approve or reject them.
  */
@@ -175,8 +177,8 @@ export default function OverviewDialog() {
         return (va < vb ? -1 : va > vb ? 1 : 0) * (sort.asc ? 1 : -1);
     });
 
-    const header = (by, label, align) => (
-        <TableCell align={align} sortDirection={sort.by === by ? (sort.asc ? 'asc' : 'desc') : false}>
+    const header = (by, label, align, sx) => (
+        <TableCell align={align} sx={sx} sortDirection={sort.by === by ? (sort.asc ? 'asc' : 'desc') : false}>
             <TableSortLabel active={sort.by === by} direction={sort.by === by && !sort.asc ? 'desc' : 'asc'}
                             onClick={() => sortBy(by)}>
                 {label}
@@ -207,11 +209,22 @@ export default function OverviewDialog() {
     const history = (bucket) => {
         if (!bucket.access)
             return '—';
-        if (!bucket.history && bucket.historyEntries === 0)
-            return <Typography variant="body2" color="text.secondary">off</Typography>;
+        // not collected: just "off" (entries left from before are told in the tooltip; they can still be cleared)
+        if (!bucket.history)
+            return bucket.historyEntries > 0
+                ? <Tooltip title={`Not collected; ${formatNumber(bucket.historyEntries)} entries (${formatSize(bucket.historySize)}) are left from before`}>
+                    <Typography variant="body2" color="text.secondary" component="span">off</Typography>
+                </Tooltip>
+                : <Typography variant="body2" color="text.secondary">off</Typography>;
         return (
             <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, whiteSpace: 'nowrap'}}>
-                <span>{bucket.history ? 'on' : 'off'} · {formatNumber(bucket.historyEntries)} · {formatSize(bucket.historySize)}</span>
+                <Tooltip title="Entries of all data rows (each version of a row is an entry) · size on disk">
+                    <span>{formatNumber(bucket.historyEntries)} entries · {formatSize(bucket.historySize)}</span>
+                </Tooltip>
+                {bucket.historyLimit != null &&
+                    <Tooltip title={`The latest ${bucket.historyLimit} entries of each row are kept (and the entry of its creation); older ones are removed every night`}>
+                        <Typography component="span" variant="body2" color="text.secondary">· keep {formatNumber(bucket.historyLimit)}</Typography>
+                    </Tooltip>}
                 {bucket.historyLarge &&
                     <Tooltip title={admin
                         ? 'The history is large. Clear it to free the space.'
@@ -324,10 +337,9 @@ export default function OverviewDialog() {
                                         {header('name', 'Bucket')}
                                         <TableCell>Description</TableCell>
                                         {header('rows', 'Rows', 'right')}
-                                        {header('free', 'Free', 'right')}
-                                        {header('reserved', 'Reserved (me / others)', 'right')}
-                                        {header('history', 'History')}
+                                        {header('reserved', 'Reserved', 'right')}
                                         {header('lastModifiedAt', 'Last change')}
+                                        {header('history', 'Data history', undefined, SEPARATOR)}
                                         <TableCell/>
                                     </TableRow>
                                 </TableHead>
@@ -337,22 +349,17 @@ export default function OverviewDialog() {
                                             <TableCell sx={{whiteSpace: 'nowrap'}}>{name(bucket)}</TableCell>
                                             <TableCell sx={{color: 'text.secondary'}}>{bucket.description}</TableCell>
                                             <TableCell align="right">{formatNumber(bucket.rows)}</TableCell>
-                                            <TableCell align="right">{formatNumber(bucket.free)}</TableCell>
-                                            <TableCell align="right">
-                                                {bucket.access
-                                                    ? `${formatNumber(bucket.reservedByMe)} / ${formatNumber(bucket.reservedByOthers)}`
-                                                    : '—'}
-                                            </TableCell>
-                                            <TableCell>{history(bucket)}</TableCell>
+                                            <TableCell align="right">{formatNumber(bucket.reserved)}</TableCell>
                                             <TableCell sx={{whiteSpace: 'nowrap'}}>
                                                 {bucket.access ? formatDate(bucket.lastModifiedAt) : '—'}
                                             </TableCell>
+                                            <TableCell sx={SEPARATOR}>{history(bucket)}</TableCell>
                                             <TableCell align="right">{action(bucket)}</TableCell>
                                         </TableRow>
                                     ))}
                                     {sorted.length === 0 &&
                                         <TableRow>
-                                            <TableCell colSpan={8} align="center" sx={{color: 'text.secondary'}}>
+                                            <TableCell colSpan={7} align="center" sx={{color: 'text.secondary'}}>
                                                 There are no buckets to show in this project.
                                             </TableCell>
                                         </TableRow>}

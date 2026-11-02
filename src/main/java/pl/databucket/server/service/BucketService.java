@@ -78,6 +78,7 @@ public class BucketService {
         bucket.setHistory(bucketDto.isHistory());
         bucket.setProtectedData(bucketDto.isProtectedData());
         bucket.setOverviewVisible(bucketDto.isOverviewVisible());
+        bucket.setHistoryLimit(bucketDto.getHistoryLimit());
         if (bucketDto.getIcon() != null) {
             bucket.setIconName(bucketDto.getIcon().getName());
             bucket.setIconColor(bucketDto.getIcon().getColor());
@@ -276,6 +277,7 @@ public class BucketService {
 
         bucket.setProtectedData(bucketDto.isProtectedData());
         bucket.setOverviewVisible(bucketDto.isOverviewVisible());
+        bucket.setHistoryLimit(bucketDto.getHistoryLimit());
 
         if (bucketDto.getRoleId() != null) {
             Role role = roleRepository.getOne(bucketDto.getRoleId());
