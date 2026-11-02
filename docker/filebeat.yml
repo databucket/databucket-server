@@ -1,0 +1,40 @@
+# Filebeat for docker-compose.elastic.yaml: ships the log of the databucket container to Elasticsearch.
+# On k8s the same idea: Filebeat / Elastic Agent reads the container logs; the ndjson parser below turns
+# each ECS JSON line of Databucket into the fields of the document (log.level, user.name, url.path, ...).
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        - condition:
+            contains:
+              docker.container.name: databucket
+          config:
+            - type: filestream
+              id: databucket-${data.docker.container.id}
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              parsers:
+                - container: ~
+                - ndjson:
+                    target: ""
+                    overwrite_keys: true
+                    expand_keys: true
+                    add_error_key: true
+
+processors:
+  # the container name and id are useful; the compose labels (paths of this machine, hashes) and the host of
+  # the Filebeat container are not
+  - drop_fields:
+      fields: ["host", "agent.ephemeral_id", "docker.container.labels"]
+      ignore_missing: true
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+
+# a single node: no replicas, so the index is green
+setup.template.settings:
+  index.number_of_replicas: 0
+# apply the settings above also when the template exists from an earlier run
+setup.template.overwrite: true
+
+logging.level: info

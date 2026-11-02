@@ -1,0 +1,76 @@
+# Databucket logs in Kibana, locally: Elasticsearch + Kibana + Filebeat next to the stack of docker-compose.yaml.
+#
+#   cd docker && docker compose -f docker-compose.yaml -f docker-compose.elastic.yaml up --build
+#
+# Kibana: http://localhost:5601  ->  Discover, data view "Databucket logs"
+#
+# Databucket writes its log as ECS JSON (one object per line) to stdout, as on k8s; Filebeat reads the log of
+# the databucket container from Docker and sends it to Elasticsearch. Security is off: for a local look only.
+# Elasticsearch needs about 1.5 GB of memory (Docker Desktop: Settings > Resources).
+services:
+  databucket:
+    environment:
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+      LOGGING_STRUCTURED_ECS_SERVICE_ENVIRONMENT: local
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.6
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -qv '\"status\":\"red\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.5.6
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      # no usage data sent to Elastic, no banner about it
+      TELEMETRY_OPTIN: "false"
+      TELEMETRY_ALLOWCHANGINGOPTINSTATUS: "false"
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -q '\"level\":\"available\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # creates the data view "Databucket logs" once Kibana is up, then exits
+  kibana-setup:
+    image: curlimages/curl:8.11.1
+    depends_on:
+      kibana:
+        condition: service_healthy
+    restart: "no"
+    command: >
+      -s -X POST http://kibana:5601/api/data_views/data_view
+      -H "kbn-xsrf: true" -H "Content-Type: application/json"
+      -d '{"override": true, "data_view": {"id": "databucket-logs", "name": "Databucket logs", "title": "filebeat-*", "timeFieldName": "@timestamp"}}'
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:9.5.6
+    user: root
+    # the config is mounted from the host, so its permissions can't be checked
+    command: ["filebeat", "-e", "--strict.perms=false"]
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - filebeat-data:/usr/share/filebeat/data
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+volumes:
+  elastic-data:
+  filebeat-data:
