@@ -82,7 +82,11 @@ const prepareColumn = (column, properties, tags, enums, users, ord) => {
                 field: 'Id',
                 source: 'id',
                 type: 'numeric',
-                ...colDef
+                ...colDef,
+                // the ids next to the actions: aligned left (not right as numbers), and without a width of its own
+                // the column takes no share of the spare width (a percentage column doesn't)
+                align: 'left',
+                width: column.width != null && `${column.width}`.trim() !== '' ? colDef.width : '1%'
             };
         case "uuid_tag_id":
             const tagLookup = createTagLookup(tags);
