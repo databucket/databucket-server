@@ -117,9 +117,6 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
-.group--header:not(.no--children):not(.hide--conjs).hide--line::before {
-  border-color: rgba(128, 128, 128, 0.1);
-}
 .group--header:not(.no--children):not(.hide--conjs)::before {
   top: 20px;
   height: calc(100% + 10px - 20px);
@@ -151,7 +148,9 @@
   height: calc(50% - 1px + 10px + 2px);
 }
 .group--children > .group-or-rule-container > .group-or-rule::before, .group--children > .group-or-rule-container > .group-or-rule::after {
-  left: -15px;
+  /* under the line from the conjunctions (header ::before, left: 11px), and touching the rule;
+     -14px because left is measured from inside the rule's/group's 1px left border */
+  left: -14px;
   width: 13px;
 }
 .group--children > .group-or-rule-container:last-child > .group-or-rule::before {
@@ -170,9 +169,6 @@
 .group--children.hide--conjs > .group-or-rule-container:first-child > .group-or-rule::after {
   top: calc(50% - 1px);
   height: calc(50% + 1px + 10px + 2px);
-}
-.group--children.hide--line > .group-or-rule-container > .group-or-rule::before, .group--children.hide--line > .group-or-rule-container > .group-or-rule::after {
-  border-color: rgba(128, 128, 128, 0.1);
 }
 
 .rule_group--children > .group-or-rule-container:first-child > .group-or-rule::before {
@@ -208,7 +204,7 @@
   height: calc(50% - 1px + 10px + 4px);
 }
 .switch_group > .group--children > .group-or-rule-container > .group-or-rule::before, .switch_group > .group--children > .group-or-rule-container > .group-or-rule::after {
-  left: -15px;
+  left: -14px;
   width: 13px;
 }
 .switch_group > .group--header:not(.no--children):not(.hide--conjs)::before {
