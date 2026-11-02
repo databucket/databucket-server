@@ -10,6 +10,8 @@
 #
 # To try SSO: sign in to Databucket as super, give a user the email demo@databucket.localhost and
 # assign a project, then use "Sign in with Keycloak" as demo / demo.
+#
+# Logs in Kibana (Elasticsearch + Kibana + Filebeat): see docker-compose.elastic.yaml.
 services:
   postgres:
     image: postgres:18-alpine
