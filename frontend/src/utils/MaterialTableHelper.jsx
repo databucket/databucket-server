@@ -180,6 +180,9 @@ export const getSettingsTabSelectedColor = (theme) => {
     }
 }
 
+// in the middle of the line, as StyledIcon: on the baseline a 24px icon makes the table row taller
+const MIDDLE = {verticalAlign: 'middle'};
+
 export const getUserIcon = (rowData) => {
     const enabled = rowData['enabled'];
     const expiredDateStr = rowData['expirationDate'];
@@ -194,17 +197,17 @@ export const getUserIcon = (rowData) => {
     if (!enabled) {
         return (
             <Tooltip title={'Disabled'}>
-                <DisabledUserIcon color={'error'}/>
+                <DisabledUserIcon color={'error'} sx={MIDDLE}/>
             </Tooltip>
         );
     } else if (expired) {
         return (
             <Tooltip title={'Expired'}>
-                <ExpiredUserIcon color={'error'}/>
+                <ExpiredUserIcon color={'error'} sx={MIDDLE}/>
             </Tooltip>
         );
     } else {
-        return (<UserIcon/>);
+        return (<UserIcon sx={MIDDLE}/>);
     }
 }
 
