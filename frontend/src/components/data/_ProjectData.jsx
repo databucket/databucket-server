@@ -37,6 +37,7 @@ import {getProjectDataPath, getProjectSettingsPath} from "../../route/AppRouter"
 import GroupMenuSelector from "./GroupMenuSelector";
 import BucketListSelector from "./BucketListSelector";
 import InfoDialog from "../dialogs/InfoDialog";
+import OverviewDialog from "../dialogs/OverviewDialog";
 import BucketTabSelector from "./BucketTabSelector";
 import UserProjects from "./UserProjects";
 import {MessageBox} from "../utils/MessageBox";
@@ -243,6 +244,7 @@ export default function ProjectData() {
                     <BucketListSelector open={open}/>
                     <Divider/>
                     <List sx={{marginTop: "auto"}}>
+                        <OverviewDialog/>
                         {
                             hasRobotRole() && (
                                 <ListItem disablePadding>
