@@ -70,7 +70,7 @@ public class OverviewService {
         List<OverviewBucketDto> overview = new ArrayList<>();
         for (Bucket bucket : bucketRepository.findAllByDeletedOrderById(false)) {
             if (bucketService.hasUserAccessToBucket(bucket, user))
-                overview.add(describe(bucket, user));
+                overview.add(describe(bucket));
             else if (bucket.isOverviewVisible())
                 overview.add(describeWithoutAccess(bucket, requests.get(bucket.getId())));
         }
@@ -80,10 +80,10 @@ public class OverviewService {
     private OverviewBucketDto describeWithoutAccess(Bucket bucket, BucketAccessRequest request) {
         OverviewBucketDto dto = identity(bucket);
         Map<String, Object> counts = jdbcTemplate.queryForMap(
-                "SELECT count(*) AS total, count(*) FILTER (WHERE NOT reserved) AS free FROM " + quote(bucket.getTableName()),
+                "SELECT count(*) AS total, count(*) FILTER (WHERE reserved) AS reserved FROM " + quote(bucket.getTableName()),
                 Map.of());
         dto.setRows(((Number) counts.get("total")).longValue());
-        dto.setFree(((Number) counts.get("free")).longValue());
+        dto.setReserved(((Number) counts.get("reserved")).longValue());
         // an approved request is shown as access; a request for a bucket the access was taken from again is history
         if (request != null && request.getStatus() != BucketAccessRequest.Status.APPROVED) {
             dto.setRequestStatus(request.getStatus().name());
@@ -103,7 +103,7 @@ public class OverviewService {
         return dto;
     }
 
-    private OverviewBucketDto describe(Bucket bucket, User user) {
+    private OverviewBucketDto describe(Bucket bucket) {
         OverviewBucketDto dto = identity(bucket);
         dto.setAccess(true);
         dto.setHistory(bucket.isHistory());
@@ -115,18 +115,12 @@ public class OverviewService {
 
         Map<String, Object> counts = jdbcTemplate.queryForMap(
                 "SELECT count(*) AS total,"
-                        + " count(*) FILTER (WHERE NOT reserved) AS free,"
-                        + " count(*) FILTER (WHERE reserved AND reserved_by = :user) AS mine,"
+                        + " count(*) FILTER (WHERE reserved) AS reserved,"
                         + " max(coalesce(modified_at, created_at)) AS last"
                         + " FROM " + data,
-                new MapSqlParameterSource("user", user.getUsername()));
-        long rows = ((Number) counts.get("total")).longValue();
-        long free = ((Number) counts.get("free")).longValue();
-        long mine = ((Number) counts.get("mine")).longValue();
-        dto.setRows(rows);
-        dto.setFree(free);
-        dto.setReservedByMe(mine);
-        dto.setReservedByOthers(rows - free - mine);
+                Map.of());
+        dto.setRows(((Number) counts.get("total")).longValue());
+        dto.setReserved(((Number) counts.get("reserved")).longValue());
         dto.setLastModifiedAt((Date) counts.get("last"));
 
         // sizes and the number of history entries come from the statistics, without reading the history

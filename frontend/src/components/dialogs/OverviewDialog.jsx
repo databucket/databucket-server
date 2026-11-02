@@ -58,15 +58,14 @@ const formatDay = (value) => new Date(value).toLocaleDateString();
 const SORT = {
     name: bucket => bucket.name.toLowerCase(),
     rows: bucket => bucket.rows,
-    free: bucket => bucket.free,
-    reserved: bucket => (bucket.reservedByMe ?? -1) + (bucket.reservedByOthers ?? 0),
+    reserved: bucket => bucket.reserved,
     history: bucket => bucket.historySize ?? -1,
     lastModifiedAt: bucket => bucket.lastModifiedAt ?? '',
 };
 
 /**
  * The Overview of the project, opened from the side panel as a dialog (movable by its title, over the data):
- * the buckets the user has access to, what they hold, how much is free, and how big their history is; and the
+ * the buckets the user has access to, how many rows they hold and how many are reserved, and how big their history is; and the
  * buckets visible on the Overview page the user has no access to, where the access can be asked for. The admins of
  * the project see the pending requests (also as a counter in the side panel) and approve or reject them.
  */
@@ -328,8 +327,7 @@ export default function OverviewDialog() {
                                         {header('name', 'Bucket')}
                                         <TableCell>Description</TableCell>
                                         {header('rows', 'Rows', 'right')}
-                                        {header('free', 'Free', 'right')}
-                                        {header('reserved', 'Reserved (me / others)', 'right')}
+                                        {header('reserved', 'Reserved', 'right')}
                                         {header('history', 'History')}
                                         {header('lastModifiedAt', 'Last change')}
                                         <TableCell/>
@@ -341,12 +339,7 @@ export default function OverviewDialog() {
                                             <TableCell sx={{whiteSpace: 'nowrap'}}>{name(bucket)}</TableCell>
                                             <TableCell sx={{color: 'text.secondary'}}>{bucket.description}</TableCell>
                                             <TableCell align="right">{formatNumber(bucket.rows)}</TableCell>
-                                            <TableCell align="right">{formatNumber(bucket.free)}</TableCell>
-                                            <TableCell align="right">
-                                                {bucket.access
-                                                    ? `${formatNumber(bucket.reservedByMe)} / ${formatNumber(bucket.reservedByOthers)}`
-                                                    : '—'}
-                                            </TableCell>
+                                            <TableCell align="right">{formatNumber(bucket.reserved)}</TableCell>
                                             <TableCell>{history(bucket)}</TableCell>
                                             <TableCell sx={{whiteSpace: 'nowrap'}}>
                                                 {bucket.access ? formatDate(bucket.lastModifiedAt) : '—'}
@@ -356,7 +349,7 @@ export default function OverviewDialog() {
                                     ))}
                                     {sorted.length === 0 &&
                                         <TableRow>
-                                            <TableCell colSpan={8} align="center" sx={{color: 'text.secondary'}}>
+                                            <TableCell colSpan={7} align="center" sx={{color: 'text.secondary'}}>
                                                 There are no buckets to show in this project.
                                             </TableCell>
                                         </TableRow>}

@@ -7,9 +7,9 @@ import lombok.Setter;
 import java.util.Date;
 
 /**
- * A bucket on the Overview page: what it is, how much data it holds and how much of it is free, and how big its
+ * A bucket on the Overview page: what it is, how much data it holds and how much of it is reserved, and how big its
  * history is. For a bucket the user has no access to (listed because it is visible on the Overview page) only its
- * name, description, rows and free rows are given, with the user's request for access.
+ * name, description, rows and reserved rows are given, with the user's request for access.
  */
 @Getter
 @Setter
@@ -27,12 +27,10 @@ public class OverviewBucketDto {
     private boolean access;
 
     private long rows;
-    // not reserved by anyone
-    private long free;
+    // reserved by anyone
+    private long reserved;
 
     // with access only
-    private Long reservedByMe;
-    private Long reservedByOthers;
     // the latest change of a row, null when the bucket is empty
     private Date lastModifiedAt;
     // whether the changes of the data are kept
