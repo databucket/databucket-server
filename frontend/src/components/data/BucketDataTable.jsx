@@ -79,6 +79,13 @@ import ViewColumn from "@mui/icons-material/ViewColumn";
 import MoreVert from "@mui/icons-material/MoreVert";
 import SaveAlt from "@mui/icons-material/SaveAlt";
 import FileUpload from "@mui/icons-material/FileUpload";
+import ContentCopy from "@mui/icons-material/ContentCopy";
+import LocalOfferOutlined from "@mui/icons-material/LocalOfferOutlined";
+import LockOutlined from "@mui/icons-material/LockOutlined";
+import LockOpenOutlined from "@mui/icons-material/LockOpenOutlined";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import {copyToClipboard, toMarkdownTable} from "../../utils/MarkdownTable";
+import SelectedRowsDialog from "./SelectedRowsDialog";
 import {exportCsv} from "../../utils/CsvExport";
 import {selectCellText} from "../../utils/TableCellSelect";
 import "./BucketDataTable.css";
@@ -227,6 +234,9 @@ const TableActions = (props) => {
             return <RowActionsMenu actions={props.actions} data={props.data} disabled={props.disabled}/>;
         return <MTableActions {...props}/>;
     }
+    // rows are selected: only the actions on them
+    if (props.actions.length > 0 && props.actions.every(action => action.position === 'toolbarOnSelect'))
+        return <MTableActions {...props}/>;
     const refresh = props.actions.filter(action => action.tooltip === 'Refresh');
     const others = props.actions.filter(action => action.tooltip !== 'Refresh');
     return (
@@ -335,6 +345,8 @@ export default function BucketDataTable() {
         open: false
     });
     const [importOpen, setImportOpen] = useState(false);
+    // a confirmation of an action on the selected rows: {type: "delete" or "tag", rows}
+    const [selectionDialog, setSelectionDialog] = useState(null);
     const [state, setState] = useState({
         bucketId: null,     // the bucket the state below was prepared for
         bucketViews: [],    // all views available for active bucket that user has access
@@ -483,15 +495,21 @@ export default function BucketDataTable() {
     const getExportFileName = () => `${activeBucket.name}-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}`;
 
     // the visible columns in the order of the table; values as shown (tag and enum names instead of ids)
+    // the visible columns in the order of the table
+    const getShownColumns = () => tableRef.current.dataManager.columns
+        .filter(column => !column.hidden && column.field)
+        .sort((a, b) => a.tableData.columnOrder - b.tableData.columnOrder);
+
+    // values as shown (tag and enum names instead of ids)
+    const toShownRows = (data, columns) => data.map(rowData => {
+        const row = {};
+        columns.forEach(column => row[column.field] = tableRef.current.dataManager.getFieldValue(rowData, column));
+        return row;
+    });
+
     const exportRows = (allRows) => {
-        const columns = tableRef.current.dataManager.columns
-            .filter(column => !column.hidden && column.field)
-            .sort((a, b) => a.tableData.columnOrder - b.tableData.columnOrder);
-        const toCsvRows = data => data.map(rowData => {
-            const row = {};
-            columns.forEach(column => row[column.field] = tableRef.current.dataManager.getFieldValue(rowData, column));
-            return row;
-        });
+        const columns = getShownColumns();
+        const toCsvRows = data => toShownRows(data, columns);
 
         if (!allRows) {
             exportCsv(getExportFileName(), columns, toCsvRows(tableRef.current.state.renderData));
@@ -879,6 +897,7 @@ export default function BucketDataTable() {
     const detailsAction = {
         icon: RateReviewOutlined,
         tooltip: 'Data details',
+        position: 'row',
         onClick: (event, rowData) => {
             onOpenDataDetailsDialog(rowData);
         }
@@ -887,6 +906,7 @@ export default function BucketDataTable() {
     const historyAction = {
         icon: History,
         tooltip: 'Data history',
+        position: 'row',
         onClick: (event, rowData) => {
             onOpenDataHistoryDialog(rowData);
         }
@@ -895,10 +915,92 @@ export default function BucketDataTable() {
     const duplicateAction = {
         icon: DuplicateIcon,
         tooltip: 'Duplicate data',
+        position: 'row',
         onClick: (event, rowData) => {
             onDuplicateData(rowData);
         }
     };
+
+    // --- actions on the selected rows (the checkboxes of the table; the selection is of the current page)
+
+    const showResult = (severity, title, message = '') => setMessageBox({open: true, severity, title, message});
+
+    const copySelectedAsMarkdown = (rows) => {
+        const columns = getShownColumns();
+        const shown = toShownRows(rows, columns).map(row => {
+            const readable = {...row};
+            // dates and yes/no as they read in the table, not as ISO text and true/false
+            columns.filter(column => column.type === 'datetime' && readable[column.field] != null)
+                .forEach(column => readable[column.field] = new Date(readable[column.field]).toLocaleString());
+            columns.filter(column => column.type === 'boolean')
+                .forEach(column => readable[column.field] = readable[column.field] === true ? '✓' : '');
+            return readable;
+        });
+        copyToClipboard(toMarkdownTable(columns, shown))
+            .then(() => showResult('success', `${rows.length} ${rows.length === 1 ? 'row' : 'rows'} copied as a Markdown table`,
+                'Paste it into Mattermost, Slack or another Markdown editor.'))
+            .catch(error => showResult('error', 'Error', error.message));
+    }
+
+    // one request for all the selected rows; the server answers e.g. "Modified 3 data row(s)"
+    const changeSelected = (rows, options, title) => {
+        const ids = rows.map(row => getRowDataId(row)).join(',');
+        fetch(getDataByIdUrl(activeBucket, ids), options)
+            .then(handleErrors)
+            .then(result => {
+                showResult('success', title, result.message ?? '');
+                reloadData();
+            })
+            .catch(error => showResult('error', 'Error', error));
+    }
+
+    const getSelectionActions = () => {
+        const view = state.activeView;
+        const actions = [{
+            icon: ContentCopy,
+            tooltip: 'Copy as Markdown table',
+            position: 'toolbarOnSelect',
+            onClick: (event, rows) => copySelectedAsMarkdown(rows)
+        }];
+        if (isFeatureEnabled(FEATURE_MODIFYING, view) && state.bucketTags.length > 0)
+            actions.push({
+                icon: LocalOfferOutlined,
+                tooltip: 'Set tag',
+                position: 'toolbarOnSelect',
+                onClick: (event, rows) => setSelectionDialog({type: 'tag', rows})
+            });
+        if (isFeatureEnabled(FEATURE_RESERVATION, view)) {
+            actions.push({
+                icon: LockOutlined,
+                tooltip: 'Reserve',
+                position: 'toolbarOnSelect',
+                onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: true}), 'Reserved')
+            });
+            actions.push({
+                icon: LockOpenOutlined,
+                tooltip: 'Release',
+                position: 'toolbarOnSelect',
+                onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: false}), 'Released')
+            });
+        }
+        if (isFeatureEnabled(FEATURE_REMOVAL, view))
+            actions.push({
+                icon: DeleteOutline,
+                tooltip: 'Delete',
+                position: 'toolbarOnSelect',
+                onClick: (event, rows) => setSelectionDialog({type: 'delete', rows})
+            });
+        return actions;
+    }
+
+    const onSelectionDialogConfirm = (tagId) => {
+        const {type, rows} = selectionDialog;
+        setSelectionDialog(null);
+        if (type === 'delete')
+            changeSelected(rows, getDeleteOptions(), 'Deleted');
+        else
+            changeSelected(rows, getPutOptions({tagId}), 'Tag set');
+    }
 
     const getActions = () => {
         let actions = [];
@@ -1113,7 +1215,8 @@ export default function BucketDataTable() {
                         pageSizeOptions: getPageSizeOptionsOnDialog(),
                         debounceInterval: 700,
                         maxColumnSort: 1,
-                        selection: false,
+                        // checkboxes for the actions on the selected rows (the toolbar shows them when rows are selected)
+                        selection: true,
                         filtering: filtering,
                         padding: 'dense',
                         search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),
@@ -1137,6 +1240,10 @@ export default function BucketDataTable() {
                         // doubleHorizontalScroll: true
                     }}
                     localization={{
+                        // compact row actions: the column is as narrow as its one button, without a title
+                        header: {
+                            actions: isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView) ? '' : 'Actions'
+                        },
                         body: {
                             addTooltip: 'Add'
                         },
@@ -1160,7 +1267,7 @@ export default function BucketDataTable() {
                     }}
                     onColumnDragged={saveColumnsLayout}
                     onChangeColumnHidden={saveColumnsLayout}
-                    actions={getActions()}
+                    actions={[...getActions(), ...getSelectionActions()]}
                     editable={getEditable()}
                 />
                 </div>
@@ -1169,6 +1276,13 @@ export default function BucketDataTable() {
                 <MessageBox
                     config={messageBox}
                     onClose={() => setMessageBox({...messageBox, open: false})}
+                />
+
+                <SelectedRowsDialog
+                    action={selectionDialog}
+                    tags={state.bucketTags}
+                    onClose={() => setSelectionDialog(null)}
+                    onConfirm={onSelectionDialogConfirm}
                 />
 
                 <ImportDataDialog
