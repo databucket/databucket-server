@@ -14,5 +14,6 @@ public class AccessTreeBucketPropertyMap extends PropertyMap<Bucket, AccessTreeB
         map().setIconColor(source.getIconColor());
         map().setIconSvg(source.getIconSvg());
         map().setClassId(source.getDataClass().getId());
+        map().setHistory(source.isHistory());
     }
 }
