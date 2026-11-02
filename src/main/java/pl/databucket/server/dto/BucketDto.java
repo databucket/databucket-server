@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import pl.databucket.server.configuration.Constants;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
 import java.util.Set;
@@ -15,6 +16,7 @@ public class BucketDto {
     private Long id;
     @Size(min=Constants.NAME_MIN, max=Constants.NAME_MAX)
     private String name;
+    @Valid
     private IconDto icon;
     @Size(max = Constants.DESCRIPTION_MAX)
     private String description;

@@ -33,7 +33,7 @@ export const MessageBox = (props) => {
                 onClose={props.onClose}
                 autoHideDuration={7000}
             >
-                <Alert severity={props.config.severity}>
+                <Alert severity={props.config.severity} sx={{whiteSpace: 'pre-line'}}>
                     <AlertTitle>{props.config.title}</AlertTitle>
                     {props.config.message}
                 </Alert>

@@ -1,6 +1,7 @@
 package pl.databucket.server.dto;
 
 import lombok.EqualsAndHashCode;
+import pl.databucket.server.dto.validation.SafeSvg;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ public class SvgDto {
 
     private Long id;
     private String name;
+    @SafeSvg
     private String structure;
 
     private String createdBy;
