@@ -33,7 +33,8 @@ export default function UserProfile(props) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const {toggleColorMode} = useContext(CustomThemeContext);
-    const {projects} = useContext(AccessContext);
+    // also in Management, which has no project (and no AccessContext): then no project is shown
+    const projects = useContext(AccessContext)?.projects;
     const project = projects?.find(project => project.id === getActiveProjectId());
     const roles = formatRoles(getRoles());
 
