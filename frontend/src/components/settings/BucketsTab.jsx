@@ -4,7 +4,7 @@ import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
 import {FilterList, Refresh} from "@mui/icons-material";
-import {useTheme} from "@mui/material";
+import {Tooltip, useTheme} from "@mui/material";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -164,7 +164,8 @@ export default function BucketsTab() {
                     {title: 'Protect orphaned data', field: 'protectedData', type: 'boolean'},
                     {title: 'Collect data history', field: 'history', type: 'boolean'},
                     // the latest history entries kept for each data row, older ones are removed every night; empty: all
-                    {title: 'Keep history entries per row', field: 'historyLimit', type: 'numeric',
+                    {title: <Tooltip title="The latest history entries kept for each data row; older ones are removed every night (the entry of the creation of the row stays). Empty: all."><span>History limit</span></Tooltip>,
+                        field: 'historyLimit', type: 'numeric',
                         validate: rowData => rowData.historyLimit == null || rowData.historyLimit === '' || rowData.historyLimit >= 1},
                     // listed on the Overview page also for users without access, who can ask for it
                     {title: 'Visible in Overview', field: 'overviewVisible', type: 'boolean', initialEditValue: true},
