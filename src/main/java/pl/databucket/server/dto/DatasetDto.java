@@ -31,6 +31,8 @@ public class DatasetDto {
     private List<DataFilterDto> filters = new ArrayList<>();
     private List<ViewDto> views = new ArrayList<>();
     private List<TaskDto> tasks = new ArrayList<>();
+    // the icons uploaded to the project (Settings > Icons); the objects keep a copy of the icon they use
+    private List<SvgDto> icons = new ArrayList<>();
 
     // the data rows of each bucket, by the bucket's name; tagId is a tag of this dataset
     private Map<String, List<DataCreateDTO>> data = new LinkedHashMap<>();

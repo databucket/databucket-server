@@ -3,6 +3,7 @@ package pl.databucket.server.controller;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -92,6 +93,20 @@ public class ManageProjectController {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (ProjectNotEmptyException e) {
             return exceptionFormatter.customException(e, HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    // the content of the project as a dataset file (the format of src/main/resources/datasets)
+    @GetMapping(value = "/{projectId}/dataset")
+    public ResponseEntity<?> exportDataset(@PathVariable Integer projectId) {
+        try {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(datasetService.exportDataset(projectId));
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
