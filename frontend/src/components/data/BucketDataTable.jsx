@@ -92,14 +92,12 @@ import "./BucketDataTable.css";
 import {
     getDataByIdUrl,
     getDataHistoryUrl,
-    getDataReserveUrl,
     getDataUrl
 } from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
 import DataDetailsDialog from "../dialogs/DataDetailsDialog";
 import DataHistoryDialog from "../dialogs/DataHistoryDialog";
-import ReserveDataDialog from "../dialogs/ReserveDataDialog";
 import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
 import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
@@ -274,16 +272,11 @@ const filterIcon = (filtering) => () => filtering
     <FilterList/>;
 
 const TableToolbar = (props) => {
-    const {state, onViewSelected, onDataReserve, handleSearchChange, theme} = useContext(DataTableContext);
+    const {state, onViewSelected, handleSearchChange, theme} = useContext(DataTableContext);
     return (
         <div style={{backgroundColor: getTableToolbarBackgroundColor(theme)}}>
             <Grid container direction="row">
                 <Grid container item direction="row" xs={3} alignItems="center">
-                    {isFeatureEnabled(FEATURE_RESERVATION, state.activeView) &&
-                    <Grid item>
-                        <ReserveDataDialog onReserve={onDataReserve}/>
-                    </Grid>
-                    }
                     {isFeatureEnabled(FEATURE_AVAILABLE_TAGS, state.activeView)
                     && <Grid item>
                         <AvailableTagsDialog bucketTags={state.bucketTags}/>
@@ -692,43 +685,6 @@ export default function BucketDataTable() {
         setHistoryState({...historyState, open: false});
     }
 
-    const onDataReserve = ({random, number, username}) => {
-        const query = tableRef.current.state.query;
-        let payload = {
-            targetOwnerUsername: username !== getUsername() ? username : null,
-            conditions: consolidateAllConditions(query.search, query.filters),
-            logic: state.activeLogic
-        };
-
-        let resultOk = true;
-        fetch(getDataReserveUrl(activeBucket, number, random),
-            getPostOptions(payload))
-            .then(handleErrors)
-            .catch(error => {
-                setMessageBox({
-                    open: true,
-                    severity: 'error',
-                    title: 'Error',
-                    message: error
-                });
-                resultOk = false;
-            })
-            .then((response) => {
-                if (resultOk) {
-                    if (response.hasOwnProperty("message")) {
-                        setMessageBox({
-                            open: true,
-                            severity: 'info',
-                            title: 'Info',
-                            message: response.message
-                        });
-                    } else {
-                        reloadData();
-                    }
-                }
-            });
-    }
-
     const consolidateAllConditions = (tableSearch, tableFilters) => {
         let allConditions = [];
         if (tableSearch != null && tableSearch.length > 0) {
@@ -1005,7 +961,8 @@ export default function BucketDataTable() {
     const getActions = () => {
         let actions = [];
         actions.push(refreshAction);
-        if (isFeatureEnabled(FEATURE_TASKS, state.activeView)) {
+        // tasks and reservation share one dialog (reservation is its tab)
+        if (isFeatureEnabled(FEATURE_TASKS, state.activeView) || isFeatureEnabled(FEATURE_RESERVATION, state.activeView)) {
             actions.push(tasksAction);
         }
         if (isFeatureEnabled(FEATURE_FILTER, state.activeView)) {
@@ -1017,7 +974,8 @@ export default function BucketDataTable() {
         if (isFeatureEnabled(FEATURE_DETAILS, state.activeView)) {
             actions.push(detailsAction);
         }
-        if (isFeatureEnabled(FEATURE_HISTORY, state.activeView)) {
+        // only a bucket that keeps the history of its data has one to show
+        if (isFeatureEnabled(FEATURE_HISTORY, state.activeView) && activeBucket.history === true) {
             actions.push(historyAction);
         }
         if (isFeatureEnabled(FEATURE_DUPLICATE, state.activeView)) {
@@ -1137,7 +1095,6 @@ export default function BucketDataTable() {
                 <DataTableContext.Provider value={{
                     state,
                     onViewSelected,
-                    onDataReserve,
                     handleSearchChange,
                     theme,
                     columnsArranged,
@@ -1326,6 +1283,8 @@ export default function BucketDataTable() {
                     onClose={onCloseTaskExecutionEditorDialog}
                     reload={resetPageAndReload}
                     activeLogic={state.activeLogic}
+                    tasksEnabled={isFeatureEnabled(FEATURE_TASKS, state.activeView)}
+                    reservationEnabled={isFeatureEnabled(FEATURE_RESERVATION, state.activeView)}
                 />
 
                 <RichFilterDialog

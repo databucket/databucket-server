@@ -23,7 +23,7 @@ import {
     getPutOptions
 } from "../../utils/MaterialTableHelper";
 import {MessageBox} from "../utils/MessageBox";
-import TaskActions from "../utils/TaskActions";
+import TaskActions, {isReserveValid, reserveActions} from "../utils/TaskActions";
 import PropertiesTable from "../utils/PropertiesTable";
 import {getBucketTags, getBucketTasks} from "../data/BucketDataTableHelper";
 import EnumsProvider from "../../context/enums/EnumsProvider";
@@ -31,6 +31,7 @@ import TaskMenuSelector from "../data/TaskMenuSelector";
 import {handleErrors} from "../../utils/FetchHelper";
 import {
     getClearDataHistoryByRulesUrl,
+    getDataReserveUrl,
     getDataUrl
 } from "../../utils/UrlBuilder";
 import {getClassById, getPropertyByUuid} from "../../utils/JsonHelper";
@@ -44,6 +45,8 @@ import {
 import AccessContext from "../../context/access/AccessContext";
 import {
     getTaskExecutionDialogSize,
+    getUsername,
+    hasAdminRole,
     setTaskExecutionDialogSize
 } from "../../utils/ConfigurationStorage";
 import {debounce} from "../utils/Debouncer";
@@ -159,16 +162,27 @@ TaskExecutionDialog.propTypes = {
     bucket: PropTypes.object.isRequired,
     onClose: PropTypes.func.isRequired,
     reload: PropTypes.func.isRequired,
-    activeLogic: PropTypes.object
+    activeLogic: PropTypes.object,
+    // the features of the view: tasks (remove, modify, clear history, saved tasks) and reservation (reserve data)
+    tasksEnabled: PropTypes.bool,
+    reservationEnabled: PropTypes.bool
 };
 
 const initialActions = {properties: []};
+
+// the rules, for reserving only of the free rows
+const FREE_ROWS = {'==': [{var: 'reserved'}, false]};
+const countedLogic = (logic, freeOnly) => !freeOnly ? logic : (logic != null ? {and: [logic, FREE_ROWS]} : FREE_ROWS);
 
 export default function TaskExecutionDialog(props) {
 
     const theme = useTheme();
     const accessContext = useContext(AccessContext);
     const bucketTags = getBucketTags(props.bucket, accessContext.tags);
+    const tasksEnabled = props.tasksEnabled !== false;
+    const reservationEnabled = props.reservationEnabled === true;
+    // without tasks the dialog only reserves data
+    const startActions = () => tasksEnabled ? initialActions : reserveActions(getUsername());
     const [activeTab, setActiveTab] = useState(0);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [appliesCount, setAppliesCount] = useState(0);
@@ -196,7 +210,7 @@ export default function TaskExecutionDialog(props) {
             setState({
                 ...state,
                 properties: getClassProperties(),
-                actions: initialActions,
+                actions: startActions(),
                 logic: props.activeLogic,
                 tree: tree,
                 config: config
@@ -234,9 +248,12 @@ export default function TaskExecutionDialog(props) {
         }
     }
 
+    // reserving takes only free rows (the server adds it, the rules don't show it): then only those are counted
+    const freeOnly = state.actions.type === 'reserve';
+
     useEffect(() => {
-        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
-    }, [props.open, state.logic]);
+        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, freeOnly)});
+    }, [props.open, state.logic, freeOnly]);
 
     const refreshAppliesCount = useCallback(
         debounce(({open, bucket, logic}) => {
@@ -257,9 +274,39 @@ export default function TaskExecutionDialog(props) {
         []
     );
 
+    // reserves free data rows matching the rules, for the current user or, for an admin, the chosen target owner
+    const onReserve = () => {
+        const {number, random, username} = state.actions;
+        const payload = {targetOwnerUsername: username !== getUsername() ? username : null, logic: state.logic};
+        setState({...state, processing: true});
+        fetch(getDataReserveUrl(props.bucket, number, random), getPostOptions(payload))
+            .then(handleErrors)
+            .then(result => {
+                setState({...state, processing: false});
+                if (result.reserved > 0) {
+                    const rows = `${result.reserved} data ${result.reserved === 1 ? 'row' : 'rows'}`;
+                    setMessageBox({
+                        open: true,
+                        severity: result.reserved < number ? 'warning' : 'success',
+                        title: result.reserved < number ? `Reserved ${rows} of ${number}` : `Reserved ${rows}`,
+                        message: `${result.available} free ${result.available === 1 ? 'row matches' : 'rows match'} the rules now.`
+                    });
+                } else
+                    setMessageBox({open: true, severity: 'info', title: 'No free data row matches the rules', message: null});
+                refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, true)});
+                props.reload();
+            })
+            .catch(error => {
+                setState({...state, processing: false});
+                setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+            });
+    }
+
     const onTaskExecute = () => {
         let resultOk = true;
-        if (state.actions.type === 'remove') {
+        if (state.actions.type === 'reserve') {
+            onReserve();
+        } else if (state.actions.type === 'remove') {
             setState({...state, processing: true});
             fetch(getDataUrl(props.bucket), getDeleteOptions({logic: state.logic}))
                 .then(handleErrors)
@@ -271,7 +318,7 @@ export default function TaskExecutionDialog(props) {
                     setState({...state, processing: false});
                     if (resultOk) {
                         setMessageBox({open: true, severity: 'success', title: result.message, message: null});
-                        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
+                        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, freeOnly)});
                         props.reload();
                     }
                 });
@@ -337,7 +384,7 @@ export default function TaskExecutionDialog(props) {
                         setState({...state, processing: false});
                         if (resultOk) {
                             setMessageBox({open: true, severity: 'success', title: result.message, message: null});
-                            refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic});
+                            refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, freeOnly)});
                             props.reload();
                         }
                     });
@@ -439,11 +486,12 @@ export default function TaskExecutionDialog(props) {
                 onMakeDialogLarger={dialogSize === 'md' ? onMakeDialogLarger : null}
             >
                 <div className={classes.oneLine}>
-                    <Typography variant="h6">{'Task execution'}</Typography>
-                    <TaskMenuSelector
-                        tasks={getBucketTasks(props.bucket, accessContext.tasks)}
-                        onTaskSelected={onTaskSelected}
-                    />
+                    <Typography variant="h6">{tasksEnabled ? 'Task execution' : 'Reservation'}</Typography>
+                    {tasksEnabled &&
+                        <TaskMenuSelector
+                            tasks={getBucketTasks(props.bucket, accessContext.tasks)}
+                            onTaskSelected={onTaskSelected}
+                        />}
                     <Tabs
                         className={classes.tabs}
                         textColor="secondary"
@@ -454,7 +502,7 @@ export default function TaskExecutionDialog(props) {
                     >
                         <StyledTab label="Action"/>
                         <StyledTab label="Rules"/>
-                        <StyledTab label="Properties"/>
+                        {tasksEnabled && <StyledTab label="Properties"/>}
                     </Tabs>
                     <div className={classes.devGrabSpace}/>
                 </div>
@@ -489,6 +537,10 @@ export default function TaskExecutionDialog(props) {
                             tags={getBucketTags(props.bucket, accessContext.tags)}
                             onChange={setActions}
                             pageSize={null}
+                            taskTypes={tasksEnabled}
+                            reserveType={reservationEnabled}
+                            historyType={props.bucket.history === true}
+                            owners={hasAdminRole() ? (accessContext.users ?? []) : null}
                         />}
 
                     {props.open && !state.processing && activeTab === 1 &&
@@ -520,13 +572,14 @@ export default function TaskExecutionDialog(props) {
                     root: classes.root2
                 }}>
                 <Typography
-                    color={'primary'}>{`${appliesCount} data ${appliesCount > 1 ? 'rows' : 'row'} ${appliesCount > 1 ? 'match' : 'matches'} the rules`}</Typography>
+                    color={'primary'}>{`${appliesCount} ${freeOnly ? 'free ' : ''}data ${appliesCount === 1 ? 'row matches' : 'rows match'} the rules`}</Typography>
                 <div className={classes.divActionGrabSpace}/>
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={onTaskExecute}
-                    disabled={state.actions.type == null}
+                    disabled={state.processing || state.actions.type == null
+                        || (state.actions.type === 'reserve' && !isReserveValid(state.actions))}
                 >
                     Execute
                 </Button>
