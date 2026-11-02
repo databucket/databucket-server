@@ -44,6 +44,7 @@ public class ProjectContentService {
 
     // the links between the project's objects, and between them and users
     private static final List<String> LINKS = List.of(
+            "DELETE FROM bucket_access_requests WHERE project_id = :p",
             "DELETE FROM buckets_teams WHERE bucket_id IN (" + BUCKETS + ") OR team_id IN (" + TEAMS + ")",
             "DELETE FROM buckets_users WHERE bucket_id IN (" + BUCKETS + ")",
             "DELETE FROM groups_buckets WHERE bucket_id IN (" + BUCKETS + ") OR group_id IN (" + GROUPS + ")",
