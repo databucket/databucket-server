@@ -20,7 +20,7 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {DeleteSweep, FilterList, Input, Output, Refresh} from "@mui/icons-material";
+import {DeleteSweep, FileDownload, FileUpload, FilterList, Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
@@ -209,14 +209,14 @@ export default function ProjectsTab() {
 
                     },
                     rowData => ({
-                        icon: () => <Input/>,
+                        icon: () => <FileUpload/>,
                         tooltip: 'Import dataset',
                         // only into an empty project
                         disabled: rowData.empty !== true,
                         onClick: (event, rowData) => setDatasetProject(rowData)
                     }),
                     rowData => ({
-                        icon: () => <Output/>,
+                        icon: () => <FileDownload/>,
                         tooltip: 'Export dataset',
                         disabled: rowData.empty === true,
                         onClick: (event, rowData) => exportDataset(rowData)

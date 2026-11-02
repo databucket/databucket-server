@@ -77,13 +77,13 @@ import DuplicateIcon from '@mui/icons-material/ViewStream'
 import SettingsBackupRestore from "@mui/icons-material/SettingsBackupRestore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import MoreVert from "@mui/icons-material/MoreVert";
-import SaveAlt from "@mui/icons-material/SaveAlt";
+import FileDownload from "@mui/icons-material/FileDownload";
 import FileUpload from "@mui/icons-material/FileUpload";
 import ContentCopy from "@mui/icons-material/ContentCopy";
-import LocalOfferOutlined from "@mui/icons-material/LocalOfferOutlined";
-import LockOutlined from "@mui/icons-material/LockOutlined";
-import LockOpenOutlined from "@mui/icons-material/LockOpenOutlined";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import LocalOffer from "@mui/icons-material/LocalOffer";
+import Lock from "@mui/icons-material/Lock";
+import LockOpen from "@mui/icons-material/LockOpen";
+import Delete from "@mui/icons-material/Delete";
 import {copyToClipboard, toMarkdownTable} from "../../utils/MarkdownTable";
 import SelectedRowsDialog from "./SelectedRowsDialog";
 import {exportCsv} from "../../utils/CsvExport";
@@ -158,7 +158,7 @@ const ExportMenu = ({onExport}) => {
         <span>
             <Tooltip title='Export'>
                 <IconButton color="inherit" onClick={event => setAnchorEl(event.currentTarget)}>
-                    <SaveAlt/>
+                    <FileDownload/>
                 </IconButton>
             </Tooltip>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
@@ -964,20 +964,20 @@ export default function BucketDataTable() {
         }];
         if (isFeatureEnabled(FEATURE_MODIFYING, view) && state.bucketTags.length > 0)
             actions.push({
-                icon: LocalOfferOutlined,
+                icon: LocalOffer,
                 tooltip: 'Set tag',
                 position: 'toolbarOnSelect',
                 onClick: (event, rows) => setSelectionDialog({type: 'tag', rows})
             });
         if (isFeatureEnabled(FEATURE_RESERVATION, view)) {
             actions.push({
-                icon: LockOutlined,
+                icon: Lock,
                 tooltip: 'Reserve',
                 position: 'toolbarOnSelect',
                 onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: true}), 'Reserved')
             });
             actions.push({
-                icon: LockOpenOutlined,
+                icon: LockOpen,
                 tooltip: 'Release',
                 position: 'toolbarOnSelect',
                 onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: false}), 'Released')
@@ -985,7 +985,7 @@ export default function BucketDataTable() {
         }
         if (isFeatureEnabled(FEATURE_REMOVAL, view))
             actions.push({
-                icon: DeleteOutline,
+                icon: Delete,
                 tooltip: 'Delete',
                 position: 'toolbarOnSelect',
                 onClick: (event, rows) => setSelectionDialog({type: 'delete', rows})
