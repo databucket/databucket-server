@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.ManageProjectDto;
+import pl.databucket.server.exception.DatasetInvalidException;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
@@ -15,6 +16,7 @@ import pl.databucket.server.exception.ProjectNotEmptyException;
 import pl.databucket.server.service.DatasetService;
 import pl.databucket.server.service.ManageProjectService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.Map;
 
@@ -93,6 +95,24 @@ public class ManageProjectController {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (ProjectNotEmptyException e) {
             return exceptionFormatter.customException(e, HttpStatus.CONFLICT);
+        } catch (DatasetInvalidException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    // a dataset file from a disk (e.g. one exported before), sent as the JSON body; read here, at most 50 MB
+    @PostMapping(value = "/{projectId}/dataset", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> importDatasetFile(@PathVariable Integer projectId, HttpServletRequest request) {
+        try {
+            return new ResponseEntity<>(Map.of("rows", datasetService.importDatasetFile(projectId, request.getInputStream())), HttpStatus.OK);
+        } catch (ItemNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (ProjectNotEmptyException e) {
+            return exceptionFormatter.customException(e, HttpStatus.CONFLICT);
+        } catch (DatasetInvalidException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

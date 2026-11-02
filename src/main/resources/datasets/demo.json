@@ -1,4 +1,5 @@
 {
+  "format": 1,
   "name": "DEMO",
   "description": "Test data of an example application: users, scheduler, jobs and configuration buckets in dev, int and prd environments, with tags, enums, filters, views and tasks.",
   "teams": [
