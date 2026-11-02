@@ -217,6 +217,10 @@ public class DataService {
         if (bucket.isProtectedData() && !user.isAdminUser())
             queryRule.getConditions().add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
 
+        // reserving never takes over a row reserved by someone (as reserveData): it has to be released first
+        if (Boolean.TRUE.equals(dataModifyDto.getReserved()))
+            queryRule.getConditions().add(new Condition(COL.RESERVED, Operator.equal, false));
+
         Map<String, Object> paramMap = new HashMap<>();
 
         if (dataModifyDto.getTagId() != null)

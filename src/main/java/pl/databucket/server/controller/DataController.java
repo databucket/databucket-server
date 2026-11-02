@@ -136,7 +136,8 @@ public class DataController {
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @Operation(summary = "Modify data rows by ids", description = "Changes the given items of the data rows; "
-            + "items left out stay unchanged. 'rules' are ignored here.")
+            + "items left out stay unchanged. 'rules' are ignored here. With reserved = true only the rows that "
+            + "are not reserved yet are changed (a row reserved by someone has to be released first).")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -185,7 +186,8 @@ public class DataController {
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
     @Operation(summary = "Modify data rows by rules", description = "Changes the given items of all data rows "
-            + "matching the rules; items left out stay unchanged. At least one rule is required.")
+            + "matching the rules; items left out stay unchanged. At least one rule is required. With reserved = true "
+            + "only the rows that are not reserved yet are changed (a row reserved by someone has to be released first).")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",

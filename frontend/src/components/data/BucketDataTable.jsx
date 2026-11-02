@@ -896,12 +896,15 @@ export default function BucketDataTable() {
     }
 
     // one request for all the selected rows; the server answers e.g. "Modified 3 data row(s)"
-    const changeSelected = (rows, options, title) => {
+    const changeSelected = (rows, options, title, describe) => {
         const ids = rows.map(row => getRowDataId(row)).join(',');
         fetch(getDataByIdUrl(activeBucket, ids), options)
             .then(handleErrors)
             .then(result => {
-                showResult('success', title, result.message ?? '');
+                const message = result.message ?? '';
+                // "Modified 7 data row(s)"
+                const count = parseInt(message.match(/\d+/)?.[0], 10);
+                showResult('success', title, describe != null && !isNaN(count) ? describe(count, rows.length) : message);
                 reloadData();
             })
             .catch(error => showResult('error', 'Error', error));
@@ -927,7 +930,10 @@ export default function BucketDataTable() {
                 icon: Lock,
                 tooltip: 'Reserve',
                 position: 'toolbarOnSelect',
-                onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: true}), 'Reserved')
+                // the server reserves only the rows that are not reserved yet
+                onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: true}), 'Reserved',
+                    (count, selected) => count === selected ? `Reserved ${count} data row(s)`
+                        : `Reserved ${count} of ${selected} data rows, the others are already reserved`)
             });
             actions.push({
                 icon: LockOpen,
