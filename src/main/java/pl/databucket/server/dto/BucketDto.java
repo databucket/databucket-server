@@ -26,6 +26,8 @@ public class BucketDto {
     private Set<Short> teamsIds;
     private boolean history;
     private boolean protectedData;
+    // listed on the Overview page for users without access (true when left out)
+    private boolean overviewVisible = true;
     private Short roleId;
 
     private String createdBy;

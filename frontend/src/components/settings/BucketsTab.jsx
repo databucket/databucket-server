@@ -69,7 +69,7 @@ export default function BucketsTab() {
     const {teams, fetchTeams} = teamsContext;
     const svgContext = useContext(SvgContext);
     const {svgs, fetchSvgs} = svgContext;
-    const changeableFields = ['name', 'icon', 'history', 'protectedData', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
+    const changeableFields = ['name', 'icon', 'history', 'protectedData', 'overviewVisible', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -163,6 +163,8 @@ export default function BucketsTab() {
                     getColumnGroups(groups, 'Show in groups'),
                     {title: 'Protect orphaned data', field: 'protectedData', type: 'boolean'},
                     {title: 'Collect data history', field: 'history', type: 'boolean'},
+                    // listed on the Overview page also for users without access, who can ask for it
+                    {title: 'Visible in Overview', field: 'overviewVisible', type: 'boolean', initialEditValue: true},
                     getColumnUsers(users, roles, 'Access for users'),
                     getColumnRole(roles, 'Access via role'),
                     getColumnTeams(teams, 'Access via teams'),

@@ -1,7 +1,9 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {
+    Badge,
     Box,
     Button,
+    Chip,
     CircularProgress,
     Dialog,
     DialogActions,
@@ -25,11 +27,11 @@ import {
     Typography,
     useTheme
 } from "@mui/material";
-import {Close, DeleteSweep, Inventory2, Refresh, WarningAmber} from "@mui/icons-material";
+import {Close, DeleteSweep, Inventory2, Lock, Refresh, WarningAmber} from "@mui/icons-material";
 import AccessContext from "../../context/access/AccessContext";
 import StyledIcon from "../utils/StyledIcon";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-import {getButtonColor, getDeleteOptions, getGetOptions, handleErrors} from "../../utils/MaterialTableHelper";
+import {getButtonColor, getDeleteOptions, getGetOptions, getPostOptions, handleErrors} from "../../utils/MaterialTableHelper";
 import {getActiveProjectId, hasAdminRole} from "../../utils/ConfigurationStorage";
 import {MessageBox} from "../utils/MessageBox";
 
@@ -50,44 +52,73 @@ const formatNumber = (value) => value.toLocaleString();
 
 const formatDate = (value) => value != null ? new Date(value).toLocaleString() : '—';
 
-// how a column is sorted
+const formatDay = (value) => new Date(value).toLocaleDateString();
+
+// how a column is sorted; buckets without access have no reservations, history or last change
 const SORT = {
     name: bucket => bucket.name.toLowerCase(),
     rows: bucket => bucket.rows,
     free: bucket => bucket.free,
-    reserved: bucket => bucket.reservedByMe + bucket.reservedByOthers,
-    history: bucket => bucket.historySize,
+    reserved: bucket => (bucket.reservedByMe ?? -1) + (bucket.reservedByOthers ?? 0),
+    history: bucket => bucket.historySize ?? -1,
     lastModifiedAt: bucket => bucket.lastModifiedAt ?? '',
 };
 
 /**
  * The Overview of the project, opened from the side panel as a dialog (movable by its title, over the data):
- * the buckets the user has access to, what they hold, how much is free, and how big their history is.
+ * the buckets the user has access to, what they hold, how much is free, and how big their history is; and the
+ * buckets visible on the Overview page the user has no access to, where the access can be asked for. The admins of
+ * the project see the pending requests (also as a counter in the side panel) and approve or reject them.
  */
 export default function OverviewDialog() {
     const theme = useTheme();
-    const {buckets, addTab, projects} = useContext(AccessContext);
+    const {buckets, addTab, projects, fetchAccessTree} = useContext(AccessContext);
     const project = projects?.find(project => project.id === getActiveProjectId());
     const [open, setOpen] = useState(false);
     const [overview, setOverview] = useState(null);
+    const [requests, setRequests] = useState([]);
+    const [requestCount, setRequestCount] = useState(0);
     const [sort, setSort] = useState({by: 'name', asc: true});
     const [clearing, setClearing] = useState(null);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const admin = hasAdminRole();
 
+    const showError = error => setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
+
+    const loadRequestCount = () => {
+        if (admin)
+            fetch(getBaseUrl('overview/access-requests/count'), getGetOptions())
+                .then(handleErrors)
+                .then(result => setRequestCount(result.count))
+                .catch(() => setRequestCount(0));
+    };
+
     const load = () => {
         fetch(getBaseUrl('overview'), getGetOptions())
             .then(handleErrors)
             .then(setOverview)
-            .catch(error => setMessageBox({open: true, severity: 'error', title: 'Error', message: error}));
+            .catch(showError);
+        if (admin)
+            fetch(getBaseUrl('overview/access-requests'), getGetOptions())
+                .then(handleErrors)
+                .then(result => {
+                    setRequests(result);
+                    setRequestCount(result.length);
+                })
+                .catch(showError);
     };
+
+    // the counter of requests waiting for an admin, when the project is opened
+    useEffect(loadRequestCount, []);
 
     // the numbers are read each time the dialog opens
     useEffect(() => {
         if (open)
             load();
-        else
+        else {
             setOverview(null);
+            loadRequestCount();
+        }
     }, [open]);
 
     const openBucket = (item) => {
@@ -96,8 +127,33 @@ export default function OverviewDialog() {
             addTab(bucket);
             setOpen(false);
         } else
-            // the access was taken away since the page was loaded
-            setMessageBox({open: true, severity: 'info', title: item.name, message: 'You have no access to the data of this bucket.'});
+            // the access was granted or taken away since the page was loaded
+            setMessageBox({open: true, severity: 'info', title: item.name,
+                message: 'The access to this bucket has changed. Reload the page to see its data.'});
+    };
+
+    const askForAccess = (bucket) => {
+        fetch(getBaseUrl(`overview/bucket/${encodeURIComponent(bucket.name)}/access-request`), getPostOptions({}))
+            .then(handleErrors)
+            .then(result => {
+                setMessageBox({open: true, severity: 'success', title: bucket.name, message: result.message});
+                load();
+            })
+            .catch(showError);
+    };
+
+    const decide = (request, decision) => {
+        fetch(getBaseUrl(`overview/access-requests/${request.id}/${decision}`), getPostOptions({}))
+            .then(handleErrors)
+            .then(result => {
+                setMessageBox({open: true, severity: 'success', title: `${request.username} · ${request.bucketName}`,
+                    message: result.message});
+                load();
+                // the admin may have given the access to themselves: their buckets change
+                if (decision === 'approve')
+                    fetchAccessTree();
+            })
+            .catch(showError);
     };
 
     const clearHistory = () => {
@@ -109,7 +165,7 @@ export default function OverviewDialog() {
                 setMessageBox({open: true, severity: 'success', title: bucket.name, message: result.message});
                 load();
             })
-            .catch(error => setMessageBox({open: true, severity: 'error', title: 'Error', message: error}));
+            .catch(showError);
     };
 
     const sortBy = (by) => setSort({by, asc: sort.by === by ? !sort.asc : true});
@@ -128,7 +184,29 @@ export default function OverviewDialog() {
         </TableCell>
     );
 
+    const bucketIcon = (bucket) => (
+        <StyledIcon iconName={bucket.iconName} iconColor={bucket.iconColor} iconSvg={bucket.iconSvg}/>
+    );
+
+    const name = (bucket) => bucket.access
+        ? <Tooltip title="Open the data">
+            <Link component="button" underline="hover" color="inherit" onClick={() => openBucket(bucket)}
+                  sx={{display: 'inline-flex', alignItems: 'center', gap: 1}}>
+                {bucketIcon(bucket)}
+                {bucket.name}
+            </Link>
+        </Tooltip>
+        : <Tooltip title="No access to the data">
+            <Box sx={{display: 'inline-flex', alignItems: 'center', gap: 1, color: 'text.disabled'}}>
+                {bucketIcon(bucket)}
+                {bucket.name}
+                <Lock fontSize="inherit"/>
+            </Box>
+        </Tooltip>;
+
     const history = (bucket) => {
+        if (!bucket.access)
+            return '—';
         if (!bucket.history && bucket.historyEntries === 0)
             return <Typography variant="body2" color="text.secondary">off</Typography>;
         return (
@@ -144,12 +222,39 @@ export default function OverviewDialog() {
         );
     };
 
+    // clearing the history (admins, with access) or asking for access (without access)
+    const action = (bucket) => {
+        if (bucket.access)
+            return admin && bucket.historyEntries > 0 &&
+                <Tooltip title="Clear the whole history">
+                    <IconButton size="small" onClick={() => setClearing(bucket)}>
+                        <DeleteSweep fontSize="small"/>
+                    </IconButton>
+                </Tooltip>;
+        if (bucket.requestStatus === 'PENDING')
+            return <Tooltip title="Waiting for an admin of the project">
+                <Chip size="small" label={`Requested · ${formatDay(bucket.requestedAt)}`}/>
+            </Tooltip>;
+        return <Tooltip title={bucket.requestStatus === 'REJECTED'
+            ? `Your last request was rejected on ${formatDay(bucket.requestedAt)}`
+            : 'Ask the admins of the project for access to the data'}>
+            <Button size="small" variant="outlined" sx={{whiteSpace: 'nowrap'}}
+                    onClick={() => askForAccess(bucket)}>
+                Ask for access
+            </Button>
+        </Tooltip>;
+    };
+
     return (
         <>
             <ListItem disablePadding>
                 <ListItemButton onClick={() => setOpen(true)}>
                     <ListItemIcon>
-                        <Inventory2 sx={{color: getButtonColor(theme)}}/>
+                        <Tooltip title={requestCount > 0 ? `${requestCount} access request(s) waiting` : ''}>
+                            <Badge badgeContent={requestCount} color="secondary">
+                                <Inventory2 sx={{color: getButtonColor(theme)}}/>
+                            </Badge>
+                        </Tooltip>
                     </ListItemIcon>
                     <ListItemText primary={'Overview'}
                                   primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
@@ -172,6 +277,44 @@ export default function OverviewDialog() {
                     </Tooltip>
                 </DialogTitle>
                 <DialogContent dividers sx={{p: 0}}>
+                    {admin && requests.length > 0 &&
+                        <Box sx={{borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover'}}>
+                            <Typography variant="subtitle2" sx={{px: 2, pt: 1.5}}>
+                                Access requests ({requests.length})
+                            </Typography>
+                            <Table size="small">
+                                <TableBody>
+                                    {requests.map(request => (
+                                        <TableRow key={request.id}>
+                                            <TableCell sx={{whiteSpace: 'nowrap'}}>
+                                                <b>{request.username}</b>
+                                                {request.email &&
+                                                    <Typography component="span" variant="body2" color="text.secondary">
+                                                        {' '}({request.email})
+                                                    </Typography>}
+                                            </TableCell>
+                                            <TableCell sx={{whiteSpace: 'nowrap'}}>
+                                                <Box sx={{display: 'inline-flex', alignItems: 'center', gap: 1}}>
+                                                    {bucketIcon(request)}
+                                                    {request.bucketName}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell sx={{color: 'text.secondary', whiteSpace: 'nowrap'}}>
+                                                {formatDate(request.requestedAt)}
+                                            </TableCell>
+                                            <TableCell align="right" sx={{whiteSpace: 'nowrap'}}>
+                                                <Tooltip title="Add the user to the users of the bucket">
+                                                    <Button size="small" variant="contained"
+                                                            onClick={() => decide(request, 'approve')}>Approve</Button>
+                                                </Tooltip>
+                                                <Button size="small" sx={{ml: 1}}
+                                                        onClick={() => decide(request, 'reject')}>Reject</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </Box>}
                     {overview == null
                         ? <Box sx={{display: 'flex', justifyContent: 'center', p: 4}}><CircularProgress/></Box>
                         : <TableContainer>
@@ -185,47 +328,32 @@ export default function OverviewDialog() {
                                         {header('reserved', 'Reserved (me / others)', 'right')}
                                         {header('history', 'History')}
                                         {header('lastModifiedAt', 'Last change')}
-                                        {admin && <TableCell/>}
+                                        <TableCell/>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {sorted.map(bucket => (
                                         <TableRow key={bucket.id} hover>
-                                            <TableCell sx={{whiteSpace: 'nowrap'}}>
-                                                <Tooltip title="Open the data">
-                                                    <Link component="button" underline="hover" color="inherit"
-                                                          onClick={() => openBucket(bucket)}
-                                                          sx={{display: 'inline-flex', alignItems: 'center', gap: 1}}>
-                                                        <StyledIcon iconName={bucket.iconName}
-                                                                    iconColor={bucket.iconColor}
-                                                                    iconSvg={bucket.iconSvg}/>
-                                                        {bucket.name}
-                                                    </Link>
-                                                </Tooltip>
-                                            </TableCell>
+                                            <TableCell sx={{whiteSpace: 'nowrap'}}>{name(bucket)}</TableCell>
                                             <TableCell sx={{color: 'text.secondary'}}>{bucket.description}</TableCell>
                                             <TableCell align="right">{formatNumber(bucket.rows)}</TableCell>
                                             <TableCell align="right">{formatNumber(bucket.free)}</TableCell>
                                             <TableCell align="right">
-                                                {formatNumber(bucket.reservedByMe)} / {formatNumber(bucket.reservedByOthers)}
+                                                {bucket.access
+                                                    ? `${formatNumber(bucket.reservedByMe)} / ${formatNumber(bucket.reservedByOthers)}`
+                                                    : '—'}
                                             </TableCell>
                                             <TableCell>{history(bucket)}</TableCell>
-                                            <TableCell sx={{whiteSpace: 'nowrap'}}>{formatDate(bucket.lastModifiedAt)}</TableCell>
-                                            {admin &&
-                                                <TableCell padding="checkbox">
-                                                    {bucket.historyEntries > 0 &&
-                                                        <Tooltip title="Clear the whole history">
-                                                            <IconButton size="small" onClick={() => setClearing(bucket)}>
-                                                                <DeleteSweep fontSize="small"/>
-                                                            </IconButton>
-                                                        </Tooltip>}
-                                                </TableCell>}
+                                            <TableCell sx={{whiteSpace: 'nowrap'}}>
+                                                {bucket.access ? formatDate(bucket.lastModifiedAt) : '—'}
+                                            </TableCell>
+                                            <TableCell align="right">{action(bucket)}</TableCell>
                                         </TableRow>
                                     ))}
                                     {sorted.length === 0 &&
                                         <TableRow>
                                             <TableCell colSpan={8} align="center" sx={{color: 'text.secondary'}}>
-                                                You have no access to any bucket of this project.
+                                                There are no buckets to show in this project.
                                             </TableCell>
                                         </TableRow>}
                                 </TableBody>

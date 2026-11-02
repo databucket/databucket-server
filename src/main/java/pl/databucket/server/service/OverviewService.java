@@ -8,17 +8,23 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
 import pl.databucket.server.dto.OverviewBucketDto;
 import pl.databucket.server.entity.Bucket;
+import pl.databucket.server.entity.BucketAccessRequest;
 import pl.databucket.server.entity.User;
+import pl.databucket.server.repository.BucketAccessRequestRepository;
+import pl.databucket.server.repository.BucketRepository;
 import pl.databucket.server.logging.AuditLog;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * The Overview page: the buckets of the project the user has access to, with the numbers of their data
- * and the size of their history. Buckets are project entities, so only the buckets of the signed-in
- * project are read (Hibernate tenant).
+ * The Overview page: the buckets of the project the user has access to, with the numbers of their data and the
+ * size of their history, and the buckets visible on the Overview page the user has no access to, with their numbers
+ * and the user's request for access. Buckets are project entities, so only the buckets of the signed-in project are
+ * read (Hibernate tenant).
  */
 @Service
 public class OverviewService {
@@ -30,14 +36,20 @@ public class OverviewService {
     private final long historyWarningRatioMinSize;
 
     private final BucketService bucketService;
+    private final BucketRepository bucketRepository;
+    private final BucketAccessRequestRepository requestRepository;
     private final UserService userService;
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public OverviewService(BucketService bucketService, UserService userService, NamedParameterJdbcTemplate jdbcTemplate,
+    public OverviewService(BucketService bucketService, BucketRepository bucketRepository,
+                           BucketAccessRequestRepository requestRepository, UserService userService,
+                           NamedParameterJdbcTemplate jdbcTemplate,
                            @Value("${databucket.overview.history-warning-size:500MB}") DataSize historyWarningSize,
                            @Value("${databucket.overview.history-warning-ratio:5}") double historyWarningRatio,
                            @Value("${databucket.overview.history-warning-ratio-min-size:50MB}") DataSize historyWarningRatioMinSize) {
         this.bucketService = bucketService;
+        this.bucketRepository = bucketRepository;
+        this.requestRepository = requestRepository;
         this.userService = userService;
         this.jdbcTemplate = jdbcTemplate;
         this.historyWarningSize = historyWarningSize.toBytes();
@@ -50,12 +62,37 @@ public class OverviewService {
     @Transactional(readOnly = true)
     public List<OverviewBucketDto> getOverview() {
         User user = userService.getCurrentUser();
-        return bucketService.getAccessTreeBuckets(user).stream()
-                .map(bucket -> describe(bucket, user))
-                .toList();
+        // the user's latest request for each bucket
+        Map<Long, BucketAccessRequest> requests = new HashMap<>();
+        for (BucketAccessRequest request : requestRepository.findAllByUserOrderByRequestedAt(user))
+            requests.put(request.getBucket().getId(), request);
+
+        List<OverviewBucketDto> overview = new ArrayList<>();
+        for (Bucket bucket : bucketRepository.findAllByDeletedOrderById(false)) {
+            if (bucketService.hasUserAccessToBucket(bucket, user))
+                overview.add(describe(bucket, user));
+            else if (bucket.isOverviewVisible())
+                overview.add(describeWithoutAccess(bucket, requests.get(bucket.getId())));
+        }
+        return overview;
     }
 
-    private OverviewBucketDto describe(Bucket bucket, User user) {
+    private OverviewBucketDto describeWithoutAccess(Bucket bucket, BucketAccessRequest request) {
+        OverviewBucketDto dto = identity(bucket);
+        Map<String, Object> counts = jdbcTemplate.queryForMap(
+                "SELECT count(*) AS total, count(*) FILTER (WHERE NOT reserved) AS free FROM " + quote(bucket.getTableName()),
+                Map.of());
+        dto.setRows(((Number) counts.get("total")).longValue());
+        dto.setFree(((Number) counts.get("free")).longValue());
+        // an approved request is shown as access; a request for a bucket the access was taken from again is history
+        if (request != null && request.getStatus() != BucketAccessRequest.Status.APPROVED) {
+            dto.setRequestStatus(request.getStatus().name());
+            dto.setRequestedAt(request.getStatus() == BucketAccessRequest.Status.PENDING ? request.getRequestedAt() : request.getDecidedAt());
+        }
+        return dto;
+    }
+
+    private static OverviewBucketDto identity(Bucket bucket) {
         OverviewBucketDto dto = new OverviewBucketDto();
         dto.setId(bucket.getId());
         dto.setName(bucket.getName());
@@ -63,6 +100,12 @@ public class OverviewService {
         dto.setIconName(bucket.getIconName());
         dto.setIconColor(bucket.getIconColor());
         dto.setIconSvg(bucket.getIconSvg());
+        return dto;
+    }
+
+    private OverviewBucketDto describe(Bucket bucket, User user) {
+        OverviewBucketDto dto = identity(bucket);
+        dto.setAccess(true);
         dto.setHistory(bucket.isHistory());
 
         // table names come from the bucket id, not from the user

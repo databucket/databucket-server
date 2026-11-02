@@ -53,6 +53,11 @@ public class Bucket extends Auditable<String> {
     @Column(name = "protected_data", nullable = false)
     private boolean protectedData = false;
 
+    // listed on the Overview page also for users without access, who can ask for it (the column default sets
+    // it for the buckets that existed before)
+    @Column(name = "overview_visible", nullable = false, columnDefinition = "boolean default true")
+    private boolean overviewVisible = true;
+
     @ManyToMany(mappedBy = "buckets")
     private Set<Group> groups;
 
