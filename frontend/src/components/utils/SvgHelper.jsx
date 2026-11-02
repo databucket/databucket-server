@@ -8,6 +8,8 @@ export const SVG_MAX_LENGTH = 32 * 1024;
 // styles, foreign content or external resources (the server checks icons too, this also covers older ones)
 const PURIFY = {
     USE_PROFILES: {svg: true, svgFilters: true},
+    // <use> of a <symbol> in the icon (icon sets use it); a reference outside the icon is removed by the hook below
+    ADD_TAGS: ['use'],
     FORBID_TAGS: ['style', 'a', 'image', 'foreignObject', 'script'],
     RETURN_DOM_FRAGMENT: true
 };
@@ -72,16 +74,51 @@ export const parseCustomSvg = (markup, color) => {
     return html !== '' ? parse(html) : null;
 };
 
+// what a class rule of a <style> may set on a shape; no url() other than into the icon (url(#gradient))
+const STYLE_PROPERTIES = ['fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-width', 'stroke-opacity',
+    'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-dasharray', 'stroke-dashoffset', 'opacity',
+    'clip-rule', 'stop-color', 'stop-opacity', 'display', 'visibility'];
+
+/**
+ * Editors such as Adobe Illustrator keep the colors in a <style> as classes (.st0{fill:#E30613;}). A <style> is never
+ * shown (it would apply to the whole page), so the simple class rules are written to the shapes as attributes instead.
+ */
+const inlineClassStyles = (root) => {
+    const rules = {};
+    for (const style of [...root.getElementsByTagName('style')]) {
+        const css = style.textContent.replace(/\/\*[\s\S]*?\*\//g, '');
+        for (const [, selectors, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+            const declarations = body.split(';')
+                .map(declaration => declaration.split(':'))
+                .filter(parts => parts.length === 2)
+                .map(([name, value]) => [name.trim().toLowerCase(), value.replace(/!important/i, '').trim()])
+                .filter(([name, value]) => STYLE_PROPERTIES.includes(name) && value !== ''
+                    && !EXTERNAL_URL.test(value) && !/[<>"]|expression|javascript/i.test(value));
+            for (const selector of selectors.split(',').map(s => s.trim()))
+                if (/^\.[\w-]+$/.test(selector))
+                    rules[selector.slice(1)] = [...(rules[selector.slice(1)] ?? []), ...declarations];
+        }
+    }
+    // a class rule wins over the attributes of the element, as in CSS (its own style attribute still wins over both)
+    for (const element of [...root.getElementsByTagName('*')])
+        for (const name of (element.getAttribute('class') ?? '').split(/\s+/))
+            for (const [property, value] of rules[name] ?? [])
+                element.setAttribute(property, value);
+}
+
 /**
  * An uploaded SVG file as an icon: the whole <svg> element, sanitized, without the XML declaration, DOCTYPE or
  * comments around it. A single color set on the root (e.g. fill="#5f6368") is removed, so that the icon takes the
- * color of the theme, as the built-in icons do; colors inside the icon stay. Throws the reason it can't be an icon.
+ * color of the theme, as the built-in icons do; colors inside the icon stay, also those set by classes of a <style>.
+ * Throws the reason it can't be an icon.
  */
 export const prepareSvgIcon = (text) => {
     const document = new DOMParser().parseFromString(text, 'image/svg+xml');
     const root = document.documentElement;
     if (document.getElementsByTagName('parsererror').length > 0 || root.localName !== 'svg')
         throw "It isn't an SVG file";
+
+    inlineClassStyles(root);
 
     const isColor = value => value != null && !['none', 'currentcolor', 'inherit'].includes(value.trim().toLowerCase())
         && !value.trim().toLowerCase().startsWith('url(');
