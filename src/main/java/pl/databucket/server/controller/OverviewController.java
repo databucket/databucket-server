@@ -1,7 +1,6 @@
 package pl.databucket.server.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +15,6 @@ import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.response.MessageResponse;
 import pl.databucket.server.service.BucketAccessRequestService;
 import pl.databucket.server.service.BucketService;
-import pl.databucket.server.service.HistoryCleanupService;
 import pl.databucket.server.service.OverviewService;
 
 /**
@@ -32,15 +30,12 @@ public class OverviewController {
     private final OverviewService overviewService;
     private final BucketService bucketService;
     private final BucketAccessRequestService requestService;
-    // absent when the cleanup is disabled (databucket.history-cleanup.enabled)
-    private final ObjectProvider<HistoryCleanupService> historyCleanup;
 
     public OverviewController(OverviewService overviewService, BucketService bucketService,
-                              BucketAccessRequestService requestService, ObjectProvider<HistoryCleanupService> historyCleanup) {
+                              BucketAccessRequestService requestService) {
         this.overviewService = overviewService;
         this.bucketService = bucketService;
         this.requestService = requestService;
-        this.historyCleanup = historyCleanup;
     }
 
     @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
@@ -63,28 +58,6 @@ public class OverviewController {
         try {
             long freed = overviewService.clearHistory(bucket);
             return new ResponseEntity<>(new MessageResponse("History cleared, " + toText(freed) + " freed"), HttpStatus.OK);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
-        }
-    }
-
-    // the history limit of a bucket applied now instead of at night
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/bucket/{bucketName}/history/limit")
-    public ResponseEntity<?> applyHistoryLimit(@PathVariable String bucketName) {
-        Bucket bucket = bucketService.getBucket(bucketName);
-        if (bucket == null)
-            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
-        if (bucket.getHistoryLimit() == null)
-            return exceptionFormatter.customException("The bucket has no history limit", HttpStatus.CONFLICT);
-        HistoryCleanupService cleanup = historyCleanup.getIfAvailable();
-        if (cleanup == null)
-            return exceptionFormatter.customException("The history cleanup is disabled", HttpStatus.CONFLICT);
-        try {
-            int removed = cleanup.clean(bucket.getId(), bucket.getName(), bucket.getHistoryLimit());
-            if (removed < 0)
-                return exceptionFormatter.customException("The history of the bucket is being cleaned right now", HttpStatus.CONFLICT);
-            return new ResponseEntity<>(new MessageResponse("Removed " + removed + " older history entries"), HttpStatus.OK);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
