@@ -7,11 +7,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.exception.BucketNotFoundException;
 import pl.databucket.server.exception.ExceptionFormatter;
-import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.response.MessageResponse;
 import pl.databucket.server.service.BucketAccessRequestService;
 import pl.databucket.server.service.BucketService;
@@ -63,53 +61,15 @@ public class OverviewController {
         }
     }
 
-    // a user without access to a bucket visible on the Overview page asks for it
+    // a user without access to a bucket visible on the Overview page asks for it: the admins get an email
     @PreAuthorize("hasAnyRole('MEMBER', 'ADMIN')")
     @PostMapping("/bucket/{bucketName}/access-request")
     public ResponseEntity<?> requestAccess(@PathVariable String bucketName) {
         try {
             requestService.request(bucketName);
-            return new ResponseEntity<>(new MessageResponse("The admins of the project have been asked for access"), HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse("The admins of the project have been asked for access by email"), HttpStatus.OK);
         } catch (IllegalStateException e) {
             return exceptionFormatter.customException(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/access-requests")
-    public ResponseEntity<?> getAccessRequests() {
-        try {
-            return new ResponseEntity<>(requestService.getPending(), HttpStatus.OK);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
-        }
-    }
-
-    // for the counter next to Overview in the side panel
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/access-requests/count")
-    public ResponseEntity<?> countAccessRequests() {
-        try {
-            return new ResponseEntity<>(Map.of("count", requestService.countPending()), HttpStatus.OK);
-        } catch (Exception e) {
-            return exceptionFormatter.defaultException(e);
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/access-requests/{id}/{decision:approve|reject}")
-    public ResponseEntity<?> decideAccessRequest(@PathVariable long id, @PathVariable String decision) {
-        try {
-            if ("approve".equals(decision)) {
-                requestService.approve(id);
-                return new ResponseEntity<>(new MessageResponse("Access granted"), HttpStatus.OK);
-            }
-            requestService.reject(id);
-            return new ResponseEntity<>(new MessageResponse("Request rejected"), HttpStatus.OK);
-        } catch (ItemNotFoundException e) {
-            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
