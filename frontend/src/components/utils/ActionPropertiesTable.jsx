@@ -277,7 +277,7 @@ export default function ActionPropertiesTable(props) {
                     padding: 'dense',
                     minBodyHeight: getBodyHeight(),
                     maxBodyHeight: getBodyHeight(),
-                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme), zIndex: 2},
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{

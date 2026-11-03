@@ -1186,7 +1186,10 @@ export default function BucketDataTable() {
                         headerStyle: {
                             position: 'sticky',
                             top: 0,
-                            backgroundColor: getTableHeaderBackgroundColor(theme)
+                            backgroundColor: getTableHeaderBackgroundColor(theme),
+                            // above the checkboxes and buttons of the rows (MUI gives them position: relative),
+                            // which would otherwise be drawn over the sticky header when scrolled (all tables)
+                            zIndex: 2
                         },
                         cellStyle: {whiteSpace: 'nowrap'},
                         rowStyle: rowData => ({

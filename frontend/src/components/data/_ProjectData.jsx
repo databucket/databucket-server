@@ -23,6 +23,7 @@ import {
     hasProject,
     hasRobotRole,
     hasSuperRole,
+    getActiveProjectId,
     hasToken,
     isLeftPanelOpen,
     setActiveProjectId,
@@ -39,7 +40,6 @@ import BucketListSelector from "./BucketListSelector";
 import InfoDialog from "../dialogs/InfoDialog";
 import OverviewDialog from "../dialogs/OverviewDialog";
 import BucketTabSelector from "./BucketTabSelector";
-import UserProjects from "./UserProjects";
 import {MessageBox} from "../utils/MessageBox";
 import {handleErrors} from "../../utils/FetchHelper";
 import {getButtonColor, getPostOptions} from "../../utils/MaterialTableHelper";
@@ -165,6 +165,11 @@ export default function ProjectData() {
         }
     }, [views]);
 
+    useEffect(() => {
+        const project = projects?.find(project => project.id === getActiveProjectId());
+        document.title = project != null ? 'Databucket - ' + project.name : 'Databucket';
+    }, [projects]);
+
     const handleDrawerOpen = (event) => {
         event.stopPropagation();
         setOpen(true);
@@ -226,8 +231,7 @@ export default function ProjectData() {
                             <MenuIcon/>
                         </IconButton>
                         <BucketTabSelector/>
-                        <UserProfile onLogout={handleLogout}/>
-                        <UserProjects onChangeProject={onChangeProject}/>
+                        <UserProfile onLogout={handleLogout} onChangeProject={onChangeProject}/>
                     </Toolbar>
                 </CustomAppBar>
                 <Drawer

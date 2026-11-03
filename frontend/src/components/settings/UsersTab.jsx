@@ -121,7 +121,8 @@ export default function UsersTab() {
                     headerStyle: {
                         position: 'sticky',
                         top: 0,
-                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                        backgroundColor: getTableHeaderBackgroundColor(theme),
+                        zIndex: 2
                     },
                     cellStyle: {whiteSpace: 'nowrap'},
                     maxBodyHeight: getSettingsTableHeight(),

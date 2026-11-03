@@ -3,7 +3,9 @@ import {
     AccountCircle,
     Brightness4 as SetDarkTheme,
     Brightness7 as SetLightTheme,
-    Logout
+    FolderOpen,
+    Logout,
+    SwapHoriz
 } from '@mui/icons-material';
 import {getActiveProjectId, getRoles, getUsername} from "../../utils/ConfigurationStorage";
 import {
@@ -18,8 +20,10 @@ import {
     Typography,
     useTheme
 } from "@mui/material";
+import {Link} from "react-router-dom";
 import CustomThemeContext from "../../context/theme/CustomThemeContext";
 import AccessContext from "../../context/access/AccessContext";
+import {getGivenProjectDataPath} from "../../route/AppRouter";
 
 // "MEMBER,ADMIN" -> "Member, Admin"
 const formatRoles = (roles) => (roles ?? '').split(',')
@@ -28,14 +32,24 @@ const formatRoles = (roles) => (roles ?? '').split(',')
     .map(role => role.charAt(0) + role.slice(1).toLowerCase())
     .join(', ');
 
+const SectionTitle = ({children}) => (
+    <Typography variant="overline" color="text.secondary" component="div" sx={{px: 2, pt: 1, lineHeight: 2}}>
+        {children}
+    </Typography>
+);
+
 export default function UserProfile(props) {
     let currentMode = useTheme().palette.mode;
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const {toggleColorMode} = useContext(CustomThemeContext);
-    // also in Management, which has no project (and no AccessContext): then no project is shown
+    // also in Management, which has no project (and no AccessContext): then no project sections are shown
     const projects = useContext(AccessContext)?.projects;
-    const project = projects?.find(project => project.id === getActiveProjectId());
+    const activeProjectId = getActiveProjectId();
+    const project = projects?.find(project => project.id === activeProjectId);
+    const otherProjects = (projects ?? [])
+        .filter(project => project.id !== activeProjectId)
+        .sort((a, b) => a.name.localeCompare(b.name));
     const roles = formatRoles(getRoles());
 
     const handleLogout = () => {
@@ -50,6 +64,11 @@ export default function UserProfile(props) {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const handleChangeProject = (projectId) => {
+        setAnchorEl(null);
+        props.onChangeProject(projectId);
+    }
 
     return (
         <div>
@@ -73,15 +92,43 @@ export default function UserProfile(props) {
                 open={open}
                 onClose={handleClose}
             >
-                {/* who is signed in and where: not an action, so not a menu item */}
+                {/* who is signed in: not an action, so not a menu item */}
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, px: 2, pt: 0.5, pb: 1.5, minWidth: 200}}>
                     <AccountCircle color="action" fontSize="large"/>
                     <Box>
                         <Typography color="secondary" fontWeight={500}>{getUsername()}</Typography>
-                        {project != null && <Typography variant="body2" color="text.secondary">{project.name}</Typography>}
                         {roles !== '' && <Typography variant="caption" color="text.secondary">{roles}</Typography>}
                     </Box>
                 </Box>
+                {project != null && <Divider/>}
+                {project != null && <SectionTitle>Current project</SectionTitle>}
+                {/* where the user is: not clickable, so not a menu item */}
+                {project != null &&
+                    <Box sx={{display: 'flex', alignItems: 'center', px: 2, pt: 0.5, pb: 1}}>
+                        <FolderOpen color="secondary" fontSize="small" sx={{mr: 1.5}}/>
+                        <Typography color="secondary" fontWeight={500}>{project.name}</Typography>
+                    </Box>
+                }
+                {otherProjects.length > 0 && <Divider/>}
+                {otherProjects.length > 0 && <SectionTitle>Switch project</SectionTitle>}
+                {/* many projects: the section scrolls instead of making the menu taller than the screen */}
+                {otherProjects.length > 0 &&
+                    <Box sx={{maxHeight: 320, overflowY: 'auto'}}>
+                        {otherProjects.map(project => (
+                            <MenuItem
+                                key={project.id}
+                                component={Link}
+                                to={getGivenProjectDataPath(project.id)}
+                                onClick={() => handleChangeProject(project.id)}
+                            >
+                                <ListItemIcon>
+                                    <SwapHoriz fontSize="small"/>
+                                </ListItemIcon>
+                                <ListItemText>{project.name}</ListItemText>
+                            </MenuItem>
+                        ))}
+                    </Box>
+                }
                 <Divider/>
                 <MenuItem onClick={toggleColorMode}>
                     <ListItemIcon>
