@@ -70,9 +70,7 @@ class UserServiceSpec extends Specification {
         result.username == "john"
         result.password == "encoded-password"
         result.enabled == true
-        result.authorities.size() == 2
-        result.authorities.any { it.authority == "ROLE_ADMIN" }
-        result.authorities.any { it.authority == "ROLE_MEMBER" }
+        result.authorities*.authority as Set == ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"] as Set
     }
 
     def "should load superuser with correct flag"() {
@@ -397,7 +395,7 @@ class UserServiceSpec extends Specification {
         when: "loading user"
         def result = userService.loadUserByUsername("test-user")
 
-        then: "authorities are created correctly"
+        then: "the highest role and every role below it are authorities (SUPER > ADMIN > MEMBER > ROBOT)"
         result.authorities.size() == expectedCount
         expectedAuthorities.every { expectedAuth ->
             result.authorities.any { it.authority == expectedAuth }
@@ -405,10 +403,12 @@ class UserServiceSpec extends Specification {
 
         where: "testing different role combinations"
         roleNames                           || expectedCount | expectedAuthorities
-        ["ADMIN"]                           || 1             | ["ROLE_ADMIN"]
-        ["ADMIN", "MEMBER"]                 || 2             | ["ROLE_ADMIN", "ROLE_MEMBER"]
-        ["SUPER", "ADMIN", "MEMBER"]        || 3             | ["ROLE_SUPER", "ROLE_ADMIN", "ROLE_MEMBER"]
+        ["ADMIN"]                           || 3             | ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"]
+        ["ADMIN", "MEMBER"]                 || 3             | ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"]
+        ["SUPER", "ADMIN", "MEMBER"]        || 4             | ["ROLE_SUPER", "ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"]
+        ["MEMBER"]                          || 2             | ["ROLE_MEMBER", "ROLE_ROBOT"]
         ["ROBOT"]                           || 1             | ["ROLE_ROBOT"]
+        ["UNKNOWN"]                         || 0             | []
     }
 
     // ==================== Helper Methods ====================

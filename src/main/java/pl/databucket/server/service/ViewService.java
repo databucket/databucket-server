@@ -202,7 +202,7 @@ public class ViewService {
         if (accessForUser)
             return true;
         else {
-            boolean accessByRole = view.getRole() != null ? user.getRoles().contains(view.getRole()) : view.getTeams().size() > 0;
+            boolean accessByRole = view.getRole() != null ? user.hasRoleAtLeast(view.getRole()) : view.getTeams().size() > 0;
             boolean accessByTeam = view.getTeams().size() > 0 ? !Collections.disjoint(view.getTeams(), user.getTeams()) : view.getRole() != null;
             return accessByRole && accessByTeam;
         }

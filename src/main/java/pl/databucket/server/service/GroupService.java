@@ -147,7 +147,7 @@ public class GroupService {
         if (accessForUser)
             return true;
         else {
-            boolean accessByRole = group.getRole() != null ? user.getRoles().contains(group.getRole()) : group.getTeams().size() > 0;
+            boolean accessByRole = group.getRole() != null ? user.hasRoleAtLeast(group.getRole()) : group.getTeams().size() > 0;
             boolean accessByTeam = group.getTeams().size() > 0 ? !Collections.disjoint(group.getTeams(), user.getTeams()) : group.getRole() != null;
             return accessByRole && accessByTeam;
         }

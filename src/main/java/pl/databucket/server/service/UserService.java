@@ -80,7 +80,8 @@ public class UserService implements UserDetailsService {
 
     private Set<SimpleGrantedAuthority> getAuthority(User user) {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName())));
+        // the role and every role below it, so hasRole('MEMBER') holds for an ADMIN too
+        user.getImpliedRoleNames().forEach(name -> authorities.add(new SimpleGrantedAuthority("ROLE_" + name)));
         return authorities;
     }
 
@@ -142,7 +143,7 @@ public class UserService implements UserDetailsService {
         // can not change password of another user except ROBOT
         if (!name.equals(changePasswordDtoRequest.getUsername())) {
             User user = userRepository.findByUsername(changePasswordDtoRequest.getUsername());
-            if (user != null && user.getRoles().size() == 1 && user.getRoles().stream().noneMatch(role -> role.getName().equals(Constants.ROLE_ROBOT)))
+            if (user != null && (user.getTopRole() == null || !Constants.ROLE_ROBOT.equals(user.getTopRole().getName())))
                 throw new IllegalArgumentException("You cannot change the password of this user!");
         }
 

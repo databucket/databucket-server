@@ -86,7 +86,7 @@ export default function UsersTab() {
                     },
                     {title: 'Name', field: 'username', editable: 'onAdd', filtering: true,},
                     {
-                        title: 'Roles', field: 'rolesIds', filtering: false, editable: 'never', sorting: false,
+                        title: 'Role', field: 'rolesIds', filtering: false, editable: 'never', sorting: false,
                         render: rowData => getRolesNames(roles, rowData['rolesIds'])
                     },
                     {

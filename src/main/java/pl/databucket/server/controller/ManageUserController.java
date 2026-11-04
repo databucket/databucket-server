@@ -36,6 +36,8 @@ public class ManageUserController {
             return new ResponseEntity<>(manageUserDtoResponse, HttpStatus.CREATED);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+        } catch (IllegalArgumentException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (SomeItemsNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -60,6 +62,8 @@ public class ManageUserController {
             return new ResponseEntity<>(manageUserDtoResponse, HttpStatus.OK);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+        } catch (IllegalArgumentException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

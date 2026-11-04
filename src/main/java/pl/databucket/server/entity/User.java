@@ -8,7 +8,12 @@ import pl.databucket.server.configuration.Constants;
 import jakarta.validation.constraints.Email;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -88,11 +93,44 @@ public class User extends Auditable<String> implements Serializable {
         this.email = normalizeEmail(email);
     }
 
+    /** The id of the user's role (one role per user; of older accounts with several, the highest). */
     public Set<Short> getRolesIds() {
-        if (roles != null && !roles.isEmpty())
-            return roles.stream().map(Role::getId).collect(Collectors.toSet());
-        else
+        Role top = getTopRole();
+        return top != null ? new HashSet<>(Set.of(top.getId())) : null;
+    }
+
+    /**
+     * The user's role. Roles form a hierarchy (see {@link Constants#ROLES_BY_LEVEL}); accounts from before 3.12.0
+     * may still have several roles, then the highest counts.
+     */
+    public Role getTopRole() {
+        if (roles == null)
             return null;
+        return roles.stream()
+                .filter(role -> Constants.roleLevel(role.getName()) >= 0)
+                .max(Comparator.comparingInt(role -> Constants.roleLevel(role.getName())))
+                .orElse(null);
+    }
+
+    /** Whether the user's role is the given one or higher; false for a null role. */
+    public boolean hasRoleAtLeast(String roleName) {
+        Role top = getTopRole();
+        int needed = Constants.roleLevel(roleName);
+        return top != null && needed >= 0 && Constants.roleLevel(top.getName()) >= needed;
+    }
+
+    public boolean hasRoleAtLeast(Role role) {
+        return role != null && hasRoleAtLeast(role.getName());
+    }
+
+    /** The user's role and every role below it, e.g. ADMIN, MEMBER, ROBOT: the authorities of the user's tokens. */
+    public List<String> getImpliedRoleNames() {
+        Role top = getTopRole();
+        if (top == null)
+            return List.of();
+        List<String> names = new ArrayList<>(Constants.ROLES_BY_LEVEL.subList(0, Constants.roleLevel(top.getName()) + 1));
+        Collections.reverse(names);
+        return names;
     }
 
     public Set<Integer> getProjectsIds() {
@@ -109,22 +147,13 @@ public class User extends Auditable<String> implements Serializable {
             return null;
     }
 
-    public boolean isRobot() {
-        return roles != null && roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_ROBOT));
-    }
-
     public boolean isSuperUser() {
-        if (roles != null && !roles.isEmpty())
-            return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_SUPER));
-        else
-            return false;
+        return hasRoleAtLeast(Constants.ROLE_SUPER);
     }
 
+    /** ADMIN or higher (SUPER). */
     public boolean isAdminUser() {
-        if (roles != null && !roles.isEmpty())
-            return roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_ADMIN));
-        else
-            return false;
+        return hasRoleAtLeast(Constants.ROLE_ADMIN);
     }
 
     public boolean isExpired() {

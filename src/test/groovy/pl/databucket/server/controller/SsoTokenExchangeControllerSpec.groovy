@@ -57,10 +57,10 @@ class SsoTokenExchangeControllerSpec extends Specification {
         response.body.token == "token"
     }
 
-    def "should refuse a client token of a user without the ROBOT role"() {
+    def "should refuse a client token of a user without a role"() {
         given:
         verifier.verify("client-token") >> "john"
-        userRepository.findWithProjectsAndRolesByUsername("john") >> user("john", "MEMBER")
+        userRepository.findWithProjectsAndRolesByUsername("john") >> new User(username: "john", enabled: true, roles: [] as Set)
 
         when:
         def response = controller.exchangeToken(new SsoTokenExchangeReqDTO(token: "client-token"))

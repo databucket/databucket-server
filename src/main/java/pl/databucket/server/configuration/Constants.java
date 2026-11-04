@@ -21,6 +21,17 @@ public class Constants {
     public static final String ROLE_MEMBER = "MEMBER";
     public static final String ROLE_ROBOT = "ROBOT";
 
+    /**
+     * Since 3.12.0 a user has one role, and each role includes the ones below it: SUPER > ADMIN > MEMBER > ROBOT.
+     * The role of a bucket, view or group means that role or higher.
+     */
+    public static final java.util.List<String> ROLES_BY_LEVEL = java.util.List.of(ROLE_ROBOT, ROLE_MEMBER, ROLE_ADMIN, ROLE_SUPER);
+
+    /** Position of the role in the hierarchy (ROBOT = 0); -1 for an unknown name. */
+    public static int roleLevel(String roleName) {
+        return ROLES_BY_LEVEL.indexOf(roleName);
+    }
+
     // Columns
     public static final String COLUMNS_DEFAULT = "default";
 
