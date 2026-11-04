@@ -30,7 +30,7 @@ const ROLES_BY_LEVEL = ['SUPER', 'ADMIN', 'MEMBER', 'ROBOT'];
 const formatRole = (roles) => {
     const names = (roles ?? '').split(',').map(role => role.trim());
     const top = ROLES_BY_LEVEL.find(role => names.includes(role));
-    return top != null ? top.charAt(0) + top.slice(1).toLowerCase() : '';
+    return top ?? '';
 };
 
 const SectionTitle = ({children}) => (
