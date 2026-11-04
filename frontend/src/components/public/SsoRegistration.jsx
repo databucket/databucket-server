@@ -82,7 +82,7 @@ export default function SsoRegistration({ticket, onClose, showError}) {
                 <Tooltip placement="bottom" title={
                     <Typography variant="body2" sx={{p: 0.5}}>
                         Your identity provider gave the email <b>{info.email}</b>. There is no Databucket account for
-                        it yet: create one and ask the administrators for access to projects.
+                        it yet. Create one and ask the administrators for access to projects.
                     </Typography>
                 }>
                     <IconButton size="small" sx={{ml: 1}} aria-label="About the account">
