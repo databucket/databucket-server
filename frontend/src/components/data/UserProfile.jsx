@@ -25,12 +25,13 @@ import CustomThemeContext from "../../context/theme/CustomThemeContext";
 import AccessContext from "../../context/access/AccessContext";
 import {getGivenProjectDataPath} from "../../route/AppRouter";
 
-// "MEMBER,ADMIN" -> "Member, Admin"
-const formatRoles = (roles) => (roles ?? '').split(',')
-    .map(role => role.trim())
-    .filter(role => role !== '')
-    .map(role => role.charAt(0) + role.slice(1).toLowerCase())
-    .join(', ');
+// A user has one role; the token also holds the roles below it (e.g. "SUPER,ADMIN,MEMBER,ROBOT"), show the highest
+const ROLES_BY_LEVEL = ['SUPER', 'ADMIN', 'MEMBER', 'ROBOT'];
+const formatRole = (roles) => {
+    const names = (roles ?? '').split(',').map(role => role.trim());
+    const top = ROLES_BY_LEVEL.find(role => names.includes(role));
+    return top != null ? top.charAt(0) + top.slice(1).toLowerCase() : '';
+};
 
 const SectionTitle = ({children}) => (
     <Typography variant="overline" color="text.secondary" component="div" sx={{px: 2, pt: 1, lineHeight: 2}}>
@@ -50,7 +51,7 @@ export default function UserProfile(props) {
     const otherProjects = (projects ?? [])
         .filter(project => project.id !== activeProjectId)
         .sort((a, b) => a.name.localeCompare(b.name));
-    const roles = formatRoles(getRoles());
+    const roles = formatRole(getRoles());
 
     const handleLogout = () => {
         setAnchorEl(null);
