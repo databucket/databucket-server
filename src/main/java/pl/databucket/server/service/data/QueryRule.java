@@ -14,7 +14,7 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class QueryRule {
+public class QueryRule implements DataFilter {
 
     private Operator operator = Operator.and;
     private List<Condition> conditions = new ArrayList<>();
@@ -41,6 +41,16 @@ public class QueryRule {
             throw new InvalidRuleException(errorMessage);
 
         recordFilterFormat(searchRules);
+    }
+
+    @Override
+    public void require(String column, Operator operator, Object value) {
+        conditions.add(new Condition(column, operator, value));
+    }
+
+    @Override
+    public Query applyTo(Query query, Map<String, Object> paramMap) throws pl.databucket.server.exception.UnknownColumnException, pl.databucket.server.exception.ConditionNotAllowedException {
+        return query.where(this, paramMap);
     }
 
     /**

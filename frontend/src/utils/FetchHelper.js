@@ -1,13 +1,17 @@
 import {logOut} from "./ConfigurationStorage";
 
+// API version 2 of the data endpoints: rules and logic translated safely (no SQL text); other endpoints ignore it
+export const API_VERSION_HEADER = {'Databucket-Api-Version': '2'};
+
 export function fetchHelper(token) {
     if (token) {
         return {
             'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...API_VERSION_HEADER
         };
     } else {
-        return {'Content-Type': 'application/json'};
+        return {'Content-Type': 'application/json', ...API_VERSION_HEADER};
     }
 }
 

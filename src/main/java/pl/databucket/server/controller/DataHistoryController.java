@@ -17,7 +17,7 @@ import pl.databucket.server.response.MessageResponse;
 import pl.databucket.server.service.BucketService;
 import pl.databucket.server.service.UserService;
 import pl.databucket.server.service.data.DataService;
-import pl.databucket.server.service.data.QueryRule;
+import pl.databucket.server.service.data.DataFilters;
 
 import java.util.List;
 
@@ -124,7 +124,7 @@ public class DataHistoryController {
     public ResponseEntity<?> clearHistory(
 //            @ApiParam(value="bucket name", required = true)
             @PathVariable String bucketName,
-//            @ApiParam(value="payload - rules", required = true)
+            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @RequestBody DataRemoveDTO dataRemoveDTO) {
 
         if ((dataRemoveDTO.getConditions() == null || dataRemoveDTO.getConditions().size() == 0)
@@ -138,10 +138,12 @@ public class DataHistoryController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.clearDataHistory(user, bucket, new QueryRule(user.getUsername(), dataRemoveDTO));
+                int count = dataService.clearDataHistory(user, bucket, DataFilters.of(user.getUsername(), dataRemoveDTO, apiVersion));
                 return new ResponseEntity<>(new MessageResponse("Removed history on " + count + " data rows."), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (pl.databucket.server.exception.InvalidRuleException | pl.databucket.server.exception.UnknownColumnException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
