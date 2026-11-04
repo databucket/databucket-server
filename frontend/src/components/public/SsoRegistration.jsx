@@ -48,16 +48,21 @@ export default function SsoRegistration({ticket, onClose, showError}) {
         return (
             <Paper className="PaperClass" elevation={3}>
                 <Typography className="Title" variant="h5">Account created</Typography>
-                <Box sx={{width: '85%', mb: 2}}>
+                <Box sx={{width: '85%'}}>
                     <Typography variant="body2" paragraph>
                         Your account <b>{created}</b> has been created.
                     </Typography>
                     <Typography variant="body2" paragraph>
-                        The administrators have been told and will give you access to projects. Until then there
-                        is no project to open; sign in with single sign-on again later.
+                        The administrators have been told about it, together with the projects you asked for.
+                        Until you are given access to a project, there is nothing to open.
+                    </Typography>
+                    <Typography variant="body2">
+                        Try to sign in again later.
                     </Typography>
                 </Box>
-                <Button variant="contained" onClick={onClose} sx={{mb: 3}}>Back to login</Button>
+            <Box sx={{width: '100%', mt: 6, mb: 2, pl: 5, display: 'flex', justifyContent: 'flex-start'}}>
+                <Link component="button" color="inherit" onClick={onClose}>Back</Link>
+            </Box>
             </Paper>
         );
 
@@ -77,7 +82,7 @@ export default function SsoRegistration({ticket, onClose, showError}) {
                 <Tooltip placement="bottom" title={
                     <Typography variant="body2" sx={{p: 0.5}}>
                         Your identity provider gave the email <b>{info.email}</b>. There is no Databucket account for
-                        it yet: create one, and the administrators will give you access to projects.
+                        it yet: create one and ask the administrators for access to projects.
                     </Typography>
                 }>
                     <IconButton size="small" sx={{ml: 1}} aria-label="About the account">
@@ -101,9 +106,9 @@ export default function SsoRegistration({ticket, onClose, showError}) {
                     {loading ? 'Processing...' : 'Create account'}
                 </Button>
             </Box>
-            <Link component="button" color="inherit" variant="caption" underline="hover" sx={{mt: 2, mb: 2}} onClick={onClose}>
-                Cancel
-            </Link>
+            <Box sx={{width: '100%', mt: 6, mb: 2, pl: 5, display: 'flex', justifyContent: 'flex-start'}}>
+                <Link component="button" color="inherit" onClick={onClose}>Back</Link>
+            </Box>
         </Paper>
     );
 }

@@ -35,7 +35,8 @@ public class MailSenderService {
         String htmlContent = "<h2>Databucket account</h2>";
 
         htmlContent += "<p>Your account has been activated.</p>";
-        htmlContent += "<p>The administrators of Databucket have been told about your account and will assign you to projects. Until then the application has no project to show.</p>";
+        htmlContent += "<p>The administrators of Databucket have been told about your account, together with the projects you asked for. Until you are given access to a project, there is nothing to open.</p>";
+        htmlContent += "<p>Try to sign in again later.</p>";
 
         MailSenderHandler mailHandler = new MailSenderHandler(sender);
         if (from != null)
