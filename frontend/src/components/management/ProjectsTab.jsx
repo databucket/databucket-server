@@ -186,7 +186,8 @@ export default function ProjectsTab() {
                     headerStyle: {
                         position: 'sticky',
                         top: 0,
-                        backgroundColor: getTableHeaderBackgroundColor(theme)
+                        backgroundColor: getTableHeaderBackgroundColor(theme),
+                        zIndex: 2
                     },
                     maxBodyHeight: getManagementTableHeight(),
                     minBodyHeight: getManagementTableHeight(),

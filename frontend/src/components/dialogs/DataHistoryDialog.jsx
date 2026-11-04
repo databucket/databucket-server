@@ -186,7 +186,7 @@ export default function DataHistoryDialog(props) {
                         search: false,
                         filtering: false,
                         padding: 'dense',
-                        headerStyle: { position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme) }
+                        headerStyle: { position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme), zIndex: 2 }
                     }}
                     components={{
                         Container: props => <div {...props} />

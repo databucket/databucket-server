@@ -191,7 +191,7 @@ export default function DataDetailsPage() {
                     search: false,
                     filtering: false,
                     padding: 'dense',
-                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme)},
+                    headerStyle: {position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme), zIndex: 2},
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
