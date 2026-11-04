@@ -108,6 +108,69 @@ class SsoCodeSpec extends Specification {
         tokenProvider.unpackFromJwts(code) == null
     }
 
+    def "should read back the email of a registration ticket"() {
+        given:
+        def ticket = tokenProvider.generateSsoRegistrationTicket("john@example.com", 60)
+
+        expect:
+        with(tokenProvider.parseSsoRegistrationTicket(ticket)) {
+            email() == "john@example.com"
+            id() != null
+            expiresAt().after(new Date())
+        }
+    }
+
+    def "should not mix registration tickets, SSO codes, tokens and confirmation links"() {
+        given:
+        def ticket = tokenProvider.generateSsoRegistrationTicket("john@example.com", 60)
+        def code = tokenProvider.generateSsoCode("john", 60)
+
+        when: "a ticket is sent as an SSO code"
+        tokenProvider.parseSsoCode(ticket)
+        then:
+        thrown(IllegalArgumentException)
+
+        when: "an SSO code is sent as a ticket"
+        tokenProvider.parseSsoRegistrationTicket(code)
+        then:
+        thrown(IllegalArgumentException)
+
+        expect: "a ticket is neither a token nor a confirmation link"
+        tokenProvider.getUsernameFromToken(ticket) == null
+        tokenProvider.unpackFromJwts(ticket) == null
+    }
+
+    def "should reject an expired registration ticket"() {
+        when:
+        tokenProvider.parseSsoRegistrationTicket(tokenProvider.generateSsoRegistrationTicket("john@example.com", -1))
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "should carry the requested projects and the message in a sign-up confirmation link"() {
+        given:
+        def link = tokenProvider.packSignUpToJwts("john@example.com", [3, 7], "I test the shop")
+
+        expect: "the link still confirms the email"
+        tokenProvider.unpackFromJwts(link) == "john@example.com"
+        with(tokenProvider.readSignUpRequest(link)) {
+            projectIds() == [3, 7]
+            message() == "I test the shop"
+        }
+    }
+
+    def "should read an empty request from a confirmation link without one"() {
+        given: "a link sent before 3.11.0"
+        def link = tokenProvider.packToJwts("john@example.com")
+
+        expect:
+        with(tokenProvider.readSignUpRequest(link)) {
+            projectIds() == []
+            message() == null
+        }
+    }
+
     private static void setField(Object target, String fieldName, Object value) {
         Field field = target.class.getDeclaredField(fieldName)
         field.setAccessible(true)

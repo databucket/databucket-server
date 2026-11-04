@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,6 +32,9 @@ public class TokenProvider implements Serializable {
     public static final String PROJECT_ID = "p-id";
     public static final String CONTENT = "content";
     public static final String SSO_USER = "sso-user";
+    public static final String SSO_REGISTER = "sso-register";
+    static final String REQUESTED_PROJECTS = "req-p";
+    static final String REQUESTED_MESSAGE = "req-m";
 
     @Value("${jwt.secret}")
     private String signingKey;
@@ -146,6 +150,73 @@ public class TokenProvider implements Serializable {
         if (username == null || claims.getId() == null)
             throw new IllegalArgumentException("Not an SSO code");
         return new SsoCode(username, claims.getId(), claims.getExpiration());
+    }
+
+    /** What a person asked for while signing up: public projects and a message for the SUPER admins. */
+    public record SignUpRequest(List<Integer> projectIds, String message) {
+    }
+
+    /**
+     * Sign-up confirmation link: like {@link #packToJwts(String)} with the email, plus the projects and the message,
+     * which are emailed to the SUPER admins once the account is confirmed (they are stored nowhere else).
+     */
+    public String packSignUpToJwts(String email, List<Integer> projectIds, String message) {
+        long now = System.currentTimeMillis();
+        JwtBuilder builder = Jwts.builder()
+                .claim(CONTENT, email)
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + 48 * 60 * 60 * 1000));
+        if (projectIds != null && !projectIds.isEmpty())
+            builder.claim(REQUESTED_PROJECTS, projectIds);
+        if (message != null)
+            builder.claim(REQUESTED_MESSAGE, message);
+        return builder.signWith(getSigningKey(), Jwts.SIG.HS256).compact();
+    }
+
+    /** The projects and the message of a sign-up confirmation link; empty for links without them. */
+    public SignUpRequest readSignUpRequest(String jwts) {
+        Claims claims = getAllClaimsFromToken(jwts);
+        List<?> ids = claims.get(REQUESTED_PROJECTS, List.class);
+        List<Integer> projectIds = ids == null ? List.of() : ids.stream()
+                .filter(Number.class::isInstance)
+                .map(id -> ((Number) id).intValue())
+                .toList();
+        return new SignUpRequest(projectIds, claims.get(REQUESTED_MESSAGE, String.class));
+    }
+
+    /** A registration ticket: an unknown person signed in at the SSO provider and may create an account. */
+    public record SsoRegistrationTicket(String email, String id, Date expiresAt) {
+    }
+
+    /**
+     * Single-use ticket handed to the browser when someone without an account signs in through SSO and may register.
+     * Like the SSO code it has no subject and no content claim, so it is neither a token nor a confirmation link.
+     */
+    public String generateSsoRegistrationTicket(String email, long ttlSeconds) {
+        long now = System.currentTimeMillis();
+        return Jwts.builder()
+                .id(UUID.randomUUID().toString())
+                .claim(SSO_REGISTER, email)
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + ttlSeconds * 1000))
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .compact();
+    }
+
+    /**
+     * @throws IllegalArgumentException when the ticket is invalid, expired or not a registration ticket
+     */
+    public SsoRegistrationTicket parseSsoRegistrationTicket(String ticket) {
+        Claims claims;
+        try {
+            claims = getAllClaimsFromToken(ticket);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid registration ticket", e);
+        }
+        String email = claims.get(SSO_REGISTER, String.class);
+        if (email == null || claims.getId() == null)
+            throw new IllegalArgumentException("Not a registration ticket");
+        return new SsoRegistrationTicket(email, claims.getId(), claims.getExpiration());
     }
 
     public String unpackFromJwts(String jwts) {

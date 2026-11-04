@@ -23,6 +23,7 @@ import ReactGA from 'react-ga';
 import {Link} from "react-router-dom";
 import {version} from "../../../package.json";
 import SsoButton from "./SsoButton";
+import SsoRegistration from "./SsoRegistration";
 
 const initialState = {
     username: "",
@@ -66,6 +67,7 @@ export default function LoginPage() {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [ssoConfig, setSsoConfig] = useState(null);
     const [ssoCode, setSsoCode] = useState(null);
+    const [ssoRegisterTicket, setSsoRegisterTicket] = useState(null);
     const ssoCodeTaken = useRef(false); // a code works once: don't exchange it twice (React StrictMode runs effects twice)
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -101,11 +103,14 @@ export default function LoginPage() {
 
         const code = searchParams.get('code');
         const ssoError = searchParams.get('sso_error');
-        if (code != null || ssoError != null)
+        const registerTicket = searchParams.get('register');
+        if (code != null || ssoError != null || registerTicket != null)
             navigate({search: ''}, {replace: true}); // keep the code out of the address bar and history
         if (code != null && !ssoCodeTaken.current) {
             ssoCodeTaken.current = true;
             ssoSignIn(code, null);
+        } else if (registerTicket != null) {
+            setSsoRegisterTicket(registerTicket);
         } else if (ssoError != null) {
             setMessageBox({open: true, severity: 'error', title: 'Login failed', message: SSO_ERRORS[ssoError] || SSO_ERRORS.idp_error});
         }
@@ -314,6 +319,14 @@ export default function LoginPage() {
     }
 
     const paper = () => {
+        if (ssoRegisterTicket != null)
+            return (
+                <SsoRegistration
+                    ticket={ssoRegisterTicket}
+                    onClose={() => setSsoRegisterTicket(null)}
+                    showError={(title, message) => setMessageBox({open: true, severity: 'error', title, message})}
+                />
+            );
         switch (getSwitchParam()) {
             case 6:
                 return redirectTo("/sign-up");

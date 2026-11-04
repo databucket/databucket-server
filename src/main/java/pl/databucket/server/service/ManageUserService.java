@@ -61,6 +61,9 @@ public class ManageUserService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private RegistrationService registrationService;
+
     @Transactional(readOnly = true)
     public List<ManageUserDtoResponse> getUsers() {
         return userRepository.findAllByOrderById().stream().map(this::toDto).collect(Collectors.toList());
@@ -111,7 +114,66 @@ public class ManageUserService {
         newUser = userRepository.save(newUser);
         AuditLog.log("auth.signup", "id={} name={}", newUser.getId(), newUser.getUsername());
 
-        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + jwtTokenUtil.packToJwts(newUser.getEmail()), appProperties.getMailFrom());
+        // the projects and the message travel in the confirmation link and reach the SUPER admins once it is confirmed
+        String link = jwtTokenUtil.packSignUpToJwts(newUser.getEmail(), signUpDtoRequest.getProjectsIds(),
+                RegistrationService.cleanMessage(signUpDtoRequest.getMessage()));
+        mailSenderService.sendConfirmationLink(newUser, signUpDtoRequest.getUrl() + link, appProperties.getMailFrom());
+    }
+
+    /**
+     * A user name to suggest for an email: the part before @, made unique with a number when taken.
+     */
+    public String suggestUsername(String email) {
+        String base = email.substring(0, email.indexOf('@') > 0 ? email.indexOf('@') : email.length()).trim();
+        if (base.isEmpty())
+            base = "user";
+        if (base.length() > Constants.USERNAME_MAX)
+            base = base.substring(0, Constants.USERNAME_MAX);
+        String candidate = base;
+        for (int i = 2; userRepository.existsByUsername(candidate); i++) {
+            String suffix = String.valueOf(i);
+            candidate = base.substring(0, Math.min(base.length(), Constants.USERNAME_MAX - suffix.length())) + suffix;
+        }
+        return candidate;
+    }
+
+    /**
+     * Checks an account to be created after an SSO login, see {@link #createSsoUser}.
+     *
+     * @return the trimmed user name
+     */
+    public String checkNewSsoUser(String email, String username) throws ItemAlreadyExistsException {
+        String name = username != null ? username.trim() : "";
+        if (name.length() < Constants.NAME_MIN || name.length() > Constants.USERNAME_MAX)
+            throw new IllegalArgumentException("The user name must have 1 to " + Constants.USERNAME_MAX + " characters");
+        if (userRepository.existsByUsername(name))
+            throw new ItemAlreadyExistsException(User.class, name);
+        if (userRepository.existsByEmailIgnoreCase(User.normalizeEmail(email)))
+            throw new IllegalStateException("An account with your email already exists. Sign in with single sign-on again.");
+        return name;
+    }
+
+    /**
+     * Account created by the person themselves after signing in through SSO: MEMBER, enabled, no projects and no
+     * usable password (a random one nobody knows; they sign in through SSO).
+     *
+     * @throws IllegalArgumentException     when the user name is empty or too long
+     * @throws ItemAlreadyExistsException   when the user name is taken
+     * @throws IllegalStateException        when there is already an account with the email
+     */
+    public User createSsoUser(String email, String username) throws ItemAlreadyExistsException {
+        String name = checkNewSsoUser(email, username);
+
+        User newUser = new User();
+        newUser.setUsername(name);
+        newUser.setEmail(email);
+        newUser.setPassword(bcryptEncoder.encode(UUID.randomUUID().toString()));
+        newUser.setEnabled(true);
+        newUser.setChangePassword(false);
+        newUser.setRoles(new HashSet<>(Set.of(roleRepository.findByName(Constants.ROLE_MEMBER))));
+        User saved = userRepository.save(newUser);
+        AuditLog.log("auth.sso-signup", "id={} name={} email={}", saved.getId(), saved.getUsername(), email);
+        return saved;
     }
 
     // The user of a confirmation link; an expired or invalid link, or one of a removed user, is refused
@@ -136,6 +198,9 @@ public class ManageUserService {
         AuditLog.log("auth.signup-confirm", "id={} name={}", user.getId(), user.getUsername());
 
         mailSenderService.sendRegistrationConfirmation(user, appProperties.getMailFrom());
+
+        TokenProvider.SignUpRequest request = jwtTokenUtil.readSignUpRequest(jwts);
+        registrationService.notifySuperAdmins(user, request.projectIds(), request.message(), "sign-up");
     }
 
     public void forgotPasswordMessage(ForgotPasswordReqDTO forgotPasswordReqDTO) throws ForbiddenRepetitionException, MessagingException, UsernameNotFoundException {
