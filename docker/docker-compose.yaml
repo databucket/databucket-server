@@ -38,7 +38,10 @@ services:
       POSTGRES_USER: databucket_user
       POSTGRES_PASSWORD: databucket_user
       POSTGRES_DB: databucket
-    # not published, so it doesn't clash with a local PostgreSQL; use: docker compose exec postgres psql -U databucket_user databucket
+    # for pgAdmin, psql or "./gradlew bootRun" on this machine: localhost:5432 (only from this machine);
+    # another port when a local PostgreSQL already uses 5432: DATABUCKET_PG_PORT=5433 in docker/.env
+    ports:
+      - "127.0.0.1:${DATABUCKET_PG_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:
