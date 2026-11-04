@@ -1,9 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {
-    Badge,
     Box,
     Button,
-    Chip,
     CircularProgress,
     Dialog,
     DialogActions,
@@ -31,7 +29,9 @@ import {Close, DeleteSweep, Inventory2, Lock, Refresh, WarningAmber} from "@mui/
 import AccessContext from "../../context/access/AccessContext";
 import StyledIcon from "../utils/StyledIcon";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-import {getButtonColor, getDeleteOptions, getGetOptions, getPostOptions, handleErrors} from "../../utils/MaterialTableHelper";
+import {getButtonColor, getDeleteOptions, getGetOptions, getPostOptions} from "../../utils/MaterialTableHelper";
+// rejects with the server's message as text (the MaterialTableHelper one rejects with an object, which can't be shown)
+import {handleErrors} from "../../utils/FetchHelper";
 import {getActiveProjectId, hasAdminRole} from "../../utils/ConfigurationStorage";
 import {MessageBox} from "../utils/MessageBox";
 
@@ -55,8 +55,6 @@ const SEPARATOR = {borderLeft: 1, borderLeftColor: 'divider'};
 
 const formatDate = (value) => value != null ? new Date(value).toLocaleString() : '—';
 
-const formatDay = (value) => new Date(value).toLocaleDateString();
-
 // how a column is sorted; buckets without access have no reservations, history or last change
 const SORT = {
     name: bucket => bucket.name.toLowerCase(),
@@ -69,17 +67,15 @@ const SORT = {
 /**
  * The Overview of the project, opened from the side panel as a dialog (movable by its title, over the data):
  * the buckets the user has access to, how many rows they hold and how many are reserved, and how big their history is; and the
- * buckets visible on the Overview page the user has no access to, where the access can be asked for. The admins of
- * the project see the pending requests (also as a counter in the side panel) and approve or reject them.
+ * buckets visible on the Overview page the user has no access to, where the access can be asked for: the admins of
+ * the project get an email and give the access in Settings (only with mail configured, otherwise there is no button).
  */
 export default function OverviewDialog() {
     const theme = useTheme();
-    const {buckets, addTab, projects, fetchAccessTree} = useContext(AccessContext);
+    const {buckets, addTab, projects} = useContext(AccessContext);
     const project = projects?.find(project => project.id === getActiveProjectId());
     const [open, setOpen] = useState(false);
     const [overview, setOverview] = useState(null);
-    const [requests, setRequests] = useState([]);
-    const [requestCount, setRequestCount] = useState(0);
     const [sort, setSort] = useState({by: 'name', asc: true});
     const [clearing, setClearing] = useState(null);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
@@ -87,40 +83,19 @@ export default function OverviewDialog() {
 
     const showError = error => setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
 
-    const loadRequestCount = () => {
-        if (admin)
-            fetch(getBaseUrl('overview/access-requests/count'), getGetOptions())
-                .then(handleErrors)
-                .then(result => setRequestCount(result.count))
-                .catch(() => setRequestCount(0));
-    };
-
     const load = () => {
         fetch(getBaseUrl('overview'), getGetOptions())
             .then(handleErrors)
             .then(setOverview)
             .catch(showError);
-        if (admin)
-            fetch(getBaseUrl('overview/access-requests'), getGetOptions())
-                .then(handleErrors)
-                .then(result => {
-                    setRequests(result);
-                    setRequestCount(result.length);
-                })
-                .catch(showError);
     };
-
-    // the counter of requests waiting for an admin, when the project is opened
-    useEffect(loadRequestCount, []);
 
     // the numbers are read each time the dialog opens
     useEffect(() => {
         if (open)
             load();
-        else {
+        else
             setOverview(null);
-            loadRequestCount();
-        }
     }, [open]);
 
     const openBucket = (item) => {
@@ -137,24 +112,7 @@ export default function OverviewDialog() {
     const askForAccess = (bucket) => {
         fetch(getBaseUrl(`overview/bucket/${encodeURIComponent(bucket.name)}/access-request`), getPostOptions({}))
             .then(handleErrors)
-            .then(result => {
-                setMessageBox({open: true, severity: 'success', title: bucket.name, message: result.message});
-                load();
-            })
-            .catch(showError);
-    };
-
-    const decide = (request, decision) => {
-        fetch(getBaseUrl(`overview/access-requests/${request.id}/${decision}`), getPostOptions({}))
-            .then(handleErrors)
-            .then(result => {
-                setMessageBox({open: true, severity: 'success', title: `${request.username} · ${request.bucketName}`,
-                    message: result.message});
-                load();
-                // the admin may have given the access to themselves: their buckets change
-                if (decision === 'approve')
-                    fetchAccessTree();
-            })
+            .then(result => setMessageBox({open: true, severity: 'success', title: bucket.name, message: result.message}))
             .catch(showError);
     };
 
@@ -235,7 +193,7 @@ export default function OverviewDialog() {
         );
     };
 
-    // clearing the history (admins, with access) or asking for access (without access)
+    // clearing the history (admins, with access) or asking for access (without access, by email: only with mail)
     const action = (bucket) => {
         if (bucket.access)
             return admin && bucket.historyEntries > 0 &&
@@ -244,13 +202,10 @@ export default function OverviewDialog() {
                         <DeleteSweep fontSize="small"/>
                     </IconButton>
                 </Tooltip>;
-        if (bucket.requestStatus === 'PENDING')
-            return <Tooltip title="Waiting for an admin of the project">
-                <Chip size="small" label={`Requested · ${formatDay(bucket.requestedAt)}`}/>
-            </Tooltip>;
-        return <Tooltip title={bucket.requestStatus === 'REJECTED'
-            ? `Your last request was rejected on ${formatDay(bucket.requestedAt)}`
-            : 'Ask the admins of the project for access to the data'}>
+        if (!bucket.canAskForAccess)
+            return null;
+        return <Tooltip title="Email the admins of the project for access to the data">
+
             <Button size="small" variant="outlined" sx={{whiteSpace: 'nowrap'}}
                     onClick={() => askForAccess(bucket)}>
                 Ask for access
@@ -263,11 +218,7 @@ export default function OverviewDialog() {
             <ListItem disablePadding>
                 <ListItemButton onClick={() => setOpen(true)}>
                     <ListItemIcon>
-                        <Tooltip title={requestCount > 0 ? `${requestCount} access request(s) waiting` : ''}>
-                            <Badge badgeContent={requestCount} color="secondary">
-                                <Inventory2 sx={{color: getButtonColor(theme)}}/>
-                            </Badge>
-                        </Tooltip>
+                        <Inventory2 sx={{color: getButtonColor(theme)}}/>
                     </ListItemIcon>
                     <ListItemText primary={'Overview'}
                                   primaryTypographyProps={{style: {color: theme.palette.text.primary}}}/>
@@ -290,44 +241,6 @@ export default function OverviewDialog() {
                     </Tooltip>
                 </DialogTitle>
                 <DialogContent dividers sx={{p: 0}}>
-                    {admin && requests.length > 0 &&
-                        <Box sx={{borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover'}}>
-                            <Typography variant="subtitle2" sx={{px: 2, pt: 1.5}}>
-                                Access requests ({requests.length})
-                            </Typography>
-                            <Table size="small">
-                                <TableBody>
-                                    {requests.map(request => (
-                                        <TableRow key={request.id}>
-                                            <TableCell sx={{whiteSpace: 'nowrap'}}>
-                                                <b>{request.username}</b>
-                                                {request.email &&
-                                                    <Typography component="span" variant="body2" color="text.secondary">
-                                                        {' '}({request.email})
-                                                    </Typography>}
-                                            </TableCell>
-                                            <TableCell sx={{whiteSpace: 'nowrap'}}>
-                                                <Box sx={{display: 'inline-flex', alignItems: 'center', gap: 1}}>
-                                                    {bucketIcon(request)}
-                                                    {request.bucketName}
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell sx={{color: 'text.secondary', whiteSpace: 'nowrap'}}>
-                                                {formatDate(request.requestedAt)}
-                                            </TableCell>
-                                            <TableCell align="right" sx={{whiteSpace: 'nowrap'}}>
-                                                <Tooltip title="Add the user to the users of the bucket">
-                                                    <Button size="small" variant="contained"
-                                                            onClick={() => decide(request, 'approve')}>Approve</Button>
-                                                </Tooltip>
-                                                <Button size="small" sx={{ml: 1}}
-                                                        onClick={() => decide(request, 'reject')}>Reject</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </Box>}
                     {overview == null
                         ? <Box sx={{display: 'flex', justifyContent: 'center', p: 4}}><CircularProgress/></Box>
                         : <TableContainer>

@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * A bucket on the Overview page: what it is, how much data it holds and how much of it is reserved, and how big its
  * history is. For a bucket the user has no access to (listed because it is visible on the Overview page) only its
- * name, description, rows and reserved rows are given, with the user's request for access.
+ * name, description, rows and reserved rows are given, and whether the access can be asked for.
  */
 @Getter
 @Setter
@@ -45,7 +45,6 @@ public class OverviewBucketDto {
     // the history is big enough to be worth clearing (or limiting)
     private Boolean historyLarge;
 
-    // without access: the user's latest request for access (PENDING or REJECTED), if any
-    private String requestStatus;
-    private Date requestedAt;
+    // without access: the admins of the project can be asked for access (by email, so only with mail configured)
+    private Boolean canAskForAccess;
 }
