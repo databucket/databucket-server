@@ -72,10 +72,11 @@ export default function SsoRegistration({ticket, onClose, showError}) {
     return (
         <Paper className="PaperClass" elevation={3}>
             <Typography className="Title" variant="h5">Create an account</Typography>
-            <Box sx={{width: '85%', mb: 1}}>
+            <Box sx={{width: '85%', mb: 3}}>
                 <Typography variant="body2">
-                    You have signed in as <b>{info.email}</b>, but there is no Databucket account for this address
-                    yet. Create one; the administrators will give you access to projects.
+                    Your identity provider gave the email <b>{info.email}</b>. There is no Databucket account for it
+                    yet: create one, and the administrators will give you access to projects. You will sign in with
+                    single sign-on; the email links you to the account.
                 </Typography>
             </Box>
             <FormControl className="LoginInputText" fullWidth>

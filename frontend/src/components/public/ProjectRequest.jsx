@@ -16,7 +16,7 @@ export default function ProjectRequest({projects, selected, onChange, message, o
     return (
         <Box sx={{width: '85%', mt: 1, mb: 1}}>
             <Typography variant="body2" sx={{mb: 0.5}}>
-                Projects you need access to (the administrators will decide):
+                Ask for access to projects:
             </Typography>
             <Box sx={{maxHeight: 180, overflowY: 'auto', pl: 0.5}}>
                 {projects.map(project => (
@@ -38,14 +38,15 @@ export default function ProjectRequest({projects, selected, onChange, message, o
             <TextField
                 fullWidth
                 multiline
-                minRows={2}
-                maxRows={5}
-                variant="standard"
-                label="Message to the administrators (optional)"
+                minRows={3}
+                maxRows={8}
+                variant="outlined"
+                size="small"
+                label="Message (optional)"
                 value={message}
                 onChange={e => onMessageChange(e.target.value.slice(0, MESSAGE_MAX))}
                 helperText={`${message.length}/${MESSAGE_MAX}`}
-                sx={{mt: 1}}
+                sx={{mt: 2}}
             />
         </Box>
     );
