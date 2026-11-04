@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SelectMultiDialog from "../utils/SelectMultiDialog";
 import {getColumnModifiedAt, getColumnModifiedBy} from "../utils/StandardColumns";
 import {getRolesNames} from "../../utils/JsonHelper";
-import SelectMultiRolesLookup from "../lookup/SelectMultiRolesLookup";
+import SelectRoleLookup from "../lookup/SelectRoleLookup";
 import {getUserIcon} from "../../utils/MaterialTableHelper";
 
 SelectUsersDialog.propTypes = {
@@ -19,10 +19,10 @@ export default function SelectUsersDialog(props) {
         {filtering: false, cellStyle: {width: '1%'}, editable: 'never', searchable: false, sorting: false, render: (rowData) => getUserIcon(rowData)},
         {title: 'Name', field: 'username', editable: 'onAdd', filtering: true},
         {
-            title: 'Roles', field: 'rolesIds', filtering: false, sorting: false,
+            title: 'Role', field: 'rolesIds', filtering: false, sorting: false,
             render: rowData => getRolesNames(props.roles, rowData['rolesIds']),
             editComponent: props => (
-                <SelectMultiRolesLookup
+                <SelectRoleLookup
                     rowData={props.rowData}
                     roles={props.roles}
                     onChange={props.onChange}

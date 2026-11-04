@@ -39,7 +39,7 @@ class AuthResponseBuilderSpec extends Specification {
         response.body.token == "token-1"
         response.body.username == "john"
         response.body.project.id == 1
-        response.body.roles == [Constants.ROLE_MEMBER]
+        response.body.roles == [Constants.ROLE_MEMBER, Constants.ROLE_ROBOT]
     }
 
     def "should list the projects of a user with several projects without issuing a token"() {

@@ -58,9 +58,9 @@ class UserServiceIntegrationSpec extends Specification {
 
     def setup() {
         // Get or create roles
-        userRole = roleRepository.findByName("USER")
+        userRole = roleRepository.findByName(Constants.ROLE_MEMBER)
         if (userRole == null) {
-            userRole = new Role(name: "USER")
+            userRole = new Role(name: Constants.ROLE_MEMBER)
             userRole = roleRepository.save(userRole)
         }
 
@@ -103,8 +103,7 @@ class UserServiceIntegrationSpec extends Specification {
 
         then: "UserDetails is returned with correct data"
         userDetails.username == "testuser"
-        userDetails.authorities.size() == 1
-        userDetails.authorities.first().authority == "ROLE_USER"
+        userDetails.authorities*.authority as Set == ["ROLE_MEMBER", "ROLE_ROBOT"] as Set
         userDetails.enabled
     }
 
@@ -358,9 +357,8 @@ class UserServiceIntegrationSpec extends Specification {
         when: "loading user by username"
         def userDetails = userService.loadUserByUsername("multirole")
 
-        then: "all roles are loaded"
-        userDetails.authorities.size() == 2
-        userDetails.authorities*.authority.containsAll(["ROLE_USER", "ROLE_ADMIN"])
+        then: "the highest role counts, with the roles below it"
+        userDetails.authorities*.authority as Set == ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"] as Set
     }
 
     def "should handle disabled user"() {

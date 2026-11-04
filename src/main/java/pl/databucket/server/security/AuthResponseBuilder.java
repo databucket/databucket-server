@@ -73,7 +73,7 @@ public class AuthResponseBuilder {
                 } else {
                     AuthProjectDTO authProjectDto = new AuthProjectDTO();
                     modelMapper.map(project, authProjectDto);
-                    List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
+                    List<String> roles = user.getImpliedRoleNames();
 
                     authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, projectId));
                     authDtoResponse.setProject(authProjectDto);
@@ -103,7 +103,7 @@ public class AuthResponseBuilder {
                 // The project is enabled and not expired
             } else {
                 List<AuthProjectDTO> projects = user.getProjects().stream().map(item -> modelMapper.map(item, AuthProjectDTO.class)).collect(Collectors.toList());
-                List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
+                List<String> roles = user.getImpliedRoleNames();
                 AuthProjectDTO authProjectDto = new AuthProjectDTO();
                 modelMapper.map(project, authProjectDto);
 
@@ -118,7 +118,7 @@ public class AuthResponseBuilder {
                     .map(item -> modelMapper.map(item, AuthProjectDTO.class))
                     .sorted(Comparator.comparing(AuthProjectDTO::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                     .collect(Collectors.toList());
-            List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
+            List<String> roles = user.getImpliedRoleNames();
 
             authDtoResponse.setProjects(projects);
             authDtoResponse.setRoles(roles);
@@ -128,7 +128,7 @@ public class AuthResponseBuilder {
 
             // We haven't got he projectId, and the user is not assigned to any project, but the user is the SUPER user.
         } else if (user.getProjects().isEmpty() && user.isSuperUser()) {
-            List<String> roles = user.getRoles().stream().map(item -> modelMapper.map(item.getName(), String.class)).collect(Collectors.toList());
+            List<String> roles = user.getImpliedRoleNames();
 
             authDtoResponse.setToken(jwtTokenUtil.generateToken(authentication, 0));
             authDtoResponse.setProjects(new ArrayList<>());

@@ -86,7 +86,7 @@ public class ManageUserService {
         newUser.setExpirationDate(manageUserDtoRequest.getExpirationDate());
 
         if (manageUserDtoRequest.getRolesIds() != null)
-            newUser.setRoles(new HashSet<>(roleRepository.findAllById(manageUserDtoRequest.getRolesIds())));
+            newUser.setRoles(new HashSet<>(roleRepository.findAllById(singleRole(manageUserDtoRequest.getRolesIds()))));
 
         if (manageUserDtoRequest.getProjectsIds() != null) {
             List<Project> projects = projectRepository.findAllByDeletedAndIdIn(false, manageUserDtoRequest.getProjectsIds());
@@ -98,6 +98,13 @@ public class ManageUserService {
         AuditLog.log("user.create", "id={} name={}", saved.getId(), saved.getUsername());
 
         return toDto(saved);
+    }
+
+    /** Since 3.12.0 a user has one role (higher roles include the lower ones). */
+    private static Set<Short> singleRole(Set<Short> rolesIds) {
+        if (rolesIds.size() > 1)
+            throw new IllegalArgumentException("A user has one role; higher roles include the lower ones (SUPER > ADMIN > MEMBER > ROBOT).");
+        return rolesIds;
     }
 
     public void signUpUser(SignUpDtoRequest signUpDtoRequest) throws MessagingException {
@@ -243,7 +250,7 @@ public class ManageUserService {
         user.setExpirationDate(manageUserDtoRequest.getExpirationDate());
 
         if (manageUserDtoRequest.getRolesIds() != null)
-            user.setRoles(new HashSet<>(roleRepository.findAllById(manageUserDtoRequest.getRolesIds())));
+            user.setRoles(new HashSet<>(roleRepository.findAllById(singleRole(manageUserDtoRequest.getRolesIds()))));
         else
             user.setRoles(null);
 

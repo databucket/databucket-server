@@ -405,7 +405,7 @@ public class BucketService {
         if (accessForUser)
             return true;
         else {
-            boolean accessByRole = bucket.getRole() != null ? user.getRoles().contains(bucket.getRole()) : bucket.getTeams().size() > 0;
+            boolean accessByRole = bucket.getRole() != null ? user.hasRoleAtLeast(bucket.getRole()) : bucket.getTeams().size() > 0;
             boolean accessByTeam = bucket.getTeams().size() > 0 ? !Collections.disjoint(bucket.getTeams(), user.getTeams()) : bucket.getRole() != null;
             return accessByRole && accessByTeam;
         }

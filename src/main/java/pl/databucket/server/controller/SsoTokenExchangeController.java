@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.configuration.SsoProperties;
 import pl.databucket.server.dto.AuthRespDTO;
 import pl.databucket.server.dto.SsoTokenExchangeReqDTO;
@@ -102,9 +103,9 @@ public class SsoTokenExchangeController {
             AuditLog.log("auth.robot-signin-failed", "user={} reason={}", robot, user == null ? "unknown user" : "disabled");
             return exceptionFormatter.customPublicException("There is no enabled Databucket user " + robot, HttpStatus.UNAUTHORIZED);
         }
-        if (!user.isRobot()) {
-            AuditLog.log("auth.robot-signin-failed", "user={} reason=not a robot", robot);
-            return exceptionFormatter.customPublicException("Only users with the ROBOT role can sign in with a client token", HttpStatus.FORBIDDEN);
+        if (!user.hasRoleAtLeast(Constants.ROLE_ROBOT)) {
+            AuditLog.log("auth.robot-signin-failed", "user={} reason=no role", robot);
+            return exceptionFormatter.customPublicException("The user has no role", HttpStatus.FORBIDDEN);
         }
 
         try {
