@@ -14,7 +14,7 @@ export default function ProjectRequest({projects, selected, onChange, message, o
     const toggle = id => onChange(selected.includes(id) ? selected.filter(item => item !== id) : [...selected, id]);
 
     return (
-        <Box sx={{width: '85%', mt: 1, mb: 1}}>
+        <Box sx={{width: '85%', mt: 3, mb: 1}}>
             <Typography variant="body2" sx={{mb: 0.5}}>
                 Ask for access to projects:
             </Typography>
@@ -46,7 +46,7 @@ export default function ProjectRequest({projects, selected, onChange, message, o
                 value={message}
                 onChange={e => onMessageChange(e.target.value.slice(0, MESSAGE_MAX))}
                 helperText={`${message.length}/${MESSAGE_MAX}`}
-                sx={{mt: 2}}
+                sx={{mt: 3}}
             />
         </Box>
     );

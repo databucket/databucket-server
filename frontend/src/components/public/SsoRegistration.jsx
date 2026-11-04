@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, FormControl, Input, InputLabel, Link, Paper, Typography} from "@mui/material";
+import {Box, Button, FormControl, IconButton, Input, InputLabel, Link, Paper, Tooltip, Typography} from "@mui/material";
+import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {handleLoginErrors} from "../../utils/FetchHelper";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import ProjectRequest from "./ProjectRequest";
@@ -71,15 +72,21 @@ export default function SsoRegistration({ticket, onClose, showError}) {
     const nameValid = username.trim().length >= 1 && username.trim().length <= 50;
     return (
         <Paper className="PaperClass" elevation={3}>
-            <Typography className="Title" variant="h5">Create an account</Typography>
-            <Box sx={{width: '85%', mb: 3}}>
-                <Typography variant="body2">
-                    Your identity provider gave the email <b>{info.email}</b>. There is no Databucket account for it
-                    yet: create one, and the administrators will give you access to projects. You will sign in with
-                    single sign-on; the email links you to the account.
-                </Typography>
+            <Box className="Title" sx={{display: 'flex', alignItems: 'center'}}>
+                <Typography variant="h5">Create an account</Typography>
+                <Tooltip placement="bottom" title={
+                    <span>
+                        Your identity provider gave the email <b>{info.email}</b>. There is no Databucket account for
+                        it yet: create one, and the administrators will give you access to projects. You will sign in
+                        with single sign-on; the email links you to the account.
+                    </span>
+                }>
+                    <IconButton size="small" sx={{ml: 1}} aria-label="About the account">
+                        <InfoIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
             </Box>
-            <FormControl className="LoginInputText" fullWidth>
+            <FormControl sx={{width: '85%'}}>
                 <InputLabel htmlFor="sso-registration-username">Username</InputLabel>
                 <Input
                     id="sso-registration-username"
