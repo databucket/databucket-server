@@ -75,11 +75,10 @@ export default function SsoRegistration({ticket, onClose, showError}) {
             <Box className="Title" sx={{display: 'flex', alignItems: 'center'}}>
                 <Typography variant="h5">Create an account</Typography>
                 <Tooltip placement="bottom" title={
-                    <span>
+                    <Typography variant="body2" sx={{p: 0.5}}>
                         Your identity provider gave the email <b>{info.email}</b>. There is no Databucket account for
-                        it yet: create one, and the administrators will give you access to projects. You will sign in
-                        with single sign-on; the email links you to the account.
-                    </span>
+                        it yet: create one, and the administrators will give you access to projects.
+                    </Typography>
                 }>
                     <IconButton size="small" sx={{ml: 1}} aria-label="About the account">
                         <InfoIcon fontSize="small"/>
