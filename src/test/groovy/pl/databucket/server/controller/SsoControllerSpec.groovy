@@ -14,7 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import pl.databucket.server.security.SsoClientRegistrationRepository
-import pl.databucket.server.security.TokenProvider
+import pl.databucket.server.entity.Project
+import pl.databucket.server.security.SsoCodeService
 import pl.databucket.server.service.UserService
 import spock.lang.Specification
 import spock.lang.Subject
@@ -26,7 +27,7 @@ class SsoControllerSpec extends Specification {
 
     SsoProperties ssoProperties = new SsoProperties(enabled: true, provider: "keycloak", name: "Company SSO")
     ObjectProvider<SsoClientRegistrationRepository> registrationProvider = Mock()
-    TokenProvider tokenProvider = Mock()
+    SsoCodeService ssoCodeService = Mock()
     UserRepository userRepository = Mock()
     UserService userService = Mock()
     AuthResponseBuilder authResponseBuilder = Mock()
@@ -38,7 +39,7 @@ class SsoControllerSpec extends Specification {
         controller = new SsoController()
         setField(controller, "ssoProperties", ssoProperties)
         setField(controller, "clientRegistrationRepository", registrationProvider)
-        setField(controller, "tokenProvider", tokenProvider)
+        setField(controller, "ssoCodeService", ssoCodeService)
         setField(controller, "userRepository", userRepository)
         setField(controller, "userService", userService)
         setField(controller, "authResponseBuilder", authResponseBuilder)
@@ -118,7 +119,7 @@ class SsoControllerSpec extends Specification {
             getUsername() >> "john"
             getAuthorities() >> []
         }
-        tokenProvider.getUsernameFromSsoCode("the-code") >> "john"
+        ssoCodeService.redeem("the-code") >> "john"
         userRepository.findWithProjectsAndRolesByUsername("john") >> user
         userService.loadUserByUsername("john") >> details
 
@@ -131,9 +132,59 @@ class SsoControllerSpec extends Specification {
         response.body.token == "token"
     }
 
+    @Unroll
+    def "should send a new code when the user #situation"() {
+        given: "a user with two projects"
+        def user = new User(username: "john", enabled: true, projects: [new Project(id: 1), new Project(id: 2)] as Set)
+        ssoCodeService.redeem("the-code") >> "john"
+        ssoCodeService.issue("john") >> "next-code"
+        userRepository.findWithProjectsAndRolesByUsername("john") >> user
+        userService.loadUserByUsername("john") >> Stub(UserDetails) { getAuthorities() >> [] }
+        authResponseBuilder.build(*_) >> new ResponseEntity<>(body, status)
+
+        when:
+        def response = controller.exchangeCode(new SsoTokenReqDTO(code: "the-code", projectId: projectId))
+
+        then: "the used code can't be sent again, so the choice goes with the new one"
+        response.body.code == "next-code"
+
+        where:
+        situation                                | projectId | body                                                       | status
+        "has to choose a project"                | null      | new AuthRespDTO(projects: [])                              | HttpStatus.OK
+        "chose a project that can't be entered"  | 2         | new AuthRespDTO(message: "The project is disabled!")       | HttpStatus.FORBIDDEN
+    }
+
+    def "should send no new code once the user is in a project"() {
+        given:
+        def user = new User(username: "john", enabled: true, projects: [new Project(id: 1), new Project(id: 2)] as Set)
+        ssoCodeService.redeem("the-code") >> "john"
+        userRepository.findWithProjectsAndRolesByUsername("john") >> user
+        userService.loadUserByUsername("john") >> Stub(UserDetails) { getAuthorities() >> [] }
+        authResponseBuilder.build(*_) >> ResponseEntity.ok(new AuthRespDTO(token: "token", project: new pl.databucket.server.dto.AuthProjectDTO()))
+
+        when:
+        def response = controller.exchangeCode(new SsoTokenReqDTO(code: "the-code", projectId: 2))
+
+        then:
+        0 * ssoCodeService.issue(_)
+        response.body.code == null
+    }
+
+    def "should refuse a code that was already used"() {
+        given:
+        ssoCodeService.redeem("used") >> { throw new IllegalArgumentException("SSO code already used") }
+
+        when:
+        def response = controller.exchangeCode(new SsoTokenReqDTO(code: "used"))
+
+        then:
+        0 * authResponseBuilder.build(*_)
+        response.statusCode == HttpStatus.UNAUTHORIZED
+    }
+
     def "should refuse an invalid or expired code"() {
         given:
-        tokenProvider.getUsernameFromSsoCode("bad") >> { throw new IllegalArgumentException("Invalid SSO code") }
+        ssoCodeService.redeem("bad") >> { throw new IllegalArgumentException("Invalid SSO code") }
 
         when:
         def response = controller.exchangeCode(new SsoTokenReqDTO(code: "bad"))
@@ -145,7 +196,7 @@ class SsoControllerSpec extends Specification {
 
     def "should refuse a user disabled after the code was issued"() {
         given:
-        tokenProvider.getUsernameFromSsoCode("the-code") >> "john"
+        ssoCodeService.redeem("the-code") >> "john"
         userRepository.findWithProjectsAndRolesByUsername("john") >> new User(username: "john", enabled: false)
 
         when:
@@ -164,7 +215,7 @@ class SsoControllerSpec extends Specification {
         def response = controller.exchangeCode(new SsoTokenReqDTO(code: "the-code"))
 
         then:
-        0 * tokenProvider.getUsernameFromSsoCode(_)
+        0 * ssoCodeService.redeem(_)
         response.statusCode == HttpStatus.NOT_FOUND
     }
 

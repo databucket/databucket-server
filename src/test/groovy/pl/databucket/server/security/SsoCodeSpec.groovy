@@ -23,7 +23,33 @@ class SsoCodeSpec extends Specification {
         def code = tokenProvider.generateSsoCode("john", 60)
 
         then:
-        tokenProvider.getUsernameFromSsoCode(code) == "john"
+        tokenProvider.parseSsoCode(code).username() == "john"
+    }
+
+    def "should give every SSO code its own id and expiry"() {
+        when: "two codes are issued for the same user"
+        def first = tokenProvider.parseSsoCode(tokenProvider.generateSsoCode("john", 60))
+        def second = tokenProvider.parseSsoCode(tokenProvider.generateSsoCode("john", 60))
+
+        then: "they can be told apart when used"
+        first.id() != null
+        first.id() != second.id()
+        first.expiresAt().after(new Date())
+    }
+
+    def "should reject an SSO code without an id (issued before codes were single-use)"() {
+        given:
+        def code = io.jsonwebtoken.Jwts.builder()
+                .claim(TokenProvider.SSO_USER, "john")
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor("test-signing-key-that-is-long-enough-for-hs256".bytes))
+                .compact()
+
+        when:
+        tokenProvider.parseSsoCode(code)
+
+        then:
+        thrown(IllegalArgumentException)
     }
 
     def "should reject an expired SSO code"() {
@@ -31,7 +57,7 @@ class SsoCodeSpec extends Specification {
         def code = tokenProvider.generateSsoCode("john", -1)
 
         when:
-        tokenProvider.getUsernameFromSsoCode(code)
+        tokenProvider.parseSsoCode(code)
 
         then:
         thrown(IllegalArgumentException)
@@ -44,7 +70,7 @@ class SsoCodeSpec extends Specification {
         def code = other.generateSsoCode("john", 60)
 
         when:
-        tokenProvider.getUsernameFromSsoCode(code)
+        tokenProvider.parseSsoCode(code)
 
         then:
         thrown(IllegalArgumentException)
@@ -56,7 +82,7 @@ class SsoCodeSpec extends Specification {
         def accessToken = tokenProvider.generateToken(auth, 1)
 
         when:
-        tokenProvider.getUsernameFromSsoCode(accessToken)
+        tokenProvider.parseSsoCode(accessToken)
 
         then:
         thrown(IllegalArgumentException)
@@ -67,7 +93,7 @@ class SsoCodeSpec extends Specification {
         def confirmation = tokenProvider.packToJwts("john@example.com")
 
         when:
-        tokenProvider.getUsernameFromSsoCode(confirmation)
+        tokenProvider.parseSsoCode(confirmation)
 
         then:
         thrown(IllegalArgumentException)

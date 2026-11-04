@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import pl.databucket.server.configuration.SsoProperties;
+import pl.databucket.server.dto.AuthRespDTO;
 import pl.databucket.server.dto.SsoConfigDTO;
 import pl.databucket.server.dto.SsoTokenReqDTO;
 import pl.databucket.server.entity.User;
@@ -25,7 +26,7 @@ import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.AuthResponseBuilder;
 import pl.databucket.server.security.SsoClientRegistrationRepository;
-import pl.databucket.server.security.TokenProvider;
+import pl.databucket.server.security.SsoCodeService;
 import pl.databucket.server.service.UserService;
 
 import java.net.URI;
@@ -45,7 +46,7 @@ public class SsoController {
     private ObjectProvider<SsoClientRegistrationRepository> clientRegistrationRepository;
 
     @Autowired
-    private TokenProvider tokenProvider;
+    private SsoCodeService ssoCodeService;
 
     @Autowired
     private UserRepository userRepository;
@@ -107,7 +108,8 @@ public class SsoController {
     @Operation(
             summary = "Exchange SSO code",
             description = "Exchanges the code from the SSO login for the same response as /api/public/signin. "
-                    + "When the user has several projects the response lists them; send the code again with the chosen projectId."
+                    + "A code can be exchanged only once. When the user has several projects the response lists them together "
+                    + "with a new code; send that code with the chosen projectId."
     )
     @PostMapping(value = "/token", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> exchangeCode(@RequestBody SsoTokenReqDTO ssoTokenReqDTO) {
@@ -116,7 +118,7 @@ public class SsoController {
 
         String username;
         try {
-            username = tokenProvider.getUsernameFromSsoCode(ssoTokenReqDTO.getCode());
+            username = ssoCodeService.redeem(ssoTokenReqDTO.getCode());
         } catch (IllegalArgumentException e) {
             AuditLog.log("auth.sso-signin-failed", "reason={}", e.getMessage());
             return exceptionFormatter.customPublicException("The sign-in has expired. Please sign in again.", HttpStatus.UNAUTHORIZED);
@@ -133,7 +135,11 @@ public class SsoController {
             UserDetails userDetails = userService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            return authResponseBuilder.build(user, authentication, ssoTokenReqDTO.getProjectId(), false, "auth.sso-signin");
+            ResponseEntity<AuthRespDTO> response = authResponseBuilder.build(user, authentication, ssoTokenReqDTO.getProjectId(), false, "auth.sso-signin");
+            // the user still has to choose a project (or chose one that can't be entered): a new code for the next try
+            if (response.getBody() != null && response.getBody().getProject() == null && user.getProjects() != null && user.getProjects().size() > 1)
+                response.getBody().setCode(ssoCodeService.issue(username));
+            return response;
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

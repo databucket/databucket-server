@@ -33,6 +33,9 @@ public class AuthRespDTO {
     @Schema(description = "The user's projects to choose from, when the projectId was left out and the user has several")
     private List<AuthProjectDTO> projects;
 
+    @Schema(description = "SSO sign-in only: a new single-use code to send with the chosen projectId")
+    private String code;
+
     @Schema(description = "Selected project details")
     private AuthProjectDTO project;
 

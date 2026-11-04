@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useState} from "react";
+import React, {forwardRef, useEffect, useRef, useState} from "react";
 import "./LoginPage.css";
 import {
     Button, Avatar, Input, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemText,
@@ -66,6 +66,7 @@ export default function LoginPage() {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [ssoConfig, setSsoConfig] = useState(null);
     const [ssoCode, setSsoCode] = useState(null);
+    const ssoCodeTaken = useRef(false); // a code works once: don't exchange it twice (React StrictMode runs effects twice)
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
@@ -102,8 +103,8 @@ export default function LoginPage() {
         const ssoError = searchParams.get('sso_error');
         if (code != null || ssoError != null)
             navigate({search: ''}, {replace: true}); // keep the code out of the address bar and history
-        if (code != null) {
-            setSsoCode(code);
+        if (code != null && !ssoCodeTaken.current) {
+            ssoCodeTaken.current = true;
             ssoSignIn(code, null);
         } else if (ssoError != null) {
             setMessageBox({open: true, severity: 'error', title: 'Login failed', message: SSO_ERRORS[ssoError] || SSO_ERRORS.idp_error});
@@ -124,7 +125,12 @@ export default function LoginPage() {
             body: JSON.stringify(body),
             headers: {'Content-Type': 'application/json'}
         })
-            .then(handleLoginErrors)
+            .then(response => {
+                // an SSO code works once; to choose a project the server sends a new one (also with a refusal)
+                if (sso)
+                    response.clone().json().then(data => setSsoCode(data.code || null)).catch(() => setSsoCode(null));
+                return handleLoginErrors(response);
+            })
             .then(data => {
                 logOut();
                 if (sso)

@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -117,6 +118,7 @@ public class TokenProvider implements Serializable {
     public String generateSsoCode(String username, long ttlSeconds) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .claim(SSO_USER, username)
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + ttlSeconds * 1000))
@@ -124,19 +126,26 @@ public class TokenProvider implements Serializable {
                 .compact();
     }
 
+    /** The content of a valid SSO code: the user, the code's own id (jti) and when it expires. */
+    public record SsoCode(String username, String id, Date expiresAt) {
+    }
+
     /**
-     * @return the username the code was issued for
+     * Checks the signature and expiry of an SSO code; whether it was already used is checked by {@link SsoCodeService}.
+     *
      * @throws IllegalArgumentException when the code is invalid, expired or not an SSO code
      */
-    public String getUsernameFromSsoCode(String code) {
+    public SsoCode parseSsoCode(String code) {
+        Claims claims;
         try {
-            String username = getAllClaimsFromToken(code).get(SSO_USER, String.class);
-            if (username == null)
-                throw new IllegalArgumentException("Not an SSO code");
-            return username;
-        } catch (JwtException e) {
+            claims = getAllClaimsFromToken(code);
+        } catch (JwtException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid SSO code", e);
         }
+        String username = claims.get(SSO_USER, String.class);
+        if (username == null || claims.getId() == null)
+            throw new IllegalArgumentException("Not an SSO code");
+        return new SsoCode(username, claims.getId(), claims.getExpiration());
     }
 
     public String unpackFromJwts(String jwts) {
