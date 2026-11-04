@@ -11,11 +11,38 @@
       "secret": "databucket-secret",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["http://databucket.localhost/login/oauth2/code/oidc"],
-      "webOrigins": ["http://databucket.localhost"],
+      "redirectUris": [
+        "http://databucket.localhost/login/oauth2/code/oidc"
+      ],
+      "webOrigins": [
+        "http://databucket.localhost"
+      ],
       "attributes": {
         "post.logout.redirect.uris": "http://databucket.localhost/login"
       }
+    },
+    {
+      "clientId": "tests-robot",
+      "name": "Robot of the tests (client credentials)",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "tests-robot-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "protocolMappers": [
+        {
+          "name": "audience databucket",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "databucket",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
     }
   ],
   "users": [

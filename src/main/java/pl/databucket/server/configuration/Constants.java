@@ -5,6 +5,8 @@ public class Constants {
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     public static final int NAME_MIN = 1;
     public static final int NAME_MAX = 30;
+    /** User names, also stored as created_by / modified_by; fits the client ID (a GUID) of a robot from Entra ID. */
+    public static final int USERNAME_MAX = 50;
     public static final int DESCRIPTION_MAX = 200;
 
     // Projects

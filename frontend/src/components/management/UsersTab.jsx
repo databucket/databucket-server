@@ -71,7 +71,7 @@ export default function UsersTab() {
     const {projects, fetchProjects, notifyProjects} = projectsContext;
     const changeableFields = ['id', 'username', 'email', 'description', 'enabled', 'expirationDate', 'rolesIds', 'projectsIds'];
     const userSpecification = {
-        username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']},
+        username: {title: 'Username', check: ['notEmpty', 'min1', 'max50']},
         email: {title: 'Email', check: ['email']},
         description: {title: 'Description', check: ['max200']}
     };

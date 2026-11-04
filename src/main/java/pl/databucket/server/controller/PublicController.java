@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import pl.databucket.server.configuration.AppProperties;
+import pl.databucket.server.configuration.SsoProperties;
 import pl.databucket.server.dto.*;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ExceptionFormatter;
@@ -61,7 +62,18 @@ public class PublicController {
     @Autowired
     private AuthResponseBuilder authResponseBuilder;
 
+    @Autowired
+    private SsoProperties ssoProperties;
+
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
+
+    static final String PASSWORD_LOGIN_DISABLED = "Password sign-in is disabled. Use single sign-on.";
+
+    /** sso.password-login: false - no sign-in, sign-up or password reset with a password. */
+    private ResponseEntity<?> passwordLoginDisabled(String auditEvent, String details) {
+        AuditLog.log(auditEvent, "{}reason=password sign-in disabled", details != null ? details + " " : "");
+        return exceptionFormatter.customPublicException(PASSWORD_LOGIN_DISABLED, HttpStatus.FORBIDDEN);
+    }
 
 
     @Operation(
@@ -75,7 +87,9 @@ public class PublicController {
                     token; sign in again with the chosen projectId.
 
                     The token expires after 24 hours by default; then sign in again. Accounts that sign in through \
-                    single sign-on can't use the API; use an account with a password, e.g. with the ROBOT role."""
+                    single sign-on can't use the API; use an account with the ROBOT role: with a password, or with a client \
+                    token from the SSO provider (POST /api/public/sso/token-exchange). When single sign-on is on and \
+                    password sign-in is switched off (sso.password-login: false), this endpoint answers 403."""
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -101,6 +115,8 @@ public class PublicController {
     public ResponseEntity<?> signIn(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The credentials and, optionally, the project", required = true)
             @RequestBody AuthReqDTO authReqDTO) {
+        if (ssoProperties.isPasswordLoginDisabled())
+            return passwordLoginDisabled("auth.signin-failed", "user=" + authReqDTO.getUsername());
         User user = userRepository.findWithProjectsAndRolesByUsername(authReqDTO.getUsername());
         if (user == null) {
             AuditLog.log("auth.signin-failed", "user={} reason=unknown user", authReqDTO.getUsername());
@@ -136,6 +152,8 @@ public class PublicController {
     public ResponseEntity<?> forgotPassword(
             @Parameter(description = "Forgot password request payload", required = true)
             @RequestBody ForgotPasswordReqDTO forgotPasswordReqDTO) {
+        if (ssoProperties.isPasswordLoginDisabled())
+            return passwordLoginDisabled("auth.forgot-password-refused", null);
         try {
             manageUserService.forgotPasswordMessage(forgotPasswordReqDTO);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -166,6 +184,8 @@ public class PublicController {
     public ResponseEntity<?> forgotPasswordConfirmation(
             @Parameter(description = "JWT token for password reset", required = true)
             @PathVariable String jwts) {
+        if (ssoProperties.isPasswordLoginDisabled())
+            return passwordLoginDisabled("auth.forgot-password-refused", null);
         try {
             manageUserService.resetAndSendPassword(jwts);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -195,6 +215,8 @@ public class PublicController {
     public ResponseEntity<?> signUp(
             @Parameter(description = "Sign up request payload", required = true)
             @RequestBody SignUpDtoRequest signUpDtoRequest) {
+        if (ssoProperties.isPasswordLoginDisabled())
+            return passwordLoginDisabled("auth.sign-up-refused", "user=" + signUpDtoRequest.getUsername());
         try {
             if (appProperties.getRecaptchaEnabled() && !checkReCaptcha(signUpDtoRequest.getRecaptchaToken()))
                 return exceptionFormatter.customPublicException("Anti-bot verification blocked your request!", HttpStatus.FORBIDDEN);
@@ -251,6 +273,8 @@ public class PublicController {
     public ResponseEntity<?> signUpConfirmation(
             @Parameter(description = "JWT token for sign up confirmation", required = true)
             @PathVariable String jwts) {
+        if (ssoProperties.isPasswordLoginDisabled())
+            return passwordLoginDisabled("auth.sign-up-refused", null);
         try {
             manageUserService.signUpUserConfirmation(jwts);
             return new ResponseEntity<>(HttpStatus.OK);

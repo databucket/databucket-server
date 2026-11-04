@@ -14,7 +14,7 @@ import java.util.Set;
 public class ManageUserDtoRequest {
 
     @NotEmpty
-    @Size(min = Constants.NAME_MIN, max = Constants.NAME_MAX)
+    @Size(min = Constants.NAME_MIN, max = Constants.USERNAME_MAX)
     private String username;
     private String description;
     private String email;

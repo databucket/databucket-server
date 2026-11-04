@@ -82,6 +82,15 @@ sso:
   # Logging out of Databucket also logs out of the provider (Microsoft/Google: of the whole account).
   # <base url>/login must be allowed as the client's post logout redirect URI at the provider.
   provider-logout: false
+  # false = no password sign-in, sign-up or password reset at all (all roles, also SUPER and ROBOT).
+  # Robots then sign in with a client token from the provider (POST /api/public/sso/token-exchange).
+  # To get in when SSO fails: stop Databucket, set it back to true and sign in with a password.
+  password-login: true
+  # Robots (client credentials grant): the token claim whose value is the robot's Databucket user name
+  # (azp = the client ID, for Keycloak and Entra ID; Okta: cid), and the audience the token must have
+  # (empty = client-id).
+  robot-claim: azp
+  robot-audience:
 
 recaptcha:
   enabled: false

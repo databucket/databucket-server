@@ -21,7 +21,7 @@ import java.util.Date;
 public class Auditable<U>
 {
     @CreatedBy
-    @Column(name = "created_by", length = Constants.NAME_MAX)
+    @Column(name = "created_by", length = Constants.USERNAME_MAX)
     private U createdBy;
 
     @CreatedDate
@@ -30,7 +30,7 @@ public class Auditable<U>
     private Date createdAt;
 
     @LastModifiedBy
-    @Column(name = "modified_by", length = Constants.NAME_MAX)
+    @Column(name = "modified_by", length = Constants.USERNAME_MAX)
     private U modifiedBy;
 
     @LastModifiedDate
