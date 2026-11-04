@@ -52,7 +52,7 @@ export default function UsersTab() {
 
     const changeableFields = ['id', 'username', 'rolesIds', 'teamsIds'];
     const userSpecification = {
-        username: {title: 'Username', check: ['notEmpty', 'min1', 'max30']}
+        username: {title: 'Username', check: ['notEmpty', 'min1', 'max50']}
     };
 
     useEffect(() => {

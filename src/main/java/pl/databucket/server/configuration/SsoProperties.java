@@ -47,4 +47,26 @@ public class SsoProperties {
      * out of their whole account, not only Databucket.
      */
     private boolean providerLogout = false;
+
+    /**
+     * Whether users can still sign in with a user name and password while SSO is enabled. When false the server
+     * refuses every password sign-in (all roles, also SUPER and ROBOT), sign-up and forgotten password;
+     * robots sign in with a client token from the provider instead (POST /api/public/sso/token-exchange).
+     * Only applies when SSO is enabled.
+     */
+    private boolean passwordLogin = true;
+
+    /**
+     * Claim of a client token (client credentials grant) that names the robot; its value must equal the user name
+     * of a Databucket user with the ROBOT role. azp works for Keycloak and Entra ID; for Okta use cid.
+     */
+    private String robotClaim = "azp";
+
+    /** Audience a robot's client token must be issued for; when empty, the client-id. */
+    private String robotAudience;
+
+    /** True when SSO is on and password sign-in is switched off. */
+    public boolean isPasswordLoginDisabled() {
+        return enabled && !passwordLogin;
+    }
 }

@@ -28,7 +28,7 @@ public class User extends Auditable<String> implements Serializable {
     @Column(name = "user_id", updatable = false, nullable = false)
     private long id;
 
-    @Column(name = "user_name", length = Constants.NAME_MAX, unique = true)
+    @Column(name = "user_name", length = Constants.USERNAME_MAX, unique = true)
     private String username;
 
     @Column(length = Constants.DESCRIPTION_MAX)
@@ -107,6 +107,10 @@ public class User extends Auditable<String> implements Serializable {
             return teams.stream().map(Team::getId).collect(Collectors.toSet());
         else
             return null;
+    }
+
+    public boolean isRobot() {
+        return roles != null && roles.stream().anyMatch(role -> role.getName().equals(Constants.ROLE_ROBOT));
     }
 
     public boolean isSuperUser() {

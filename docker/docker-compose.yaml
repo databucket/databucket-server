@@ -11,6 +11,14 @@
 # To try SSO: sign in to Databucket as super, give a user the email demo@databucket.localhost and
 # assign a project, then use "Sign in with Keycloak" as demo / demo.
 #
+# A robot without a password: create a ROBOT user named tests-robot with a project, then get a client token
+# from Keycloak and exchange it for a Databucket token (see the wiki page Single sign-on, Robots):
+#   curl -d grant_type=client_credentials -d client_id=tests-robot -d client_secret=tests-robot-secret \
+#        http://auth.localhost/realms/databucket/protocol/openid-connect/token
+#   curl -H "Content-Type: application/json" -d '{"token": "<access_token>"}' \
+#        http://databucket.localhost/api/public/sso/token-exchange
+# To switch the password sign-in off: SSO_PASSWORD_LOGIN=false docker compose up -d
+#
 # Logs in Kibana (Elasticsearch + Kibana + Filebeat): see docker-compose.elastic.yaml.
 services:
   postgres:
@@ -44,6 +52,7 @@ services:
       SSO_ISSUER_URI: http://auth.localhost/realms/databucket
       SSO_CLIENT_ID: databucket
       SSO_CLIENT_SECRET: databucket-secret
+      SSO_PASSWORD_LOGIN: ${SSO_PASSWORD_LOGIN:-true}
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
