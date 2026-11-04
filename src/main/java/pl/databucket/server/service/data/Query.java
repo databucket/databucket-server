@@ -161,6 +161,13 @@ public class Query {
         return this;
     }
 
+    /** A WHERE condition built by API version 2 ({@link pl.databucket.server.service.data.v2.LogicSql}); null for none. */
+    public Query whereSql(String condition) {
+        if (condition != null && !condition.isBlank())
+            query += " WHERE " + condition;
+        return this;
+    }
+
     public Query where(Condition condition, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
         if (condition != null) {
             query += " WHERE " + generateConditionString("n", condition, paramMap);

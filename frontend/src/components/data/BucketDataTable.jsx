@@ -474,10 +474,13 @@ export default function BucketDataTable() {
             }
         }
 
+        // API version 2 takes JsonLogic only: the search and the column filters too, combined with the rich filter
+        const parts = consolidateAllConditions(query.search, query.filters).map(conditionToLogic);
+        if (state.activeLogic != null && Object.keys(state.activeLogic).length > 0)
+            parts.push(state.activeLogic);
         const payload = {
             columns: getFetchColumns(state.tableColumns),
-            conditions: consolidateAllConditions(query.search, query.filters),
-            logic: state.activeLogic
+            logic: parts.length > 0 ? {and: parts} : null
         }
         return {url, payload};
     }
@@ -681,6 +684,12 @@ export default function BucketDataTable() {
     const onCloseDataHistoryDialog = () => {
         setHistoryState({...historyState, open: false});
     }
+
+    // {left_value: '$.a', operator: 'like', right_value: '%x%'} -> {"like": [{"var": "$.a"}, "%x%"]}
+    const CONDITION_OPERATORS = {'like': 'like', '=': '==', 'in': 'in'};
+    const conditionToLogic = condition => ({
+        [CONDITION_OPERATORS[condition.operator]]: [{var: condition.left_value}, condition.right_value]
+    });
 
     const consolidateAllConditions = (tableSearch, tableFilters) => {
         let allConditions = [];
