@@ -53,6 +53,28 @@ class SsoCodeServiceIntegrationSpec extends Specification {
         ssoCodeService.redeem(ssoCodeService.issue("john")) == "john"
     }
 
+    def "should create an account once per registration ticket"() {
+        given:
+        def ticket = ssoCodeService.issueRegistrationTicket("john@example.com")
+
+        expect: "the form can be shown several times"
+        ssoCodeService.readRegistrationTicket(ticket) == "john@example.com"
+        ssoCodeService.readRegistrationTicket(ticket) == "john@example.com"
+
+        and: "the account is created once"
+        ssoCodeService.redeemRegistrationTicket(ticket) == "john@example.com"
+
+        when: "the ticket is used again, to show the form or to create the account"
+        ssoCodeService.readRegistrationTicket(ticket)
+        then:
+        thrown(IllegalArgumentException)
+
+        when:
+        ssoCodeService.redeemRegistrationTicket(ticket)
+        then:
+        thrown(IllegalArgumentException)
+    }
+
     def "should remove used codes once they have expired"() {
         given: "a used code that expired a minute ago"
         usedSsoCodeRepository.saveAndFlush(new UsedSsoCode("expired-code", new Date(System.currentTimeMillis() - 60_000)))

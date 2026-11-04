@@ -36,13 +36,49 @@ public class SsoCodeService {
      */
     public String redeem(String code) {
         TokenProvider.SsoCode ssoCode = tokenProvider.parseSsoCode(code);
+        markUsed(ssoCode.id(), ssoCode.expiresAt(), "SSO code already used");
+        return ssoCode.username();
+    }
+
+    /** How long someone without an account has to fill in the registration after the SSO login. */
+    public static final long REGISTRATION_TTL_SECONDS = 15 * 60;
+
+    public String issueRegistrationTicket(String email) {
+        return tokenProvider.generateSsoRegistrationTicket(email, REGISTRATION_TTL_SECONDS);
+    }
+
+    /**
+     * Reads a registration ticket without using it up (to show the registration form).
+     *
+     * @return the email the ticket was issued for
+     * @throws IllegalArgumentException when the ticket is invalid, expired or already used
+     */
+    public String readRegistrationTicket(String ticket) {
+        TokenProvider.SsoRegistrationTicket parsed = tokenProvider.parseSsoRegistrationTicket(ticket);
+        if (usedSsoCodeRepository.existsById(parsed.id()))
+            throw new IllegalArgumentException("Registration ticket already used");
+        return parsed.email();
+    }
+
+    /**
+     * Uses up a registration ticket: the account is created once.
+     *
+     * @return the email the ticket was issued for
+     * @throws IllegalArgumentException when the ticket is invalid, expired or already used
+     */
+    public String redeemRegistrationTicket(String ticket) {
+        TokenProvider.SsoRegistrationTicket parsed = tokenProvider.parseSsoRegistrationTicket(ticket);
+        markUsed(parsed.id(), parsed.expiresAt(), "Registration ticket already used");
+        return parsed.email();
+    }
+
+    private void markUsed(String id, Date expiresAt, String usedMessage) {
         usedSsoCodeRepository.deleteExpired(new Date());
         try {
             // no surrounding transaction: a duplicate key fails this insert only
-            usedSsoCodeRepository.saveAndFlush(new UsedSsoCode(ssoCode.id(), ssoCode.expiresAt()));
+            usedSsoCodeRepository.saveAndFlush(new UsedSsoCode(id, expiresAt));
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("SSO code already used");
+            throw new IllegalArgumentException(usedMessage);
         }
-        return ssoCode.username();
     }
 }

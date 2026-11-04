@@ -9,3 +9,7 @@ http://databucket.localhost {
 http://auth.localhost {
   reverse_proxy keycloak:8080
 }
+
+http://mail.localhost {
+  reverse_proxy mailpit:8025
+}

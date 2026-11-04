@@ -45,6 +45,9 @@ public class SsoAuthenticationHandler implements AuthenticationSuccessHandler, A
     @Autowired
     private TokenProvider tokenProvider;
 
+    @Autowired
+    private SsoCodeService ssoCodeService;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         invalidateSession(request);
@@ -64,7 +67,13 @@ public class SsoAuthenticationHandler implements AuthenticationSuccessHandler, A
 
         User user = userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
-            refuse(request, response, email, UNKNOWN_USER);
+            if (ssoProperties.isSelfRegistrationAllowed(email)) {
+                AuditLog.log("auth.sso-registration-offered", "email={}", email);
+                String ticket = ssoCodeService.issueRegistrationTicket(email);
+                response.sendRedirect(request.getContextPath() + "/login/sso?register=" + ticket);
+            } else {
+                refuse(request, response, email, UNKNOWN_USER);
+            }
             return;
         }
         if (!user.getEnabled()) {

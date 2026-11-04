@@ -65,6 +65,28 @@ public class SsoProperties {
     /** Audience a robot's client token must be issued for; when empty, the client-id. */
     private String robotAudience;
 
+    /**
+     * Whether someone who signs in through SSO without a Databucket account can create one (role MEMBER, no projects,
+     * no password). While registering they can pick public projects; the SUPER admins get an email.
+     */
+    private boolean selfRegistration = false;
+
+    /** Email domains allowed to register themselves, e.g. example.com; empty = anyone the provider lets in. */
+    private List<String> selfRegistrationDomains = List.of();
+
+    /** Whether the person with this email (already signed in at the provider) may create an account. */
+    public boolean isSelfRegistrationAllowed(String email) {
+        if (!enabled || !selfRegistration || email == null)
+            return false;
+        if (selfRegistrationDomains == null || selfRegistrationDomains.stream().allMatch(d -> d == null || d.isBlank()))
+            return true;
+        String domain = email.substring(email.lastIndexOf('@') + 1).toLowerCase();
+        return selfRegistrationDomains.stream()
+                .filter(d -> d != null && !d.isBlank())
+                .map(d -> d.trim().toLowerCase().replaceFirst("^@", ""))
+                .anyMatch(domain::equals);
+    }
+
     /** True when SSO is on and password sign-in is switched off. */
     public boolean isPasswordLoginDisabled() {
         return enabled && !passwordLogin;

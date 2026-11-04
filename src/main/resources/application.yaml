@@ -91,6 +91,11 @@ sso:
   # (empty = client-id).
   robot-claim: azp
   robot-audience:
+  # Someone who signs in through SSO without a Databucket account can create one (MEMBER, no projects, no password).
+  # While registering they can pick projects marked as Public and write a message; the SUPER admins get an email.
+  self-registration: false
+  # Email domains allowed to register, e.g. [example.com]; empty = anyone the provider lets in
+  self-registration-domains: []
 
 recaptcha:
   enabled: false

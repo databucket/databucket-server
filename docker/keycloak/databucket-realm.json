@@ -60,6 +60,21 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "username": "stranger",
+      "email": "stranger@databucket.localhost",
+      "emailVerified": true,
+      "firstName": "Stranger",
+      "lastName": "Without account",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "stranger",
+          "temporary": false
+        }
+      ]
     }
   ]
 }

@@ -7,6 +7,7 @@ import {Navigate} from "react-router-dom";
 import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import {handleErrors, handleLoginErrors} from "../../utils/FetchHelper";
+import ProjectRequest from "./ProjectRequest";
 
 export default function SignUpPage() {
 
@@ -18,6 +19,16 @@ export default function SignUpPage() {
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [recaptcha, setRecaptcha] = useState({enabled: true, siteKey: null});
     const [loading, setLoading] = useState(false);
+    const [projects, setProjects] = useState([]);
+    const [projectsIds, setProjectsIds] = useState([]);
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        fetch(getBaseUrl('public/projects'))
+            .then(handleLoginErrors)
+            .then(setProjects)
+            .catch(() => setProjects([]));
+    }, []);
 
     useEffect(() => {
         if (recaptcha.enabled === true && recaptcha.siteKey == null) {
@@ -85,7 +96,9 @@ export default function SignUpPage() {
             email: email,
             password: password,
             url: window.location.origin + getContextPath() + "/confirmation/sign-up/",
-            recaptchaToken: token
+            recaptchaToken: token,
+            projectsIds: projectsIds,
+            message: message
         }
 
         fetch(getBaseUrl('public/sign-up'), {
@@ -154,8 +167,8 @@ export default function SignUpPage() {
     }
 
     const checkUsername = (username) => {
-        if (!(username.length >= 3 && username.length < 30))
-            setMessageBox({open: true, severity: 'info', title: 'Please enter a username between 3 and 30 characters.', message: ''});
+        if (!(username.length >= 3 && username.length <= 50))
+            setMessageBox({open: true, severity: 'info', title: 'Please enter a username between 3 and 50 characters.', message: ''});
     }
 
     const checkEmail = (email) => {
@@ -233,6 +246,8 @@ export default function SignUpPage() {
                             }}
                         />
                     </FormControl>
+                    <ProjectRequest projects={projects} selected={projectsIds} onChange={setProjectsIds}
+                                    message={message} onMessageChange={setMessage}/>
                     <div className="ButtonSingUp">
                         <Button
                             fullWidth={true}
@@ -242,6 +257,7 @@ export default function SignUpPage() {
                             disabled={
                                 !(validateEmail(email)
                                     && username.length >= 3
+                                    && username.length <= 50
                                     && password.length > 0
                                     && passwordConfirmation.length > 0
                                     && password === passwordConfirmation

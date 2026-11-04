@@ -20,6 +20,7 @@ class SsoAuthenticationHandlerSpec extends Specification {
 
     UserRepository userRepository = Mock()
     TokenProvider tokenProvider = Mock()
+    SsoCodeService ssoCodeService = Mock()
     SsoProperties ssoProperties = new SsoProperties()
 
     @Subject
@@ -33,6 +34,44 @@ class SsoAuthenticationHandlerSpec extends Specification {
         setField(handler, "userRepository", userRepository)
         setField(handler, "tokenProvider", tokenProvider)
         setField(handler, "ssoProperties", ssoProperties)
+        setField(handler, "ssoCodeService", ssoCodeService)
+    }
+
+    def "should offer an unknown person to create an account when self-registration allows it"() {
+        given: "self-registration for example.com"
+        ssoProperties.enabled = true
+        ssoProperties.selfRegistration = true
+        ssoProperties.selfRegistrationDomains = ["example.com"]
+        userRepository.findByEmailIgnoreCase("john@example.com") >> null
+
+        when:
+        handler.onAuthenticationSuccess(request, response, login([sub: "1", email: "John@Example.com", email_verified: true]))
+
+        then: "a registration ticket for the email is handed over instead of an error"
+        1 * ssoCodeService.issueRegistrationTicket("john@example.com") >> "the-ticket"
+        0 * tokenProvider.generateSsoCode(*_)
+        response.redirectedUrl == "/db/login/sso?register=the-ticket"
+    }
+
+    @Unroll
+    def "should refuse an unknown person when #situation"() {
+        given:
+        ssoProperties.enabled = true
+        ssoProperties.selfRegistration = selfRegistration
+        ssoProperties.selfRegistrationDomains = domains
+        userRepository.findByEmailIgnoreCase("john@example.com") >> null
+
+        when:
+        handler.onAuthenticationSuccess(request, response, login([sub: "1", email: "john@example.com"]))
+
+        then:
+        0 * ssoCodeService.issueRegistrationTicket(_)
+        response.redirectedUrl == "/db/login?sso_error=" + SsoAuthenticationHandler.UNKNOWN_USER
+
+        where:
+        situation                          | selfRegistration | domains
+        "self-registration is off"         | false            | []
+        "the domain is not allowed"        | true             | ["company.com"]
     }
 
     def "should send a known user to the login page with a code"() {

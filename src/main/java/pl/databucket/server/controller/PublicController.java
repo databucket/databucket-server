@@ -32,6 +32,7 @@ import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.security.AuthResponseBuilder;
 import pl.databucket.server.security.TokenProvider;
 import pl.databucket.server.service.ManageUserService;
+import pl.databucket.server.service.RegistrationService;
 
 import jakarta.mail.MessagingException;
 import java.util.*;
@@ -64,6 +65,9 @@ public class PublicController {
 
     @Autowired
     private SsoProperties ssoProperties;
+
+    @Autowired
+    private RegistrationService registrationService;
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(PublicController.class);
 
@@ -285,6 +289,13 @@ public class PublicController {
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
+    }
+
+    /** Projects a person can ask for while registering (only public ones, and only when mail is configured). */
+    @Hidden
+    @GetMapping(value = "/projects", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<PublicProjectDto> getPublicProjects() {
+        return registrationService.getPublicProjects();
     }
 
     @Operation(
