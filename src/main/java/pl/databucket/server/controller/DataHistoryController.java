@@ -11,6 +11,7 @@ import pl.databucket.server.dto.DataRemoveDTO;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.BucketNotFoundException;
+import pl.databucket.server.exception.DataNotFoundException;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.NoAccessToBucketException;
 import pl.databucket.server.response.MessageResponse;
@@ -59,9 +60,11 @@ public class DataHistoryController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                return new ResponseEntity<>(service.getDataHistory(bucket, id), HttpStatus.OK);
+                return new ResponseEntity<>(service.getDataHistory(user, bucket, id), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (DataNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
@@ -82,9 +85,11 @@ public class DataHistoryController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                return new ResponseEntity<>(service.getDataHistoryProperties(bucket, id, ids), HttpStatus.OK);
+                return new ResponseEntity<>(service.getDataHistoryProperties(user, bucket, id, ids), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+        } catch (DataNotFoundException e) {
+            return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
