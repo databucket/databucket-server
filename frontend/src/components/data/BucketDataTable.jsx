@@ -55,6 +55,7 @@ import {
     FEATURE_RESERVATION,
     FEATURE_RICH_FILTER,
     FEATURE_SEARCH,
+    FEATURE_SELECTION,
     FEATURE_TASKS,
     isFeatureEnabled
 } from "../utils/ViewFeatures";
@@ -1184,8 +1185,9 @@ export default function BucketDataTable() {
                         pageSizeOptions: getPageSizeOptionsOnDialog(),
                         debounceInterval: 700,
                         maxColumnSort: 1,
-                        // checkboxes for the actions on the selected rows (the toolbar shows them when rows are selected)
-                        selection: true,
+                        // checkboxes for the actions on the selected rows (the toolbar shows them when rows are
+                        // selected), when the view has the Selection feature
+                        selection: isFeatureEnabled(FEATURE_SELECTION, state.activeView),
                         filtering: filtering,
                         padding: 'dense',
                         search: isFeatureEnabled(FEATURE_SEARCH, state.activeView),

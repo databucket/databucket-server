@@ -4,7 +4,9 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
-    moveUp
+    moveUp,
+    removeRow,
+    replaceRow
 } from "../../utils/MaterialTableHelper";
 import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
@@ -211,14 +213,7 @@ export default function PropertiesTable(props) {
                                 return;
                             }
 
-                            const updated = data.map(column => {
-                                if (column.tableData.id
-                                    === oldData.tableData.id) {
-                                    return newData;
-                                }
-                                return column;
-                            });
-                            setData(updated);
+                            setData(replaceRow(data, oldData, newData));
                             resolve();
                         }),
                     onRowDelete: oldData =>
@@ -233,9 +228,7 @@ export default function PropertiesTable(props) {
                                 });
                                 reject();
                             } else {
-                                setData(data.filter(
-                                    column => column.tableData.id
-                                        !== oldData.tableData.id));
+                                setData(removeRow(data, oldData));
                                 resolve();
                             }
                         }),

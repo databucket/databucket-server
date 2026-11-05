@@ -21,6 +21,7 @@ import pl.databucket.server.dto.DataModifyDTO;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.exception.ConditionNotAllowedException;
+import pl.databucket.server.exception.DataNotFoundException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.UnexpectedException;
 import pl.databucket.server.exception.UnknownColumnException;
@@ -329,7 +330,30 @@ public class DataService {
         return count;
     }
 
-    public List<Map<String, Object>> getDataHistory(Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException {
+    /**
+     * Whether the user may see the data row and its history: in a bucket with protected data, below the role ADMIN,
+     * only a row reserved by the user (the history keeps the whole properties of every version, so it is protected
+     * as the data). Also false for a row that doesn't exist.
+     */
+    public boolean canSeeData(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException {
+        List<Condition> conditions = new ArrayList<>();
+        conditions.add(new Condition(COL.DATA_ID, Operator.equal, dataId));
+        if (bucket.isProtectedData() && !user.isAdminUser())
+            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+
+        Map<String, Object> paramMap = new HashMap<>();
+        Query query = new Query(bucket.getTableName())
+                .select(COL.COUNT)
+                .from()
+                .where(conditions, paramMap);
+        Long count = jdbcTemplate.queryForObject(query.toString(logger, paramMap), paramMap, Long.class);
+        return count != null && count > 0;
+    }
+
+    public List<Map<String, Object>> getDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException, DataNotFoundException {
+        if (!canSeeData(user, bucket, dataId))
+            throw new DataNotFoundException(bucket.getName(), dataId);
+
         Map<String, Object> paramMap = new HashMap<>();
 
         String[] columns = {COL.ID, COL.TAG_ID, COL.RESERVED, COL.PROPERTIES + " is not null as \"" + COL.PROPERTIES + "\"", COL.MODIFIED_AT, COL.MODIFIED_BY};
@@ -367,7 +391,10 @@ public class DataService {
         return result;
     }
 
-    public List<Map<String, Object>> getDataHistoryProperties(Bucket bucket, Long dataId, List<Long> ids) throws UnexpectedException, UnknownColumnException, ConditionNotAllowedException {
+    public List<Map<String, Object>> getDataHistoryProperties(User user, Bucket bucket, Long dataId, List<Long> ids) throws UnexpectedException, UnknownColumnException, ConditionNotAllowedException, DataNotFoundException {
+        if (!canSeeData(user, bucket, dataId))
+            throw new DataNotFoundException(bucket.getName(), dataId);
+
         List<Condition> conditions = new ArrayList<>();
         Map<String, Object> namedParameters = new HashMap<>();
 

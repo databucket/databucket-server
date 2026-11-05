@@ -14,6 +14,7 @@ import {
     Divider,
     Grid,
     IconButton,
+    InputAdornment,
     TextField,
     Tooltip,
     useTheme
@@ -24,6 +25,7 @@ import {getDataByIdUrl2} from "../../../utils/UrlBuilder";
 import {handleErrors} from "../../../utils/FetchHelper";
 import { JSONPath } from "jsonpath-plus";
 import {MessageBox} from "../../utils/MessageBox";
+import JsonColorsButton from "../../utils/JsonColorsButton";
 import {getDirectDataPath, getProjectDataPath} from "../../../route/AppRouter";
 import { JsonEditor as Editor } from 'jsoneditor-react18';
 import Ajv from 'ajv';
@@ -51,6 +53,7 @@ export default function DataDetailsPage() {
     const {tags, fetchTags} = tagsContext;
     const tagsLookup = createTagLookup(tags);
     const [jsonPath, setJsonPath] = useState(null);
+    const [jsonPathFilled, setJsonPathFilled] = useState(false);
     const [data, setData] = useState(null);
 
     const setNativeValue = (el, value) => {
@@ -88,6 +91,7 @@ export default function DataDetailsPage() {
                     if (inputParams.jsonPath != null && jsonPathRef.current != null) {
                         setJsonPath(inputParams.jsonPath);
                         setNativeValue(document.getElementById('jsonPathId'), inputParams.jsonPath);
+                        setJsonPathFilled(true);
                     }
                 }
             });
@@ -133,7 +137,18 @@ export default function DataDetailsPage() {
     const debouncedChangedJsonPath = useRef(debounce(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
 
     const handleChangedJsonPath = (event) => {
+        setJsonPathFilled(event.target.value !== '');
         debouncedChangedJsonPath(event.target.value);
+    };
+
+    // the debounced change is called too, so that a change still pending does not bring the old path back
+    const clearJsonPath = () => {
+        const input = document.getElementById('jsonPathId');
+        if (input != null)
+            input.value = '';
+        setJsonPathFilled(false);
+        debouncedChangedJsonPath('');
+        setJsonPath('');
     };
 
     useEffect(() => {
@@ -213,11 +228,11 @@ export default function DataDetailsPage() {
             <Divider/>
             <Grid container spacing={0} alignItems="center">
                 <Grid item xs>
+                    <JsonColorsButton style={{marginLeft: "30px"}}/>
                     <Tooltip id="copy-content-tooltip" title="Copy content">
                         <IconButton
                             color={"inherit"}
                             onClick={copyContent}
-                            style={{marginLeft: "30px"}}
                             size="large">
                             <span className="material-icons">content_copy</span>
                         </IconButton>
@@ -231,7 +246,17 @@ export default function DataDetailsPage() {
                         size="small"
                         fullWidth
                         placeholder={"$.store.books[*].title"}
-                        InputProps={{disableUnderline: true}}
+                        InputProps={{
+                            disableUnderline: true,
+                            startAdornment:
+                                <InputAdornment position="start">
+                                    <Tooltip title="Clear JSON path">
+                                        <span>
+                                            <IconButton size="small" onClick={clearJsonPath} disabled={!jsonPathFilled}><CloseIcon fontSize="small"/></IconButton>
+                                        </span>
+                                    </Tooltip>
+                                </InputAdornment>
+                        }}
                         onChange={handleChangedJsonPath}
                     />
                 </Grid>

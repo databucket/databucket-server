@@ -130,7 +130,7 @@ export default function TaskActions(props) {
                         />}
                     </RadioGroup>
                     {props.actions.type === 'reserve' &&
-                    <div style={{display: 'flex', alignItems: 'flex-start', gap: 32, marginTop: 8}}>
+                    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, marginTop: 8}}>
                         <TextField
                             label="Number of data rows"
                             type="number"
@@ -141,7 +141,7 @@ export default function TaskActions(props) {
                             inputProps={{min: 1, max: MAX_RESERVATION, step: 1}}
                             error={!isReserveValid(props.actions)}
                             helperText={isReserveValid(props.actions) ? ' ' : `From 1 to ${MAX_RESERVATION}`}
-                            sx={{width: 160, flexShrink: 0}}
+                            sx={{width: 220}}
                         />
                         {props.owners != null &&
                         <TextField
@@ -151,7 +151,7 @@ export default function TaskActions(props) {
                             color="secondary"
                             value={props.actions.username}
                             onChange={e => props.onChange({...props.actions, username: e.target.value})}
-                            sx={{minWidth: 160, flexShrink: 0}}
+                            sx={{width: 220}}
                         >
                             {props.owners.map(user =>
                                 <MenuItem key={user.id} value={user.username}>{user.username}</MenuItem>)}
@@ -159,7 +159,6 @@ export default function TaskActions(props) {
                         }
                         <FormControlLabel
                             label="Random data rows"
-                            sx={{mt: 1.5}}
                             control={<Checkbox checked={props.actions.random || false} color="secondary"
                                                onChange={e => props.onChange({...props.actions, random: e.target.checked})}/>}
                         />

@@ -24,7 +24,9 @@ const FILE = '#file';
 
 const summary = dataset =>
     `${dataset.buckets} buckets, ${dataset.views} views, ${dataset.rows.toLocaleString()} data rows`
-    + (dataset.icons > 0 ? `, ${dataset.icons} icons` : '');
+    + (dataset.icons > 0 ? `, ${dataset.icons} icons` : '')
+    + (dataset.changes > 0 ? `, ${dataset.changes.toLocaleString()} changes in the history` : '')
+    + (dataset.users?.length > 0 ? `; users: ${dataset.users.join(', ')}` : '');
 
 // what the dialog shows of a dataset file chosen from a disk, read in the browser; the server checks it on import
 const describeFile = (file, text) => {
@@ -40,7 +42,9 @@ const describeFile = (file, text) => {
         buckets: dataset.buckets.length,
         views: (dataset.views ?? []).length,
         rows,
-        icons: (dataset.icons ?? []).length
+        icons: (dataset.icons ?? []).length,
+        changes: (dataset.history?.changes ?? []).length,
+        users: (dataset.users ?? []).map(user => user.username)
     };
 }
 
@@ -188,7 +192,8 @@ export default function DatasetImportDialog({project, onClose, onDone}) {
                        onChange={onFileChosen}/>
 
                 <Typography variant="body2" color="textSecondary" sx={{mt: 2}}>
-                    Reserved data rows are reserved for you, and you join the teams of the dataset.
+                    Reserved data rows are reserved for you, and you join the teams of the dataset. The users of
+                    the dataset are created if they don't exist yet, and get access to the project.
                 </Typography>
                 {working && <LinearProgress sx={{mt: 2}}/>}
                 {error != null && <Alert severity="error" sx={{mt: 2, whiteSpace: 'pre-line'}}>{error}</Alert>}

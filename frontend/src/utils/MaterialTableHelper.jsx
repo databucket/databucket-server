@@ -215,6 +215,15 @@ export const moveUp = (dataCollection, itemId) => {
     return swappedArray(dataCollection, itemId, itemId - 1);
 }
 
+// A row edited or removed in a table whose rows are kept in a state: material-table 6 passes copies of the rows (with
+// tableData) and leaves the objects of the state as they are, so the row is found by its position (tableData.index)
+const withoutTableData = ({tableData, ...row}) => row;
+
+export const replaceRow = (rows, oldData, newData) =>
+    rows.map((row, index) => index === oldData.tableData.index ? withoutTableData(newData) : row);
+
+export const removeRow = (rows, oldData) => rows.filter((row, index) => index !== oldData.tableData.index);
+
 export const moveDown = (dataCollection, itemId) => {
     return swappedArray(dataCollection, itemId, itemId + 1);
 }

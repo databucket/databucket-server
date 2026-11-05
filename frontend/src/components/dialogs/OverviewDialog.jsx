@@ -280,6 +280,7 @@ export default function OverviewDialog() {
                             </Table>
                         </TableContainer>}
                 </DialogContent>
+                <DialogActions sx={{minHeight: 44}}/>
             </Dialog>
             <Dialog open={clearing != null} onClose={() => setClearing(null)}>
                 <DialogTitle>Clear history</DialogTitle>

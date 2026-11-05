@@ -1,11 +1,17 @@
 package pl.databucket.server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.databucket.server.dto.*;
 import pl.databucket.server.entity.Bucket;
+import pl.databucket.server.entity.Project;
 import pl.databucket.server.entity.User;
+import pl.databucket.server.logging.AuditLog;
+import pl.databucket.server.repository.ProjectRepository;
+import pl.databucket.server.repository.RoleRepository;
+import pl.databucket.server.repository.UserRepository;
 import pl.databucket.server.service.data.DataService;
 
 import java.util.*;
@@ -32,6 +38,11 @@ public class DatasetImporter {
     @Autowired private TaskService taskService;
     @Autowired private DataService dataService;
     @Autowired private SvgService svgService;
+    @Autowired private DatasetHistoryMaker datasetHistoryMaker;
+    @Autowired private UserRepository userRepository;
+    @Autowired private RoleRepository roleRepository;
+    @Autowired private ProjectRepository projectRepository;
+    @Autowired private BCryptPasswordEncoder passwordEncoder;
 
     // the new ids of the dataset's objects, by the ids in the dataset
     private static class Ids {
@@ -46,7 +57,7 @@ public class DatasetImporter {
     }
 
     @Transactional
-    public int importDataset(DatasetDto dataset, User user) throws Exception {
+    public int importDataset(DatasetDto dataset, User user, int projectId) throws Exception {
         Ids ids = new Ids();
 
         // nothing refers to an icon by its id: the objects keep a copy of the icon they use
@@ -55,11 +66,15 @@ public class DatasetImporter {
             svgService.createSvg(icon);
         }
 
-        // the importing user joins the teams, so that what the teams give access to is visible to them
+        // the users of the dataset get access to the project; together with the importing user they join the teams,
+        // so that what the teams give access to is visible to them
+        Set<Long> teamUsers = new HashSet<>(Set.of(user.getId()));
+        teamUsers.addAll(importUsers(dataset.getUsers(), projectId));
+
         for (TeamDto team : dataset.getTeams()) {
             Short id = team.getId();
             team.setId(null);
-            team.setUsersIds(Set.of(user.getId()));
+            team.setUsersIds(teamUsers);
             ids.teams.put(id, teamService.createTeam(team).getId());
         }
 
@@ -157,6 +172,7 @@ public class DatasetImporter {
         }
 
         int rows = 0;
+        Map<String, Bucket> bucketsWithData = new HashMap<>();
         for (Map.Entry<String, List<DataCreateDTO>> entry : dataset.getData().entrySet()) {
             if (entry.getValue().isEmpty())
                 continue;
@@ -165,9 +181,47 @@ public class DatasetImporter {
             entry.getValue().forEach(row -> row.setTagId(map(ids.tags, row.getTagId())));
             Bucket bucket = bucketService.getBucket(entry.getKey());
             dataService.createData(user, bucket, entry.getValue());
+            bucketsWithData.put(entry.getKey(), bucket);
             rows += entry.getValue().size();
         }
+
+        if (dataset.getHistory() != null)
+            datasetHistoryMaker.makeHistory(dataset.getHistory(), bucketsWithData, ids.tags, user.getUsername());
         return rows;
+    }
+
+    /**
+     * Creates the users of the dataset that don't exist yet (with the password and role of the dataset) and gives
+     * all of them access to the project; an existing user keeps their password and role.
+     *
+     * @return the ids of the users
+     */
+    private Set<Long> importUsers(List<DatasetUserDto> users, int projectId) {
+        Set<Long> ids = new HashSet<>();
+        if (users.isEmpty())
+            return ids;
+        Project project = projectRepository.findByIdAndDeleted(projectId, false);
+        for (DatasetUserDto datasetUser : users) {
+            User user = userRepository.findByUsername(datasetUser.getUsername());
+            if (user == null) {
+                user = new User();
+                user.setUsername(datasetUser.getUsername());
+                user.setDescription(datasetUser.getDescription());
+                user.setPassword(passwordEncoder.encode(datasetUser.getPassword()));
+                user.setChangePassword(false);
+                user.setRoles(new HashSet<>(Set.of(roleRepository.findByName(datasetUser.getRole()))));
+                user.setProjects(new HashSet<>());
+                user.setTeams(new HashSet<>());
+                AuditLog.log("user.create", "name={} dataset", user.getUsername());
+            }
+            if (user.getProjects() == null)
+                user.setProjects(new HashSet<>());
+            if (user.getTeams() == null)
+                user.setTeams(new HashSet<>());
+            user.getProjects().add(project);
+            ids.add(userRepository.saveAndFlush(user).getId());
+        }
+        return ids;
     }
 
     // a reference to an object of the dataset; null stays null, an unknown id is an error in the dataset

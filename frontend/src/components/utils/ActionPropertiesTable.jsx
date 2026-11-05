@@ -3,7 +3,9 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
-    moveUp
+    moveUp,
+    removeRow,
+    replaceRow
 } from "../../utils/MaterialTableHelper";
 import {
     convertPropertiesDates,
@@ -188,12 +190,7 @@ export default function ActionPropertiesTable(props) {
                         return;
                     }
 
-                    const updated = data.map(column => {
-                        if (column.tableData.id === oldData.tableData.id)
-                            return newData;
-                        return column;
-                    });
-                    setData(updated);
+                    setData(replaceRow(data, oldData, newData));
                     resolve();
                 })
         };
@@ -202,7 +199,7 @@ export default function ActionPropertiesTable(props) {
             ...editable,
             onRowDelete: oldData =>
                 new Promise((resolve) => {
-                    setData(data.filter(column => column.tableData.id !== oldData.tableData.id));
+                    setData(removeRow(data, oldData));
                     resolve();
                 })
         };
