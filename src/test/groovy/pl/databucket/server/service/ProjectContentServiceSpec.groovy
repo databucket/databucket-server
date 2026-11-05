@@ -49,6 +49,24 @@ class ProjectContentServiceSpec extends Specification {
         order == order.toSorted()
     }
 
+    def "should remove the access requests of 3.9.0 only when their table exists"() {
+        given:
+        namedJdbc.queryForList(_ as String, _ as MapSqlParameterSource, Long) >> []
+        namedJdbc.queryForObject({ it.contains("to_regclass('bucket_access_requests')") }, _ as MapSqlParameterSource, Boolean) >> exists
+        def statements = []
+        namedJdbc.update(_ as String, _ as MapSqlParameterSource) >> { String sql, MapSqlParameterSource p -> statements << sql; 0 }
+
+        when:
+        service.clearProject(5)
+
+        then:
+        statements.contains("DELETE FROM bucket_access_requests WHERE project_id = :p") == exists
+        statements.indexOf("DELETE FROM buckets WHERE project_id = :p") > 0
+
+        where:
+        exists << [true, false]
+    }
+
     def "should leave the users of the project"() {
         given:
         namedJdbc.queryForList(_ as String, _ as MapSqlParameterSource, Long) >> []

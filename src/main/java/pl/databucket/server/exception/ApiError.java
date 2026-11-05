@@ -55,8 +55,9 @@ public record ApiError(String message, HttpStatus status) {
         // a value that doesn't fit the type used in a rule, an invalid regular expression...
         if (state.startsWith("22"))
             return new ApiError("Invalid value: " + text, requestError(status, HttpStatus.BAD_REQUEST));
-        // a rule that can't be applied to the data, e.g. an operator for other types (operator does not exist: ...)
-        if (state.startsWith("42"))
+        // a rule that can't be applied to the data, e.g. an operator for other types (operator does not exist: ...);
+        // a missing table (42P01) is an error of the server, not of the rules
+        if (state.startsWith("42") && !state.equals("42P01"))
             return new ApiError("The rules can't be applied to the data: " + text, requestError(status, HttpStatus.BAD_REQUEST));
         if (state.equals("57014"))
             return new ApiError("The query took too long and was cancelled", HttpStatus.SERVICE_UNAVAILABLE);
