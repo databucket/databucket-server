@@ -168,7 +168,7 @@ export default function SelectMultiDialog(props) {
                         tableRef={tableRef}
                         columns={props.columns}
                         data={data}
-                        onChangeRowsPerPage={onChangeRowsPerPage}
+                        onRowsPerPageChange={onChangeRowsPerPage}
                         onSelectionChange={handleSelectionChange}
                         options={{
                             paging: true,

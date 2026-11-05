@@ -173,7 +173,7 @@ export default function SelectSingleDialog(props) {
                         tableRef={tableRef}
                         columns={[getColumnSelection(), ...props.columns]}
                         data={data}
-                        onChangeRowsPerPage={onChangeRowsPerPage}
+                        onRowsPerPageChange={onChangeRowsPerPage}
                         onRowClick={(event, rowData) => props.onChange(
                             rowData.id !== props.id ? rowData.id : -1)}
                         options={{
