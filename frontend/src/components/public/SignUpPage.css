@@ -33,9 +33,10 @@
     /*overflow: auto;*/
 }
 
+/* as wide as the fields (85%) */
 .ButtonSingUp {
-    width: 100%;
-    padding: 20px;
+    width: 85%;
+    padding: 20px 0;
 }
 
 .EmailInputTextSingUp {
