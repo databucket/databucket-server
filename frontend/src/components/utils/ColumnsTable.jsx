@@ -4,7 +4,9 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
-    moveUp
+    moveUp,
+    removeRow,
+    replaceRow
 } from "../../utils/MaterialTableHelper";
 import {
     getPropertyTitle,
@@ -216,20 +218,12 @@ export default function ColumnsTable(props) {
                                 return;
                             }
 
-                            const updated = columns.map(column => {
-                                if (column.tableData.id
-                                    === oldData.tableData.id) {
-                                    return newData;
-                                }
-                                return column;
-                            });
-                            setData(updated);
+                            setData(replaceRow(columns, oldData, newData));
                             resolve();
                         }),
                     onRowDelete: oldData =>
                         new Promise((resolve) => {
-                            setData(columns.filter(column => column.tableData.id
-                                !== oldData.tableData.id))
+                            setData(removeRow(columns, oldData));
                             resolve();
                         }),
                 }}

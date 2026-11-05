@@ -1,50 +1,42 @@
 import React, {forwardRef} from 'react';
-import {Icon, IconButton, styled, useTheme} from '@mui/material';
+import {Icon, IconButton, useTheme} from '@mui/material';
 import {parseCustomSvg} from "./SvgHelper";
 import PropTypes from "prop-types";
 import {getIconColor} from "../../utils/MaterialTableHelper";
 
-const PREFIX = 'StyledIconButton';
-
-const classes = {
-    customStyles: `${PREFIX}-customStyles`
-};
-
-const TheStyledIconButton = styled(IconButton)(({theme}) => ({
-    color: (props) => getIconColor(theme.palette.mode, props.iconColor)
-}));
-
-TheStyledIconButton.propTypes = {
-    iconName: PropTypes.string.isRequired,
-    iconColor: PropTypes.string.isRequired,
-    iconSvg: PropTypes.string.isRequired,
-    onClick: PropTypes.func
-};
-
-export default forwardRef(
+// A button with an icon (a Material icon by name, or an SVG) in its color, as the icon shows in the tables
+const StyledIconButton = forwardRef(
     function StyledIconButton({onClick, iconName, iconColor, iconSvg, ...props},
         ref) {
         const theme = useTheme();
 
-        if (iconSvg !== null) {
+        if (iconSvg) {
             return (
-                <TheStyledIconButton onClick={onClick}
-                                     size="large"
-                                     {...props}
-                                     ref={ref}>
+                <IconButton onClick={onClick}
+                            size="large"
+                            {...props}
+                            ref={ref}>
                     {parseCustomSvg(iconSvg,
                         getIconColor(theme.palette.mode, iconColor))}
-                </TheStyledIconButton>
+                </IconButton>
             );
         } else {
             return (
                 <IconButton onClick={onClick}
-                            className={classes.customStyles}
                             size="large"
                             {...props}
                             ref={ref}>
-                    <Icon>{iconName}</Icon>
+                    <Icon sx={{color: iconColor}}>{iconName}</Icon>
                 </IconButton>
             );
         }
     });
+
+StyledIconButton.propTypes = {
+    iconName: PropTypes.string,
+    iconColor: PropTypes.string,
+    iconSvg: PropTypes.string,
+    onClick: PropTypes.func
+};
+
+export default StyledIconButton;

@@ -21,7 +21,9 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
-    moveUp
+    moveUp,
+    removeRow,
+    replaceRow
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from '@material-table/core';
 import PropTypes from 'prop-types';
@@ -208,14 +210,7 @@ export default function EditEnumDialog(props) {
                             onRowUpdate: (newData, oldData) =>
                                 new Promise((resolve, reject) => {
                                     if (isValid(newData)) {
-                                        const updated = data.map(item => {
-                                            if (item.tableData.id
-                                                === oldData.tableData.id) {
-                                                return newData;
-                                            }
-                                            return item;
-                                        });
-                                        setData(updated);
+                                        setData(replaceRow(data, oldData, newData));
                                         resolve();
                                     } else {
                                         reject();
@@ -223,9 +218,7 @@ export default function EditEnumDialog(props) {
                                 }),
                             onRowDelete: oldData =>
                                 new Promise((resolve) => {
-                                    setData(data.filter(
-                                        item => item.tableData.id
-                                            !== oldData.tableData.id));
+                                    setData(removeRow(data, oldData));
                                     resolve();
                                 }),
                         }}
