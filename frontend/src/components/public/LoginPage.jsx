@@ -299,8 +299,8 @@ export default function LoginPage() {
                         );
                     })}
                 </List>
-                {/* back to signing in, e.g. for a ROBOT, who can't use the web application in any project */}
-                <div style={{width: '100%', margin: '16px 0 15px 40px', display: 'flex'}}>
+                {/* back to signing in, e.g. for a ROBOT, who can't use the web application in any project; at the bottom left */}
+                <div style={{width: '100%', margin: 'auto 0 15px 40px', paddingTop: 16, display: 'flex'}}>
                     <MaterialLink component="button" color="inherit" onClick={backToSignIn}>
                         Back
                     </MaterialLink>
