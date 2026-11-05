@@ -132,7 +132,7 @@ public class DatasetService {
         SecurityContext original = SecurityContextHolder.getContext();
         try {
             SecurityContextHolder.setContext(contextOfProject(original, project.getId()));
-            int rows = datasetImporter.importDataset(dataset, user);
+            int rows = datasetImporter.importDataset(dataset, user, project.getId());
             AuditLog.log("project.dataset-import", "id={} name={} dataset={} rows={}",
                     project.getId(), project.getName(), dataset.getName(), rows);
             return rows;

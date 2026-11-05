@@ -31,7 +31,7 @@ class DatasetCheckSpec extends Specification {
         dataset.format = DatasetCheck.FORMAT + 1
 
         expect:
-        DatasetCheck.problems(dataset, validator) == ["The dataset is of a newer format (2) than this Databucket reads (1)"]
+        DatasetCheck.problems(dataset, validator) == ["The dataset is of a newer format (${DatasetCheck.FORMAT + 1}) than this Databucket reads (${DatasetCheck.FORMAT})".toString()]
     }
 
     def "should list missing references, unsafe icons and invalid objects"() {
@@ -81,5 +81,41 @@ class DatasetCheckSpec extends Specification {
         then:
         problems.size() == 20
         problems[0] == "The dataset has no name"
+    }
+
+    def "should check the users and the history of the data"() {
+        given:
+        DatasetDto dataset = new DatasetDto(name: "X")
+        dataset.buckets = [new BucketDto(id: 1L, name: "b")]
+        dataset.tags = [new TagDto(id: 1L, name: "tag")]
+        dataset.data = [b: [new DataCreateDTO(), new DataCreateDTO()]]
+        dataset.users = [
+                new DatasetUserDto(username: "robot", password: "test", role: "ROBOT"),
+                new DatasetUserDto(username: "boss", password: "test", role: "SUPER"),
+                new DatasetUserDto(username: "robot", role: "MEMBER")
+        ]
+        dataset.history = new DatasetHistoryDto(since: "P30D", changes: [
+                new DatasetHistoryDto.Change(bucket: "b", row: 1, ago: "P2DT3H", user: "robot", tagId: 1L, reserved: true),
+                new DatasetHistoryDto.Change(bucket: "b", row: 0, ago: "PT5M", tagId: 0L, properties: [a: 1]),
+                new DatasetHistoryDto.Change(bucket: "b", row: 2, ago: "P31D", user: "nobody", tagId: 9L),
+                new DatasetHistoryDto.Change(bucket: "c", row: 0, ago: "yesterday"),
+        ])
+
+        when:
+        List<String> problems = DatasetCheck.problems(dataset, validator)
+
+        then:
+        problems == [
+                "User boss: the role must be one of [ADMIN, MEMBER, ROBOT]",
+                "User robot: the name is used twice",
+                "User robot: has no password",
+                "History change 2: there is no row 2 in the data of b",
+                "History change 2: ago must be an ISO-8601 duration, at most since (P30D)",
+                "History change 2: refers to a missing user nobody",
+                "History change 2: refers to a missing tag 9",
+                "History change 3: there are no data of the bucket c",
+                "History change 3: ago must be an ISO-8601 duration, at most since (P30D)",
+                "History change 3: changes nothing"
+        ]
     }
 }

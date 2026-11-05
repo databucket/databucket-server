@@ -2,8 +2,11 @@ package pl.databucket.server.service;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.*;
 
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,7 +19,11 @@ import java.util.stream.Collectors;
 public final class DatasetCheck {
 
     // the format this version reads and writes; a newer file can't be read reliably
-    public static final int FORMAT = 1;
+    // 2: users and the history of the data
+    public static final int FORMAT = 2;
+
+    // the roles a user of a dataset may have (never SUPER)
+    static final Set<String> USER_ROLES = Set.of(Constants.ROLE_ADMIN, Constants.ROLE_MEMBER, Constants.ROLE_ROBOT);
 
     private static final int MAX_PROBLEMS = 20;
 
@@ -115,6 +122,66 @@ public final class DatasetCheck {
                     .filter(tagId -> tagId != null && !tags.contains(tagId)).collect(Collectors.toCollection(TreeSet::new));
             if (!missingTags.isEmpty())
                 problems.add("Data of " + rows.getKey() + ": refers to missing tags " + missingTags);
+        }
+
+        Set<String> users = checkUsers(d.getUsers());
+        checkHistory(d, users, tags);
+    }
+
+    private Set<String> checkUsers(List<DatasetUserDto> list) {
+        Set<String> users = new HashSet<>();
+        for (DatasetUserDto user : list) {
+            String name = user.getUsername();
+            if (name == null || name.isBlank() || name.length() > Constants.USERNAME_MAX || !name.equals(name.trim())) {
+                problems.add("User " + name + ": the name must have 1 to " + Constants.USERNAME_MAX + " characters, without spaces around");
+                continue;
+            }
+            if (!users.add(name))
+                problems.add("User " + name + ": the name is used twice");
+            if (user.getPassword() == null || user.getPassword().isEmpty())
+                problems.add("User " + name + ": has no password");
+            if (!USER_ROLES.contains(user.getRole()))
+                problems.add("User " + name + ": the role must be one of " + new TreeSet<>(USER_ROLES));
+        }
+        return users;
+    }
+
+    private void checkHistory(DatasetDto d, Set<String> users, Set<Long> tags) {
+        DatasetHistoryDto history = d.getHistory();
+        if (history == null)
+            return;
+        Duration since = duration(history.getSince());
+        if (since == null) {
+            problems.add("History: since must be an ISO-8601 duration, e.g. P30D");
+            return;
+        }
+        int i = 0;
+        for (DatasetHistoryDto.Change change : history.getChanges()) {
+            String owner = "History change " + i++;
+            List<DataCreateDTO> rows = change.getBucket() == null ? null : d.getData().get(change.getBucket());
+            if (rows == null)
+                problems.add(owner + ": there are no data of the bucket " + change.getBucket());
+            else if (change.getRow() == null || change.getRow() < 0 || change.getRow() >= rows.size())
+                problems.add(owner + ": there is no row " + change.getRow() + " in the data of " + change.getBucket());
+            Duration ago = duration(change.getAgo());
+            if (ago == null || ago.compareTo(since) > 0)
+                problems.add(owner + ": ago must be an ISO-8601 duration, at most since (" + history.getSince() + ")");
+            if (change.getUser() != null && !users.contains(change.getUser()))
+                problems.add(owner + ": refers to a missing user " + change.getUser());
+            if (change.getTagId() != null && change.getTagId() != 0 && !tags.contains(change.getTagId()))
+                problems.add(owner + ": refers to a missing tag " + change.getTagId());
+            if (change.getTagId() == null && change.getReserved() == null && change.getProperties() == null)
+                problems.add(owner + ": changes nothing");
+        }
+    }
+
+    // a non-negative ISO-8601 duration, or null
+    private static Duration duration(String text) {
+        try {
+            Duration duration = text == null ? null : Duration.parse(text);
+            return duration == null || duration.isNegative() ? null : duration;
+        } catch (DateTimeParseException e) {
+            return null;
         }
     }
 

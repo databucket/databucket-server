@@ -117,7 +117,7 @@ const buildPropertiesFields = (propFields, enums) => {
 
         subfield['valueSources'] = ["value"];
 
-        subfields[field.path.replace(".", "*")] = subfield;
+        subfields[field.path.replaceAll(".", "*")] = subfield;
     });
 
     return {
