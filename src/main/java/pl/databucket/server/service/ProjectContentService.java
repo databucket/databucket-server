@@ -44,7 +44,6 @@ public class ProjectContentService {
 
     // the links between the project's objects, and between them and users
     private static final List<String> LINKS = List.of(
-            "DELETE FROM bucket_access_requests WHERE project_id = :p",
             "DELETE FROM buckets_teams WHERE bucket_id IN (" + BUCKETS + ") OR team_id IN (" + TEAMS + ")",
             "DELETE FROM buckets_users WHERE bucket_id IN (" + BUCKETS + ")",
             "DELETE FROM groups_buckets WHERE bucket_id IN (" + BUCKETS + ") OR group_id IN (" + GROUPS + ")",
@@ -117,6 +116,11 @@ public class ProjectContentService {
             jdbcTemplate.getJdbcTemplate().execute("DROP TABLE IF EXISTS " + quoted(bucketId));
         }
 
+        // the access requests of 3.9.0 and 3.9.1: their table (with a foreign key to the buckets) stays in databases
+        // created by those versions, a newer database doesn't have it
+        if (Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT to_regclass('bucket_access_requests') IS NOT NULL", params, Boolean.class)))
+            jdbcTemplate.update("DELETE FROM bucket_access_requests WHERE project_id = :p", params);
         for (String sql : LINKS)
             jdbcTemplate.update(sql, params);
         for (String[] table : CONTENT)
