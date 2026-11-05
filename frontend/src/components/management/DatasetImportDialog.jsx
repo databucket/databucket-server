@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     Alert,
     Button,
@@ -57,6 +57,12 @@ export default function DatasetImportDialog({project, onClose, onDone}) {
     const [working, setWorking] = useState(false);
     const [error, setError] = useState(null);
     const fileInput = useRef(null);
+    // the choice before "From a file…", back to it when choosing the file is cancelled
+    const beforeFile = useRef(null);
+    const fileRef = useRef(null);
+    useEffect(() => {
+        fileRef.current = file;
+    }, [file]);
 
     useEffect(() => {
         setSelected(null);
@@ -74,12 +80,28 @@ export default function DatasetImportDialog({project, onClose, onDone}) {
     const onSelect = value => {
         setError(null);
         if (value === FILE) {
+            beforeFile.current = selected;
             setSelected(FILE);
             if (file == null)
                 fileInput.current.click();
         } else
             setSelected(datasets.find(d => d.id === value));
     }
+
+    // the file dialog closed without a file: back to the choice before, unless a file was chosen earlier
+    const onFileCancelled = () => {
+        if (fileRef.current == null)
+            setSelected(beforeFile.current);
+    }
+
+    // React 18 handles onCancel only on <dialog>: the native "cancel" event of the file input
+    const fileInputRef = useCallback(input => {
+        if (fileInput.current != null)
+            fileInput.current.removeEventListener('cancel', onFileCancelled);
+        fileInput.current = input;
+        if (input != null)
+            input.addEventListener('cancel', onFileCancelled);
+    }, []);
 
     const onFileChosen = async event => {
         const chosen = event.target.files[0];
@@ -163,9 +185,18 @@ export default function DatasetImportDialog({project, onClose, onDone}) {
                                 <div>
                                     <Typography fontWeight={600} component="span">From a file…</Typography>
                                     {file == null
-                                        ? <Typography variant="body2" color="textSecondary">
-                                            A dataset file from your disk, e.g. a project exported before
-                                        </Typography>
+                                        ? <>
+                                            <Typography variant="body2" color="textSecondary">
+                                                A dataset file from your disk, e.g. a project exported before
+                                            </Typography>
+                                            {selected === FILE &&
+                                                <div>
+                                                    <Button size="small" sx={{p: 0, minWidth: 0}} disabled={working}
+                                                            onClick={() => fileInput.current.click()}>
+                                                        Choose a file
+                                                    </Button>
+                                                </div>}
+                                        </>
                                         : <>
                                             <Typography variant="body2">{file.name}
                                                 <Typography component="span" variant="body2" color="textSecondary">
@@ -188,7 +219,7 @@ export default function DatasetImportDialog({project, onClose, onDone}) {
                         />
                     </RadioGroup>
                 }
-                <input ref={fileInput} type="file" accept=".json,application/json" style={{display: 'none'}}
+                <input ref={fileInputRef} type="file" accept=".json,application/json" style={{display: 'none'}}
                        onChange={onFileChosen}/>
 
                 <Typography variant="body2" color="textSecondary" sx={{mt: 2}}>
