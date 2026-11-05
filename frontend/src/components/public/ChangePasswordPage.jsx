@@ -1,6 +1,7 @@
 import {Button, FormControl, Input, InputLabel, Link as MaterialLink, Paper, Typography} from "@mui/material";
 import React, {forwardRef, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
+import PasswordVisibility from "./PasswordVisibility";
 import {clearToken, getToken, getUsername} from "../../utils/ConfigurationStorage";
 import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
 import {Link, Navigate} from "react-router-dom";
@@ -28,6 +29,8 @@ export default function ChangePasswordPage() {
     const [{password, newPassword, newPasswordConfirmation}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [redirect, setRedirect] = useState(false);
+    // the eye of the current password shows all three passwords
+    const [showPasswords, setShowPasswords] = useState(false);
 
     const handleChangePassword = () => {
         const username = getUsername();
@@ -99,9 +102,10 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-password">Current password</InputLabel>
                         <Input
                             name="password"
-                            type='password'
+                            type={showPasswords ? 'text' : 'password'}
                             value={password}
                             onChange={onChange}
+                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
@@ -111,7 +115,7 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-new-password">New password</InputLabel>
                         <Input
                             name="newPassword"
-                            type='password'
+                            type={showPasswords ? 'text' : 'password'}
                             value={newPassword}
                             onChange={onChange}
                             onFocus={(event) => {
@@ -123,7 +127,7 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-confirm-password">Confirm new password</InputLabel>
                         <Input
                             name="newPasswordConfirmation"
-                            type='password'
+                            type={showPasswords ? 'text' : 'password'}
                             value={newPasswordConfirmation}
                             onChange={onChange}
                             onFocus={(event) => {

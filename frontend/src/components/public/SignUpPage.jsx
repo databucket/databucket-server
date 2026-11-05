@@ -8,6 +8,7 @@ import {validateEmail} from "../../utils/Misc";
 import {getBaseUrl, getContextPath} from "../../utils/UrlBuilder";
 import {handleErrors, handleLoginErrors} from "../../utils/FetchHelper";
 import ProjectRequest from "./ProjectRequest";
+import PasswordVisibility from "./PasswordVisibility";
 
 export default function SignUpPage() {
 
@@ -16,6 +17,8 @@ export default function SignUpPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
+    // the eye of the password shows both the password and its confirmation
+    const [showPasswords, setShowPasswords] = useState(false);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [recaptcha, setRecaptcha] = useState({enabled: true, siteKey: null});
     const [loading, setLoading] = useState(false);
@@ -245,9 +248,10 @@ export default function SignUpPage() {
                         <Input
                             id="standard-adornment-password"
                             name="password"
-                            type={'password'}
+                            type={showPasswords ? 'text' : 'password'}
                             value={password}
                             onChange={handlePassword}
+                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
                             onKeyPress={(event) => handleKeypress(event)}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
@@ -258,7 +262,7 @@ export default function SignUpPage() {
                         <InputLabel htmlFor="standard-adornment-confirm-password">Confirm password</InputLabel>
                         <Input
                             name="passwordConfirmation"
-                            type='password'
+                            type={showPasswords ? 'text' : 'password'}
                             value={passwordConfirmation}
                             onChange={handlePasswordConfirmation}
                             onKeyPress={(event) => handleKeypress(event)}
