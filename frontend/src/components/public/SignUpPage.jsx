@@ -22,6 +22,8 @@ export default function SignUpPage() {
     const [projects, setProjects] = useState([]);
     const [projectsIds, setProjectsIds] = useState([]);
     const [message, setMessage] = useState("");
+    // two steps when there are public projects to ask for: 1 the account, 2 the projects (optional)
+    const [step, setStep] = useState(1);
 
     useEffect(() => {
         fetch(getBaseUrl('public/projects'))
@@ -77,7 +79,7 @@ export default function SignUpPage() {
 
     const handleSubmit = e => {
         setLoading(true);
-        e.preventDefault();
+        e?.preventDefault();
 
         if (recaptcha.enabled) {
             window.grecaptcha.ready(() => {
@@ -110,6 +112,8 @@ export default function SignUpPage() {
             .catch(error => {
                 errorResp = true;
                 setLoading(false);
+                // e.g. the username or the email is taken: back to the account
+                setStep(1);
                 setMessageBox({open: true, severity: 'error', title: 'Registration failed', message: error});
             })
             .then(() => {
@@ -176,9 +180,21 @@ export default function SignUpPage() {
             setMessageBox({open: true, severity: 'error', title: 'Invalid email address.', message: ''});
     }
 
+    const accountValid = validateEmail(email)
+        && username.length >= 3
+        && username.length <= 50
+        && password.length > 0
+        && passwordConfirmation.length > 0
+        && password === passwordConfirmation;
+    const twoSteps = projects != null && projects.length > 0;
+
     const handleKeypress = e => {
-        if (e.key === 'Enter')
-            handleSubmit();
+        if (e.key === 'Enter' && accountValid && !loading) {
+            if (twoSteps)
+                setStep(2);
+            else
+                handleSubmit();
+        }
     };
 
     if (back)
@@ -191,6 +207,9 @@ export default function SignUpPage() {
                     <Typography className="TitleSingUp" variant="h5">
                         Sign up
                     </Typography>
+                    {twoSteps &&
+                        <Typography variant="caption" color="textSecondary">Step {step} of 2</Typography>}
+                    {step === 1 && <>
                     <Typography className="DescriptionSingUp">
                         You want to create a new account?
                         Send required fields and wait for the confirmation link.
@@ -229,6 +248,7 @@ export default function SignUpPage() {
                             type={'password'}
                             value={password}
                             onChange={handlePassword}
+                            onKeyPress={(event) => handleKeypress(event)}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
@@ -241,40 +261,38 @@ export default function SignUpPage() {
                             type='password'
                             value={passwordConfirmation}
                             onChange={handlePasswordConfirmation}
+                            onKeyPress={(event) => handleKeypress(event)}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
                         />
                     </FormControl>
-                    <ProjectRequest projects={projects} selected={projectsIds} onChange={setProjectsIds}
-                                    message={message} onMessageChange={setMessage}/>
+                    </>}
+                    {step === 2 && <>
+                        <Typography className="DescriptionSingUp">
+                            Optionally, choose the projects you want to work in and write a message for their
+                            administrators. You can also submit without choosing any.
+                        </Typography>
+                        <ProjectRequest projects={projects} selected={projectsIds} onChange={setProjectsIds}
+                                        message={message} onMessageChange={setMessage}/>
+                    </>}
                     <div className="ButtonSingUp">
-                        <Button
-                            fullWidth={true}
-                            variant="contained"
-                            color="primary"
-                            size={'large'}
-                            disabled={
-                                !(validateEmail(email)
-                                    && username.length >= 3
-                                    && username.length <= 50
-                                    && password.length > 0
-                                    && passwordConfirmation.length > 0
-                                    && password === passwordConfirmation
-                                    && !loading
-                                )}
-                            onClick={handleSubmit}
-                        >
-                            {loading ? 'Processing...' : 'Submit'}
-                        </Button>
+                        {step === 1 && twoSteps
+                            ? <Button fullWidth={true} variant="contained" color="primary" size={'large'}
+                                      disabled={!accountValid} onClick={() => setStep(2)}>
+                                Next
+                            </Button>
+                            : <Button fullWidth={true} variant="contained" color="primary" size={'large'}
+                                      disabled={!accountValid || loading} onClick={handleSubmit}>
+                                {loading ? 'Processing...' : 'Submit'}
+                            </Button>}
                     </div>
                     <div className="BackLinkSingUp">
                         <Link
                             component="button"
                             color="inherit"
-                            onClick={() => {
-                                setBack(true);
-                            }}
+                            disabled={loading}
+                            onClick={() => step === 2 ? setStep(1) : setBack(true)}
                         >
                             Back
                         </Link>
