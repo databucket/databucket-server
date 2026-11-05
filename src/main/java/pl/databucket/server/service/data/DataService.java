@@ -297,6 +297,21 @@ public class DataService {
         return dataIds;
     }
 
+    /**
+     * The number of free (not reserved) data rows matching the rules. Anyone with access to the bucket may reserve
+     * them, so they are counted also in a bucket with protected data, where the user sees only the rows reserved by
+     * them.
+     */
+    public long countFreeData(Bucket bucket, DataFilter queryRule) throws UnknownColumnException, ConditionNotAllowedException {
+        Map<String, Object> paramMap = new HashMap<>();
+        queryRule.require(COL.RESERVED, Operator.equal, false);
+        Query query = queryRule.applyTo(new Query(bucket.getTableName())
+                .select(COL.COUNT)
+                .from(), paramMap);
+        Long count = jdbcTemplate.queryForObject(query.toString(logger, paramMap), paramMap, Long.class);
+        return count != null ? count : 0;
+    }
+
     public int deleteDataByIds(User user, Bucket bucket, List<Long> dataIds) throws UnknownColumnException, ConditionNotAllowedException {
         Map<String, Object> paramMap = new HashMap<>();
         List<Condition> conditions = new ArrayList<>();
