@@ -95,7 +95,10 @@ export default function ProjectsTab() {
     }, [roles, fetchRoles]);
     const onDatasetImported = (project, dataset, rows) => {
         setDatasetProject(null);
-        editProject({...project, empty: false});
+        // the import gives the users of the dataset (created when missing) access to the project: the users of the
+        // project and the list of users change on the server
+        fetchProjects();
+        fetchUsers();
         setMessageBox({
             open: true,
             severity: 'success',
