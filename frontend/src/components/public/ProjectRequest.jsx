@@ -1,5 +1,5 @@
 import React from "react";
-import {Box, Checkbox, FormControlLabel, TextField, Typography} from "@mui/material";
+import {Box, Checkbox, FormControl, FormControlLabel, FormHelperText, Input, InputLabel, Typography} from "@mui/material";
 
 export const MESSAGE_MAX = 500;
 
@@ -35,19 +35,19 @@ export default function ProjectRequest({projects, selected, onChange, message, o
                     />
                 ))}
             </Box>
-            <TextField
-                fullWidth
-                multiline
-                minRows={3}
-                maxRows={8}
-                variant="outlined"
-                size="small"
-                label="Message (optional)"
-                value={message}
-                onChange={e => onMessageChange(e.target.value.slice(0, MESSAGE_MAX))}
-                helperText={`${message.length}/${MESSAGE_MAX}`}
-                sx={{mt: 3}}
-            />
+            {/* as the other fields of the sign-in pages (e.g. change password): a label and an underline */}
+            <FormControl fullWidth sx={{mt: 3}}>
+                <InputLabel htmlFor="project-request-message">Message (optional)</InputLabel>
+                <Input
+                    id="project-request-message"
+                    multiline
+                    minRows={1}
+                    maxRows={8}
+                    value={message}
+                    onChange={e => onMessageChange(e.target.value.slice(0, MESSAGE_MAX))}
+                />
+                <FormHelperText>{`${message.length}/${MESSAGE_MAX}`}</FormHelperText>
+            </FormControl>
         </Box>
     );
 }
