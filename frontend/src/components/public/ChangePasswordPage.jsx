@@ -99,7 +99,7 @@ export default function ChangePasswordPage() {
                     <Typography className="Title" variant="h5">
                         Change password
                     </Typography>
-                    <FormControl className="LoginInputText">
+                    <FormControl className="PasswordInputText">
                         <InputLabel htmlFor="standard-adornment-password">Current password</InputLabel>
                         <Input
                             name="password"
@@ -112,7 +112,7 @@ export default function ChangePasswordPage() {
                             }}
                         />
                     </FormControl>
-                    <FormControl className="LoginInputText">
+                    <FormControl className="PasswordInputText">
                         <InputLabel htmlFor="standard-adornment-new-password">New password</InputLabel>
                         <Input
                             name="newPassword"
@@ -125,7 +125,7 @@ export default function ChangePasswordPage() {
                             }}
                         />
                     </FormControl>
-                    <FormControl className="LoginInputText">
+                    <FormControl className="PasswordInputText">
                         <InputLabel htmlFor="standard-adornment-confirm-password">Confirm new password</InputLabel>
                         <Input
                             name="newPasswordConfirmation"
