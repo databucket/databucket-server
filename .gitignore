@@ -46,3 +46,6 @@ bin
 src/main/resources/static
 /.claude/
 /src/main/resources/application-kslysz.yaml
+
+# local settings of docker compose (e.g. DATABUCKET_DB_URL)
+/docker/.env

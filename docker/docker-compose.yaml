@@ -23,6 +23,13 @@
 # Self-registration is on: signing in with Keycloak as a user without a Databucket account (e.g. stranger / stranger)
 # offers to create one; the SUPER admins (with an email) get a message in Mailpit. Off: SSO_SELF_REGISTRATION=false
 #
+# Your own PostgreSQL (e.g. installed on this machine, to see the data in pgAdmin): put into docker/.env
+#   DATABUCKET_DB_URL=jdbc:postgresql://host.docker.internal:5432/<database>
+#   DATABUCKET_DB_USER=<user>
+#   DATABUCKET_DB_PASSWORD=<password>
+# and run "docker compose up -d databucket". Use a database only for this compose. To copy data into it, restore
+# the copy before Databucket starts on it (wiki: Installation, Copying the database).
+#
 # Logs in Kibana (Elasticsearch + Kibana + Filebeat): see docker-compose.elastic.yaml.
 services:
   postgres:
@@ -31,7 +38,10 @@ services:
       POSTGRES_USER: databucket_user
       POSTGRES_PASSWORD: databucket_user
       POSTGRES_DB: databucket
-    # not published, so it doesn't clash with a local PostgreSQL; use: docker compose exec postgres psql -U databucket_user databucket
+    # for pgAdmin, psql or "./gradlew bootRun" on this machine: localhost:5432 (only from this machine);
+    # another port when a local PostgreSQL already uses 5432: DATABUCKET_PG_PORT=5433 in docker/.env
+    ports:
+      - "127.0.0.1:${DATABUCKET_PG_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:
@@ -48,9 +58,10 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/databucket
-      SPRING_DATASOURCE_USERNAME: databucket_user
-      SPRING_DATASOURCE_PASSWORD: databucket_user
+      # the database of this compose by default; a PostgreSQL on this machine: see "Your own PostgreSQL" at the top
+      SPRING_DATASOURCE_URL: ${DATABUCKET_DB_URL:-jdbc:postgresql://postgres:5432/databucket}
+      SPRING_DATASOURCE_USERNAME: ${DATABUCKET_DB_USER:-databucket_user}
+      SPRING_DATASOURCE_PASSWORD: ${DATABUCKET_DB_PASSWORD:-databucket_user}
       SSO_ENABLED: "true"
       SSO_PROVIDER: keycloak
       SSO_ISSUER_URI: http://auth.localhost/realms/databucket
