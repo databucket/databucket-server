@@ -17,7 +17,7 @@ export default function SignUpPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
-    // the eye of the password shows both the password and its confirmation
+    // the eyes of the password and its confirmation show or hide both
     const [showPasswords, setShowPasswords] = useState(false);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [recaptcha, setRecaptcha] = useState({enabled: true, siteKey: null});
@@ -265,6 +265,7 @@ export default function SignUpPage() {
                             type={showPasswords ? 'text' : 'password'}
                             value={passwordConfirmation}
                             onChange={handlePasswordConfirmation}
+                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
                             onKeyPress={(event) => handleKeypress(event)}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');

@@ -29,7 +29,7 @@ export default function ChangePasswordPage() {
     const [{password, newPassword, newPasswordConfirmation}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [redirect, setRedirect] = useState(false);
-    // the eye of the current password shows all three passwords
+    // the eye of any of the three passwords shows or hides all of them
     const [showPasswords, setShowPasswords] = useState(false);
 
     const handleChangePassword = () => {
@@ -118,6 +118,7 @@ export default function ChangePasswordPage() {
                             type={showPasswords ? 'text' : 'password'}
                             value={newPassword}
                             onChange={onChange}
+                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
@@ -130,6 +131,7 @@ export default function ChangePasswordPage() {
                             type={showPasswords ? 'text' : 'password'}
                             value={newPasswordConfirmation}
                             onChange={onChange}
+                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
