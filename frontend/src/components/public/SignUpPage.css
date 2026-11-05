@@ -33,9 +33,10 @@
     /*overflow: auto;*/
 }
 
+/* as wide as the fields (85%) */
 .ButtonSingUp {
-    width: 100%;
-    padding: 20px;
+    width: 85%;
+    padding: 20px 0;
 }
 
 .EmailInputTextSingUp {
@@ -56,10 +57,10 @@
     /*overflow: auto;*/
 }
 
+/* left aligned with the fields and the button (85%, centred) */
 .BackLinkSingUp {
-    width: 100%;
+    width: 85%;
     margin-top: 20px;
-    margin-left: 40px;
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;

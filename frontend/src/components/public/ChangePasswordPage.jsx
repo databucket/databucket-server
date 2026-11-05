@@ -1,6 +1,7 @@
 import {Button, FormControl, Input, InputLabel, Link as MaterialLink, Paper, Typography} from "@mui/material";
 import React, {forwardRef, useState} from "react";
 import {MessageBox} from "../utils/MessageBox";
+import PasswordVisibility from "./PasswordVisibility";
 import {clearToken, getToken, getUsername} from "../../utils/ConfigurationStorage";
 import {fetchHelper, handleErrors} from "../../utils/FetchHelper";
 import {Link, Navigate} from "react-router-dom";
@@ -28,6 +29,9 @@ export default function ChangePasswordPage() {
     const [{password, newPassword, newPasswordConfirmation}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [redirect, setRedirect] = useState(false);
+    // the eye of each password field shows or hides only that field
+    const [shown, setShown] = useState({});
+    const toggleShown = name => setShown(prev => ({...prev, [name]: !prev[name]}));
 
     const handleChangePassword = () => {
         const username = getUsername();
@@ -99,9 +103,10 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-password">Current password</InputLabel>
                         <Input
                             name="password"
-                            type='password'
+                            type={shown.password ? 'text' : 'password'}
                             value={password}
                             onChange={onChange}
+                            endAdornment={<PasswordVisibility shown={shown.password === true} onToggle={() => toggleShown('password')}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
@@ -111,9 +116,10 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-new-password">New password</InputLabel>
                         <Input
                             name="newPassword"
-                            type='password'
+                            type={shown.newPassword ? 'text' : 'password'}
                             value={newPassword}
                             onChange={onChange}
+                            endAdornment={<PasswordVisibility shown={shown.newPassword === true} onToggle={() => toggleShown('newPassword')}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
@@ -123,9 +129,10 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-confirm-password">Confirm new password</InputLabel>
                         <Input
                             name="newPasswordConfirmation"
-                            type='password'
+                            type={shown.newPasswordConfirmation ? 'text' : 'password'}
                             value={newPasswordConfirmation}
                             onChange={onChange}
+                            endAdornment={<PasswordVisibility shown={shown.newPasswordConfirmation === true} onToggle={() => toggleShown('newPasswordConfirmation')}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
