@@ -39,9 +39,10 @@ const SectionTitle = ({children}) => (
     </Typography>
 );
 
+// greys softer than the themes themselves, so the item doesn't stand out too much
 const THEME_ITEM = {
-    dark: {mx: 1, my: 0.5, borderRadius: 1, bgcolor: '#303030', color: '#ffffff', '&:hover': {bgcolor: '#424242'}},
-    light: {mx: 1, my: 0.5, borderRadius: 1, bgcolor: '#f5f5f5', color: 'rgba(0, 0, 0, 0.87)', '&:hover': {bgcolor: '#e0e0e0'}}
+    dark: {mx: 1, my: 0.5, borderRadius: 1, bgcolor: '#616161', color: '#ffffff', '&:hover': {bgcolor: '#757575'}},
+    light: {mx: 1, my: 0.5, borderRadius: 1, bgcolor: '#bdbdbd', color: 'rgba(0, 0, 0, 0.87)', '&:hover': {bgcolor: '#cfcfcf'}}
 };
 
 export default function UserProfile(props) {
