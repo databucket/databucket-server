@@ -4,6 +4,7 @@ import CustomThemeContext from "./CustomThemeContext";
 import {createTheme, ThemeProvider} from "@mui/material";
 import {getTheme} from "../../utils/Themes";
 import DraggablePaper from "../../components/utils/DraggablePaper";
+import {applyJsonColors} from "../../utils/JsonColors";
 
 const draggableDialogs = {
     components: {
@@ -36,8 +37,10 @@ const CustomThemeProvider = props => {
     );
     const theme = useMemo(() => createTheme(getTheme(mode), draggableDialogs), [mode]);
     // global styles that depend on the theme (components/styles/json-editor-styles.css) select by this attribute
+    // and use the JSON colors chosen for it
     useLayoutEffect(() => {
         document.documentElement.dataset.theme = mode;
+        applyJsonColors(mode);
     }, [mode]);
     return (
         <CustomThemeContext.Provider value={colorMode}>

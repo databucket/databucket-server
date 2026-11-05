@@ -8,6 +8,7 @@ import {
     DialogTitle as MuiDialogTitle,
     Divider,
     IconButton,
+    InputAdornment,
     styled,
     TextField,
     Tooltip,
@@ -27,6 +28,7 @@ import {
     setDataDetailsDialogSize
 } from "../../utils/ConfigurationStorage";
 import {MessageBox} from "../utils/MessageBox";
+import JsonColorsButton from "../utils/JsonColorsButton";
 import { JSONPath } from "jsonpath-plus";
 import {getDirectDataPath} from "../../route/AppRouter";
 import {debounce} from "../utils/Debouncer";
@@ -161,6 +163,7 @@ export default function DataDetailsDialog(props) {
     const tagsLookup = createTagLookup(props.tags);
     const [dialogSize, setDialogSize] = useState('lg');
     const [jsonPath, setJsonPath] = useState(null);
+    const [jsonPathFilled, setJsonPathFilled] = useState(false);
 
     useEffect(() => {
         setDialogSize(getDataDetailsDialogSize());
@@ -211,7 +214,7 @@ export default function DataDetailsDialog(props) {
         try {
             let dataLink = getDirectDataPath(props.bucket.name,
                 props.dataRow.id);
-            if (jsonPath != null) {
+            if (jsonPath != null && jsonPath !== '') {
                 dataLink += "/" + jsonPath;
             }
             await navigator.clipboard.writeText(dataLink);
@@ -227,7 +230,7 @@ export default function DataDetailsDialog(props) {
 
     const openDataLink = async () => {
         let dataLink = getDirectDataPath(props.bucket.name, props.dataRow.id);
-        if (jsonPath != null) {
+        if (jsonPath != null && jsonPath !== '') {
             dataLink += "/" + jsonPath;
         }
         window.open(dataLink, "_blank");
@@ -263,7 +266,18 @@ export default function DataDetailsDialog(props) {
         debounce(newJsonPath => setJsonPath(newJsonPath), 1000)).current;
 
     const handleChangedJsonPath = (event) => {
+        setJsonPathFilled(event.target.value !== '');
         debouncedSave(event.target.value);
+    };
+
+    // the debounced change is called too, so that a change still pending does not bring the old path back
+    const clearJsonPath = () => {
+        const input = document.getElementById('jsonPathId');
+        if (input != null)
+            input.value = '';
+        setJsonPathFilled(false);
+        debouncedSave('');
+        setJsonPath('');
     };
 
     useEffect(() => {
@@ -378,6 +392,7 @@ export default function DataDetailsDialog(props) {
                 classes={{
                     root: classes.root2
                 }}>
+                <JsonColorsButton/>
                 <Tooltip id="copy-content-tooltip" title="Copy content">
                     <IconButton color={"inherit"} onClick={copyContent}
                                 size="large">
@@ -391,7 +406,17 @@ export default function DataDetailsDialog(props) {
                     variant="standard"
                     fullWidth
                     placeholder={"$.store.books[*].title"}
-                    InputProps={{disableUnderline: true}}
+                    InputProps={{
+                        disableUnderline: true,
+                        startAdornment:
+                            <InputAdornment position="start">
+                                <Tooltip title="Clear JSON path">
+                                    <span>
+                                        <IconButton size="small" onClick={clearJsonPath} disabled={!jsonPathFilled}><CloseIcon fontSize="small"/></IconButton>
+                                    </span>
+                                </Tooltip>
+                            </InputAdornment>
+                    }}
                     onChange={handleChangedJsonPath}
                 />
                 <div style={{width: '100px'}}/>

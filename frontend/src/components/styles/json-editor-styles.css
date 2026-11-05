@@ -32,60 +32,36 @@
 }
 
 
-/* light */
+/* the menu bar */
 
 [data-theme="light"] .jsoneditor-menu {
     background-color: #bababa;
 }
 
-/* the editor area slightly less white than the default theme's white */
-[data-theme="light"] .jsoneditor .ace-jsoneditor.ace_editor,
-[data-theme="light"] .jsoneditor .ace-jsoneditor .ace_scroller {
-    background-color: #f7f7f7;
-}
-
-/* JSON colors, the same as in the data history (utils/JsonHighlight.jsx) */
-[data-theme="light"] .jsoneditor .ace_editor .ace_variable {
-    color: #0451a5;
-}
-
-[data-theme="light"] .jsoneditor .ace_editor .ace_string {
-    color: #a31515;
-}
-
-[data-theme="light"] .jsoneditor .ace_editor .ace_constant.ace_numeric {
-    color: #098658;
-}
-
-[data-theme="light"] .jsoneditor .ace_editor .ace_constant.ace_language {
-    color: #0000ff;
-}
-
-
-/* dark */
-
 [data-theme="dark"] .jsoneditor-menu {
     background-color: #43453e;
 }
 
-/* the editor area lighter than monokai's own background, closer to the menu bar above it */
-[data-theme="dark"] .jsoneditor .ace-monokai.ace_editor,
-[data-theme="dark"] .jsoneditor .ace-monokai .ace_scroller {
-    background-color: #393b34;
+/* JSON colors: the palette chosen for the theme (utils/JsonColors.js sets the variables on <html>), the same as in
+   the data history (utils/JsonHighlight.jsx) */
+.jsoneditor .ace_editor,
+.jsoneditor .ace_editor .ace_scroller {
+    background-color: var(--json-background);
+    color: var(--json-text);
 }
 
-[data-theme="dark"] .jsoneditor .ace_editor .ace_variable {
-    color: #9cdcfe;
+.jsoneditor .ace_editor .ace_variable {
+    color: var(--json-key);
 }
 
-[data-theme="dark"] .jsoneditor .ace_editor .ace_string {
-    color: #ce9178;
+.jsoneditor .ace_editor .ace_string {
+    color: var(--json-string);
 }
 
-[data-theme="dark"] .jsoneditor .ace_editor .ace_constant.ace_numeric {
-    color: #b5cea8;
+.jsoneditor .ace_editor .ace_constant.ace_numeric {
+    color: var(--json-number);
 }
 
-[data-theme="dark"] .jsoneditor .ace_editor .ace_constant.ace_language {
-    color: #569cd6;
+.jsoneditor .ace_editor .ace_constant.ace_language {
+    color: var(--json-literal);
 }
