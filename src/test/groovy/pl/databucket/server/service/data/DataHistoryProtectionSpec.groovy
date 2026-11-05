@@ -2,6 +2,7 @@ package pl.databucket.server.service.data
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
+import pl.databucket.server.dto.DataGetDTO
 import pl.databucket.server.entity.Bucket
 import pl.databucket.server.entity.User
 import pl.databucket.server.exception.DataNotFoundException
@@ -71,6 +72,24 @@ class DataHistoryProtectionSpec extends Specification {
         1 * jdbcTemplate.queryForObject(_ as String, _ as Map, Long) >> 0L
         0 * jdbcTemplate.queryForList(*_)
         thrown(DataNotFoundException)
+    }
+
+    def "the free rows are counted without the owner, so also a member of a bucket with protected data sees how many can be reserved"() {
+        given:
+        def filter = DataFilters.of('member1', new DataGetDTO(rules: [['$.country', '==', 'PL']]), '2')
+        String sql = null
+        Map<String, Object> params = null
+
+        when:
+        def count = dataService.countFreeData(bucket(true), filter)
+
+        then:
+        1 * jdbcTemplate.queryForObject(_ as String, _ as Map, Long) >> { String s, Map p, Class c -> sql = s; params = p; 5L }
+        count == 5
+        sql.contains('reserved')
+        params.containsValue(false)
+        !params.containsValue('member1')
+        !sql.contains('reserved_by')
     }
 
     def "the history of a row reserved by the member is read"() {

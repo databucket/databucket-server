@@ -414,14 +414,14 @@ public class DataController {
             ),
             @ApiResponse(responseCode = "400", description = INVALID_RULES),
             @ApiResponse(responseCode = "404", description = NOT_FOUND),
-            @ApiResponse(responseCode = "406", description = "Not acceptable - the limit is less than 1, or a property in the rules can't be compared"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable - the limit is negative, or a property in the rules can't be compared"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = {"/reserve"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reserveData(
             @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = "Number of data rows to reserve", example = "1")
+            @Parameter(description = "Number of data rows to reserve; 0 reserves nothing and only counts the free rows matching the rules (available)", example = "1")
             @RequestParam(required = false, defaultValue = "1") Integer limit,
             @Parameter(description = SORT, example = "random")
             @RequestParam(required = false, defaultValue = "id") String sort,
@@ -434,8 +434,8 @@ public class DataController {
         if (bucket == null)
             return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
 
-        if (limit < 1)
-            return exceptionFormatter.customException("The limit must be greater than 0!", HttpStatus.NOT_ACCEPTABLE);
+        if (limit < 0)
+            return exceptionFormatter.customException("The limit must not be negative!", HttpStatus.NOT_ACCEPTABLE);
 
         try {
             ReserveDataResponse response = new ReserveDataResponse();
@@ -449,15 +449,15 @@ public class DataController {
                     targetOwnerUsername = dataReserveDTO.getTargetOwnerUsername();
 
                 DataFilter queryRule = DataFilters.of(user.getUsername(), dataReserveDTO, apiVersion);
-                List<Long> dataIds = dataService.reserveData(user, bucket, queryRule, limit, sort, targetOwnerUsername);
+                // limit 0: only counts the free rows
+                List<Long> dataIds = limit > 0 ? dataService.reserveData(user, bucket, queryRule, limit, sort, targetOwnerUsername) : null;
                 if (dataIds != null && dataIds.size() > 0)
                     response.setReserved(dataIds.size());
                 else
                     response.setReserved(0);
 
-                queryRule.require(COL.RESERVED, Operator.notEqual, true);
-                Map<ResultField, Object> getDataResult = dataService.getData(user, bucket, Optional.empty(), queryRule, 0, 0, "id");
-                response.setAvailable((Long) getDataResult.get(ResultField.TOTAL));
+                // all free rows, also in a bucket with protected data (where the user sees only their own rows)
+                response.setAvailable(dataService.countFreeData(bucket, queryRule));
 
                 if (dataIds != null && dataIds.size() > 0) {
                     List<DataDTO> dataDTOList = dataService.getData(user, bucket, dataIds);

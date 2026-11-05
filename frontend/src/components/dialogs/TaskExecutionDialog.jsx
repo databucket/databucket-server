@@ -170,10 +170,6 @@ TaskExecutionDialog.propTypes = {
 
 const initialActions = {properties: []};
 
-// the rules, for reserving only of the free rows
-const FREE_ROWS = {'==': [{var: 'reserved'}, false]};
-const countedLogic = (logic, freeOnly) => !freeOnly ? logic : (logic != null ? {and: [logic, FREE_ROWS]} : FREE_ROWS);
-
 export default function TaskExecutionDialog(props) {
 
     const theme = useTheme();
@@ -248,18 +244,23 @@ export default function TaskExecutionDialog(props) {
         }
     }
 
-    // reserving takes only free rows (the server adds it, the rules don't show it): then only those are counted
+    // reserving takes only free rows (the server adds it, the rules don't show it): then only those are counted, by
+    // the reservation with limit 0, which counts all free rows also in a bucket with protected data (where /get
+    // returns only the user's own rows)
     const freeOnly = state.actions.type === 'reserve';
 
     useEffect(() => {
-        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, freeOnly)});
+        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic, freeOnly});
     }, [props.open, state.logic, freeOnly]);
 
     const refreshAppliesCount = useCallback(
-        debounce(({open, bucket, logic}) => {
+        debounce(({open, bucket, logic, freeOnly}) => {
             if (open) {
                 let resultOk = true;
-                fetch(getDataUrl(bucket) + '/get?limit=0', getPostOptions({logic}))
+                const request = freeOnly
+                    ? fetch(getDataReserveUrl(bucket, 0, false), getPostOptions({logic}))
+                    : fetch(getDataUrl(bucket) + '/get?limit=0', getPostOptions({logic}));
+                request
                     .then(handleErrors)
                     .catch(error => {
                         setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
@@ -267,7 +268,7 @@ export default function TaskExecutionDialog(props) {
                     })
                     .then(result => {
                         if (resultOk)
-                            setAppliesCount(result.total);
+                            setAppliesCount(freeOnly ? result.available : result.total);
                     });
             }
         }, 1000),
@@ -293,7 +294,7 @@ export default function TaskExecutionDialog(props) {
                     });
                 } else
                     setMessageBox({open: true, severity: 'info', title: 'No free data row matches the rules', message: null});
-                refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, true)});
+                refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic, freeOnly: true});
                 props.reload();
             })
             .catch(error => {
@@ -318,7 +319,7 @@ export default function TaskExecutionDialog(props) {
                     setState({...state, processing: false});
                     if (resultOk) {
                         setMessageBox({open: true, severity: 'success', title: result.message, message: null});
-                        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, freeOnly)});
+                        refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic, freeOnly});
                         props.reload();
                     }
                 });
@@ -384,7 +385,7 @@ export default function TaskExecutionDialog(props) {
                         setState({...state, processing: false});
                         if (resultOk) {
                             setMessageBox({open: true, severity: 'success', title: result.message, message: null});
-                            refreshAppliesCount({open: props.open, bucket: props.bucket, logic: countedLogic(state.logic, freeOnly)});
+                            refreshAppliesCount({open: props.open, bucket: props.bucket, logic: state.logic, freeOnly});
                             props.reload();
                         }
                     });
