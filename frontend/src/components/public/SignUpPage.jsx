@@ -17,8 +17,9 @@ export default function SignUpPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
-    // the eyes of the password and its confirmation show or hide both
-    const [showPasswords, setShowPasswords] = useState(false);
+    // the eye of each password field shows or hides only that field
+    const [shown, setShown] = useState({});
+    const toggleShown = name => setShown(prev => ({...prev, [name]: !prev[name]}));
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [recaptcha, setRecaptcha] = useState({enabled: true, siteKey: null});
     const [loading, setLoading] = useState(false);
@@ -248,10 +249,10 @@ export default function SignUpPage() {
                         <Input
                             id="standard-adornment-password"
                             name="password"
-                            type={showPasswords ? 'text' : 'password'}
+                            type={shown.password ? 'text' : 'password'}
                             value={password}
                             onChange={handlePassword}
-                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
+                            endAdornment={<PasswordVisibility shown={shown.password === true} onToggle={() => toggleShown('password')}/>}
                             onKeyPress={(event) => handleKeypress(event)}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
@@ -262,10 +263,10 @@ export default function SignUpPage() {
                         <InputLabel htmlFor="standard-adornment-confirm-password">Confirm password</InputLabel>
                         <Input
                             name="passwordConfirmation"
-                            type={showPasswords ? 'text' : 'password'}
+                            type={shown.passwordConfirmation ? 'text' : 'password'}
                             value={passwordConfirmation}
                             onChange={handlePasswordConfirmation}
-                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
+                            endAdornment={<PasswordVisibility shown={shown.passwordConfirmation === true} onToggle={() => toggleShown('passwordConfirmation')}/>}
                             onKeyPress={(event) => handleKeypress(event)}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');

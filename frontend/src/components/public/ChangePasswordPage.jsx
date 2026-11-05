@@ -29,8 +29,9 @@ export default function ChangePasswordPage() {
     const [{password, newPassword, newPasswordConfirmation}, setState] = useState(initialState);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [redirect, setRedirect] = useState(false);
-    // the eye of any of the three passwords shows or hides all of them
-    const [showPasswords, setShowPasswords] = useState(false);
+    // the eye of each password field shows or hides only that field
+    const [shown, setShown] = useState({});
+    const toggleShown = name => setShown(prev => ({...prev, [name]: !prev[name]}));
 
     const handleChangePassword = () => {
         const username = getUsername();
@@ -102,10 +103,10 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-password">Current password</InputLabel>
                         <Input
                             name="password"
-                            type={showPasswords ? 'text' : 'password'}
+                            type={shown.password ? 'text' : 'password'}
                             value={password}
                             onChange={onChange}
-                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
+                            endAdornment={<PasswordVisibility shown={shown.password === true} onToggle={() => toggleShown('password')}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
@@ -115,10 +116,10 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-new-password">New password</InputLabel>
                         <Input
                             name="newPassword"
-                            type={showPasswords ? 'text' : 'password'}
+                            type={shown.newPassword ? 'text' : 'password'}
                             value={newPassword}
                             onChange={onChange}
-                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
+                            endAdornment={<PasswordVisibility shown={shown.newPassword === true} onToggle={() => toggleShown('newPassword')}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
@@ -128,10 +129,10 @@ export default function ChangePasswordPage() {
                         <InputLabel htmlFor="standard-adornment-confirm-password">Confirm new password</InputLabel>
                         <Input
                             name="newPasswordConfirmation"
-                            type={showPasswords ? 'text' : 'password'}
+                            type={shown.newPasswordConfirmation ? 'text' : 'password'}
                             value={newPasswordConfirmation}
                             onChange={onChange}
-                            endAdornment={<PasswordVisibility shown={showPasswords} onToggle={() => setShowPasswords(!showPasswords)}/>}
+                            endAdornment={<PasswordVisibility shown={shown.newPasswordConfirmation === true} onToggle={() => toggleShown('newPasswordConfirmation')}/>}
                             onFocus={(event) => {
                                 event.target.setAttribute('autocomplete', 'off');
                             }}
