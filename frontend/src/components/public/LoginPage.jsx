@@ -172,6 +172,13 @@ export default function LoginPage() {
     };
 
 
+    // forgets the account chosen (and its token) and shows the sign-in form again
+    const backToSignIn = () => {
+        logOut();
+        setSsoCode(null);
+        setState(prevState => ({...prevState, password: '', projects: null}));
+    };
+
     const selectProject = (id) => {
         if (ssoCode != null)
             ssoSignIn(ssoCode, id);
@@ -292,6 +299,12 @@ export default function LoginPage() {
                         );
                     })}
                 </List>
+                {/* back to signing in, e.g. for a ROBOT, who can't use the web application in any project */}
+                <div style={{width: '100%', margin: '16px 0 15px 40px', display: 'flex'}}>
+                    <MaterialLink component="button" color="inherit" onClick={backToSignIn}>
+                        Back
+                    </MaterialLink>
+                </div>
             </Paper>
         );
     }
