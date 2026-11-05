@@ -336,20 +336,16 @@ export default function LoginPage() {
                 return redirectTo("/change-password");
             case 3:
                 return getProjectsPaper();
-            case 2:
+            case 2: {
+                // the page the app was opened at (e.g. a link to a data row), only when it is in the project signed
+                // in to; e.g. /management/... (the app opened in Management, then signed out) leads to the project
                 const pathname = getPathname();
-                if (pathname != null
-                    && pathname !== "null"
-                    && !pathname.includes("confirmation")
-                    && !pathname.includes("forgot-password")
-                    && !pathname.includes("sign-up")
-                ) {
-                    setPathname(null);
-                    return redirectTo(pathname)
-                } else {
-                    const pathname = getProjectDataPath();
+                setPathname(null);
+                const projectPath = getProjectDataPath();
+                if (pathname != null && (pathname === projectPath || pathname.startsWith(projectPath + '/')))
                     return redirectTo(pathname);
-                }
+                return redirectTo(projectPath);
+            }
             case 1:
                 return redirectTo(getManagementProjectsPath());
             default:
