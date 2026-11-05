@@ -11,7 +11,8 @@ import {
     TableBody,
     TableCell,
     TableRow,
-    TextField,
+    FormControl,
+    OutlinedInput,
     Typography
 } from '@mui/material';
 import {getBaseUrl} from "../../utils/UrlBuilder";
@@ -90,15 +91,16 @@ export default function ProjectContentDialog({project, mode, onClose, onDone}) {
                 </Typography>
                 <Typography variant="body2" color="error" gutterBottom>This can't be undone.</Typography>
 
-                <TextField
-                    label="Type the project name to confirm"
-                    value={confirmedName}
-                    onChange={e => setConfirmedName(e.target.value)}
-                    disabled={working}
-                    fullWidth
-                    size="small"
-                    sx={{mt: 2}}
-                />
+                {/* as in the other confirmations (reset password, removing in the settings) */}
+                <Typography style={{marginTop: '20px', marginBottom: '4px'}}>Please type the project name to confirm.</Typography>
+                <FormControl variant="outlined" fullWidth>
+                    <OutlinedInput
+                        value={confirmedName}
+                        onChange={e => setConfirmedName(e.target.value)}
+                        disabled={working}
+                        inputProps={{'aria-label': 'project name'}}
+                    />
+                </FormControl>
                 {working && <LinearProgress sx={{mt: 2}}/>}
                 {error != null && <Alert severity="error" sx={{mt: 2}}>{error}</Alert>}
             </DialogContent>

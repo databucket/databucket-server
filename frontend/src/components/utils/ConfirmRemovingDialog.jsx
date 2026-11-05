@@ -51,7 +51,7 @@ export default function ConfirmRemovingDialog(props) {
                     }}>{props.message}</Typography>
                     <Typography style={{display: 'inline-block'}} color={'secondary'}>{`${props.name}`}</Typography>
 
-                    <Typography color={'error'} style={{marginTop: '10px'}}>{'This action will be undone.'}</Typography>
+                    <Typography color={'error'} style={{marginTop: '10px'}}>{"This action can't be undone."}</Typography>
                     <Typography color={'error'}>{'Approving this action will permanently delete this item and contained data!'}</Typography>
 
                     <Typography style={{marginTop: '20px', marginBottom: '4px'}}>{'Please type the item name to confirm.'}</Typography>
