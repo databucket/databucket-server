@@ -137,7 +137,7 @@ export default function PropertiesTable(props) {
                     {title: 'UUID', field: 'uuid', hidden: true, type: 'string'}
                 ]}
                 data={data}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                onRowsPerPageChange={onChangeRowsPerPage}
                 options={{
                     paging: props.pageSize != null,
                     pageSize: props.pageSize != null ? props.pageSize

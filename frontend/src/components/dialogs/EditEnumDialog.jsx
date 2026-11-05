@@ -29,6 +29,7 @@ import MaterialTable from '@material-table/core';
 import PropTypes from 'prop-types';
 import EditIconDialog from "./SelectIconDialog";
 import {MessageBox} from "../utils/MessageBox";
+import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import StyledIcon from "../utils/StyledIcon";
 
 const PREFIX = 'EditEnumDialog';
@@ -88,6 +89,8 @@ export default function EditEnumDialog(props) {
         {open: false, severity: 'error', title: '', message: ''});
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(props.items != null ? props.items : []);
+    // the rows per page of the dialogs, remembered
+    const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
 
     const getColumns = () => {
         let columnsArray = [];
@@ -173,9 +176,13 @@ export default function EditEnumDialog(props) {
                         tableRef={tableRef}
                         columns={getColumns()}
                         data={data}
+                        onRowsPerPageChange={size => {
+                            setPageSize(size);
+                            setLastPageSizeOnDialog(size);
+                        }}
                         options={{
                             paging: true,
-                            pageSize: 10,
+                            pageSize: pageSize,
                             paginationType: 'stepped',
                             pageSizeOptions: getPageSizeOptionsOnDialog(),
                             actionsColumnIndex: -1,

@@ -145,7 +145,7 @@ export default function ColumnsTable(props) {
                     }
                 ]}
                 data={columns}
-                onChangeRowsPerPage={onChangeRowsPerPage}
+                onRowsPerPageChange={onChangeRowsPerPage}
                 options={{
                     paging: false,
                     pageSize: pageSize,
