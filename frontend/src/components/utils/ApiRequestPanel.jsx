@@ -143,10 +143,10 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
                 <Box flexGrow={1}/>
                 {open && <>
                     <Tooltip title={copied === 'json' ? 'Copied' : 'Copy the JSON body'}>
-                        <Button size="small" onClick={() => copy('json', text)} startIcon={<ContentCopy/>}>JSON</Button>
+                        <Button size="small" color="inherit" onClick={() => copy('json', text)} startIcon={<ContentCopy/>}>JSON</Button>
                     </Tooltip>
                     <Tooltip title={copied === 'curl' ? 'Copied' : 'Copy the request as curl'}>
-                        <Button size="small" onClick={() => copy('curl', curl)} startIcon={<ContentCopy/>}>curl</Button>
+                        <Button size="small" color="inherit" onClick={() => copy('curl', curl)} startIcon={<ContentCopy/>}>curl</Button>
                     </Tooltip>
                 </>}
             </Box>
