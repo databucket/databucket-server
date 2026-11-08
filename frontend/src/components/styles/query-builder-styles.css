@@ -106,7 +106,15 @@
 .group--header:not(.no--children):not(.hide--conjs) {
   position: relative;
 }
+/* The whole vertical line is drawn by the items of the group (their ::before / ::after), which all start at the same x:
+   a part drawn by the header was rounded aside at 125 %, more so in a scrolled dialog. The group is a stacking
+   context, so that the line (z-index -1) is drawn above the background of the group but behind the NOT/AND/OR
+   buttons and the rules, and its first part can start under the buttons. */
+.group {
+  isolation: isolate;
+}
 .group--header:not(.no--children):not(.hide--conjs)::before {
+  display: none;
   z-index: 0;
   content: "";
   position: absolute;
@@ -119,7 +127,8 @@
 }
 .group--header:not(.no--children):not(.hide--conjs)::before {
   top: 20px;
-  height: calc(100% + 10px - 20px);
+  /* 4px longer than to the first rule: overlapping it, the line has no gap at any zoom (rounding at 125 %) */
+  height: calc(100% + 10px - 20px + 4px);
   left: 11px;
   width: 13px;
 }
@@ -133,19 +142,21 @@
 .group--children > .group-or-rule-container > .group-or-rule::before, .group--children > .group-or-rule-container > .group-or-rule::after {
   content: "";
   position: absolute;
+  z-index: -1;
   border-color: #424242;
   border-style: solid;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+/* the vertical parts overlap by 2-3px (the same ends as before), so that rounding leaves no gap between them */
 .group--children > .group-or-rule-container > .group-or-rule::before {
-  top: -1px;
-  height: calc(50% + 1px + 1px);
+  top: -3px;
+  height: calc(50% + 1px + 3px);
 }
 .group--children > .group-or-rule-container > .group-or-rule::after {
-  top: calc(50% + 1px);
-  height: calc(50% - 1px + 10px + 2px);
+  top: calc(50% - 1px);
+  height: calc(50% + 1px + 10px + 2px);
 }
 .group--children > .group-or-rule-container > .group-or-rule::before, .group--children > .group-or-rule-container > .group-or-rule::after {
   /* under the line from the conjunctions (header ::before, left: 11px), and touching the rule;
@@ -153,17 +164,24 @@
   left: -14px;
   width: 13px;
 }
+/* no rounded corners on the line: a rounded part is drawn another way than the straight ones and lands a fraction of
+   a pixel aside (at 125 %), which shows along the whole height of a group as the last item */
 .group--children > .group-or-rule-container:last-child > .group-or-rule::before {
-  border-radius: 0 0 0 4px;
+  border-radius: 0;
 }
 .group--children > .group-or-rule-container:last-child > .group-or-rule::after {
   display: none;
+}
+/* up into the header (10px between the header and the items, the line started 20px below the top of the header) */
+.group--children > .group-or-rule-container:first-child > .group-or-rule::before {
+  top: -24px;
+  height: calc(50% + 1px + 24px);
 }
 .group--children.hide--conjs > .group-or-rule-container:first-child > .group-or-rule::before {
   display: none;
 }
 .group--children.hide--conjs > .group-or-rule-container:first-child > .group-or-rule::after {
-  border-radius: 4px 0 0 0;
+  border-radius: 0;
   border-width: 2px 0 0 2px;
 }
 .group--children.hide--conjs > .group-or-rule-container:first-child > .group-or-rule::after {
@@ -175,7 +193,7 @@
   display: none;
 }
 .rule_group--children > .group-or-rule-container:first-child > .group-or-rule::after {
-  border-radius: 4px 0 0 0;
+  border-radius: 0;
   border-width: 2px 0 0 2px;
 }
 .rule_group--children > .group-or-rule-container:first-child > .group-or-rule::after {
