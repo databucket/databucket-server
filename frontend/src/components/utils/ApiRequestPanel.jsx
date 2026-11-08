@@ -102,9 +102,17 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
         return () => clearTimeout(timer);
     }, [open, text]);
 
+    // the line height of the editor (it depends on the zoom and the fonts); read once the editor is shown
+    const [lineHeight, setLineHeight] = useState(19);
+
     useEffect(() => {
-        editorRef.current?.jsonEditor?.setText(text);
-    }, [text, open, theme.palette.mode]);
+        const jsonEditor = editorRef.current?.jsonEditor;
+        jsonEditor?.setText(text);
+        const measured = jsonEditor?.aceEditor?.renderer?.lineHeight;
+        if (measured > 0 && measured !== lineHeight)
+            setLineHeight(measured);
+        jsonEditor?.aceEditor?.resize();
+    }, [text, open, theme.palette.mode, lineHeight]);
 
     const changeTab = (event, value) => {
         saveTab(value);
@@ -157,7 +165,8 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
                     {Object.entries(HEADERS).map(([name, value]) =>
                         <div key={name} style={{opacity: 0.75}}>{name}: {value}</div>)}
                 </Typography>
-                <Box sx={{height: Math.min(lines * 17 + 12, 320)}}>
+                {/* the whole body without a scrollbar of its own, and a spare line (the dialog scrolls if needed) */}
+                <Box sx={{height: (lines + 1) * lineHeight + 12}}>
                     <Editor
                         key={theme.palette.mode}
                         ref={editorRef}
