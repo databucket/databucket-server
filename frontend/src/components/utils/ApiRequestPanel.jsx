@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import PropTypes from "prop-types";
-import {Box, Button, Tab, Tabs, Tooltip, Typography, useTheme} from "@mui/material";
+import {Box, Button, Tooltip, Typography, useTheme} from "@mui/material";
 import {ContentCopy, WarningAmber} from "@mui/icons-material";
 import {JsonEditor as Editor} from 'jsoneditor-react18';
 import ace from 'brace';
@@ -10,23 +10,6 @@ import {logicToRules} from "../../utils/LogicToRules";
 import {getDataUrl} from "../../utils/UrlBuilder";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {API_VERSION_HEADER, handleErrors} from "../../utils/FetchHelper";
-
-// the tab shown under the rules (SQL or API request) is remembered in the browser
-const TAB_KEY = 'rich-filter-preview-tab';
-const readTab = () => {
-    try {
-        return localStorage.getItem(TAB_KEY) === 'api' ? 'api' : 'sql';
-    } catch (e) {
-        return 'sql';
-    }
-};
-const saveTab = (tab) => {
-    try {
-        localStorage.setItem(TAB_KEY, tab);
-    } catch (e) {
-        // not remembered
-    }
-};
 
 const HEADERS = {
     'Authorization': 'Bearer $TOKEN',
@@ -67,15 +50,13 @@ const formatBody = (body) => '{\n' + Object.entries(body).map(([key, value]) => 
 const count = (url, body) => fetch(url, getPostOptions(body)).then(handleErrors).then(result => result.total);
 
 /**
- * Under the rules (rich filter, task execution), two tabs: the rules as an SQL condition, what follows WHERE (given
- * as `sql`), and as an API request to copy into an API client (Postman, Bruno) or a test. By default the request reads
- * the matching data; a task gives its own `method`, `url` and the other items of the body (`extra`). The request
- * holds the "rules" format of the API; when the logic can't be expressed by rules, the logic itself.
+ * The rules (rich filter, task execution) as an API request, to copy into an API client (Postman, Bruno) or a test:
+ * the method, the URL, the headers and the body. By default the request reads the matching data; a task gives its
+ * own `method`, `url` and the other items of the body (`extra`). The body holds the "rules" format of the API; when
+ * the logic can't be expressed by rules, the logic itself.
  */
-export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', url: requestUrl, extra = {}}) {
+export default function ApiRequestPanel({bucket, logic, method = 'POST', url: requestUrl, extra = {}}) {
     const theme = useTheme();
-    const [tab, setTab] = useState(readTab);
-    const open = tab === 'api';
     const [copied, setCopied] = useState(null);
     const [check, setCheck] = useState(null);   // {rules, logic}: the numbers of rows both match
     const editorRef = useRef(null);
@@ -84,14 +65,14 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
     const body = {...(rules != null ? {rules} : {logic}), ...extra};
     const text = formatBody(body);
     const url = requestUrl ?? `${getDataUrl(bucket)}/get?limit=10`;
-    const curl = `curl -X ${method} "${url}" \\\n`
-        + Object.entries(HEADERS).map(([name, value]) => `  -H "${name}: ${value}" \\\n`).join('')
-        + `  -d '${JSON.stringify(body).replaceAll("'", "'\\''")}'`;   // an apostrophe in a value closes and reopens the quotes
+    const curl = `curl -X ${method} "${url}" \\n`
+        + Object.entries(HEADERS).map(([name, value]) => `  -H "${name}: ${value}" \\n`).join('')
+        + `  -d '${JSON.stringify(body).replaceAll("'", "'\''")}'`;   // an apostrophe in a value closes and reopens the quotes
 
-    // the rules and the logic must match the same rows; checked while the panel is open
+    // the rules and the logic must match the same rows; checked while the request is shown
     useEffect(() => {
         setCheck(null);
-        if (!open || rules == null || rules.length === 0)
+        if (rules == null || rules.length === 0)
             return;
         const timer = setTimeout(() => {
             const countUrl = `${getDataUrl(bucket)}/get?limit=0`;
@@ -100,7 +81,7 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
                 .catch(() => setCheck(null));
         }, 1000);
         return () => clearTimeout(timer);
-    }, [open, text]);
+    }, [text]);
 
     // the line height of the editor (it depends on the zoom and the fonts); read once the editor is shown
     const [lineHeight, setLineHeight] = useState(19);
@@ -112,12 +93,7 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
         if (measured > 0 && measured !== lineHeight)
             setLineHeight(measured);
         jsonEditor?.aceEditor?.resize();
-    }, [text, open, theme.palette.mode, lineHeight]);
-
-    const changeTab = (event, value) => {
-        saveTab(value);
-        setTab(value);
-    };
+    }, [text, theme.palette.mode, lineHeight]);
 
     const copy = async (what, value) => {
         try {
@@ -133,65 +109,48 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
     const differs = check != null && check.rules !== check.logic;
 
     return (
-        <Box sx={{mx: 2, mb: 2}}>
-            <Box display="flex" alignItems="center" sx={{borderBottom: 1, borderColor: 'divider'}}>
-                {/* neutral, not in the accent color of the dialog's own tabs: the selected tab bold and underlined in the
-                    color of the text, the other one faded */}
-                <Tabs value={tab} onChange={changeTab} textColor="inherit"
-                      sx={{
-                          minHeight: 36,
-                          '& .MuiTabs-indicator': {backgroundColor: 'text.primary', height: 2},
-                          '& .MuiTab-root': {minHeight: 36, py: 0.5, color: 'text.primary', opacity: 0.5},
-                          '& .MuiTab-root:hover': {opacity: 0.8},
-                          '& .MuiTab-root.Mui-selected': {opacity: 1, fontWeight: 700}
-                      }}>
-                    <Tab value="sql" label="SQL condition"/>
-                    <Tab value="api" label="API request"/>
-                </Tabs>
-                <Box flexGrow={1}/>
-                {open && <>
+        <Box sx={{m: 2}}>
+            <Box display="flex" alignItems="flex-start" gap={2}>
+                <Typography variant="body2" component="div" sx={{fontFamily: 'monospace', wordBreak: 'break-all', flexGrow: 1}}>
+                    {method} {url}
+                    {Object.entries(HEADERS).map(([name, value]) =>
+                        <div key={name} style={{opacity: 0.75}}>{name}: {value}</div>)}
+                </Typography>
+                <Box display="flex" flexShrink={0}>
                     <Tooltip title={copied === 'json' ? 'Copied' : 'Copy the JSON body'}>
                         <Button size="small" color="inherit" onClick={() => copy('json', text)} startIcon={<ContentCopy/>}>JSON</Button>
                     </Tooltip>
                     <Tooltip title={copied === 'curl' ? 'Copied' : 'Copy the request as curl'}>
                         <Button size="small" color="inherit" onClick={() => copy('curl', curl)} startIcon={<ContentCopy/>}>curl</Button>
                     </Tooltip>
-                </>}
-            </Box>
-            {!open && <Box sx={{mx: -2}}>{sql}</Box>}
-            {open && <>
-                <Typography variant="body2" component="div" sx={{fontFamily: 'monospace', my: 1, wordBreak: 'break-all'}}>
-                    {method} {url}
-                    {Object.entries(HEADERS).map(([name, value]) =>
-                        <div key={name} style={{opacity: 0.75}}>{name}: {value}</div>)}
-                </Typography>
-                {/* the whole body without a scrollbar of its own, and a spare line (the dialog scrolls if needed) */}
-                <Box sx={{height: (lines + 1) * lineHeight + 12}}>
-                    <Editor
-                        key={theme.palette.mode}
-                        ref={editorRef}
-                        value={{}}
-                        mode="code"
-                        ace={ace}
-                        theme={theme.palette.mode === 'light' ? null : "ace/theme/monokai"}
-                        onEditable={() => false}
-                        mainMenuBar={false}
-                        statusBar={false}
-                        htmlElementProps={{style: {height: "100%"}}}
-                    />
                 </Box>
-                {rules == null &&
-                    <Typography variant="caption" color="text.secondary">
-                        This filter can't be written as rules: the body holds its logic (JsonLogic), which the API takes too.
-                    </Typography>}
-                {differs &&
-                    <Typography variant="caption" color="error" display="flex" alignItems="center" gap={0.5}>
-                        <WarningAmber fontSize="inherit"/>
-                        The rules match {check.rules} rows, the filter {check.logic}. Please report it; use the logic of the filter meanwhile.
-                    </Typography>}
-                {copied === 'error' &&
-                    <Typography variant="caption" color="error">The browser doesn't allow copying here: select the text and copy it.</Typography>}
-            </>}
+            </Box>
+            {/* the whole body without a scrollbar of its own, and a spare line (the dialog scrolls if needed) */}
+            <Box sx={{height: (lines + 1) * lineHeight + 12, mt: 1}}>
+                <Editor
+                    key={theme.palette.mode}
+                    ref={editorRef}
+                    value={{}}
+                    mode="code"
+                    ace={ace}
+                    theme={theme.palette.mode === 'light' ? null : "ace/theme/monokai"}
+                    onEditable={() => false}
+                    mainMenuBar={false}
+                    statusBar={false}
+                    htmlElementProps={{style: {height: "100%"}}}
+                />
+            </Box>
+            {rules == null &&
+                <Typography variant="caption" color="text.secondary">
+                    These rules can't be written in the rules format: the body holds their logic (JsonLogic), which the API takes too.
+                </Typography>}
+            {differs &&
+                <Typography variant="caption" color="error" display="flex" alignItems="center" gap={0.5}>
+                    <WarningAmber fontSize="inherit"/>
+                    The rules match {check.rules} rows, the logic {check.logic}. Please report it; use the logic meanwhile.
+                </Typography>}
+            {copied === 'error' &&
+                <Typography variant="caption" color="error">The browser doesn't allow copying here: select the text and copy it.</Typography>}
         </Box>
     );
 }
@@ -199,7 +158,6 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
 ApiRequestPanel.propTypes = {
     bucket: PropTypes.object.isRequired,
     logic: PropTypes.object,
-    sql: PropTypes.node,
     method: PropTypes.string,
     url: PropTypes.string,
     extra: PropTypes.object

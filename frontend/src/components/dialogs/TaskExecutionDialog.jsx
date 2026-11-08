@@ -525,15 +525,15 @@ export default function TaskExecutionDialog(props) {
                         <StyledTab label="Action"/>
                         <StyledTab label="Rules"/>
                         {tasksEnabled && <StyledTab label="Properties"/>}
+                        <StyledTab label="API request" value="api"/>
                     </Tabs>
                     <div className={classes.devGrabSpace}/>
                 </div>
             </DialogTitle>
-            {/* the content grows with what it shows (up to the height of the window, then it scrolls) */}
             <EnumsProvider>
                 <DialogContent
                     dividers
-                    style={{minHeight: '62vh'}}
+                    style={{height: '62vh'}}
                     ref={dialogContentRef}
                     classes={{
                         root: classes.root
@@ -574,9 +574,7 @@ export default function TaskExecutionDialog(props) {
                                 onChange={onRulesChange}
                                 renderBuilder={renderBuilder}
                             />
-                            <ApiRequestPanel bucket={props.bucket} logic={state.logic}
-                                             sql={renderResult({tree: state.tree, config: state.config})}
-                                             {...getActionRequest()}/>
+                            {renderResult({tree: state.tree, config: state.config})}
                         </Box>
                     }
 
@@ -590,6 +588,9 @@ export default function TaskExecutionDialog(props) {
                             pageSize={null}
                             parentContentRef={dialogContentRef}
                         />}
+
+                    {props.open && !state.processing && activeTab === 'api' &&
+                        <ApiRequestPanel bucket={props.bucket} logic={state.logic} {...getActionRequest()}/>}
                 </DialogContent>
             </EnumsProvider>
             <DialogActions
