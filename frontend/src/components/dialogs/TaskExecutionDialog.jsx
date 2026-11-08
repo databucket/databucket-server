@@ -76,13 +76,18 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
     },
 
     [`& .${classes.oneLine}`]: {
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
         padding: theme.spacing(2)
     },
 
+    // the tabs in the middle of the title bar, whatever is left (title, task / filter menu) and right (size, close) of them
     [`& .${classes.tabs}`]: {
-        flexGrow: 1
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)'
     },
 
     [`& .${classes.devGrabSpace}`]: {
