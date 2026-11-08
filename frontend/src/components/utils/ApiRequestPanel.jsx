@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import PropTypes from "prop-types";
-import {Box, Button, Collapse, Tooltip, Typography, useTheme} from "@mui/material";
-import {ContentCopy, ExpandMore, ChevronRight, WarningAmber} from "@mui/icons-material";
+import {Box, Button, Tab, Tabs, Tooltip, Typography, useTheme} from "@mui/material";
+import {ContentCopy, WarningAmber} from "@mui/icons-material";
 import {JsonEditor as Editor} from 'jsoneditor-react18';
 import ace from 'brace';
 import 'brace/mode/json';
@@ -11,18 +11,18 @@ import {getDataUrl} from "../../utils/UrlBuilder";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {API_VERSION_HEADER, handleErrors} from "../../utils/FetchHelper";
 
-// whether the panel is open is remembered in the browser
-const OPEN_KEY = 'rich-filter-api-request';
-const readOpen = () => {
+// the tab shown under the rules (SQL or API request) is remembered in the browser
+const TAB_KEY = 'rich-filter-preview-tab';
+const readTab = () => {
     try {
-        return localStorage.getItem(OPEN_KEY) === 'true';
+        return localStorage.getItem(TAB_KEY) === 'api' ? 'api' : 'sql';
     } catch (e) {
-        return false;
+        return 'sql';
     }
 };
-const saveOpen = (open) => {
+const saveTab = (tab) => {
     try {
-        localStorage.setItem(OPEN_KEY, String(open));
+        localStorage.setItem(TAB_KEY, tab);
     } catch (e) {
         // not remembered
     }
@@ -63,12 +63,14 @@ const formatBody = (body) => body.rules != null
 const count = (url, body) => fetch(url, getPostOptions(body)).then(handleErrors).then(result => result.total);
 
 /**
- * The rules of the rich filter as the body of an API request, to copy into an API client (Postman, Bruno) or a test.
- * Shown in the "rules" format of the API; when the logic can't be expressed by rules, as the logic itself.
+ * Under the rules of the rich filter, two tabs: the filter as SQL (given as `sql`) and as the body of an API request,
+ * to copy into an API client (Postman, Bruno) or a test. The request holds the "rules" format of the API; when the
+ * logic can't be expressed by rules, the logic itself.
  */
-export default function ApiRequestPanel({bucket, logic}) {
+export default function ApiRequestPanel({bucket, logic, sql}) {
     const theme = useTheme();
-    const [open, setOpen] = useState(readOpen);
+    const [tab, setTab] = useState(readTab);
+    const open = tab === 'api';
     const [copied, setCopied] = useState(null);
     const [check, setCheck] = useState(null);   // {rules, logic}: the numbers of rows both match
     const editorRef = useRef(null);
@@ -99,9 +101,9 @@ export default function ApiRequestPanel({bucket, logic}) {
         editorRef.current?.jsonEditor?.setText(text);
     }, [text, open, theme.palette.mode]);
 
-    const toggle = () => {
-        saveOpen(!open);
-        setOpen(!open);
+    const changeTab = (event, value) => {
+        saveTab(value);
+        setTab(value);
     };
 
     const copy = async (what, value) => {
@@ -119,11 +121,12 @@ export default function ApiRequestPanel({bucket, logic}) {
 
     return (
         <Box sx={{mx: 2, mb: 2}}>
-            <Box display="flex" alignItems="center">
-                <Button size="small" color="inherit" onClick={toggle} startIcon={open ? <ExpandMore/> : <ChevronRight/>}
-                        sx={{textTransform: 'none'}}>
-                    API request (JSON)
-                </Button>
+            <Box display="flex" alignItems="center" sx={{borderBottom: 1, borderColor: 'divider'}}>
+                <Tabs value={tab} onChange={changeTab} textColor="secondary" indicatorColor="secondary"
+                      sx={{minHeight: 36, '& .MuiTab-root': {minHeight: 36, py: 0.5}}}>
+                    <Tab value="sql" label="SQL"/>
+                    <Tab value="api" label="API request"/>
+                </Tabs>
                 <Box flexGrow={1}/>
                 {open && <>
                     <Tooltip title={copied === 'json' ? 'Copied' : 'Copy the JSON body'}>
@@ -134,7 +137,8 @@ export default function ApiRequestPanel({bucket, logic}) {
                     </Tooltip>
                 </>}
             </Box>
-            <Collapse in={open} unmountOnExit>
+            {!open && <Box sx={{mx: -2}}>{sql}</Box>}
+            {open && <>
                 <Typography variant="body2" component="div" sx={{fontFamily: 'monospace', my: 1, wordBreak: 'break-all'}}>
                     POST {url}
                     {Object.entries(HEADERS).map(([name, value]) =>
@@ -165,12 +169,13 @@ export default function ApiRequestPanel({bucket, logic}) {
                     </Typography>}
                 {copied === 'error' &&
                     <Typography variant="caption" color="error">The browser doesn't allow copying here: select the text and copy it.</Typography>}
-            </Collapse>
+            </>}
         </Box>
     );
 }
 
 ApiRequestPanel.propTypes = {
     bucket: PropTypes.object.isRequired,
-    logic: PropTypes.object
+    logic: PropTypes.object,
+    sql: PropTypes.node
 };

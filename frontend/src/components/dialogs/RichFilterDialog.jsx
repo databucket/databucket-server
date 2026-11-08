@@ -374,8 +374,8 @@ export default function RichFilterDialog(props) {
                                 onChange={onRulesChange}
                                 renderBuilder={renderBuilder}
                             />
-                            {renderResult({tree: state.tree, config: state.config})}
-                            <ApiRequestPanel bucket={props.bucket} logic={state.logic}/>
+                            <ApiRequestPanel bucket={props.bucket} logic={state.logic}
+                                             sql={renderResult({tree: state.tree, config: state.config})}/>
                         </Box>
                     }
 
