@@ -155,8 +155,10 @@
   left: -14px;
   width: 13px;
 }
+/* no rounded corners on the line: a rounded part is drawn another way than the straight ones and lands a fraction of
+   a pixel aside (at 125 %), which shows along the whole height of a group as the last item */
 .group--children > .group-or-rule-container:last-child > .group-or-rule::before {
-  border-radius: 0 0 0 4px;
+  border-radius: 0;
 }
 .group--children > .group-or-rule-container:last-child > .group-or-rule::after {
   display: none;
@@ -165,7 +167,7 @@
   display: none;
 }
 .group--children.hide--conjs > .group-or-rule-container:first-child > .group-or-rule::after {
-  border-radius: 4px 0 0 0;
+  border-radius: 0;
   border-width: 2px 0 0 2px;
 }
 .group--children.hide--conjs > .group-or-rule-container:first-child > .group-or-rule::after {
@@ -177,7 +179,7 @@
   display: none;
 }
 .rule_group--children > .group-or-rule-container:first-child > .group-or-rule::after {
-  border-radius: 4px 0 0 0;
+  border-radius: 0;
   border-width: 2px 0 0 2px;
 }
 .rule_group--children > .group-or-rule-container:first-child > .group-or-rule::after {
