@@ -38,6 +38,7 @@ import {
     setDataFilterDialogSize
 } from "../../utils/ConfigurationStorage";
 import {debounce} from "../utils/Debouncer";
+import ApiRequestPanel from "../utils/ApiRequestPanel";
 
 const PREFIX = 'RichFilterDialog';
 
@@ -374,6 +375,7 @@ export default function RichFilterDialog(props) {
                                 renderBuilder={renderBuilder}
                             />
                             {renderResult({tree: state.tree, config: state.config})}
+                            <ApiRequestPanel bucket={props.bucket} logic={state.logic}/>
                         </Box>
                     }
 
