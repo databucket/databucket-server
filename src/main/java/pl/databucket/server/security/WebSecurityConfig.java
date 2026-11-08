@@ -53,6 +53,8 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/favicon.ico",
+                                "/favicon.svg",
+                                "/apple-touch-icon.png",
                                 "/index.html",
                                 "/static/**",
                                 "/assets/**",

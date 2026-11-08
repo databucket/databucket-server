@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import Logo from "../../images/databucket-logo.png";
+import DatabucketLogo from "../utils/DatabucketLogo";
 import {
     Paper as RawPaper,
     Stack as RawStack,
@@ -63,7 +63,7 @@ export default function ConfirmationPage() {
                    alignItems="center"
                    spacing={2}
             >
-                {<img src={Logo} alt=''/>}
+                <DatabucketLogo/>
                 <Paper elevation={3}>
                     <Stack direction="column"
                            spacing={2}

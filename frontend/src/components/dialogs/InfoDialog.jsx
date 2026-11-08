@@ -9,7 +9,7 @@ import {
     Typography,
     useTheme, withStyles
 } from '@mui/material';
-import DatabucketLogo from "../../images/databucket-logo.png";
+import DatabucketLogo from "../utils/DatabucketLogo";
 import SpringBootLogo from "../../images/spring-boot-logo.png";
 import PostgresqlLogo from "../../images/postgresql-logo.png";
 import ReactLogo from "../../images/react-js-logo.png";
@@ -59,7 +59,7 @@ export default function InfoDialog() {
                 open={open}
                 fullWidth={true}
             >
-                <img style={{marginLeft: '100px', marginTop: '20px'}} src={DatabucketLogo} alt='' width='399' height='65'/>
+                <DatabucketLogo style={{display: 'block', margin: '32px auto 13px'}}/>
                 <div style={{margin: '20px'}}>
                     <Typography color='secondary'>Version: <b>{version}</b></Typography>
                     <Link target='_blank' href='https://www.databucket.pl' color="primary">www.databucket.pl</Link><br/>

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import "./SignUpPage.css";
-import Logo from "../../images/databucket-logo.png";
+import DatabucketLogo from "../utils/DatabucketLogo";
 import {Input, InputLabel, Paper, Button, Typography, FormControl, Link} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
 import {Navigate} from "react-router-dom";
@@ -206,7 +206,7 @@ export default function SignUpPage() {
     else
         return (
             <div className="ContainerClassSingUp">
-                {<img src={Logo} alt=''/>}
+                <DatabucketLogo/>
                 <Paper className="PaperClassSingUp" elevation={3}>
                     <Typography className="TitleSingUp" variant="h5">
                         Sign up
