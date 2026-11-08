@@ -4,7 +4,7 @@ import LogoBlue from "../../images/databucket-logo.svg";
 import LogoWhite from "../../images/databucket-logo-white.svg";
 
 // the width and height of the logo's viewBox
-const RATIO = 263.2 / 40;
+const RATIO = 263.9 / 40;
 
 /**
  * The Databucket logo: blue, white in the dark theme. Its margins keep the place the old logo image took
