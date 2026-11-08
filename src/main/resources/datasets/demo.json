@@ -5,8 +5,8 @@
   "teams": [
     {
       "id": 1,
-      "name": "test",
-      "description": "test"
+      "name": "QA team",
+      "description": "Testers and test automation of the demo application"
     }
   ],
   "enums": [

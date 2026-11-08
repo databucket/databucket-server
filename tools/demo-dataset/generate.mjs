@@ -1,5 +1,5 @@
 // Generates the "user" part of the DEMO dataset (src/main/resources/datasets/demo.json): the class, enums, icons,
-// columns, filters and views of the users buckets, their data (dev/int/prd-users, 1074 rows each), the demo users,
+// columns, filters and views of the users buckets, their data (dev/int/prd-users, 1074 rows each), the team, the demo users,
 // the history of 30 days and the descriptions of buckets and tags. The rest of the dataset (scheduler, config, jobs)
 // is kept as it is in the file, except the data id of the scheduler rows (a random user).
 //
@@ -624,6 +624,9 @@ dataset.tags.forEach(tag => tag.description = TAG_DESCRIPTIONS[tag.name] ?? tag.
 
 const flagIcons = Object.entries(FLAGS).map(([code, markup]) => ({name: 'flag-' + code.toLowerCase(), structure: markup}));
 dataset.icons = [...flagIcons, {name: 'payment-card', structure: CARD_SVG}].map((i, k) => ({id: k + 1, ...i}));
+
+// one team: on import the demo users and the importing user join it
+dataset.teams = [{id: 1, name: 'QA team', description: 'Testers and test automation of the demo application'}];
 
 dataset.users = [
     {username: ADMIN, password: 'test', role: 'ADMIN', description: 'Demo administrator (DEMO dataset)'},
