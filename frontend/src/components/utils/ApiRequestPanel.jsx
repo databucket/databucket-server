@@ -65,9 +65,9 @@ export default function ApiRequestPanel({bucket, logic, method = 'POST', url: re
     const body = {...(rules != null ? {rules} : {logic}), ...extra};
     const text = formatBody(body);
     const url = requestUrl ?? `${getDataUrl(bucket)}/get?limit=10`;
-    const curl = `curl -X ${method} "${url}" \\n`
-        + Object.entries(HEADERS).map(([name, value]) => `  -H "${name}: ${value}" \\n`).join('')
-        + `  -d '${JSON.stringify(body).replaceAll("'", "'\''")}'`;   // an apostrophe in a value closes and reopens the quotes
+    const curl = `curl -X ${method} "${url}" \\\n`
+        + Object.entries(HEADERS).map(([name, value]) => `  -H "${name}: ${value}" \\\n`).join('')
+        + `  -d '${JSON.stringify(body).replaceAll("'", "'\\''")}'`;   // an apostrophe in a value closes and reopens the quotes
 
     // the rules and the logic must match the same rows; checked while the request is shown
     useEffect(() => {
