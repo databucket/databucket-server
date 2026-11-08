@@ -11,8 +11,28 @@
 
 **Databucket** is an Open Source Test Data Management Tool. It delivers features to effectively create and maintain test data and metadata for extensive tests on multiple projects, environments, and various integrated tools at the same time. Databucket stores data in elastic structures, which gives a ready approach to maintain constantly changing test data in the software development process.
 
+* **No more data collisions** – tests reserve records through the REST API, each record goes to one test at a time.
+* **Flexible data buckets** – data of any shape as JSON, per project, environment and team.
+* **Full history and audit** – who changed what and when, with a side-by-side diff.
+* **Find the right data fast** – tags, saved filters, a visual rule builder and views, also on nested JSON.
+* **Self-hosted** – a single jar and PostgreSQL, single sign-on (OpenID Connect), roles and robot accounts for CI.
+
+<picture>
+  <source srcset="docs/screens/data-table-dark.webp" media="(prefers-color-scheme: dark)">
+  <img src="docs/screens/data-table-light.webp" alt="Databucket data table with users of a tested application">
+</picture>
+
+| Visual rule builder | Data details |
+|---|---|
+| <picture><source srcset="docs/screens/rich-filter-dark.webp" media="(prefers-color-scheme: dark)"><img src="docs/screens/rich-filter-light.webp" alt="Rich filter with rules on nested JSON properties"></picture> | <picture><source srcset="docs/screens/data-details-dark.webp" media="(prefers-color-scheme: dark)"><img src="docs/screens/data-details-light.webp" alt="Data details dialog with the JSON of a record"></picture> |
+| **History diff** | **Reserving data** |
+| <picture><source srcset="docs/screens/history-diff-dark.webp" media="(prefers-color-scheme: dark)"><img src="docs/screens/history-diff-light.webp" alt="Side-by-side diff of two versions of a record"></picture> | <picture><source srcset="docs/screens/reserve-flow-dark.gif" media="(prefers-color-scheme: dark)"><img src="docs/screens/reserve-flow-light.gif" alt="A saved filter is applied and three records are reserved"></picture> |
+
+The screenshots show the DEMO dataset that comes with Databucket (Management → Projects → Import dataset).
+
 # Getting started with Databucket
 * First you can read about key features on [databucket.pl](https://databucket.pl)
+* Try it with Docker: `cd docker && docker compose up --build`, open http://databucket.localhost, sign in as `super` / `super` and import the DEMO dataset in Management → Projects.
 * Next, you can dive deeper in the [Wiki page](https://github.com/databucket/databucket-server/wiki).
 
 # Upgrading
