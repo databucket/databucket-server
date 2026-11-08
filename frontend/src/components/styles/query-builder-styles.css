@@ -119,7 +119,8 @@
 }
 .group--header:not(.no--children):not(.hide--conjs)::before {
   top: 20px;
-  height: calc(100% + 10px - 20px);
+  /* 4px longer than to the first rule: overlapping it, the line has no gap at any zoom (rounding at 125 %) */
+  height: calc(100% + 10px - 20px + 4px);
   left: 11px;
   width: 13px;
 }
@@ -139,13 +140,14 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+/* the vertical parts overlap by 2-3px (the same ends as before), so that rounding leaves no gap between them */
 .group--children > .group-or-rule-container > .group-or-rule::before {
-  top: -1px;
-  height: calc(50% + 1px + 1px);
+  top: -3px;
+  height: calc(50% + 1px + 3px);
 }
 .group--children > .group-or-rule-container > .group-or-rule::after {
-  top: calc(50% + 1px);
-  height: calc(50% - 1px + 10px + 2px);
+  top: calc(50% - 1px);
+  height: calc(50% + 1px + 10px + 2px);
 }
 .group--children > .group-or-rule-container > .group-or-rule::before, .group--children > .group-or-rule-container > .group-or-rule::after {
   /* under the line from the conjunctions (header ::before, left: 11px), and touching the rule;
