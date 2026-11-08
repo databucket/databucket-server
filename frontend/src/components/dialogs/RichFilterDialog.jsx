@@ -38,6 +38,7 @@ import {
     setDataFilterDialogSize
 } from "../../utils/ConfigurationStorage";
 import {debounce} from "../utils/Debouncer";
+import ApiRequestPanel from "../utils/ApiRequestPanel";
 
 const PREFIX = 'RichFilterDialog';
 
@@ -60,8 +61,12 @@ const StyledDialog = styled(Dialog)(({theme}) => ({
         minHeight: '80vh',
     },
 
+    // the tabs in the middle of the title bar, whatever is left (title, task / filter menu) and right (size, close) of them
     [`& .${classes.tabs}`]: {
-        flexGrow: 1
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)'
     },
 
     [`& .${classes.divActionGrabSpace}`]: {
@@ -101,7 +106,7 @@ const DialogTitleGrid = (props => {
     const {children, onClose, onMakeDialogSmaller, onMakeDialogLarger} = props;
     return (
         <StyledDialogTitle>
-            <Grid container direction="row" sx={{alignItems: 'center'}}>
+            <Grid container direction="row" sx={{alignItems: 'center', position: 'relative'}}>
                 {children}
                 <Grid item xs>
                     <Box sx={{display: 'flex', justifyContent: "flex-end"}}>
@@ -355,6 +360,7 @@ export default function RichFilterDialog(props) {
                 >
                     <StyledTab label="Rules"/>
                     <StyledTab label="Properties"/>
+                    <StyledTab label="API request"/>
                 </Tabs>
             </DialogTitleGrid>
             <EnumsProvider>
@@ -387,6 +393,9 @@ export default function RichFilterDialog(props) {
                             pageSize={null}
                             parentContentRef={dialogContentRef}
                         />}
+
+                    {props.open && activeTab === 2 &&
+                        <ApiRequestPanel bucket={props.bucket} logic={state.logic}/>}
 
                 </DialogContent>
             </EnumsProvider>
