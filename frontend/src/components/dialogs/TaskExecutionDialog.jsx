@@ -50,6 +50,7 @@ import {
     setTaskExecutionDialogSize
 } from "../../utils/ConfigurationStorage";
 import {debounce} from "../utils/Debouncer";
+import ApiRequestPanel from "../utils/ApiRequestPanel";
 
 const PREFIX = 'TaskExecutionDialog';
 
@@ -275,12 +276,63 @@ export default function TaskExecutionDialog(props) {
         []
     );
 
+    // the changes of the "modify" action: what the request sets or removes besides the rules (empty: nothing defined)
+    const getModifyChanges = () => {
+        const changes = {};
+        if (state.actions.setTag != null && state.actions.setTag === true)
+            changes.tagId = state.actions.tagId;
+        if (state.actions.setReserved != null && state.actions.setReserved === true)
+            changes.reserved = state.actions.reserved;
+        if (state.actions.properties != null && state.actions.properties.length > 0) {
+            let propertiesToSet = {};
+            let propertiesToRemove = [];
+            state.actions.properties.forEach(property => {
+                const propertyDef = getPropertyByUuid(state.properties, property.uuid);
+                if (propertyDef == null)
+                    return;
+                if (['setValue', 'setNull'].includes(property.action))
+                    propertiesToSet[propertyDef.path] = property.value;
+                else
+                    propertiesToRemove.push(propertyDef.path);
+            });
+            if (Object.keys(propertiesToSet).length)
+                changes.propertiesToSet = propertiesToSet;
+            if (propertiesToRemove.length > 0)
+                changes.propertiesToRemove = propertiesToRemove;
+        }
+        return changes;
+    }
+
+    // the request of the chosen action, besides the rules: its method, URL and the other items of the body.
+    // Used to execute the task and to show it as an API request, so both are always the same.
+    const getActionRequest = () => {
+        const {type, number, random, username} = state.actions;
+        switch (type) {
+            case 'reserve': {
+                const targetOwnerUsername = username !== getUsername() ? username : null;
+                return {
+                    method: 'POST', url: getDataReserveUrl(props.bucket, number, random),
+                    extra: targetOwnerUsername != null ? {targetOwnerUsername} : {}
+                };
+            }
+            case 'remove':
+                return {method: 'DELETE', url: getDataUrl(props.bucket), extra: {}};
+            case 'clear history':
+                return {method: 'DELETE', url: getClearDataHistoryByRulesUrl(props.bucket), extra: {}};
+            case 'modify':
+                return {method: 'PUT', url: getDataUrl(props.bucket), extra: getModifyChanges()};
+            default:
+                return {method: 'POST', url: `${getDataUrl(props.bucket)}/get?limit=10`, extra: {}};
+        }
+    }
+
     // reserves free data rows matching the rules, for the current user or, for an admin, the chosen target owner
     const onReserve = () => {
-        const {number, random, username} = state.actions;
-        const payload = {targetOwnerUsername: username !== getUsername() ? username : null, logic: state.logic};
+        const {number} = state.actions;
+        const {url, extra} = getActionRequest();
+        const payload = {targetOwnerUsername: null, ...extra, logic: state.logic};
         setState({...state, processing: true});
-        fetch(getDataReserveUrl(props.bucket, number, random), getPostOptions(payload))
+        fetch(url, getPostOptions(payload))
             .then(handleErrors)
             .then(result => {
                 setState({...state, processing: false});
@@ -339,41 +391,10 @@ export default function TaskExecutionDialog(props) {
                     }
                 });
         } else {
-            let change = false;
-            let payload = {logic: state.logic};
+            const changes = getModifyChanges();
+            const payload = {logic: state.logic, ...changes};
 
-            if (state.actions.setTag != null && state.actions.setTag === true) {
-                payload.tagId = state.actions.tagId;
-                change = true;
-            }
-
-            if (state.actions.setReserved != null && state.actions.setReserved === true) {
-                payload.reserved = state.actions.reserved;
-                change = true;
-            }
-
-            if (state.actions.properties != null && state.actions.properties.length > 0) {
-                let propertiesToSet = {};
-                let propertiesToRemove = [];
-                state.actions.properties.forEach(property => {
-                    const propertyDef = getPropertyByUuid(state.properties, property.uuid);
-                    if (['setValue', 'setNull'].includes(property.action))
-                        propertiesToSet[propertyDef.path] = property.value;
-                    else
-                        propertiesToRemove.push(propertyDef.path);
-                });
-                if (Object.keys(propertiesToSet).length) {
-                    payload.propertiesToSet = propertiesToSet;
-                    change = true;
-                }
-
-                if (propertiesToRemove.length > 0) {
-                    payload.propertiesToRemove = propertiesToRemove;
-                    change = true;
-                }
-            }
-
-            if (change) {
+            if (Object.keys(changes).length > 0) {
                 setState({...state, processing: true});
                 fetch(getDataUrl(props.bucket), getPutOptions(payload))
                     .then(handleErrors)
@@ -552,7 +573,9 @@ export default function TaskExecutionDialog(props) {
                                 onChange={onRulesChange}
                                 renderBuilder={renderBuilder}
                             />
-                            {renderResult({tree: state.tree, config: state.config})}
+                            <ApiRequestPanel bucket={props.bucket} logic={state.logic}
+                                             sql={renderResult({tree: state.tree, config: state.config})}
+                                             {...getActionRequest()}/>
                         </Box>
                     }
 

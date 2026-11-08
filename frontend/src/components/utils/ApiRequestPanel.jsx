@@ -56,18 +56,23 @@ const formatItem = (item, indent) => {
     return '{' + JSON.stringify(operator) + ': ' + formatItem(value, indent) + '}';
 };
 
-const formatBody = (body) => body.rules != null
-    ? (body.rules.length === 0 ? '{\n  "rules": []\n}' : '{\n  "rules": ' + formatItem(body.rules, '  ') + '\n}')
-    : JSON.stringify(body, null, 2);
+// the body: the rules as above, the other items (logic, the changes of a task...) as JSON indented by 2
+const formatBody = (body) => '{\n' + Object.entries(body).map(([key, value]) => {
+    const formatted = key === 'rules'
+        ? (value.length === 0 ? '[]' : formatItem(value, '  '))
+        : JSON.stringify(value, null, 2).replaceAll('\n', '\n  ');
+    return '  ' + JSON.stringify(key) + ': ' + formatted;
+}).join(',\n') + '\n}';
 
 const count = (url, body) => fetch(url, getPostOptions(body)).then(handleErrors).then(result => result.total);
 
 /**
- * Under the rules of the rich filter, two tabs: the filter as an SQL condition, what follows WHERE (given as `sql`), and as the body of an API request,
- * to copy into an API client (Postman, Bruno) or a test. The request holds the "rules" format of the API; when the
- * logic can't be expressed by rules, the logic itself.
+ * Under the rules (rich filter, task execution), two tabs: the rules as an SQL condition, what follows WHERE (given
+ * as `sql`), and as an API request to copy into an API client (Postman, Bruno) or a test. By default the request reads
+ * the matching data; a task gives its own `method`, `url` and the other items of the body (`extra`). The request
+ * holds the "rules" format of the API; when the logic can't be expressed by rules, the logic itself.
  */
-export default function ApiRequestPanel({bucket, logic, sql}) {
+export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', url: requestUrl, extra = {}}) {
     const theme = useTheme();
     const [tab, setTab] = useState(readTab);
     const open = tab === 'api';
@@ -76,10 +81,10 @@ export default function ApiRequestPanel({bucket, logic, sql}) {
     const editorRef = useRef(null);
 
     const rules = useMemo(() => logicToRules(logic), [logic]);
-    const body = rules != null ? {rules} : {logic};
+    const body = {...(rules != null ? {rules} : {logic}), ...extra};
     const text = formatBody(body);
-    const url = `${getDataUrl(bucket)}/get?limit=10`;
-    const curl = `curl -X POST "${url}" \\\n`
+    const url = requestUrl ?? `${getDataUrl(bucket)}/get?limit=10`;
+    const curl = `curl -X ${method} "${url}" \\\n`
         + Object.entries(HEADERS).map(([name, value]) => `  -H "${name}: ${value}" \\\n`).join('')
         + `  -d '${JSON.stringify(body).replaceAll("'", "'\\''")}'`;   // an apostrophe in a value closes and reopens the quotes
 
@@ -122,8 +127,14 @@ export default function ApiRequestPanel({bucket, logic, sql}) {
     return (
         <Box sx={{mx: 2, mb: 2}}>
             <Box display="flex" alignItems="center" sx={{borderBottom: 1, borderColor: 'divider'}}>
-                <Tabs value={tab} onChange={changeTab} textColor="secondary" indicatorColor="secondary"
-                      sx={{minHeight: 36, '& .MuiTab-root': {minHeight: 36, py: 0.5}}}>
+                {/* neutral: the selected tab is only bold, not in the accent color of the dialog's own tabs */}
+                <Tabs value={tab} onChange={changeTab} textColor="inherit"
+                      sx={{
+                          minHeight: 36,
+                          '& .MuiTabs-indicator': {display: 'none'},
+                          '& .MuiTab-root': {minHeight: 36, py: 0.5, color: 'text.secondary', opacity: 1},
+                          '& .MuiTab-root.Mui-selected': {color: 'text.primary', fontWeight: 700}
+                      }}>
                     <Tab value="sql" label="SQL condition"/>
                     <Tab value="api" label="API request"/>
                 </Tabs>
@@ -140,7 +151,7 @@ export default function ApiRequestPanel({bucket, logic, sql}) {
             {!open && <Box sx={{mx: -2}}>{sql}</Box>}
             {open && <>
                 <Typography variant="body2" component="div" sx={{fontFamily: 'monospace', my: 1, wordBreak: 'break-all'}}>
-                    POST {url}
+                    {method} {url}
                     {Object.entries(HEADERS).map(([name, value]) =>
                         <div key={name} style={{opacity: 0.75}}>{name}: {value}</div>)}
                 </Typography>
@@ -177,5 +188,8 @@ export default function ApiRequestPanel({bucket, logic, sql}) {
 ApiRequestPanel.propTypes = {
     bucket: PropTypes.object.isRequired,
     logic: PropTypes.object,
-    sql: PropTypes.node
+    sql: PropTypes.node,
+    method: PropTypes.string,
+    url: PropTypes.string,
+    extra: PropTypes.object
 };
