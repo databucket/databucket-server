@@ -106,7 +106,15 @@
 .group--header:not(.no--children):not(.hide--conjs) {
   position: relative;
 }
+/* The whole vertical line is drawn by the items of the group (their ::before / ::after), which all start at the same x:
+   a part drawn by the header was rounded aside at 125 %, more so in a scrolled dialog. The group is a stacking
+   context, so that the line (z-index -1) is drawn above the background of the group but behind the NOT/AND/OR
+   buttons and the rules, and its first part can start under the buttons. */
+.group {
+  isolation: isolate;
+}
 .group--header:not(.no--children):not(.hide--conjs)::before {
+  display: none;
   z-index: 0;
   content: "";
   position: absolute;
@@ -134,6 +142,7 @@
 .group--children > .group-or-rule-container > .group-or-rule::before, .group--children > .group-or-rule-container > .group-or-rule::after {
   content: "";
   position: absolute;
+  z-index: -1;
   border-color: #424242;
   border-style: solid;
   -webkit-box-sizing: border-box;
@@ -162,6 +171,11 @@
 }
 .group--children > .group-or-rule-container:last-child > .group-or-rule::after {
   display: none;
+}
+/* up into the header (10px between the header and the items, the line started 20px below the top of the header) */
+.group--children > .group-or-rule-container:first-child > .group-or-rule::before {
+  top: -24px;
+  height: calc(50% + 1px + 24px);
 }
 .group--children.hide--conjs > .group-or-rule-container:first-child > .group-or-rule::before {
   display: none;
