@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import "./ForgotPasswordPage.css";
-import Logo from "../../images/databucket-logo.png";
+import DatabucketLogo from "../utils/DatabucketLogo";
 import {Button, Input, InputLabel, Paper, Typography, FormControl, Link} from "@mui/material";
 import {MessageBox} from "../utils/MessageBox";
 import {Navigate} from "react-router-dom";
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
     else
         return (
             <div className="ContainerClass">
-                {<img src={Logo} alt=''/>}
+                <DatabucketLogo/>
                 <Paper className="PaperClass" elevation={3}>
                     <Typography className="Title" variant="h5">
                         Forgot your password?

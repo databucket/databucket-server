@@ -4,7 +4,7 @@ import {
     Button, Avatar, Input, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemText,
     Paper, Tooltip, IconButton, FormControl, Typography, Grid, Divider, Link as MaterialLink
 } from "@mui/material";
-import Logo from "../../images/databucket-logo.png";
+import DatabucketLogo from "../utils/DatabucketLogo";
 import ActiveProjectIcon from "@mui/icons-material/FolderSpecial";
 import DisabledProjectIcon from "@mui/icons-material/FolderSpecial";
 import ExpiredProjectIcon from "@mui/icons-material/EventBusy";
@@ -368,7 +368,7 @@ export default function LoginPage() {
 
     return (
         <div className="ContainerClass">
-            {<img src={Logo} alt=''/>}
+            <DatabucketLogo/>
             {paper()}
             <Typography variant="caption">{version}</Typography>
             <MessageBox
