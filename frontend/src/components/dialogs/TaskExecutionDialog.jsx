@@ -529,10 +529,11 @@ export default function TaskExecutionDialog(props) {
                     <div className={classes.devGrabSpace}/>
                 </div>
             </DialogTitle>
+            {/* the content grows with what it shows (up to the height of the window, then it scrolls) */}
             <EnumsProvider>
                 <DialogContent
                     dividers
-                    style={{height: '62vh'}}
+                    style={{minHeight: '62vh'}}
                     ref={dialogContentRef}
                     classes={{
                         root: classes.root

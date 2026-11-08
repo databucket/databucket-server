@@ -358,10 +358,11 @@ export default function RichFilterDialog(props) {
                     <StyledTab label="Properties"/>
                 </Tabs>
             </DialogTitleGrid>
+            {/* the content grows with what it shows (up to the height of the window, then it scrolls) */}
             <EnumsProvider>
                 <DialogContent
                     dividers
-                    style={{height: '62vh'}}
+                    style={{minHeight: '62vh'}}
                     ref={dialogContentRef}
                     classes={{
                         root: classes.root
