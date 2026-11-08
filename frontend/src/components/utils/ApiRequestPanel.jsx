@@ -63,7 +63,7 @@ const formatBody = (body) => body.rules != null
 const count = (url, body) => fetch(url, getPostOptions(body)).then(handleErrors).then(result => result.total);
 
 /**
- * Under the rules of the rich filter, two tabs: the filter as SQL (given as `sql`) and as the body of an API request,
+ * Under the rules of the rich filter, two tabs: the filter as an SQL condition, what follows WHERE (given as `sql`), and as the body of an API request,
  * to copy into an API client (Postman, Bruno) or a test. The request holds the "rules" format of the API; when the
  * logic can't be expressed by rules, the logic itself.
  */
@@ -124,7 +124,7 @@ export default function ApiRequestPanel({bucket, logic, sql}) {
             <Box display="flex" alignItems="center" sx={{borderBottom: 1, borderColor: 'divider'}}>
                 <Tabs value={tab} onChange={changeTab} textColor="secondary" indicatorColor="secondary"
                       sx={{minHeight: 36, '& .MuiTab-root': {minHeight: 36, py: 0.5}}}>
-                    <Tab value="sql" label="SQL"/>
+                    <Tab value="sql" label="SQL condition"/>
                     <Tab value="api" label="API request"/>
                 </Tabs>
                 <Box flexGrow={1}/>
