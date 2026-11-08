@@ -127,13 +127,15 @@ export default function ApiRequestPanel({bucket, logic, sql, method = 'POST', ur
     return (
         <Box sx={{mx: 2, mb: 2}}>
             <Box display="flex" alignItems="center" sx={{borderBottom: 1, borderColor: 'divider'}}>
-                {/* neutral: the selected tab is only bold, not in the accent color of the dialog's own tabs */}
+                {/* neutral, not in the accent color of the dialog's own tabs: the selected tab bold and underlined in the
+                    color of the text, the other one faded */}
                 <Tabs value={tab} onChange={changeTab} textColor="inherit"
                       sx={{
                           minHeight: 36,
-                          '& .MuiTabs-indicator': {display: 'none'},
-                          '& .MuiTab-root': {minHeight: 36, py: 0.5, color: 'text.secondary', opacity: 1},
-                          '& .MuiTab-root.Mui-selected': {color: 'text.primary', fontWeight: 700}
+                          '& .MuiTabs-indicator': {backgroundColor: 'text.primary', height: 2},
+                          '& .MuiTab-root': {minHeight: 36, py: 0.5, color: 'text.primary', opacity: 0.5},
+                          '& .MuiTab-root:hover': {opacity: 0.8},
+                          '& .MuiTab-root.Mui-selected': {opacity: 1, fontWeight: 700}
                       }}>
                     <Tab value="sql" label="SQL condition"/>
                     <Tab value="api" label="API request"/>
