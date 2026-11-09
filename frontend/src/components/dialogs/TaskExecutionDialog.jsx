@@ -323,10 +323,7 @@ export default function TaskExecutionDialog(props) {
             case 'remove':
                 return {method: 'DELETE', url: getDataUrl(props.bucket), extra: {}};
             case 'clear history':
-                return {
-                    method: 'DELETE', url: getClearDataHistoryByRulesUrl(props.bucket), extra: {},
-                    note: 'The history is available to the role MEMBER or higher, not to ROBOT accounts.'
-                };
+                return {method: 'DELETE', url: getClearDataHistoryByRulesUrl(props.bucket), extra: {}};
             case 'modify':
                 return {method: 'PUT', url: getDataUrl(props.bucket), extra: getModifyChanges()};
             default:
