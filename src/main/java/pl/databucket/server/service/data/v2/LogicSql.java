@@ -31,15 +31,38 @@ public final class LogicSql {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final Map<String, String> FIELDS = Map.ofEntries(
-            Map.entry("id", COL.DATA_ID), Map.entry("tagId", COL.TAG_ID), Map.entry("owner", COL.RESERVED_BY),
-            Map.entry("reserved", COL.RESERVED), Map.entry("properties", COL.PROPERTIES),
-            Map.entry("createdBy", COL.CREATED_BY), Map.entry("createdAt", COL.CREATED_AT),
-            Map.entry("modifiedBy", COL.MODIFIED_BY), Map.entry("modifiedAt", COL.MODIFIED_AT));
+    /**
+     * The table a filter is translated for: the fields a rule can name, the columns they map to (column names are
+     * accepted as well), and whether properties ($.a.b) can be used.
+     */
+    public record Fields(Map<String, String> fields, Set<String> columns, boolean properties) {
 
-    /** Column names are accepted as well. */
-    private static final Set<String> COLUMNS = Set.of(COL.DATA_ID, COL.TAG_ID, COL.RESERVED, COL.RESERVED_BY,
-            COL.PROPERTIES, COL.CREATED_BY, COL.CREATED_AT, COL.MODIFIED_BY, COL.MODIFIED_AT);
+        /** The data rows of a bucket ("x-bucket-N"). */
+        public static final Fields DATA = new Fields(Map.ofEntries(
+                Map.entry("id", COL.DATA_ID), Map.entry("tagId", COL.TAG_ID), Map.entry("owner", COL.RESERVED_BY),
+                Map.entry("reserved", COL.RESERVED), Map.entry("properties", COL.PROPERTIES),
+                Map.entry("createdBy", COL.CREATED_BY), Map.entry("createdAt", COL.CREATED_AT),
+                Map.entry("modifiedBy", COL.MODIFIED_BY), Map.entry("modifiedAt", COL.MODIFIED_AT)),
+                Set.of(COL.DATA_ID, COL.TAG_ID, COL.RESERVED, COL.RESERVED_BY, COL.PROPERTIES, COL.CREATED_BY,
+                        COL.CREATED_AT, COL.MODIFIED_BY, COL.MODIFIED_AT),
+                true);
+
+        /**
+         * The history entries of a bucket ("x-bucket-N-h"): id is the id of the entry, dataId the data row; the
+         * properties of the versions can't be searched.
+         */
+        public static final Fields HISTORY = new Fields(Map.ofEntries(
+                Map.entry("id", COL.ID), Map.entry("dataId", COL.DATA_ID), Map.entry("tagId", COL.TAG_ID),
+                Map.entry("reserved", COL.RESERVED), Map.entry("modifiedBy", COL.MODIFIED_BY),
+                Map.entry("modifiedAt", COL.MODIFIED_AT)),
+                Set.of(COL.ID, COL.DATA_ID, COL.TAG_ID, COL.RESERVED, COL.MODIFIED_BY, COL.MODIFIED_AT),
+                false);
+
+        /** The names a rule can use for the fields. */
+        public Set<String> names() {
+            return fields.keySet();
+        }
+    }
 
     private static final Set<String> FUNCTIONS = Set.of("length()", "exists()", "notExists()", "isNull()",
             "isNotNull()", "isEmpty()", "isNotEmpty()");
@@ -53,23 +76,32 @@ public final class LogicSql {
     private final String currentUser;
     private final Map<String, Object> params;
     private final String prefix;
+    private final Fields fields;
     private int counter;
 
-    private LogicSql(String currentUser, Map<String, Object> params, String prefix) {
+    private LogicSql(String currentUser, Map<String, Object> params, String prefix, Fields fields) {
         this.currentUser = currentUser;
         this.params = params;
         this.prefix = prefix;
+        this.fields = fields;
     }
 
     /**
+     * The condition on the data rows of a bucket.
+     *
      * @param prefix names of the parameters this call adds (prefix0, prefix1, ...); the same logic rendered again with
      *               the same prefix gets the same names and values
      * @return the condition, or null for no logic
      */
     public static String toSql(Object logic, String currentUser, Map<String, Object> params, String prefix) throws InvalidRuleException {
+        return toSql(logic, currentUser, params, prefix, Fields.DATA);
+    }
+
+    /** The condition on the table the fields describe, e.g. {@link Fields#HISTORY}. */
+    public static String toSql(Object logic, String currentUser, Map<String, Object> params, String prefix, Fields fields) throws InvalidRuleException {
         if (logic == null || (logic instanceof Map<?, ?> map && map.isEmpty()))
             return null;
-        return new LogicSql(currentUser, params, prefix).node(logic);
+        return new LogicSql(currentUser, params, prefix, fields).node(logic);
     }
 
     // ---- operands
@@ -108,6 +140,8 @@ public final class LogicSql {
             var = "$." + var.substring("prop.$*".length()).replace('*', '.');
 
         if (var.startsWith("$.")) {
+            if (!fields.properties())
+                throw new InvalidRuleException("Properties can't be used here: " + var + " (allowed: " + new java.util.TreeSet<>(fields.names()) + ")");
             if (var.endsWith("()")) {
                 int dot = var.lastIndexOf('.');
                 String function = var.substring(dot + 1);
@@ -120,9 +154,9 @@ public final class LogicSql {
             return new Property(checkPath(var), false);
         }
 
-        if (FIELDS.containsKey(var))
-            return new Column(FIELDS.get(var));
-        if (COLUMNS.contains(var))
+        if (fields.fields().containsKey(var))
+            return new Column(fields.fields().get(var));
+        if (fields.columns().contains(var))
             return new Column(var);
         throw new InvalidRuleException("Unknown field: " + var);
     }

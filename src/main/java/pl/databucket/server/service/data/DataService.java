@@ -429,26 +429,23 @@ public class DataService {
         return result;
     }
 
-    public int clearDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException {
-        DataDTO data = getData(user, bucket, dataId);
-        if (data != null) {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<Condition> conditions = new ArrayList<>();
-            conditions.add(new Condition(COL.DATA_ID, Operator.equal, dataId));
+    /**
+     * Removes the history of one data row; the row must be visible to the user (see {@link #canSeeData}), otherwise
+     * DataNotFoundException as for a missing row.
+     */
+    public int clearDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException, DataNotFoundException {
+        if (!canSeeData(user, bucket, dataId))
+            throw new DataNotFoundException(bucket.getName(), dataId);
 
-            if (bucket.isProtectedData() && !user.isAdminUser())
-                conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+        Map<String, Object> paramMap = new HashMap<>();
+        Query query = new Query(bucket.getTableHistoryName())
+                .delete()
+                .from()
+                .where(new Condition(COL.DATA_ID, Operator.equal, dataId), paramMap);
 
-            Query query = new Query(bucket.getTableHistoryName())
-                    .delete()
-                    .from()
-                    .where(conditions, paramMap);
-
-            int count = jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
-            AuditLog.log("data.history-clear", "bucket={} id={} count={}", bucket.getName(), dataId, count);
-            return count;
-        } else
-            throw new AccessDeniedException("Data reserved by another user!");
+        int count = jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
+        AuditLog.log("data.history-clear", "bucket={} id={} count={}", bucket.getName(), dataId, count);
+        return count;
     }
 
     public int clearDataHistory(User user, Bucket bucket, DataFilter queryRule) throws UnknownColumnException, ConditionNotAllowedException {

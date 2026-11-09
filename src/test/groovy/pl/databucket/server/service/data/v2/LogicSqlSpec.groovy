@@ -183,4 +183,45 @@ class LogicSqlSpec extends Specification {
         LogicSql.toSql(logic, "john", again, "lg") == first
         again == params
     }
+
+    // ---- the history of a bucket
+
+    String historySql(Object logic) {
+        LogicSql.toSql(logic, "john", params, "hl", LogicSql.Fields.HISTORY)
+    }
+
+    def "should map the fields of the history entries"() {
+        expect:
+        historySql([and: [["==": [[var: "dataId"], 7]], ["==": [[var: "modifiedBy"], "@currentUser"]], [">": [[var: "id"], 3]]]]) ==
+                "((data_id = :hl0) AND (modified_by = :hl1) AND (id > :hl2))"
+        params == [hl0: 7, hl1: "john", hl2: 3]
+    }
+
+    def "should compare the time of a history entry as a timestamp"() {
+        expect:
+        historySql([">=": [[var: "modifiedAt"], "2026-11-09T10:00:00.000Z"]]) == "(modified_at >= :hl0)"
+        params.hl0 instanceof java.sql.Timestamp
+    }
+
+    @Unroll
+    def "should refuse #what in the history"() {
+        when:
+        historySql(logic)
+
+        then:
+        def e = thrown(InvalidRuleException)
+        e.message.contains(message)
+
+        where:
+        what                   | logic                                              || message
+        "a property"           | ["==": [[var: '$.status'], "used"]]                || "Properties can't be used here"
+        "a property function"  | ["==": [[var: '$.tmp.exists()'], true]]           || "Properties can't be used here"
+        "a field of the data"  | ["==": [[var: "owner"], "john"]]                   || "Unknown field: owner"
+        "a column of the data" | ["==": [[var: "reserved_by"], "john"]]             || "Unknown field: reserved_by"
+    }
+
+    def "should keep the id of the data rows as data_id"() {
+        expect:
+        sql(["==": [[var: "id"], 1]]) == "(data_id = :lg0)"
+    }
 }

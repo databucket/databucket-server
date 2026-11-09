@@ -96,4 +96,10 @@ class RulesToLogicSpec extends Specification {
         sql.endsWith("AND (reserved_by = :rq0)")
         params.rq0 == "john"
     }
+
+    def "should read the field names of the history in the history rules"() {
+        expect:
+        RulesToLogic.convert([['dataId', '==', 5], ['modifiedBy', '==', 'owner']], LogicSql.Fields.HISTORY.names()) ==
+                [and: [["==": [[var: 'dataId'], 5]], ["==": [[var: 'modifiedBy'], 'owner']]]]
+    }
 }
