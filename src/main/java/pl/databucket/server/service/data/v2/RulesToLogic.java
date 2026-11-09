@@ -42,17 +42,22 @@ public final class RulesToLogic {
 
     /** The rules as one JsonLogic expression; the items of a list are combined with "and". */
     public static Object convert(List<Object> rules) throws InvalidRuleException {
-        return and(rules);
+        return convert(rules, FIELDS);
     }
 
-    private static Map<String, Object> and(List<?> items) throws InvalidRuleException {
+    /** As {@link #convert(List)}, with the field names of another table, e.g. those of {@link LogicSql.Fields#HISTORY}. */
+    public static Object convert(List<Object> rules, Set<String> fields) throws InvalidRuleException {
+        return and(rules, fields);
+    }
+
+    private static Map<String, Object> and(List<?> items, Set<String> fields) throws InvalidRuleException {
         List<Object> converted = new ArrayList<>();
         for (Object item : items)
-            converted.add(item(item));
+            converted.add(item(item, fields));
         return Map.of("and", converted);
     }
 
-    private static Object item(Object item) throws InvalidRuleException {
+    private static Object item(Object item, Set<String> fields) throws InvalidRuleException {
         if (item instanceof String)
             throw new InvalidRuleException(RAW_SQL);
 
@@ -63,8 +68,8 @@ public final class RulesToLogic {
             if (operator == null)
                 throw new InvalidRuleException("Unknown operator '" + operatorText + "' in the rule " + rule);
             List<Object> args = new ArrayList<>();
-            args.add(operand(rule.get(0)));
-            args.add(operand(rule.get(2)));
+            args.add(operand(rule.get(0), fields));
+            args.add(operand(rule.get(2), fields));
             return Map.of(operator, args);
         }
 
@@ -80,7 +85,7 @@ public final class RulesToLogic {
                         throw new InvalidRuleException("Expected a list of rules in '" + key + "'");
                     List<Object> converted = new ArrayList<>();
                     for (Object child : list)
-                        converted.add(item(child));
+                        converted.add(item(child, fields));
                     Map<String, Object> result = new LinkedHashMap<>();
                     result.put(key, converted);
                     return result;
@@ -88,7 +93,7 @@ public final class RulesToLogic {
                 case "!" -> {
                     // {"!": {"and": [...]}} or {"!": [rule, ...]}
                     Object negated = value instanceof List<?> list && !list.isEmpty() && !(list.get(0) instanceof String)
-                            && (list.get(0) instanceof List || list.get(0) instanceof Map) ? and(list) : item(value);
+                            && (list.get(0) instanceof List || list.get(0) instanceof Map) ? and(list, fields) : item(value, fields);
                     return Map.of("!", negated);
                 }
                 default -> throw new InvalidRuleException("Expected one of the operators [and, or, !], got '" + key + "'");
@@ -99,11 +104,11 @@ public final class RulesToLogic {
     }
 
     /** A field, a property ($.a.b) or a property function ($.a.length()) becomes a variable, anything else a value. */
-    private static Object operand(Object value) throws InvalidRuleException {
+    private static Object operand(Object value, Set<String> fields) throws InvalidRuleException {
         if (value instanceof String text) {
             if (text.startsWith("#func:"))
                 throw new InvalidRuleException(RAW_SQL);
-            if (text.startsWith("$") || FIELDS.contains(text))
+            if (text.startsWith("$") || fields.contains(text))
                 return Map.of("var", text);
         }
         return value;
