@@ -55,7 +55,7 @@ const count = (url, body) => fetch(url, getPostOptions(body)).then(handleErrors)
  * own `method`, `url` and the other items of the body (`extra`). The body holds the "rules" format of the API; when
  * the logic can't be expressed by rules, the logic itself.
  */
-export default function ApiRequestPanel({bucket, logic, method = 'POST', url: requestUrl, extra = {}}) {
+export default function ApiRequestPanel({bucket, logic, method = 'POST', url: requestUrl, extra = {}, note}) {
     const theme = useTheme();
     const [copied, setCopied] = useState(null);
     const [check, setCheck] = useState(null);   // {rules, logic}: the numbers of rows both match
@@ -126,7 +126,8 @@ export default function ApiRequestPanel({bucket, logic, method = 'POST', url: re
                 </Box>
             </Box>
             {/* the whole body without a scrollbar of its own, and a spare line (the dialog scrolls if needed) */}
-            <Box sx={{height: (lines + 1) * lineHeight + 12, mt: 1}}>
+            {/* overflow hidden: the ace editor inside is at least 200px high and would cover the notes below */}
+            <Box sx={{height: (lines + 1) * lineHeight + 12, mt: 1, overflow: 'hidden'}}>
                 <Editor
                     key={theme.palette.mode}
                     ref={editorRef}
@@ -140,8 +141,10 @@ export default function ApiRequestPanel({bucket, logic, method = 'POST', url: re
                     htmlElementProps={{style: {height: "100%"}}}
                 />
             </Box>
+            {note &&
+                <Typography variant="caption" color="text.secondary" component="div">{note}</Typography>}
             {rules == null &&
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" component="div">
                     These rules can't be written in the rules format: the body holds their logic (JsonLogic), which the API takes too.
                 </Typography>}
             {differs &&
@@ -160,5 +163,6 @@ ApiRequestPanel.propTypes = {
     logic: PropTypes.object,
     method: PropTypes.string,
     url: PropTypes.string,
-    extra: PropTypes.object
+    extra: PropTypes.object,
+    note: PropTypes.string
 };

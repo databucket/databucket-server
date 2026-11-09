@@ -9,7 +9,8 @@
 //   {"in": ["text", {"var": ...}]} (contains)            -> [field, "like", "%text%"]
 //   {"!": {"var": ...}} / {"!!": {"var": ...}} (is empty / is not empty)
 //                                                        -> ["$.a.isEmpty()", "==", true] or [field, "==", null]
-// Returns null when the logic has something else: then the rules can't be shown.
+// Returns null when the logic has something else, or a text value the rules would read as a property or a field
+// ("$10", "owner"): then the rules can't be shown.
 
 const COMPARISONS = ['==', '!=', '<', '<=', '>', '>='];
 const INVERTED = {'<': '>', '<=': '>='};
@@ -26,6 +27,16 @@ const isProperty = field => field.startsWith('$.');
 
 class Unsupported extends Error {
 }
+
+// In the rules format the server reads a text starting with "$" or equal to a field name as a property or a field
+// on either side of a rule (["$.a", "==", "$.b"] compares two properties), so such a value can't be a constant there.
+const FIELDS = ['id', 'tagId', 'owner', 'reserved', 'properties', 'createdBy', 'createdAt', 'modifiedBy', 'modifiedAt'];
+
+const constant = value => {
+    if (typeof value === 'string' && (value.startsWith('$') || FIELDS.includes(value)))
+        throw new Unsupported();
+    return value;
+};
 
 // one item of a list of rules (a rule or a group), or several rules for a "between"
 const convert = (logic) => {
@@ -60,10 +71,10 @@ const convert = (logic) => {
 
     if (COMPARISONS.includes(operator)) {
         if (args.length === 2 && isVar(args[0]) && !isVar(args[1]))
-            return [[toField(args[0]), operator, args[1]]];
+            return [[toField(args[0]), operator, constant(args[1])]];
         if (args.length === 3 && INVERTED[operator] && !isVar(args[0]) && isVar(args[1]) && !isVar(args[2])) {
             const field = toField(args[1]);
-            return [[field, INVERTED[operator], args[0]], [field, operator, args[2]]];
+            return [[field, INVERTED[operator], constant(args[0])], [field, operator, constant(args[2])]];
         }
         throw new Unsupported();
     }
