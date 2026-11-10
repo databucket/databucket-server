@@ -8,7 +8,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 2 : undefined,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    ['list'],
+    // the main report: npm run report (Allure); the Playwright one stays for its trace viewer
+    ['allure-playwright', { resultsDir: 'allure-results', detail: false, suiteTitle: true, environmentInfo: { 'Databucket URL': env.baseUrl } }],
+    ['html', { open: 'never' }],
+  ],
   use: {
     baseURL: env.baseUrl,
   },

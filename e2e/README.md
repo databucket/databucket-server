@@ -18,7 +18,7 @@ cd e2e
 npm install
 npx playwright install chromium   # once
 npm test                          # everything; npm run test:api / npm run test:ui
-npm run report                    # the HTML report of the last run
+npm run report                    # the Allure report of the last run (npm run report:playwright: the Playwright one)
 ```
 
 Another Databucket: `BASE_URL=http://localhost:8080 SUPER_USER=... SUPER_PASSWORD=... npm test`.
@@ -40,19 +40,22 @@ API: `project.createBucket(...)`, `project.createView(...)`, `project.quietly('r
 | `tests/api/` | API tests (project `api`) |
 | `tests/ui/` | GUI tests in Chromium (project `ui`) |
 | `pages/` | page objects of the GUI |
-| `support/api.ts` | REST client: every call is a step in the report with the request and the response |
+| `support/api.ts` | REST client: every call is an Allure step with the request and the response |
 | `support/project.ts` | the test project with its users, buckets and views |
 | `fixtures.ts` | `test` and `expect` to import in the tests |
 
 ## The report
 
-`playwright-report/index.html`; in GitHub Actions the `playwright-report` artifact of the run.
+[Allure 3](https://allurereport.org) (`allure-playwright`; no Java needed): `npm run report` generates `allure-report/index.html`
+(one file, opens from the disk) and opens it. In GitHub Actions it is the `allure-report` artifact of the run.
 
-- API calls are steps such as `e2e-...-robot: POST /api/bucket/orders/get`, with the request (method, URL, headers,
-  JSON) and the response (status, time, JSON) attached. Tokens and passwords are masked.
-- GUI tests: a screenshot at the end of every test (and named ones from `screenshot(page, '...')`), the trace of every
-  test (open it from the report: page snapshots before and after every action, network, console) and a video of the
-  failed ones.
+- API calls are steps such as `e2e-...-robot: POST /api/bucket/orders/get → 200` (with the time as a parameter) with
+  the request (method, URL, headers, JSON) and the response (status, JSON) attached. Tokens and passwords are masked.
+- GUI tests: the actions of the page objects are steps ("Open bucket orders", "Search \"Bob\""); a screenshot at the
+  end of every test (and named ones from `screenshot(page, '...')`), the Playwright trace of every test (page snapshots
+  before and after every action, network, console) and a video of the failed ones.
+
+The Playwright HTML report is still written (`playwright-report/`, `npm run report:playwright`).
 
 ## Selectors
 

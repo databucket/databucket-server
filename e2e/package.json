@@ -7,15 +7,23 @@
     "node": ">=20.19"
   },
   "scripts": {
+    "clean": "node -e \"require('fs').rmSync('allure-results',{recursive:true,force:true})\"",
+    "pretest": "npm run clean",
     "test": "playwright test",
+    "pretest:api": "npm run clean",
     "test:api": "playwright test --project=api",
+    "pretest:ui": "npm run clean",
     "test:ui": "playwright test --project=ui",
-    "report": "playwright show-report",
+    "report": "allure generate allure-results --clean -o allure-report && allure open allure-report",
+    "report:playwright": "playwright show-report",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
     "@types/node": "22.20.5",
+    "allure": "3.33.0",
+    "allure-js-commons": "3.14.0",
+    "allure-playwright": "3.14.0",
     "typescript": "7.0.2"
   }
 }

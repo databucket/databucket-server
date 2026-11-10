@@ -1,6 +1,6 @@
 # End-to-end tests (e2e/): builds Databucket, starts the docker compose (PostgreSQL, Keycloak, Caddy) and runs the
-# Playwright tests of the API and the GUI against it. The HTML report (requests and responses, screenshots, traces)
-# is attached to the run as the "playwright-report" artifact.
+# Playwright tests of the API and the GUI against it. The Allure report (requests and responses, screenshots, traces)
+# is attached to the run as the "allure-report" artifact: one index.html, open it from the disk.
 name: E2E tests
 
 on:
@@ -52,12 +52,17 @@ jobs:
         working-directory: e2e
         run: npx playwright test
 
+      - name: Allure report
+        if: ${{ !cancelled() }}
+        working-directory: e2e
+        run: npx allure generate allure-results --clean -o allure-report
+
       - name: Attach the report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: e2e/playwright-report/
+          name: allure-report
+          path: e2e/allure-report/index.html
           retention-days: 14
 
       - name: Logs of Databucket

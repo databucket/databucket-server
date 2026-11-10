@@ -1,4 +1,5 @@
-import { test, type APIRequestContext } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import * as allure from 'allure-js-commons';
 
 /** Header selecting version 2 of the data API. */
 export const API_V2 = { 'Databucket-Api-Version': '2' };
@@ -56,7 +57,7 @@ export class Api {
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
     if (options.data !== undefined) headers['Content-Type'] = 'application/json';
 
-    const send = async (step?: { attach: (name: string, body: { body: string; contentType: string }) => Promise<void> }) => {
+    const send = async (step?: allure.StepContext) => {
       const start = Date.now();
       const response = await this.request.fetch(path, {
         method,
@@ -69,11 +70,10 @@ export class Api {
       const result: ApiResponse<T> = { status: response.status(), headers: response.headers(), body: parse(text), text };
 
       if (step) {
-        await step.attach('request', { body: formatRequest(method, response.url(), headers, options.data), contentType: 'text/plain' });
-        await step.attach(`response ${result.status} (${took} ms)`, {
-          body: formatResponse(result, response.statusText()),
-          contentType: 'text/plain',
-        });
+        await step.displayName(`${this.user}: ${method} ${path} → ${result.status}`);
+        await step.parameter('time', `${took} ms`);
+        await allure.attachment('request', formatRequest(method, response.url(), headers, options.data), 'text/plain');
+        await allure.attachment(`response ${result.status}`, formatResponse(result, response.statusText()), 'text/plain');
       }
       if (options.expectStatus !== undefined && result.status !== options.expectStatus)
         throw new Error(`${method} ${path}: expected status ${options.expectStatus}, got ${result.status}\n${text.slice(0, 2000)}`);
@@ -81,7 +81,7 @@ export class Api {
     };
 
     if (this.quiet) return send();
-    return test.step(`${this.user}: ${method} ${path}`, step => send(step), { box: true });
+    return allure.step(`${this.user}: ${method} ${path}`, step => send(step));
   }
 }
 
