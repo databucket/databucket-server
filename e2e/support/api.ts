@@ -1,6 +1,6 @@
 import type { APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
-import { requestView, responseView } from './http-view';
+import { exchangeView } from './http-view';
 
 /** Header selecting version 2 of the data API. */
 export const API_V2 = { 'Databucket-Api-Version': '2' };
@@ -25,7 +25,7 @@ const SECRET_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
 
 /**
  * A REST client for the tests. Every call is a step in the report ("demo-admin: POST /api/buckets → 201")
- * with the request and the response attached as HTML views: method, URL, a table of headers and highlighted JSON.
+ * with the request and the response attached as one HTML view (see http-view.ts).
  * Tokens and passwords are masked, so reports can be shared.
  *
  * `quiet` clients (used to prepare test data) skip the steps and attachments.
@@ -73,8 +73,18 @@ export class Api {
       if (step) {
         await step.displayName(`${this.user}: ${method} ${path} → ${result.status}`);
         await step.parameter('time', `${took} ms`);
-        await allure.attachment('request', requestView(method, response.url(), maskHeaders(headers), mask(options.data)), 'text/html');
-        await allure.attachment(`response ${result.status}`, responseView(result.status, response.statusText(), took, shownHeaders(result.headers), mask(result.body)), 'text/html');
+        const view = exchangeView({
+          method,
+          url: response.url(),
+          requestHeaders: maskHeaders(headers),
+          requestBody: mask(options.data),
+          status: result.status,
+          statusText: response.statusText(),
+          took,
+          responseHeaders: shownHeaders(result.headers),
+          responseBody: mask(result.body),
+        });
+        await allure.attachment('request / response', view, 'text/html');
       }
       if (options.expectStatus !== undefined && result.status !== options.expectStatus)
         throw new Error(`${method} ${path}: expected status ${options.expectStatus}, got ${result.status}\n${text.slice(0, 2000)}`);

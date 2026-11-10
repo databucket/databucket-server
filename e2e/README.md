@@ -50,8 +50,10 @@ API: `project.createBucket(...)`, `project.createView(...)`, `project.quietly('r
 no Java needed): `npm run report` generates `allure-report/index.html` (one file, opens from the disk) and opens it. In GitHub Actions it is the `allure-report` artifact of the run.
 
 - API calls are steps such as `e2e-...-robot: POST /api/bucket/orders/get → 200` (with the time as a parameter) with
-  the request and the response attached as HTML views (`support/http-view.ts`): method and URL / status, a table of
-  headers, highlighted JSON. Tokens and passwords are masked.
+  the request and the response attached as one HTML view (`support/http-view.ts`): method, URL, status and time, then
+  the request and the response with their headers (collapsed) and highlighted JSON bodies. Buttons copy the request,
+  the response or both, with or without headers, as Markdown code blocks ready to paste into Slack or Mattermost.
+  Tokens and passwords are masked, also in what is copied.
 - GUI tests: the actions of the page objects are steps ("Open bucket orders", "Search \"Bob\""); a screenshot at the
   end of every test (and named ones from `screenshot(page, '...')`), the Playwright trace of every test (download it and
   open it at https://trace.playwright.dev or with `npx playwright show-trace`) and a video of the failed ones.
