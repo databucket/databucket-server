@@ -24,7 +24,7 @@ const SECRET_FIELDS = new Set(['password', 'newPassword', 'token', 'ssoToken']);
 const SECRET_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
 
 /**
- * A REST client for the tests. Every call is a step in the report ("demo-admin: POST /api/buckets → 201")
+ * A REST client for the tests. Every call is a step in the report ("admin: POST /api/buckets → 201")
  * with the request and the response attached as one HTML view (see http-view.ts).
  * Tokens and passwords are masked, so reports can be shared.
  *
@@ -33,6 +33,7 @@ const SECRET_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
 export class Api {
   constructor(
     private readonly request: APIRequestContext,
+    /** Who calls, as shown in the report: the role in the test project (admin, member, robot) or e.g. "anonymous". */
     readonly user: string,
     readonly token?: string,
     private readonly quiet = false,

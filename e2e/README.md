@@ -49,7 +49,7 @@ API: `project.createBucket(...)`, `project.createView(...)`, `project.quietly('r
 [Allure](https://allurereport.org) in the classic Allure 2 layout (Allure 3 CLI with its `allure2` plugin, `allure-playwright`;
 no Java needed): `npm run report` generates `allure-report/index.html` (one file, opens from the disk) and opens it. In GitHub Actions it is the `allure-report` artifact of the run.
 
-- API calls are steps such as `e2e-...-robot: POST /api/bucket/orders/get → 200` (with the time as a parameter) with
+- API calls are steps such as `robot: POST /api/bucket/orders/get → 200` (the caller's role in the test project; the time as a parameter) with
   the request and the response attached as one HTML view (`support/http-view.ts`): method, URL, status and time, then
   the request and the response with their headers (collapsed) and highlighted JSON bodies. A Copy button copies the request
   and the response, with or without headers, as code blocks ready to paste into Slack or Mattermost.

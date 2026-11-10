@@ -95,7 +95,7 @@ export class TestProject {
       token = response.body.token as string;
       this.tokens.set(key, token);
     }
-    return new Api(this.request, user.username, token, true);
+    return new Api(this.request, key, token, true);
   }
 
   /** Creates a bucket every user of the project can use (access from ROBOT up). */
