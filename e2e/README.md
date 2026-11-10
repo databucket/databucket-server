@@ -46,16 +46,17 @@ API: `project.createBucket(...)`, `project.createView(...)`, `project.quietly('r
 
 ## The report
 
-[Allure 3](https://allurereport.org) (`allure-playwright`; no Java needed): `npm run report` generates `allure-report/index.html`
-(one file, opens from the disk) and opens it. In GitHub Actions it is the `allure-report` artifact of the run.
+[Allure](https://allurereport.org) in the classic Allure 2 layout (Allure 3 CLI with its `allure2` plugin, `allure-playwright`;
+no Java needed): `npm run report` generates `allure-report/index.html` (one file, opens from the disk) and opens it. In GitHub Actions it is the `allure-report` artifact of the run.
 
 - API calls are steps such as `e2e-...-robot: POST /api/bucket/orders/get → 200` (with the time as a parameter) with
-  the request (method, URL, headers, JSON) and the response (status, JSON) attached. Tokens and passwords are masked.
+  the request and the response attached as HTML views (`support/http-view.ts`): method and URL / status, a table of
+  headers, highlighted JSON. Tokens and passwords are masked.
 - GUI tests: the actions of the page objects are steps ("Open bucket orders", "Search \"Bob\""); a screenshot at the
-  end of every test (and named ones from `screenshot(page, '...')`), the Playwright trace of every test (page snapshots
-  before and after every action, network, console) and a video of the failed ones.
+  end of every test (and named ones from `screenshot(page, '...')`), the Playwright trace of every test (download it and
+  open it at https://trace.playwright.dev or with `npx playwright show-trace`) and a video of the failed ones.
 
-The Playwright HTML report is still written (`playwright-report/`, `npm run report:playwright`).
+The Playwright HTML report is still written (`playwright-report/`, `npm run report:playwright`), with its built-in trace viewer.
 
 ## Selectors
 

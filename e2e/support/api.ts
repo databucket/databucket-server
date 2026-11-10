@@ -1,5 +1,6 @@
 import type { APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
+import { requestView, responseView } from './http-view';
 
 /** Header selecting version 2 of the data API. */
 export const API_V2 = { 'Databucket-Api-Version': '2' };
@@ -24,7 +25,7 @@ const SECRET_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
 
 /**
  * A REST client for the tests. Every call is a step in the report ("demo-admin: POST /api/buckets → 201")
- * with the request and the response attached as readable text: method, URL, headers and pretty-printed JSON.
+ * with the request and the response attached as HTML views: method, URL, a table of headers and highlighted JSON.
  * Tokens and passwords are masked, so reports can be shared.
  *
  * `quiet` clients (used to prepare test data) skip the steps and attachments.
@@ -72,8 +73,8 @@ export class Api {
       if (step) {
         await step.displayName(`${this.user}: ${method} ${path} → ${result.status}`);
         await step.parameter('time', `${took} ms`);
-        await allure.attachment('request', formatRequest(method, response.url(), headers, options.data), 'text/plain');
-        await allure.attachment(`response ${result.status}`, formatResponse(result, response.statusText()), 'text/plain');
+        await allure.attachment('request', requestView(method, response.url(), maskHeaders(headers), mask(options.data)), 'text/html');
+        await allure.attachment(`response ${result.status}`, responseView(result.status, response.statusText(), took, shownHeaders(result.headers), mask(result.body)), 'text/html');
       }
       if (options.expectStatus !== undefined && result.status !== options.expectStatus)
         throw new Error(`${method} ${path}: expected status ${options.expectStatus}, got ${result.status}\n${text.slice(0, 2000)}`);
@@ -101,24 +102,13 @@ function mask(value: unknown): unknown {
   return value;
 }
 
-function formatHeaders(headers: Record<string, string>): string {
-  return Object.entries(headers)
-    .map(([name, value]) => `${name}: ${SECRET_HEADERS.has(name.toLowerCase()) ? value.replace(/(Bearer )?.+/, '$1***') : value}`)
-    .join('\n');
-}
-
-function formatBody(body: unknown): string {
-  if (body === undefined || body === '') return '';
-  return typeof body === 'string' ? body : JSON.stringify(mask(body), null, 2);
-}
-
-function formatRequest(method: string, url: string, headers: Record<string, string>, data: unknown): string {
-  return [`${method} ${url}`, formatHeaders(headers), '', formatBody(data)].join('\n').trimEnd();
-}
-
-function formatResponse(response: ApiResponse, statusText: string): string {
-  const shown = Object.fromEntries(
-    Object.entries(response.headers).filter(([name]) => ['content-type', 'location'].includes(name)),
+function maskHeaders(headers: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(headers).map(([name, value]) => [name, SECRET_HEADERS.has(name.toLowerCase()) ? value.replace(/^(Bearer )?.+$/, '$1***') : value]),
   );
-  return [`HTTP ${response.status} ${statusText}`, formatHeaders(shown), '', formatBody(response.body)].join('\n').trimEnd();
+}
+
+/** The response headers worth seeing (the others are the same for every call). */
+function shownHeaders(headers: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(Object.entries(headers).filter(([name]) => ['content-type', 'location'].includes(name)));
 }

@@ -11,7 +11,7 @@ export default defineConfig({
   reporter: [
     ['list'],
     // the main report: npm run report (Allure); the Playwright one stays for its trace viewer
-    ['allure-playwright', { resultsDir: 'allure-results', detail: false, suiteTitle: true, environmentInfo: { 'Databucket URL': env.baseUrl } }],
+    ['allure-playwright', { resultsDir: 'allure-results', detail: false, suiteTitle: false, environmentInfo: { 'Databucket URL': env.baseUrl } }],
     ['html', { open: 'never' }],
   ],
   use: {
