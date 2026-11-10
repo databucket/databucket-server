@@ -2,8 +2,8 @@
  * An HTML view of one HTTP call (request and response) for the Allure report: an attachment of type text/html, which
  * the report shows in a sandboxed frame (scripts allowed).
  *
- * - a summary line: method, URL, status, time
- * - request, then response: headers (collapsed) and body (open; highlighted JSON)
+ * - the first line: method, URL, a Copy button
+ * - the request (headers collapsed, body open; highlighted JSON), then the response with its status and time
  * - a Copy button: request and response, with or without headers, as Markdown code blocks that look
  *   right when pasted into Slack (HTML on the clipboard) or Mattermost (Markdown text)
  *
@@ -36,13 +36,16 @@ const STYLE = `
   .PATCH { background: #0e7490; } .HEAD, .OPTIONS { background: #6e7781; }
   .s2 { background: #1a7f37; } .s3 { background: #6e7781; } .s4 { background: #bc4c00; } .s5 { background: #cf222e; }
   .muted { color: #6e7781; }
-  .toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
-  .toolbar label { margin-right: 6px; color: #57606a; font-size: 12px; cursor: pointer; user-select: none; }
+  .toolbar { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+  .toolbar label { margin-right: 4px; color: #57606a; font-size: 12px; cursor: pointer; user-select: none; white-space: nowrap; }
+  .request { margin-top: 6px; }
   button { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid #d0d7de; border-radius: 6px; background: #f6f8fa; color: #1f2328; cursor: pointer; }
   button:hover { background: #eaeef2; }
   button.done { border-color: #1a7f37; color: #1a7f37; }
   section { margin-top: 12px; border-top: 1px solid #d8dee4; padding-top: 6px; }
-  h3 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #57606a; }
+  h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #57606a; }
+  h3 .title { text-transform: uppercase; letter-spacing: .05em; }
+  h3 .muted { font-weight: 400; }
   details { margin: 4px 0; }
   summary { cursor: pointer; color: #57606a; font-size: 12px; user-select: none; }
   table { border-collapse: collapse; font-size: 12px; margin: 4px 0 0 14px; }
@@ -133,12 +136,13 @@ export function exchangeView(x: HttpExchange): string {
     `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body>` +
     `<div class="summary"><span class="badge ${esc(x.method)}">${esc(x.method)}</span>` +
     `<span class="url mono">${esc(x.url)}</span>` +
-    `<span class="badge s${String(x.status)[0]}">${x.status} ${esc(x.statusText)}</span>` +
-    `<span class="muted">${x.took} ms</span></div>` +
     `<div class="toolbar"><label><input type="checkbox" id="with-headers"> with headers</label>` +
-    `<button class="copy">Copy</button></div>` +
-    `<section><h3>Request</h3>${headersBlock(x.requestHeaders)}${bodyBlock(x.requestBody, true)}</section>` +
-    `<section class="${failed ? 'error' : ''}"><h3>Response</h3>${headersBlock(x.responseHeaders)}${bodyBlock(x.responseBody, true)}</section>` +
+    `<button class="copy">Copy</button></div></div>` +
+    `<div class="request">${headersBlock(x.requestHeaders)}${bodyBlock(x.requestBody, true)}</div>` +
+    `<section class="${failed ? 'error' : ''}"><h3><span class="title">Response</span>` +
+    `<span class="badge s${String(x.status)[0]}">${x.status} ${esc(x.statusText)}</span>` +
+    `<span class="muted">${x.took} ms</span></h3>` +
+    `${headersBlock(x.responseHeaders)}${bodyBlock(x.responseBody, true)}</section>` +
     `<script type="application/json" id="exchange">${data}</script><script>${SCRIPT}</script>` +
     `</body></html>`
   );
