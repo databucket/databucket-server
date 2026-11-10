@@ -41,6 +41,7 @@ API: `project.createBucket(...)`, `project.createView(...)`, `project.quietly('r
 | `tests/ui/` | GUI tests in Chromium (project `ui`) |
 | `pages/` | page objects of the GUI |
 | `support/api.ts` | REST client: every call is an Allure step with the request and the response |
+| `support/report-config.ts` | what the report shows: response headers (`date`, `x-request-id`...), masked headers and fields |
 | `support/project.ts` | the test project with its users, buckets and views |
 | `fixtures.ts` | `test` and `expect` to import in the tests |
 

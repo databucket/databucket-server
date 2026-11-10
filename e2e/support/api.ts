@@ -1,6 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { exchangeView } from './http-view';
+import { reportConfig } from './report-config';
 
 /** Header selecting version 2 of the data API. */
 export const API_V2 = { 'Databucket-Api-Version': '2' };
@@ -22,8 +23,9 @@ export interface CallOptions {
   name?: string;
 }
 
-const SECRET_FIELDS = new Set(['password', 'newPassword', 'token', 'ssoToken']);
-const SECRET_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
+const SECRET_FIELDS = new Set(reportConfig.secretFields);
+const SECRET_HEADERS = new Set(reportConfig.secretHeaders.map(name => name.toLowerCase()));
+const SHOWN_RESPONSE_HEADERS = new Set(reportConfig.responseHeaders.map(name => name.toLowerCase()));
 
 /**
  * A REST client for the tests. Every call is a step in the report ("POST /api/buckets → 201")
@@ -83,7 +85,7 @@ export class Api {
           status: result.status,
           statusText: response.statusText(),
           took,
-          responseHeaders: shownHeaders(result.headers),
+          responseHeaders: maskHeaders(shownHeaders(result.headers)),
           responseBody: mask(result.body),
         });
         await allure.attachment(options.name ?? 'request / response', view, 'text/html');
@@ -120,7 +122,7 @@ function maskHeaders(headers: Record<string, string>): Record<string, string> {
   );
 }
 
-/** The response headers worth seeing (the others are the same for every call). */
+/** The response headers worth seeing: reportConfig.responseHeaders. */
 function shownHeaders(headers: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(Object.entries(headers).filter(([name]) => ['content-type', 'location'].includes(name)));
+  return Object.fromEntries(Object.entries(headers).filter(([name]) => SHOWN_RESPONSE_HEADERS.has(name.toLowerCase())));
 }
