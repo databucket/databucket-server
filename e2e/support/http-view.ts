@@ -4,7 +4,7 @@
  *
  * - a summary line: method, URL, status, time
  * - request, then response: headers (collapsed) and body (open; highlighted JSON)
- * - buttons copying the request, the response or both, with or without headers, as Markdown code blocks that look
+ * - a Copy button: request and response, with or without headers, as Markdown code blocks that look
  *   right when pasted into Slack (HTML on the clipboard) or Mattermost (Markdown text)
  *
  * The previous view (two attachments, request and response separately) is in git: commit e3141ee.
@@ -67,17 +67,23 @@ const SCRIPT = `
     if (body(b)) parts.push(body(b));
     return parts.join('\\n\\n') || '(empty)';
   };
-  const call = x.method + ' ' + x.url;
-  const result = ' → ' + x.status + ' ' + x.statusText + ' (' + x.took + ' ms)';
-  // a message as a list of parts: a line (inline code + text) or a code block
+  // the copied message:
+  //   Request:
+  //   POST http://... (inline code)
+  //   (block: headers if wanted, body)
+  //
+  //   Response: 200 OK (21 ms)
+  //   (block: headers if wanted, body)
   const line = (code, text) => ({ code, text: text || '' });
   const block = text => ({ block: text });
-  const messages = {
-    request: h => [line(call), block(content(x.requestHeaders, x.requestBody, h))],
-    response: h => [line(call, result), block(content(x.responseHeaders, x.responseBody, h))],
-    all: h => [line(call, result), line(null, 'Request:'), block(content(x.requestHeaders, x.requestBody, h)),
-               line(null, 'Response:'), block(content(x.responseHeaders, x.responseBody, h))],
-  };
+  const message = h => [
+    line(null, 'Request:'),
+    line(x.method + ' ' + x.url),
+    block(content(x.requestHeaders, x.requestBody, h)),
+    line(null, ''),
+    line(null, 'Response: ' + x.status + ' ' + x.statusText + ' (' + x.took + ' ms)'),
+    block(content(x.responseHeaders, x.responseBody, h)),
+  ];
   // Markdown for Mattermost and other editors pasting plain text
   const markdown = parts => parts.map(p => p.block !== undefined
     ? fence + '\\n' + p.block + '\\n' + fence
@@ -85,7 +91,7 @@ const SCRIPT = `
   // HTML for Slack: its editor formats pasted HTML (code, pre), not pasted Markdown
   const html = parts => parts.map(p => p.block !== undefined
     ? '<pre>' + esc(p.block) + '</pre>'
-    : '<p>' + (p.code ? '<code>' + esc(p.code) + '</code>' : '') + esc(p.text).replace('→', '&rarr;') + '</p>').join('');
+    : p.code || p.text ? '<p>' + (p.code ? '<code>' + esc(p.code) + '</code>' : '') + esc(p.text) + '</p>' : '').join('');
   // the frame of the report has no clipboard permission: a copy event filled by hand, then the API (text only)
   const copy = parts => {
     const text = markdown(parts);
@@ -102,10 +108,10 @@ const SCRIPT = `
     if (filled) return Promise.resolve();
     return navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject(new Error('no clipboard'));
   };
-  document.querySelectorAll('button[data-copy]').forEach(button => {
+  document.querySelectorAll('button.copy').forEach(button => {
     const label = button.textContent;
     button.addEventListener('click', () => {
-      const parts = messages[button.dataset.copy](document.getElementById('with-headers').checked);
+      const parts = message(document.getElementById('with-headers').checked);
       copy(parts).then(
         () => { button.textContent = 'Copied ✓'; button.classList.add('done'); },
         () => { button.textContent = 'Copy failed'; },
@@ -124,8 +130,7 @@ export function exchangeView(x: HttpExchange): string {
     `<span class="badge s${String(x.status)[0]}">${x.status} ${esc(x.statusText)}</span>` +
     `<span class="muted">${x.took} ms</span></div>` +
     `<div class="toolbar"><label><input type="checkbox" id="with-headers"> with headers</label>` +
-    `<button data-copy="request">Copy request</button><button data-copy="response">Copy response</button>` +
-    `<button data-copy="all">Copy both</button></div>` +
+    `<button class="copy">Copy</button></div>` +
     `<section><h3>Request</h3>${headersBlock(x.requestHeaders)}${bodyBlock(x.requestBody, true)}</section>` +
     `<section class="${failed ? 'error' : ''}"><h3>Response</h3>${headersBlock(x.responseHeaders)}${bodyBlock(x.responseBody, true)}</section>` +
     `<script type="application/json" id="exchange">${data}</script><script>${SCRIPT}</script>` +

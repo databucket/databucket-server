@@ -51,8 +51,8 @@ no Java needed): `npm run report` generates `allure-report/index.html` (one file
 
 - API calls are steps such as `e2e-...-robot: POST /api/bucket/orders/get → 200` (with the time as a parameter) with
   the request and the response attached as one HTML view (`support/http-view.ts`): method, URL, status and time, then
-  the request and the response with their headers (collapsed) and highlighted JSON bodies. Buttons copy the request,
-  the response or both, with or without headers, as Markdown code blocks ready to paste into Slack or Mattermost.
+  the request and the response with their headers (collapsed) and highlighted JSON bodies. A Copy button copies the request
+  and the response, with or without headers, as code blocks ready to paste into Slack or Mattermost.
   Tokens and passwords are masked, also in what is copied.
 - GUI tests: the actions of the page objects are steps ("Open bucket orders", "Search \"Bob\""); a screenshot at the
   end of every test (and named ones from `screenshot(page, '...')`), the Playwright trace of every test (download it and
