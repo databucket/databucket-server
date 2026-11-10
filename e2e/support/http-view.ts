@@ -81,14 +81,12 @@ const SCRIPT = `
     return parts.join('\\n\\n') || '(empty)';
   };
   // plain text, no formatting (wrap it in a code block yourself where you paste it):
-  //   Request:
   //   POST http://...
   //   headers if wanted, body
   //
   //   Response: 200 OK (21 ms)
   //   headers if wanted, body
   const message = h => [
-    'Request:',
     x.method + ' ' + x.url,
     content(x.requestHeaders, x.requestBody, h),
     '',
