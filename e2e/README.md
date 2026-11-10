@@ -53,7 +53,8 @@ no Java needed): `npm run report` generates `allure-report/index.html` (one file
   HTML view (`support/http-view.ts`): method, URL, status and time, then the request and the response with their
   headers (collapsed) and highlighted JSON bodies. The view is named by the `name` option of the call, e.g.
   `api.post(path, { name: 'GET data by rules', ... })`, "request / response" otherwise. A Copy button copies the
-  request and the response, with or without headers, as code blocks ready to paste into Slack or Mattermost. Tokens
+  request and the response, with or without headers, as plain text (to paste e.g. into a code block in Slack or
+  Mattermost). Tokens
   and passwords are masked, also in what is copied.
 - GUI tests: the actions of the page objects are steps ("Open bucket orders", "Search \"Bob\""); a screenshot at the
   end of every test (and named ones from `screenshot(page, '...')`), the Playwright trace of every test (download it and

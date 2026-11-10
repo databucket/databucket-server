@@ -4,8 +4,7 @@
  *
  * - the first line: method, URL, a Copy button
  * - the request (headers collapsed, body open; highlighted JSON), then the response with its status and time
- * - a Copy button: request and response, with or without headers, as Markdown code blocks that look
- *   right when pasted into Slack (HTML on the clipboard) or Mattermost (Markdown text)
+ * - a Copy button: request and response, with or without headers, as plain text
  *
  * The previous view (two attachments, request and response separately) is in git: commit e3141ee.
  */
@@ -57,12 +56,9 @@ const STYLE = `
   .k { color: #0550ae; } .str { color: #116329; } .num { color: #953800; } .lit { color: #8250df; font-weight: 600; }
 `;
 
-/** Builds the Markdown texts on click; the data of the call is embedded as JSON. */
+/** Builds the copied text on click; the data of the call is embedded as JSON. */
 const SCRIPT = `
   const x = JSON.parse(document.getElementById('exchange').textContent);
-  const tick = '\\u0060';
-  const fence = tick + tick + tick;
-  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const body = b => b === undefined || b === null || b === '' ? '' : (typeof b === 'string' ? b : JSON.stringify(b, null, 2));
   const headers = h => Object.entries(h).map(([n, v]) => n + ': ' + v).join('\\n');
   const content = (h, b, withHeaders) => {
@@ -71,43 +67,26 @@ const SCRIPT = `
     if (body(b)) parts.push(body(b));
     return parts.join('\\n\\n') || '(empty)';
   };
-  // the copied message:
+  // plain text, no formatting (wrap it in a code block yourself where you paste it):
   //   Request:
-  //   POST http://... (inline code)
-  //   (block: headers if wanted, body)
+  //   POST http://...
+  //   headers if wanted, body
   //
   //   Response: 200 OK (21 ms)
-  //   (block: headers if wanted, body)
-  const line = (code, text) => ({ code, text: text || '' });
-  const block = text => ({ block: text });
+  //   headers if wanted, body
   const message = h => [
-    line(null, 'Request:'),
-    line(x.method + ' ' + x.url),
-    block(content(x.requestHeaders, x.requestBody, h)),
-    line(null, ''),
-    line(null, 'Response: ' + x.status + ' ' + x.statusText + ' (' + x.took + ' ms)'),
-    block(content(x.responseHeaders, x.responseBody, h)),
-  ];
-  // Markdown for Mattermost and other editors pasting plain text
-  const markdown = parts => parts.map(p => p.block !== undefined
-    ? fence + '\\n' + p.block + '\\n' + fence
-    : (p.code ? tick + p.code + tick : '') + p.text).join('\\n');
-  // HTML for Slack: its editor formats pasted HTML (code, pre), not pasted Markdown
-  // lines end with <br> unless a block follows (a block starts on a new line itself); no paragraphs, as Slack puts
-  // an empty line after each
-  const html = parts => parts.map((p, i) => {
-    if (p.block !== undefined) return '<pre>' + esc(p.block) + '</pre>';
-    const next = parts[i + 1];
-    const content = (p.code ? '<code>' + esc(p.code) + '</code>' : '') + esc(p.text);
-    return content + (next && next.block === undefined ? '<br>' : '');
-  }).join('');
-  // the frame of the report has no clipboard permission: a copy event filled by hand, then the API (text only)
-  const copy = parts => {
-    const text = markdown(parts);
+    'Request:',
+    x.method + ' ' + x.url,
+    content(x.requestHeaders, x.requestBody, h),
+    '',
+    'Response: ' + x.status + ' ' + x.statusText + ' (' + x.took + ' ms)',
+    content(x.responseHeaders, x.responseBody, h),
+  ].join('\\n');
+  // the frame of the report has no clipboard permission: a copy event filled by hand, then the API
+  const copy = text => {
     let filled = false;
     const onCopy = e => {
       e.clipboardData.setData('text/plain', text);
-      e.clipboardData.setData('text/html', html(parts));
       e.preventDefault();
       filled = true;
     };
@@ -120,8 +99,7 @@ const SCRIPT = `
   document.querySelectorAll('button.copy').forEach(button => {
     const label = button.textContent;
     button.addEventListener('click', () => {
-      const parts = message(document.getElementById('with-headers').checked);
-      copy(parts).then(
+      copy(message(document.getElementById('with-headers').checked)).then(
         () => { button.textContent = 'Copied ✓'; button.classList.add('done'); },
         () => { button.textContent = 'Copy failed'; },
       ).finally(() => setTimeout(() => { button.textContent = label; button.classList.remove('done'); }, 1500));
