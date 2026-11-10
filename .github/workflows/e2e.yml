@@ -1,0 +1,70 @@
+# End-to-end tests (e2e/): builds Databucket, starts the docker compose (PostgreSQL, Keycloak, Caddy) and runs the
+# Playwright tests of the API and the GUI against it. The Allure report (requests and responses, screenshots, traces)
+# is attached to the run as the "allure-report" artifact: one index.html, open it from the disk.
+name: E2E tests
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Names of the compose
+        run: echo "127.0.0.1 databucket.localhost auth.localhost mail.localhost" | sudo tee -a /etc/hosts
+
+      - name: Start Databucket
+        working-directory: docker
+        run: docker compose up -d --build
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Install the tests
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Wait for Databucket
+        run: |
+          for i in $(seq 1 90); do
+            curl -sf http://databucket.localhost/api/public/projects > /dev/null && exit 0
+            sleep 5
+          done
+          docker compose -f docker/docker-compose.yaml logs databucket | tail -100
+          exit 1
+
+      - name: Run the tests
+        working-directory: e2e
+        run: npx playwright test
+
+      - name: Allure report
+        if: ${{ !cancelled() }}
+        working-directory: e2e
+        run: npx allure generate allure-results --clean -o allure-report
+
+      - name: Attach the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: e2e/allure-report/index.html
+          retention-days: 14
+
+      - name: Logs of Databucket
+        if: failure()
+        run: docker compose -f docker/docker-compose.yaml logs databucket | tail -300
