@@ -5,7 +5,7 @@
  * - a summary line: method, URL, status, time
  * - request, then response: headers (collapsed) and body (open; highlighted JSON)
  * - buttons copying the request, the response or both, with or without headers, as Markdown code blocks that look
- *   right when pasted into Slack or Mattermost
+ *   right when pasted into Slack (HTML on the clipboard) or Mattermost (Markdown text)
  *
  * The previous view (two attachments, request and response separately) is in git: commit e3141ee.
  */
@@ -56,42 +56,57 @@ const STYLE = `
 /** Builds the Markdown texts on click; the data of the call is embedded as JSON. */
 const SCRIPT = `
   const x = JSON.parse(document.getElementById('exchange').textContent);
-  const fence = '\\u0060\\u0060\\u0060';
+  const tick = '\\u0060';
+  const fence = tick + tick + tick;
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const body = b => b === undefined || b === null || b === '' ? '' : (typeof b === 'string' ? b : JSON.stringify(b, null, 2));
   const headers = h => Object.entries(h).map(([n, v]) => n + ': ' + v).join('\\n');
-  const block = (h, b, withHeaders) => {
+  const content = (h, b, withHeaders) => {
     const parts = [];
     if (withHeaders && Object.keys(h).length) parts.push(headers(h));
     if (body(b)) parts.push(body(b));
-    return fence + '\\n' + (parts.join('\\n\\n') || '(empty)') + '\\n' + fence;
+    return parts.join('\\n\\n') || '(empty)';
   };
-  const call = '\\u0060' + x.method + ' ' + x.url + '\\u0060';
-  const result = x.status + ' ' + x.statusText + ' (' + x.took + ' ms)';
-  const texts = {
-    request: h => call + '\\n' + block(x.requestHeaders, x.requestBody, h),
-    response: h => call + ' → ' + result + '\\n' + block(x.responseHeaders, x.responseBody, h),
-    all: h => call + ' → ' + result + '\\nRequest:\\n' + block(x.requestHeaders, x.requestBody, h) +
-              '\\nResponse:\\n' + block(x.responseHeaders, x.responseBody, h),
+  const call = x.method + ' ' + x.url;
+  const result = ' → ' + x.status + ' ' + x.statusText + ' (' + x.took + ' ms)';
+  // a message as a list of parts: a line (inline code + text) or a code block
+  const line = (code, text) => ({ code, text: text || '' });
+  const block = text => ({ block: text });
+  const messages = {
+    request: h => [line(call), block(content(x.requestHeaders, x.requestBody, h))],
+    response: h => [line(call, result), block(content(x.responseHeaders, x.responseBody, h))],
+    all: h => [line(call, result), line(null, 'Request:'), block(content(x.requestHeaders, x.requestBody, h)),
+               line(null, 'Response:'), block(content(x.responseHeaders, x.responseBody, h))],
   };
-  // the frame of the report has no clipboard permission: the old way (a selected text area) first, then the API
-  const copy = text => {
-    const area = document.createElement('textarea');
-    area.value = text;
-    area.style.position = 'fixed';
-    area.style.opacity = '0';
-    document.body.appendChild(area);
-    area.select();
-    let ok = false;
-    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-    area.remove();
-    if (ok) return Promise.resolve();
+  // Markdown for Mattermost and other editors pasting plain text
+  const markdown = parts => parts.map(p => p.block !== undefined
+    ? fence + '\\n' + p.block + '\\n' + fence
+    : (p.code ? tick + p.code + tick : '') + p.text).join('\\n');
+  // HTML for Slack: its editor formats pasted HTML (code, pre), not pasted Markdown
+  const html = parts => parts.map(p => p.block !== undefined
+    ? '<pre>' + esc(p.block) + '</pre>'
+    : '<p>' + (p.code ? '<code>' + esc(p.code) + '</code>' : '') + esc(p.text).replace('→', '&rarr;') + '</p>').join('');
+  // the frame of the report has no clipboard permission: a copy event filled by hand, then the API (text only)
+  const copy = parts => {
+    const text = markdown(parts);
+    let filled = false;
+    const onCopy = e => {
+      e.clipboardData.setData('text/plain', text);
+      e.clipboardData.setData('text/html', html(parts));
+      e.preventDefault();
+      filled = true;
+    };
+    document.addEventListener('copy', onCopy);
+    try { document.execCommand('copy'); } catch (e) { /* not supported */ }
+    document.removeEventListener('copy', onCopy);
+    if (filled) return Promise.resolve();
     return navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject(new Error('no clipboard'));
   };
   document.querySelectorAll('button[data-copy]').forEach(button => {
     const label = button.textContent;
     button.addEventListener('click', () => {
-      const text = texts[button.dataset.copy](document.getElementById('with-headers').checked);
-      copy(text).then(
+      const parts = messages[button.dataset.copy](document.getElementById('with-headers').checked);
+      copy(parts).then(
         () => { button.textContent = 'Copied ✓'; button.classList.add('done'); },
         () => { button.textContent = 'Copy failed'; },
       ).finally(() => setTimeout(() => { button.textContent = label; button.classList.remove('done'); }, 1500));
