@@ -18,13 +18,15 @@ export interface CallOptions {
   headers?: Record<string, string>;
   /** Fail the call when the status differs. */
   expectStatus?: number;
+  /** The name of the call in the report (the attachment), e.g. "GET data by rules"; "request / response" by default. */
+  name?: string;
 }
 
 const SECRET_FIELDS = new Set(['password', 'newPassword', 'token', 'ssoToken']);
 const SECRET_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
 
 /**
- * A REST client for the tests. Every call is a step in the report ("admin: POST /api/buckets → 201")
+ * A REST client for the tests. Every call is a step in the report ("POST /api/buckets → 201")
  * with the request and the response attached as one HTML view (see http-view.ts).
  * Tokens and passwords are masked, so reports can be shared.
  *
@@ -33,7 +35,7 @@ const SECRET_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
 export class Api {
   constructor(
     private readonly request: APIRequestContext,
-    /** Who calls, as shown in the report: the role in the test project (admin, member, robot) or e.g. "anonymous". */
+    /** Who calls: the role in the test project (admin, member, robot) or e.g. "anonymous"; not shown in the report. */
     readonly user: string,
     readonly token?: string,
     private readonly quiet = false,
@@ -72,8 +74,7 @@ export class Api {
       const result: ApiResponse<T> = { status: response.status(), headers: response.headers(), body: parse(text), text };
 
       if (step) {
-        await step.displayName(`${this.user}: ${method} ${path} → ${result.status}`);
-        await step.parameter('time', `${took} ms`);
+        await step.displayName(`${method} ${path} → ${result.status}`);
         const view = exchangeView({
           method,
           url: response.url(),
@@ -85,7 +86,7 @@ export class Api {
           responseHeaders: shownHeaders(result.headers),
           responseBody: mask(result.body),
         });
-        await allure.attachment('request / response', view, 'text/html');
+        await allure.attachment(options.name ?? 'request / response', view, 'text/html');
       }
       if (options.expectStatus !== undefined && result.status !== options.expectStatus)
         throw new Error(`${method} ${path}: expected status ${options.expectStatus}, got ${result.status}\n${text.slice(0, 2000)}`);
@@ -93,7 +94,7 @@ export class Api {
     };
 
     if (this.quiet) return send();
-    return allure.step(`${this.user}: ${method} ${path}`, step => send(step));
+    return allure.step(`${method} ${path}`, step => send(step));
   }
 }
 

@@ -39,10 +39,11 @@ test.describe('Data API v2', () => {
     });
     const newOrders = { logic: { '==': [{ var: '$.status' }, 'NEW'] } };
 
-    const count = await robot.post(`${DATA}/get?limit=0`, { headers: API_V2, data: newOrders, expectStatus: 200 });
+    const count = await robot.post(`${DATA}/get?limit=0`, { name: 'Count new orders', headers: API_V2, data: newOrders, expectStatus: 200 });
     expect(count.body.total).toBe(3);
 
     const page = await robot.post(`${DATA}/get?limit=2&page=1&sort=desc(${encodeURIComponent('$.total')})`, {
+      name: 'GET data by rules',
       headers: API_V2,
       data: newOrders,
       expectStatus: 200,
