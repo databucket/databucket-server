@@ -107,6 +107,26 @@ const SCRIPT = `
     if (filled) return Promise.resolve();
     return navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject(new Error('no clipboard'));
   };
+  // The height of the frame: Allure's own script (injected into the attachment) measures the larger of the content and
+  // the frame, so the frame never shrinks and leaves an empty area below the response. Send the height of the content
+  // through the same message (its type and token are in that script); Allure keeps its minimum of 320 px.
+  const allureToken = (() => {
+    for (const script of document.scripts) {
+      const match = script.textContent.match(/const token = "([^"]+)"/);
+      if (match) return match[1];
+    }
+    return null;
+  })();
+  const fit = () => {
+    if (!allureToken) return;
+    const height = Math.ceil(document.body.getBoundingClientRect().height);
+    parent.postMessage({ type: 'allure:html-preview:resize', token: allureToken, height }, '*');
+  };
+  // after Allure's own message (sent on the next animation frame)
+  const fitLater = () => setTimeout(fit, 50);
+  window.addEventListener('load', fitLater);
+  document.addEventListener('toggle', fitLater, true);
+  fitLater();
   document.querySelectorAll('button.copy').forEach(button => {
     const label = button.textContent;
     button.addEventListener('click', () => {
