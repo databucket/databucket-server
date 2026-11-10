@@ -78,7 +78,7 @@ const SCRIPT = `
     const parts = [];
     if (withHeaders && Object.keys(h).length) parts.push(headers(h));
     if (body(b)) parts.push(body(b));
-    return parts.join('\\n\\n') || '(empty)';
+    return parts.join('\\n') || '(empty)';
   };
   // plain text, no formatting (wrap it in a code block yourself where you paste it):
   //   POST http://...
