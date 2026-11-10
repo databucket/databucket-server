@@ -25,7 +25,9 @@ export interface HttpExchange {
 const LONG_BODY_LINES = 300;
 
 const STYLE = `
-  body { margin: 0; padding: 10px 12px; font: 13px/1.45 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #1f2328; background: #fff; }
+  /* the theme of the report: Allure sets color-scheme dark on its page, which the frame sees as prefers-color-scheme */
+  :root { color-scheme: light dark; }
+  body { margin: 0; padding: 10px 12px; font: 13px/1.45 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #1f2328; background: transparent; }
   .mono { font-family: Consolas, "Cascadia Mono", Menlo, monospace; }
   .summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .url { word-break: break-all; }
@@ -54,6 +56,17 @@ const STYLE = `
         font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
   .error pre { border-color: #ff8182; background: #fff8f8; }
   .k { color: #0550ae; } .str { color: #116329; } .num { color: #953800; } .lit { color: #8250df; font-weight: 600; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e6edf3; }
+    .muted, summary, h3, td:first-child, .toolbar label { color: #8d96a0; }
+    section { border-top-color: #30363d; }
+    pre { background: #161b22; border-color: #30363d; }
+    .error pre { border-color: #f85149; background: #2d1214; }
+    button { background: #21262d; border-color: #30363d; color: #e6edf3; }
+    button:hover { background: #30363d; }
+    button.done { border-color: #3fb950; color: #3fb950; }
+    .k { color: #79c0ff; } .str { color: #7ee787; } .num { color: #ffa657; } .lit { color: #d2a8ff; }
+  }
 `;
 
 /** Builds the copied text on click; the data of the call is embedded as JSON. */
