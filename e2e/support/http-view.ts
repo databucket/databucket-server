@@ -31,8 +31,9 @@ const STYLE = `
   .summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .url { word-break: break-all; }
   .badge { padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px; color: #fff; white-space: nowrap; }
-  .GET { background: #1f6feb; } .POST { background: #1a7f37; } .PUT { background: #9a6700; } .DELETE { background: #cf222e; }
-  .PATCH { background: #8250df; }
+  /* method colors as in Bruno (PATCH, the same as PUT there, gets its own) */
+  .GET { background: #059669; } .POST { background: #8e44ad; } .PUT { background: #ca7811; } .DELETE { background: #b91c1c; }
+  .PATCH { background: #0e7490; } .HEAD, .OPTIONS { background: #6e7781; }
   .s2 { background: #1a7f37; } .s3 { background: #6e7781; } .s4 { background: #bc4c00; } .s5 { background: #cf222e; }
   .muted { color: #6e7781; }
   .toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
@@ -89,9 +90,14 @@ const SCRIPT = `
     ? fence + '\\n' + p.block + '\\n' + fence
     : (p.code ? tick + p.code + tick : '') + p.text).join('\\n');
   // HTML for Slack: its editor formats pasted HTML (code, pre), not pasted Markdown
-  const html = parts => parts.map(p => p.block !== undefined
-    ? '<pre>' + esc(p.block) + '</pre>'
-    : p.code || p.text ? '<p>' + (p.code ? '<code>' + esc(p.code) + '</code>' : '') + esc(p.text) + '</p>' : '').join('');
+  // lines end with <br> unless a block follows (a block starts on a new line itself); no paragraphs, as Slack puts
+  // an empty line after each
+  const html = parts => parts.map((p, i) => {
+    if (p.block !== undefined) return '<pre>' + esc(p.block) + '</pre>';
+    const next = parts[i + 1];
+    const content = (p.code ? '<code>' + esc(p.code) + '</code>' : '') + esc(p.text);
+    return content + (next && next.block === undefined ? '<br>' : '');
+  }).join('');
   // the frame of the report has no clipboard permission: a copy event filled by hand, then the API (text only)
   const copy = parts => {
     const text = markdown(parts);
