@@ -56,6 +56,12 @@ public class ApplicationInitialDataCreator implements ApplicationRunner {
             userRole.setName(Constants.ROLE_ROBOT);
             roleRepository.save(userRole);
         }
+
+        if (!roleRepository.existsByName(Constants.ROLE_AGENT)) {
+            Role agentRole = new Role();
+            agentRole.setName(Constants.ROLE_AGENT);
+            roleRepository.save(agentRole);
+        }
     }
 
     private void createSuperUser() {

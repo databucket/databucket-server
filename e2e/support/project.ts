@@ -2,9 +2,9 @@ import type { APIRequestContext } from '@playwright/test';
 import { Api } from './api';
 import { env, ROLE, TEST_PASSWORD, type RoleName } from './env';
 
-export type UserKey = 'admin' | 'member' | 'robot';
+export type UserKey = 'admin' | 'member' | 'robot' | 'agent';
 
-const USER_ROLES: Record<UserKey, RoleName> = { admin: 'ADMIN', member: 'MEMBER', robot: 'ROBOT' };
+const USER_ROLES: Record<UserKey, RoleName> = { admin: 'ADMIN', member: 'MEMBER', robot: 'ROBOT', agent: 'AGENT' };
 
 export interface TestUser {
   username: string;
@@ -13,7 +13,7 @@ export interface TestUser {
 }
 
 /**
- * A project of its own for one test, with three users (ADMIN, MEMBER, ROBOT) assigned to it. Tests don't see each
+ * A project of its own for one test, with four users (ADMIN, MEMBER, ROBOT, AGENT) assigned to it. Tests don't see each
  * other's data, so they can run in parallel. Removed after the test (cleared and deleted; the users are disabled,
  * as users can't be deleted).
  */
@@ -98,7 +98,7 @@ export class TestProject {
     return new Api(this.request, key, token, true);
   }
 
-  /** Creates a bucket every user of the project can use (access from ROBOT up). */
+  /** Creates a bucket every user of the project can use (access from AGENT up). */
   async createBucket(name: string, options: { history?: boolean; protectedData?: boolean } = {}): Promise<number> {
     const admin = await this.quietly('admin');
     const response = await admin.post('/api/buckets', {
@@ -107,7 +107,7 @@ export class TestProject {
         icon: { name: 'Storage' },
         history: options.history ?? true,
         protectedData: options.protectedData ?? false,
-        roleId: ROLE.ROBOT,
+        roleId: ROLE.AGENT,
       },
       expectStatus: 201,
     });

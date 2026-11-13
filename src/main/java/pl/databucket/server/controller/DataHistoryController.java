@@ -35,11 +35,11 @@ import pl.databucket.server.service.data.DataFilters;
 import java.util.List;
 
 @Tag(name = "Data history", description = "The changes of the data rows (buckets with history enabled). "
-        + "Requires the MEMBER or ROBOT role and access to the bucket; in a bucket with protected data, below ADMIN, "
-        + "only the history of the rows reserved by the user.")
+        + "Requires the AGENT role or higher and access to the bucket (clearing the history: ROBOT or higher); in a "
+        + "bucket with protected data, below ADMIN, only the history of the rows reserved by the user.")
 @SecurityRequirement(name = OpenApiConfiguration.BEARER)
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+@PreAuthorize("hasRole('AGENT')")
 @RequestMapping("/api")
 @RestController
 public class DataHistoryController {
@@ -120,6 +120,7 @@ public class DataHistoryController {
 
     @Operation(summary = "Clear the history of a data row", description = "Removes the history entries of one data row; "
             + "the row stays.")
+    @PreAuthorize("hasRole('ROBOT')")
     @DeleteMapping(value = {
             "/bucket/{bucketName}/{id}/history/clear"},
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -151,6 +152,7 @@ public class DataHistoryController {
 
     @Operation(summary = "Clear the history by rules", description = "Removes the history of all data rows matching the "
             + "rules (at least one rule); the rows stay.")
+    @PreAuthorize("hasRole('ROBOT')")
     @DeleteMapping(value = {
             "/bucket/{bucketName}/history/clear"},
             produces = MediaType.APPLICATION_JSON_VALUE)

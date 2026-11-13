@@ -58,7 +58,7 @@ public class OpenApiConfiguration {
                     responses.addApiResponse("401", new ApiResponse()
                             .description("Unauthorized - the token is missing, invalid or expired; sign in again"));
                     responses.addApiResponse("403", new ApiResponse()
-                            .description("Forbidden - the user has neither the MEMBER nor the ROBOT role"));
+                            .description("Forbidden - the user's role is too low for the operation"));
                     ApiResponses sorted = new ApiResponses();
                     new TreeMap<>(responses).forEach(sorted::addApiResponse);
                     operation.setResponses(sorted);

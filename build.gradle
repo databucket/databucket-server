@@ -55,6 +55,9 @@ dependencies {
     implementation 'org.modelmapper:modelmapper:3.2.6'
     implementation 'com.lmax:disruptor:4.0.0'
     implementation 'commons-io:commons-io:2.21.0'
+    // MCP server for AI agents (/mcp); Spring AI 1.1 is the line for Spring Boot 3.5 (2.x needs Spring Boot 4)
+    implementation platform('org.springframework.ai:spring-ai-bom:1.1.8')
+    implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
 
     compileOnly 'org.projectlombok:lombok:1.18.44'
     annotationProcessor 'org.projectlombok:lombok'
