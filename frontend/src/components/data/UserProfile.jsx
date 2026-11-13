@@ -25,8 +25,8 @@ import CustomThemeContext from "../../context/theme/CustomThemeContext";
 import AccessContext from "../../context/access/AccessContext";
 import {getGivenProjectDataPath} from "../../route/AppRouter";
 
-// A user has one role; the token also holds the roles below it (e.g. "SUPER,ADMIN,MEMBER,ROBOT"), show the highest
-const ROLES_BY_LEVEL = ['SUPER', 'ADMIN', 'MEMBER', 'ROBOT'];
+// A user has one role; the token also holds the roles below it (e.g. "SUPER,ADMIN,MEMBER,ROBOT,AGENT"), show the highest
+const ROLES_BY_LEVEL = ['SUPER', 'ADMIN', 'MEMBER', 'ROBOT', 'AGENT'];
 const formatRole = (roles) => {
     const names = (roles ?? '').split(',').map(role => role.trim());
     const top = ROLES_BY_LEVEL.find(role => names.includes(role));

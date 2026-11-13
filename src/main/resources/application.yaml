@@ -18,6 +18,12 @@ databucket:
   history-cleanup:
     enabled: true
     cron: "0 30 2 * * *"
+  # MCP server for AI agents (Claude, Cursor, Copilot, ...) at <databucket url>/mcp (streamable HTTP, stateless).
+  # An agent signs in like an API client: the header "Authorization: Bearer <token>" with a token from
+  # /api/public/signin (the token holds the project). It acts as that user: their buckets and role; a user with
+  # the AGENT role can't remove rows or clear the history.
+  mcp:
+    enabled: false
 
 spring:
   application:
@@ -46,6 +52,25 @@ spring:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
   main:
     allow-circular-references: true
+  ai:
+    mcp:
+      server:
+        enabled: ${databucket.mcp.enabled}
+        name: databucket
+        type: SYNC
+        # each request on its own, on the request thread: the token's user and project apply, no sessions to share
+        # between replicas
+        protocol: STATELESS
+        streamable-http:
+          mcp-endpoint: /mcp
+        instructions: >-
+          Databucket keeps test data in buckets (tables); each data row has an id, a tag, a reservation (reserved,
+          owner) and properties (JSON, the data itself, addressed by paths such as $.name or $.address.city).
+          Start with list_buckets, then describe_bucket to learn the property paths, enum values and tag ids of a
+          bucket. Find rows with find_data; to use rows exclusively (e.g. a test account), reserve them with
+          reserve_data and release them with release_data when done. Rules: a list of [left, operator, right],
+          combined with 'and', e.g. [["$.status", "==", "active"], ["reserved", "==", false]]; nest with
+          {"or": [...]}, {"and": [...]}, {"!": rule}. You act as the signed-in user, only in their project.
 
 server:
   # Behind the k8s ingress: take the client address, scheme and host from the X-Forwarded-* headers.
