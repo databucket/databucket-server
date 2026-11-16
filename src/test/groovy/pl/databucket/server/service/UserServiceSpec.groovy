@@ -70,7 +70,7 @@ class UserServiceSpec extends Specification {
         result.username == "john"
         result.password == "encoded-password"
         result.enabled == true
-        result.authorities*.authority as Set == ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"] as Set
+        result.authorities*.authority as Set == ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT", "ROLE_AGENT"] as Set
     }
 
     def "should load superuser with correct flag"() {
@@ -395,7 +395,7 @@ class UserServiceSpec extends Specification {
         when: "loading user"
         def result = userService.loadUserByUsername("test-user")
 
-        then: "the highest role and every role below it are authorities (SUPER > ADMIN > MEMBER > ROBOT)"
+        then: "the highest role and every role below it are authorities (SUPER > ADMIN > MEMBER > ROBOT > AGENT)"
         result.authorities.size() == expectedCount
         expectedAuthorities.every { expectedAuth ->
             result.authorities.any { it.authority == expectedAuth }
@@ -403,11 +403,11 @@ class UserServiceSpec extends Specification {
 
         where: "testing different role combinations"
         roleNames                           || expectedCount | expectedAuthorities
-        ["ADMIN"]                           || 3             | ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"]
-        ["ADMIN", "MEMBER"]                 || 3             | ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"]
-        ["SUPER", "ADMIN", "MEMBER"]        || 4             | ["ROLE_SUPER", "ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"]
-        ["MEMBER"]                          || 2             | ["ROLE_MEMBER", "ROLE_ROBOT"]
-        ["ROBOT"]                           || 1             | ["ROLE_ROBOT"]
+        ["ADMIN"]                           || 4             | ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT", "ROLE_AGENT"]
+        ["ADMIN", "MEMBER"]                 || 4             | ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT", "ROLE_AGENT"]
+        ["SUPER", "ADMIN", "MEMBER"]        || 5             | ["ROLE_SUPER", "ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT", "ROLE_AGENT"]
+        ["MEMBER"]                          || 3             | ["ROLE_MEMBER", "ROLE_ROBOT", "ROLE_AGENT"]
+        ["ROBOT"]                           || 2             | ["ROLE_ROBOT", "ROLE_AGENT"]
         ["UNKNOWN"]                         || 0             | []
     }
 

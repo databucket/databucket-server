@@ -10,5 +10,5 @@ export const env = {
 /** The password of every user the tests create. */
 export const TEST_PASSWORD = 'E2e-Passw0rd!';
 
-export const ROLE = { SUPER: 1, ADMIN: 2, MEMBER: 3, ROBOT: 4 } as const;
+export const ROLE = { SUPER: 1, ADMIN: 2, MEMBER: 3, ROBOT: 4, AGENT: 5 } as const;
 export type RoleName = keyof typeof ROLE;

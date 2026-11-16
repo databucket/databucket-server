@@ -25,6 +25,22 @@ test.describe('Data API v2', () => {
     expect(read.body).toMatchObject({ id: inserted.body.id, properties: { customer: 'Alice' }, createdBy: project.users.robot.username });
   });
 
+  test('in a bucket with protected data a member inserts a free row and gets it back, but sees only own rows later', async ({ project }) => {
+    await project.createBucket('secrets', { protectedData: true });
+    const member = await project.as('member');
+
+    const inserted = await member.post('/api/bucket/secrets', {
+      headers: API_V2,
+      data: { properties: { login: 'erin' } },
+      expectStatus: 201,
+    });
+    expect(inserted.body).toMatchObject({ reserved: false, properties: { login: 'erin' } });
+
+    // not reserved by the member, so hidden from them afterwards (as an id that doesn't exist: no rows)
+    const read = await member.get(`/api/bucket/secrets/${inserted.body.id}`, { headers: API_V2, expectStatus: 200 });
+    expect(read.body).toEqual([]);
+  });
+
   test('finds rows by JsonLogic rules with paging, sorting and counting', async ({ project }) => {
     const robot = await project.as('robot');
     await robot.post(`${DATA}/multi`, {

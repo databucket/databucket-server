@@ -4,7 +4,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
- * One role per user, SUPER > ADMIN > MEMBER > ROBOT; older accounts with several roles count their highest.
+ * One role per user, SUPER > ADMIN > MEMBER > ROBOT > AGENT; older accounts with several roles count their highest.
  */
 class UserRoleHierarchySpec extends Specification {
 
@@ -33,10 +33,11 @@ class UserRoleHierarchySpec extends Specification {
 
         where:
         role     || implied
-        "SUPER"  || ["SUPER", "ADMIN", "MEMBER", "ROBOT"]
-        "ADMIN"  || ["ADMIN", "MEMBER", "ROBOT"]
-        "MEMBER" || ["MEMBER", "ROBOT"]
-        "ROBOT"  || ["ROBOT"]
+        "SUPER"  || ["SUPER", "ADMIN", "MEMBER", "ROBOT", "AGENT"]
+        "ADMIN"  || ["ADMIN", "MEMBER", "ROBOT", "AGENT"]
+        "MEMBER" || ["MEMBER", "ROBOT", "AGENT"]
+        "ROBOT"  || ["ROBOT", "AGENT"]
+        "AGENT"  || ["AGENT"]
     }
 
     @Unroll
@@ -53,6 +54,9 @@ class UserRoleHierarchySpec extends Specification {
         "MEMBER" | "MEMBER"   || true
         "ROBOT"  | "MEMBER"   || false
         "MEMBER" | "ROBOT"    || true
+        "AGENT"  | "ROBOT"    || false
+        "AGENT"  | "AGENT"    || true
+        "ROBOT"  | "AGENT"    || true
 
         text = allowed ? "let" : "not let"
     }
@@ -67,7 +71,7 @@ class UserRoleHierarchySpec extends Specification {
         !new User(roles: null).adminUser
     }
 
-    private static final Map<String, Short> ids = [SUPER: 1 as short, ADMIN: 2 as short, MEMBER: 3 as short, ROBOT: 4 as short, UNKNOWN: 9 as short]
+    private static final Map<String, Short> ids = [SUPER: 1 as short, ADMIN: 2 as short, MEMBER: 3 as short, ROBOT: 4 as short, AGENT: 5 as short, UNKNOWN: 9 as short]
 
     private static User userWith(List<String> names) {
         new User(roles: names.collect { new Role(id: ids[it], name: it) } as Set)

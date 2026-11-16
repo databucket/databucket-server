@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Input, MenuItem, Select} from '@mui/material';
 
-// one role per user (since 3.12.0); a higher role includes the lower ones: SUPER > ADMIN > MEMBER > ROBOT
-const ORDER = ['SUPER', 'ADMIN', 'MEMBER', 'ROBOT'];
+// one role per user (since 3.12.0); a higher role includes the lower ones: SUPER > ADMIN > MEMBER > ROBOT > AGENT
+const ORDER = ['SUPER', 'ADMIN', 'MEMBER', 'ROBOT', 'AGENT'];
 
 export default function SelectRoleLookup(props) {
     const initial = props.rowData['rolesIds'] != null && props.rowData['rolesIds'].length > 0 ? props.rowData['rolesIds'][0] : '';

@@ -28,8 +28,8 @@ Handy while writing tests: `npx playwright test --ui` (watch mode with the brows
 
 ## How the tests are isolated
 
-Every test gets its own project (fixture `project`): a SUPER admin creates it with three users, ADMIN, MEMBER and
-ROBOT (`project.users.admin` etc.), and removes it after the test (cleared and deleted; the users are disabled, as
+Every test gets its own project (fixture `project`): a SUPER admin creates it with four users, ADMIN, MEMBER,
+ROBOT and AGENT (`project.users.admin` etc.), and removes it after the test (cleared and deleted; the users are disabled, as
 users can't be deleted). Tests don't see each other's data and run in parallel. The test data is created through the
 API: `project.createBucket(...)`, `project.createView(...)`, `project.quietly('robot')` for calls left out of the report.
 

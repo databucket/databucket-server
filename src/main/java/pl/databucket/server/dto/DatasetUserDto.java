@@ -15,7 +15,7 @@ public class DatasetUserDto {
     private String username;
     // in plain text: only for demo or training accounts, never for real ones
     private String password;
-    // ADMIN, MEMBER or ROBOT (not SUPER)
+    // ADMIN, MEMBER, ROBOT or AGENT (not SUPER)
     private String role;
     private String description;
 

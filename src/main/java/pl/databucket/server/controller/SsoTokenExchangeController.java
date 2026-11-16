@@ -63,7 +63,7 @@ public class SsoTokenExchangeController {
 
                     The token must be signed by the provider, not expired and issued for Databucket (audience: \
                     `sso.robot-audience`, by default `sso.client-id`). Its claim `sso.robot-claim` (by default `azp`, \
-                    the client ID) must equal the user name of an enabled Databucket user with the **ROBOT** role.
+                    the client ID) must equal the user name of an enabled Databucket user with the **ROBOT** or **AGENT** role (or higher).
 
                     The response is the same as for /api/public/signin: with **projectId** the token for that project; \
                     without it the token for the only project, or the list of `projects` to choose from (then send the \
@@ -103,7 +103,7 @@ public class SsoTokenExchangeController {
             AuditLog.log("auth.robot-signin-failed", "user={} reason={}", robot, user == null ? "unknown user" : "disabled");
             return exceptionFormatter.customPublicException("There is no enabled Databucket user " + robot, HttpStatus.UNAUTHORIZED);
         }
-        if (!user.hasRoleAtLeast(Constants.ROLE_ROBOT)) {
+        if (!user.hasRoleAtLeast(Constants.ROLE_AGENT)) {
             AuditLog.log("auth.robot-signin-failed", "user={} reason=no role", robot);
             return exceptionFormatter.customPublicException("The user has no role", HttpStatus.FORBIDDEN);
         }

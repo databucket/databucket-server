@@ -106,7 +106,7 @@ class DatasetCheckSpec extends Specification {
 
         then:
         problems == [
-                "User boss: the role must be one of [ADMIN, MEMBER, ROBOT]",
+                "User boss: the role must be one of [ADMIN, AGENT, MEMBER, ROBOT]",
                 "User robot: the name is used twice",
                 "User robot: has no password",
                 "History change 2: there is no row 2 in the data of b",

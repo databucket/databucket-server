@@ -103,7 +103,7 @@ class UserServiceIntegrationSpec extends Specification {
 
         then: "UserDetails is returned with correct data"
         userDetails.username == "testuser"
-        userDetails.authorities*.authority as Set == ["ROLE_MEMBER", "ROLE_ROBOT"] as Set
+        userDetails.authorities*.authority as Set == ["ROLE_MEMBER", "ROLE_ROBOT", "ROLE_AGENT"] as Set
         userDetails.enabled
     }
 
@@ -358,7 +358,7 @@ class UserServiceIntegrationSpec extends Specification {
         def userDetails = userService.loadUserByUsername("multirole")
 
         then: "the highest role counts, with the roles below it"
-        userDetails.authorities*.authority as Set == ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT"] as Set
+        userDetails.authorities*.authority as Set == ["ROLE_ADMIN", "ROLE_MEMBER", "ROLE_ROBOT", "ROLE_AGENT"] as Set
     }
 
     def "should handle disabled user"() {

@@ -20,14 +20,16 @@ public class Constants {
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_MEMBER = "MEMBER";
     public static final String ROLE_ROBOT = "ROBOT";
+    /** An AI agent (MCP) or a client that may read and change data but not remove rows or clear their history. */
+    public static final String ROLE_AGENT = "AGENT";
 
     /**
-     * Since 3.12.0 a user has one role, and each role includes the ones below it: SUPER > ADMIN > MEMBER > ROBOT.
+     * Since 3.12.0 a user has one role, and each role includes the ones below it: SUPER > ADMIN > MEMBER > ROBOT > AGENT.
      * The role of a bucket, view or group means that role or higher.
      */
-    public static final java.util.List<String> ROLES_BY_LEVEL = java.util.List.of(ROLE_ROBOT, ROLE_MEMBER, ROLE_ADMIN, ROLE_SUPER);
+    public static final java.util.List<String> ROLES_BY_LEVEL = java.util.List.of(ROLE_AGENT, ROLE_ROBOT, ROLE_MEMBER, ROLE_ADMIN, ROLE_SUPER);
 
-    /** Position of the role in the hierarchy (ROBOT = 0); -1 for an unknown name. */
+    /** Position of the role in the hierarchy (AGENT = 0); -1 for an unknown name. */
     public static int roleLevel(String roleName) {
         return ROLES_BY_LEVEL.indexOf(roleName);
     }

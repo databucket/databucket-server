@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Tag(name = "Data", description = "Creating, reading, reserving, modifying and removing data in a bucket. "
-        + "Requires the MEMBER or ROBOT role and access to the bucket.")
+        + "Requires the AGENT role or higher and access to the bucket; removing rows requires ROBOT or higher.")
 @SecurityRequirement(name = OpenApiConfiguration.BEARER)
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/bucket/{bucketName}")
@@ -64,7 +64,7 @@ public class DataController {
     private UserService userService;
 
 
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('AGENT')")
     @Operation(summary = "Insert a data row", description = "Inserts one data row and returns it with its id. "
             + "With reserved = true the row is reserved by the signed-in user.")
     @ApiResponses(value = {
@@ -102,7 +102,7 @@ public class DataController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('AGENT')")
     @Operation(summary = "Insert many data rows", description = "Inserts a list of data rows in one call. "
             + "The response has no body; to get the rows, search for them by rules.")
     @ApiResponses(value = {
@@ -137,7 +137,7 @@ public class DataController {
     }
 
 
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('AGENT')")
     @Operation(summary = "Modify data rows by ids", description = "Changes the given items of the data rows; "
             + "items left out stay unchanged. 'rules' are ignored here. With reserved = true only the rows that "
             + "are not reserved yet are changed (a row reserved by someone has to be released first).")
@@ -191,7 +191,7 @@ public class DataController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('AGENT')")
     @Operation(summary = "Modify data rows by rules", description = "Changes the given items of all data rows "
             + "matching the rules; items left out stay unchanged. At least one rule is required. With reserved = true "
             + "only the rows that are not reserved yet are changed (a row reserved by someone has to be released first).")
@@ -261,7 +261,7 @@ public class DataController {
             @ApiResponse(responseCode = "404", description = NOT_FOUND),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('AGENT')")
     @GetMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getData(
             @Parameter(description = BUCKET_NAME, required = true)
@@ -304,7 +304,7 @@ public class DataController {
             @ApiResponse(responseCode = "404", description = NOT_FOUND),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('ROBOT')")
     @DeleteMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteData(
             @Parameter(description = BUCKET_NAME, required = true)
@@ -328,7 +328,7 @@ public class DataController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('AGENT')")
     @Operation(summary = "Get data rows by rules", description = "Returns the data rows matching the rules, one page "
             + "at a time (by default only 1 row). Without rules all rows match. Without 'columns' the rows are in 'data'; "
             + "with 'columns' only the chosen fields and properties are returned, in 'customData'.")
@@ -402,7 +402,7 @@ public class DataController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('AGENT')")
     @Operation(summary = "Reserve data rows by rules", description = "Reserves free (not reserved) data rows matching "
             + "the rules and returns them. Rows taken at the same moment by another client are skipped, so parallel "
             + "tests never get the same row. When nothing is free, 'reserved' is 0 and there is a message.")
@@ -481,7 +481,7 @@ public class DataController {
     }
 
 
-    @PreAuthorize("hasAnyRole('MEMBER', 'ROBOT')")
+    @PreAuthorize("hasRole('ROBOT')")
     @Operation(summary = "Remove data rows by rules", description = "Removes all data rows matching the rules, "
             + "together with their history. At least one rule is required.")
     @ApiResponses(value = {

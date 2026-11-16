@@ -71,7 +71,9 @@ public class DataService {
         jdbcTemplate.update(query.toString(logger, paramMap.getValues()), paramMap, keyHolder, new String[]{COL.DATA_ID});
         long id = Objects.requireNonNull(keyHolder.getKey()).intValue();
         AuditLog.log("data.create", "bucket={} id={}", bucket.getName(), id);
-        return getData(user, bucket, id);
+        // the new row as written, also when it isn't reserved in a bucket with protected data (the user may not see it
+        // afterwards, but has just given it)
+        return getData(bucket, id, null);
     }
 
     // all rows or none: a failed row rolls back the ones before it (e.g. a CSV import)
@@ -108,11 +110,16 @@ public class DataService {
     }
 
     public DataDTO getData(User user, Bucket bucket, long id) throws UnknownColumnException, ConditionNotAllowedException {
+        return getData(bucket, id, bucket.isProtectedData() && !user.isAdminUser() ? user.getUsername() : null);
+    }
+
+    // owner: only a row reserved by this user, or null for any row
+    private DataDTO getData(Bucket bucket, long id, String owner) throws UnknownColumnException, ConditionNotAllowedException {
         List<Condition> conditions = new ArrayList<>();
         conditions.add(new Condition(COL.DATA_ID, Operator.equal, id));
 
-        if (bucket.isProtectedData() && !user.isAdminUser())
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+        if (owner != null)
+            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, owner));
 
         Map<String, Object> paramMap = new HashMap<>();
         Query queryData = new Query(bucket.getTableName())

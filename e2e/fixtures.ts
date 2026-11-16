@@ -2,7 +2,7 @@ import { test as base, expect } from '@playwright/test';
 import { TestProject } from './support/project';
 
 export interface Fixtures {
-  /** A fresh project with its own ADMIN, MEMBER and ROBOT users, removed after the test. */
+  /** A fresh project with its own ADMIN, MEMBER, ROBOT and AGENT users, removed after the test. */
   project: TestProject;
 }
 

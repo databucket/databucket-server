@@ -69,6 +69,8 @@ services:
       SSO_CLIENT_SECRET: databucket-secret
       SSO_PASSWORD_LOGIN: ${SSO_PASSWORD_LOGIN:-true}
       SSO_SELF_REGISTRATION: ${SSO_SELF_REGISTRATION:-true}
+      # MCP server for AI agents: http://databucket.localhost/mcp
+      DATABUCKET_MCP_ENABLED: "true"
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: 1025
       SPRING_MAIL_USERNAME: ""

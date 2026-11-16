@@ -140,10 +140,10 @@ public class UserService implements UserDetailsService {
     public void changePassword(ChangePasswordDtoRequest changePasswordDtoRequest) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        // can not change password of another user except ROBOT
+        // can not change password of another user except ROBOT or AGENT (accounts of programs)
         if (!name.equals(changePasswordDtoRequest.getUsername())) {
             User user = userRepository.findByUsername(changePasswordDtoRequest.getUsername());
-            if (user != null && (user.getTopRole() == null || !Constants.ROLE_ROBOT.equals(user.getTopRole().getName())))
+            if (user != null && (user.getTopRole() == null || user.hasRoleAtLeast(Constants.ROLE_MEMBER)))
                 throw new IllegalArgumentException("You cannot change the password of this user!");
         }
 

@@ -23,7 +23,7 @@ public final class DatasetCheck {
     public static final int FORMAT = 2;
 
     // the roles a user of a dataset may have (never SUPER)
-    static final Set<String> USER_ROLES = Set.of(Constants.ROLE_ADMIN, Constants.ROLE_MEMBER, Constants.ROLE_ROBOT);
+    static final Set<String> USER_ROLES = Set.of(Constants.ROLE_ADMIN, Constants.ROLE_MEMBER, Constants.ROLE_ROBOT, Constants.ROLE_AGENT);
 
     private static final int MAX_PROBLEMS = 20;
 
