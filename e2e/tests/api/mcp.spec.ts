@@ -114,6 +114,22 @@ test.describe('MCP server', () => {
     expect(byRobot.value.count).toBe(1);
   });
 
+  test('an agent inserts free rows into a bucket with protected data', async ({ project }) => {
+    await project.createBucket('secrets', { protectedData: true });
+    const agent = await project.as('agent');
+
+    const inserted = await callTool(agent, 'insert_data', {
+      bucket: 'secrets',
+      rows: [{ properties: { login: 'free' } }, { properties: { login: 'mine' }, reserved: true }],
+    });
+    expect(inserted.isError).toBe(false);
+    expect(inserted.value.map((row: any) => [row.properties.login, row.reserved])).toEqual([['free', false], ['mine', true]]);
+
+    // afterwards the agent sees only its own row
+    const found = await callTool(agent, 'find_data', { bucket: 'secrets' });
+    expect(found.value.data.map((row: any) => row.properties.login)).toEqual(['mine']);
+  });
+
   test('explains mistakes to the agent', async ({ project }) => {
     const agent = await project.as('agent');
 
