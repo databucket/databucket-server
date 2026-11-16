@@ -4,13 +4,15 @@
 // Handles what the query builder of the rich filter produces:
 //   {"and": [...]}, {"or": [...]}, {"!": {...}}         -> {"and": [...]}, {"or": [...]}, {"!": {...}}
 //   {"==": [{"var": "prop.$*a*b"}, 1]} (also != < <= > >=) -> ["$.a.b", "==", 1]
+//   {"==": [{"var": ...}, "$10"]} (also !=, a text read as a property or a field)
+//                                                        -> [field, "in", ["$10"]] (!in)
 //   {"<=": [1, {"var": "id"}, 9]} (between)            -> ["id", ">=", 1], ["id", "<=", 9]
 //   {"in": [{"var": ...}, [1, 2]]} (any in)              -> [field, "in", [1, 2]]
-//   {"in": ["text", {"var": ...}]} (contains)            -> [field, "like", "%text%"]
+//   {"in": ["text", {"var": ...}]} (contains)            -> [field, "like", "%text%"] (% _ \ of the text escaped)
 //   {"!": {"var": ...}} / {"!!": {"var": ...}} (is empty / is not empty)
 //                                                        -> ["$.a.isEmpty()", "==", true] or [field, "==", null]
 // Returns null when the logic has something else, or a text value the rules would read as a property or a field
-// ("$10", "owner"): then the rules can't be shown.
+// ("$10", "owner") in a comparison other than == / != : then the rules can't be shown.
 
 const COMPARISONS = ['==', '!=', '<', '<=', '>', '>='];
 const INVERTED = {'<': '>', '<=': '>='};
@@ -32,11 +34,19 @@ class Unsupported extends Error {
 // on either side of a rule (["$.a", "==", "$.b"] compares two properties), so such a value can't be a constant there.
 const FIELDS = ['id', 'tagId', 'owner', 'reserved', 'properties', 'createdBy', 'createdAt', 'modifiedBy', 'modifiedAt'];
 
+const readAsVariable = value => typeof value === 'string' && (value.startsWith('$') || FIELDS.includes(value));
+
 const constant = value => {
-    if (typeof value === 'string' && (value.startsWith('$') || FIELDS.includes(value)))
+    if (readAsVariable(value))
         throw new Unsupported();
     return value;
 };
+
+// the values of a list are always constants: == / != with such a text become in / !in with a one-element list
+const EQUALITY_AS_IN = {'==': 'in', '!=': '!in'};
+
+// a LIKE pattern matching the text anywhere, with the wildcards of the text escaped (as the server does for "in")
+const likeContains = text => `%${text.replace(/[\\%_]/g, c => '\\' + c)}%`;
 
 // one item of a list of rules (a rule or a group), or several rules for a "between"
 const convert = (logic) => {
@@ -70,8 +80,11 @@ const convert = (logic) => {
         throw new Unsupported();
 
     if (COMPARISONS.includes(operator)) {
-        if (args.length === 2 && isVar(args[0]) && !isVar(args[1]))
+        if (args.length === 2 && isVar(args[0]) && !isVar(args[1])) {
+            if (EQUALITY_AS_IN[operator] && readAsVariable(args[1]))
+                return [[toField(args[0]), EQUALITY_AS_IN[operator], [args[1]]]];
             return [[toField(args[0]), operator, constant(args[1])]];
+        }
         if (args.length === 3 && INVERTED[operator] && !isVar(args[0]) && isVar(args[1]) && !isVar(args[2])) {
             const field = toField(args[1]);
             return [[field, INVERTED[operator], constant(args[0])], [field, operator, constant(args[2])]];
@@ -83,7 +96,7 @@ const convert = (logic) => {
         if (isVar(args[0]) && Array.isArray(args[1]))
             return [[toField(args[0]), 'in', args[1]]];
         if (typeof args[0] === 'string' && isVar(args[1]))
-            return [[toField(args[1]), 'like', `%${args[0]}%`]];
+            return [[toField(args[1]), 'like', likeContains(args[0])]];
     }
     throw new Unsupported();
 };
