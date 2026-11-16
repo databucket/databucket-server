@@ -25,5 +25,8 @@
     "allure-js-commons": "3.14.0",
     "allure-playwright": "3.14.0",
     "typescript": "7.0.2"
+  },
+  "overrides": {
+    "glob": "14.0.6"
   }
 }
