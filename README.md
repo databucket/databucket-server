@@ -43,6 +43,7 @@ rules written in code. Version 2.0.0 works with Databucket 3.13.0+ (API version 
 |---|---|---|
 | Java 11+ | Maven Central [`pl.databucket:databucket-client`](https://central.sonatype.com/artifact/pl.databucket/databucket-client) | [databucket-java-client](https://github.com/databucket/databucket-java-client) |
 | Python 3.10+ | PyPI [`databucket-client`](https://pypi.org/project/databucket-client/) | [databucket-python-client](https://github.com/databucket/databucket-python-client) |
+| JavaScript / TypeScript (Node.js 20.19+) | npm [`databucket-client`](https://www.npmjs.com/package/databucket-client) | [databucket-js-client](https://github.com/databucket/databucket-js-client) |
 
 See also [Clients](https://github.com/databucket/databucket-server/wiki/Clients) in the wiki. AI agents can use the
 [MCP server](https://github.com/databucket/databucket-server/wiki/AI-agents).
