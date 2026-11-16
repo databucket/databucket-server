@@ -45,6 +45,9 @@ rules written in code. Version 2.0.0 works with Databucket 3.13.0+ (API version 
 | Python 3.10+ | PyPI [`databucket-client`](https://pypi.org/project/databucket-client/) | [databucket-python-client](https://github.com/databucket/databucket-python-client) |
 | JavaScript / TypeScript (Node.js 20.19+) | npm [`databucket-client`](https://www.npmjs.com/package/databucket-client) | [databucket-js-client](https://github.com/databucket/databucket-js-client) |
 
+Runnable examples - tests that reserve, change, create and find test data on the DEMO dataset - are in
+[databucket-examples](https://github.com/databucket/databucket-examples).
+
 See also [Clients](https://github.com/databucket/databucket-server/wiki/Clients) in the wiki. AI agents can use the
 [MCP server](https://github.com/databucket/databucket-server/wiki/AI-agents).
 
