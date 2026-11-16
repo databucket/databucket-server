@@ -35,6 +35,18 @@ The screenshots show the DEMO dataset that comes with Databucket (Management →
 * Try it with Docker: `cd docker && docker compose up --build`, open http://databucket.localhost, sign in as `super` / `super` and import the DEMO dataset in Management → Projects.
 * Next, you can dive deeper in the [Wiki page](https://github.com/databucket/databucket-server/wiki).
 
+# Clients
+Client libraries for automated tests: sign-in (password or SSO token), find, reserve, change and remove data,
+rules written in code. Version 2.0.0 works with Databucket 3.13.0+ (API version 2).
+
+| Language | Package | Repository |
+|---|---|---|
+| Java 11+ | Maven Central [`pl.databucket:databucket-client`](https://central.sonatype.com/artifact/pl.databucket/databucket-client) | [databucket-java-client](https://github.com/databucket/databucket-java-client) |
+| Python 3.10+ | PyPI [`databucket-client`](https://pypi.org/project/databucket-client/) | [databucket-python-client](https://github.com/databucket/databucket-python-client) |
+
+See also [Clients](https://github.com/databucket/databucket-server/wiki/Clients) in the wiki. AI agents can use the
+[MCP server](https://github.com/databucket/databucket-server/wiki/AI-agents).
+
 # Upgrading
 New tables and columns are added automatically on startup. Changes that can't be done that way come
 as SQL scripts in [`upgrade/`](upgrade), named after the version that needs them. When upgrading an
