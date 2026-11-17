@@ -228,6 +228,16 @@ export const moveDown = (dataCollection, itemId) => {
     return swappedArray(dataCollection, itemId, itemId + 1);
 }
 
+// Rows sorted for good by a text field: natural order ("item2" before "item10"), letters with diacritics in place, a
+// stable sort (rows with the same value keep their order)
+const naturalCollator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+
+export const sortedRows = (rows, field, descending = false) =>
+    rows.map(withoutTableData).sort((a, b) => {
+        const result = naturalCollator.compare(String(a[field] ?? ''), String(b[field] ?? ''));
+        return descending ? -result : result;
+    });
+
 function swappedArray(arr, index1, index2) {
     const newArr = [...arr];
     [newArr[index1], newArr[index2]] = [newArr[index2], newArr[index1]];
