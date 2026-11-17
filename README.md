@@ -111,4 +111,6 @@ PostgreSQL and Keycloak (single sign-on): `cd docker && docker compose up --buil
 | `export SPRING_PROFILES_ACTIVE=dev && ./gradlew bootRun` | starts app with dev profile                                                             |
 | `./gradlew clean build`                                  | compiles java classes, builds frontend, runs tests and prepares all-in-one runnable jar |
 
+# License
 
+Apache License 2.0, see [LICENSE](LICENSE) and [NOTICE](NOTICE).
