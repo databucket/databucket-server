@@ -4,7 +4,6 @@ import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
 import {
-    FilterList,
     Refresh,
     ViewStream as CloneIcon
 } from "@mui/icons-material";
@@ -184,7 +183,7 @@ export default function TasksTab() {
                         onClick: () => fetchTasks()
                     },
                     {
-                        icon: () => <FilterList/>,
+                        icon: tableState.filterIcon,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: tableState.toggleFiltering
