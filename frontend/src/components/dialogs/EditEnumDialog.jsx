@@ -5,6 +5,8 @@ import {
     DialogContent as MuiDialogContent,
     DialogTitle as MuiDialogTitle,
     IconButton,
+    Menu,
+    MenuItem,
     styled,
     Tooltip,
     useTheme
@@ -13,7 +15,8 @@ import {
     ArrowDropDown,
     ArrowDropUp,
     Close as CloseIcon,
-    MoreHoriz
+    MoreHoriz,
+    SortByAlpha
 } from '@mui/icons-material';
 import {
     getDialogTableHeight,
@@ -21,9 +24,12 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
+    movedRow,
     moveUp,
     removeRow,
-    replaceRow
+    replaceRow,
+    sortedRows,
+    withoutHeaderSorting
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from '@material-table/core';
 import PropTypes from 'prop-types';
@@ -31,6 +37,7 @@ import EditIconDialog from "./SelectIconDialog";
 import {MessageBox} from "../utils/MessageBox";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import StyledIcon from "../utils/StyledIcon";
+import DraggableBodyRow from "../utils/DraggableBodyRow";
 
 const PREFIX = 'EditEnumDialog';
 
@@ -91,6 +98,19 @@ export default function EditEnumDialog(props) {
     const [data, setData] = useState(props.items != null ? props.items : []);
     // the rows per page of the dialogs, remembered
     const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
+    // the Sort menu: sorts the items for good (the order of the list in the data); opened at the position of the
+    // button, because material-table renders its actions again and the button element itself doesn't stay
+    const [sortMenuPosition, setSortMenuPosition] = useState(null);
+
+    const openSortMenu = event => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        setSortMenuPosition({top: rect.bottom, left: rect.left});
+    }
+
+    const sortItems = (field, descending) => {
+        setData(sortedRows(data, field, descending));
+        setSortMenuPosition(null);
+    }
 
     const getColumns = () => {
         let columnsArray = [];
@@ -112,7 +132,7 @@ export default function EditEnumDialog(props) {
                 editComponent: EditComponent
             });
         }
-        return columnsArray;
+        return withoutHeaderSorting(columnsArray);
     }
 
     const handleClickOpen = () => {
@@ -186,7 +206,6 @@ export default function EditEnumDialog(props) {
                             paginationType: 'stepped',
                             pageSizeOptions: getPageSizeOptionsOnDialog(),
                             actionsColumnIndex: -1,
-                            maxColumnSort: 1,
                             selection: false,
                             filtering: false,
                             padding: 'dense',
@@ -202,7 +221,9 @@ export default function EditEnumDialog(props) {
                             })
                         }}
                         components={{
-                            Container: props => <div {...props} />
+                            Container: props => <div {...props} />,
+                            Row: props => <DraggableBodyRow {...props}
+                                                            onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                         }}
                         editable={{
                             onRowAdd: newData =>
@@ -230,6 +251,13 @@ export default function EditEnumDialog(props) {
                                 }),
                         }}
                         actions={[
+                            {
+                                icon: () => <SortByAlpha/>,
+                                tooltip: 'Sort items',
+                                isFreeAction: true,
+                                disabled: data.length < 2,
+                                onClick: openSortMenu
+                            },
                             rowData => ({
                                 icon: () => <ArrowDropDown/>,
                                 tooltip: 'Move down',
@@ -247,6 +275,17 @@ export default function EditEnumDialog(props) {
                             })
                         ]}
                     />
+                    <Menu
+                        anchorReference='anchorPosition'
+                        anchorPosition={sortMenuPosition ?? undefined}
+                        open={sortMenuPosition != null}
+                        onClose={() => setSortMenuPosition(null)}
+                    >
+                        <MenuItem onClick={() => sortItems('value', false)}>Value: A → Z</MenuItem>
+                        <MenuItem onClick={() => sortItems('value', true)}>Value: Z → A</MenuItem>
+                        <MenuItem onClick={() => sortItems('text', false)}>Text: A → Z</MenuItem>
+                        <MenuItem onClick={() => sortItems('text', true)}>Text: Z → A</MenuItem>
+                    </Menu>
                 </DialogContent>
             </Dialog>
             <MessageBox

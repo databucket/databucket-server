@@ -4,7 +4,9 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
+    movedRow,
     moveUp,
+    withoutHeaderSorting,
     removeRow,
     replaceRow
 } from "../../utils/MaterialTableHelper";
@@ -15,6 +17,7 @@ import {
 } from "../../utils/JsonHelper";
 import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 import MaterialTable from '@material-table/core';
+import DraggableBodyRow from "./DraggableBodyRow";
 import React, {useEffect, useState} from "react";
 import {
     getLastPageSizeOnDialog,
@@ -65,7 +68,7 @@ export default function ColumnsTable(props) {
             <MaterialTable
                 title={'Class origin or defined properties:'}
                 tableRef={tableRef}
-                columns={[
+                columns={withoutHeaderSorting([
                     {
                         title: '#',
                         cellStyle: {width: '1%'},
@@ -143,7 +146,7 @@ export default function ColumnsTable(props) {
                         initialEditValue: true,
                         cellStyle: {width: '1%'}
                     }
-                ]}
+                ])}
                 data={columns}
                 onRowsPerPageChange={onChangeRowsPerPage}
                 options={{
@@ -152,7 +155,6 @@ export default function ColumnsTable(props) {
                     paginationType: 'stepped',
                     pageSizeOptions: getPageSizeOptionsOnDialog(),
                     actionsColumnIndex: -1,
-                    maxColumnSort: 1,
                     selection: false,
                     filtering: false,
                     padding: 'dense',
@@ -170,7 +172,9 @@ export default function ColumnsTable(props) {
                     })
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: props => <div {...props} />,
+                    Row: props => <DraggableBodyRow {...props}
+                                                    onMoveRow={(from, to) => setData(movedRow(columns, from, to))}/>
                 }}
                 editable={{
                     onRowAdd: newData =>
