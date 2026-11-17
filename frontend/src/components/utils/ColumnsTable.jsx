@@ -3,9 +3,7 @@ import {
     getTableBodyHeight,
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
-    moveDown,
     movedRow,
-    moveUp,
     withoutHeaderSorting,
     removeRow,
     replaceRow
@@ -15,7 +13,6 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 import MaterialTable from '@material-table/core';
 import DraggableBodyRow from "./DraggableBodyRow";
 import React, {useEffect, useState} from "react";
@@ -231,22 +228,6 @@ export default function ColumnsTable(props) {
                             resolve();
                         }),
                 }}
-                actions={[
-                    rowData => ({
-                        icon: () => <ArrowDropDown/>,
-                        tooltip: 'Move down',
-                        onClick: (event, rowData) => setData(
-                            moveDown(columns, rowData.tableData.id)),
-                        disabled: (rowData.tableData.id === columns.length - 1)
-                    }),
-                    rowData => ({
-                        icon: () => <ArrowDropUp/>,
-                        tooltip: 'Move up',
-                        onClick: (event, rowData) => setData(
-                            moveUp(columns, rowData.tableData.id)),
-                        disabled: (rowData.tableData.id === 0)
-                    })
-                ]}
             />
             <MessageBox
                 config={messageBox}

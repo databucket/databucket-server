@@ -2,9 +2,7 @@ import {
     getTableBodyHeight,
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
-    moveDown,
     movedRow,
-    moveUp,
     withoutHeaderSorting,
     removeRow,
     replaceRow
@@ -16,8 +14,6 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable, {MTableEditField} from '@material-table/core';
 import DraggableBodyRow from "./DraggableBodyRow";
 import React, {useContext, useEffect, useState} from "react";
@@ -285,20 +281,6 @@ export default function ActionPropertiesTable(props) {
                                                     onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                 }}
                 editable={getEditable()}
-                actions={[
-                    rowData => ({
-                        icon: ArrowDropDown,
-                        tooltip: 'Move down',
-                        onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
-                        disabled: (rowData.tableData.id === data.length - 1)
-                    }),
-                    rowData => ({
-                        icon: ArrowDropUp,
-                        tooltip: 'Move up',
-                        onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
-                        disabled: (rowData.tableData.id === 0)
-                    })
-                ]}
             />
             <MessageBox
                 config={messageBox}

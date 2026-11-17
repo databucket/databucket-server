@@ -3,16 +3,13 @@ import {
     getTableBodyHeight,
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
-    moveDown,
     movedRow,
-    moveUp,
     withoutHeaderSorting,
     removeRow,
     replaceRow
 } from "../../utils/MaterialTableHelper";
 import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
-import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 import MaterialTable from '@material-table/core';
 import DraggableBodyRow from "./DraggableBodyRow";
 import React, {useEffect, useState} from "react";
@@ -234,20 +231,6 @@ export default function PropertiesTable(props) {
                             }
                         }),
                 }}
-                actions={[
-                    rowData => ({
-                        icon: () => <ArrowDropDown/>,
-                        tooltip: 'Move down',
-                        onClick: (event, rowData) => setData(moveDown(data, rowData.tableData.id)),
-                        disabled: (rowData.tableData.id === data.length - 1)
-                    }),
-                    rowData => ({
-                        icon: () => <ArrowDropUp/>,
-                        tooltip: 'Move up',
-                        onClick: (event, rowData) => setData(moveUp(data, rowData.tableData.id)),
-                        disabled: (rowData.tableData.id === 0)
-                    })
-                ]}
             />
             <MessageBox
                 config={messageBox}
