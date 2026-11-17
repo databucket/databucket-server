@@ -24,10 +24,12 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
+    movedRow,
     moveUp,
     removeRow,
     replaceRow,
-    sortedRows
+    sortedRows,
+    withoutHeaderSorting
 } from "../../utils/MaterialTableHelper";
 import MaterialTable from '@material-table/core';
 import PropTypes from 'prop-types';
@@ -35,6 +37,7 @@ import EditIconDialog from "./SelectIconDialog";
 import {MessageBox} from "../utils/MessageBox";
 import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import StyledIcon from "../utils/StyledIcon";
+import DraggableBodyRow from "../utils/DraggableBodyRow";
 
 const PREFIX = 'EditEnumDialog';
 
@@ -129,9 +132,7 @@ export default function EditEnumDialog(props) {
                 editComponent: EditComponent
             });
         }
-        // no sorting by the headers: it would only sort the view, while the arrows and the Sort menu change the order
-        // of the items (options.sorting is not enough in material-table 6)
-        return columnsArray.map(column => ({...column, sorting: false}));
+        return withoutHeaderSorting(columnsArray);
     }
 
     const handleClickOpen = () => {
@@ -205,7 +206,6 @@ export default function EditEnumDialog(props) {
                             paginationType: 'stepped',
                             pageSizeOptions: getPageSizeOptionsOnDialog(),
                             actionsColumnIndex: -1,
-                            sorting: false,
                             selection: false,
                             filtering: false,
                             padding: 'dense',
@@ -221,7 +221,9 @@ export default function EditEnumDialog(props) {
                             })
                         }}
                         components={{
-                            Container: props => <div {...props} />
+                            Container: props => <div {...props} />,
+                            Row: props => <DraggableBodyRow {...props}
+                                                            onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                         }}
                         editable={{
                             onRowAdd: newData =>

@@ -238,6 +238,19 @@ export const sortedRows = (rows, field, descending = false) =>
         return descending ? -result : result;
     });
 
+// Rows with the row at position "from" moved to position "to" (dragging a row onto another one)
+export const movedRow = (rows, from, to) => {
+    const newRows = [...rows];
+    const [row] = newRows.splice(from, 1);
+    newRows.splice(to, 0, row);
+    return newRows;
+}
+
+// Columns of a table whose rows have an order of their own (Move up/down, dragging): the headers don't sort, because
+// that would only sort the view, while the arrows and dragging move the rows in the data (options.sorting is not
+// enough in material-table 6)
+export const withoutHeaderSorting = columns => columns.map(column => ({...column, sorting: false}));
+
 function swappedArray(arr, index1, index2) {
     const newArr = [...arr];
     [newArr[index1], newArr[index2]] = [newArr[index2], newArr[index1]];

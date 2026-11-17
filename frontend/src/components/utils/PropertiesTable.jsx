@@ -4,7 +4,9 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
+    movedRow,
     moveUp,
+    withoutHeaderSorting,
     removeRow,
     replaceRow
 } from "../../utils/MaterialTableHelper";
@@ -12,6 +14,7 @@ import SelectEnumDialog from "../dialogs/SelectEnumDialog";
 import {isItemChanged, uuidV4, validateItem} from "../../utils/JsonHelper";
 import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 import MaterialTable from '@material-table/core';
+import DraggableBodyRow from "./DraggableBodyRow";
 import React, {useEffect, useState} from "react";
 import {
     getLastPageSizeOnDialog,
@@ -79,15 +82,12 @@ export default function PropertiesTable(props) {
         return '';
     }
 
-    console.log("data:");
-    console.log(data);
-
     return !delay && (
         <div>
             <MaterialTable
                 title={props.title}
                 tableRef={tableRef}
-                columns={[
+                columns={withoutHeaderSorting([
                     {
                         title: '#',
                         cellStyle: {width: '1%'},
@@ -135,7 +135,7 @@ export default function PropertiesTable(props) {
                         ) : <div/>
                     },
                     {title: 'UUID', field: 'uuid', hidden: true, type: 'string'}
-                ]}
+                ])}
                 data={data}
                 onRowsPerPageChange={onChangeRowsPerPage}
                 options={{
@@ -145,7 +145,6 @@ export default function PropertiesTable(props) {
                     paginationType: 'stepped',
                     pageSizeOptions: getPageSizeOptionsOnDialog(),
                     actionsColumnIndex: -1,
-                    maxColumnSort: 1,
                     selection: false,
                     filtering: false,
                     padding: 'dense',
@@ -163,7 +162,9 @@ export default function PropertiesTable(props) {
                     })
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: props => <div {...props} />,
+                    Row: props => <DraggableBodyRow {...props}
+                                                    onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                 }}
                 editable={{
                     onRowAdd: newData =>

@@ -3,7 +3,9 @@ import {
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
     moveDown,
+    movedRow,
     moveUp,
+    withoutHeaderSorting,
     removeRow,
     replaceRow
 } from "../../utils/MaterialTableHelper";
@@ -17,6 +19,7 @@ import {
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
 import MaterialTable, {MTableEditField} from '@material-table/core';
+import DraggableBodyRow from "./DraggableBodyRow";
 import React, {useContext, useEffect, useState} from "react";
 import EnumsContext from "../../context/enums/EnumsContext";
 import {useTheme} from "@mui/material";
@@ -212,7 +215,7 @@ export default function ActionPropertiesTable(props) {
             <MaterialTable
                 title={'Modify properties:'}
                 tableRef={tableRef}
-                columns={[
+                columns={withoutHeaderSorting([
                     {
                         title: '#',
                         cellStyle: {width: '1%'},
@@ -262,12 +265,11 @@ export default function ActionPropertiesTable(props) {
                                 return (<div/>);
                         }
                     }
-                ]}
+                ])}
                 data={data}
                 options={{
                     paging: false,
                     actionsColumnIndex: -1,
-                    maxColumnSort: 1,
                     selection: false,
                     search: true,
                     filtering: false,
@@ -278,7 +280,9 @@ export default function ActionPropertiesTable(props) {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: props => <div {...props} />,
+                    Row: props => <DraggableBodyRow {...props}
+                                                    onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                 }}
                 editable={getEditable()}
                 actions={[
