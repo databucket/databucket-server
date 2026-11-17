@@ -1,11 +1,14 @@
-import {useRef, useState} from "react";
+import React, {useRef, useState} from "react";
+import {FilterList} from "@mui/icons-material";
 import {getTablePageSize, getTableState, setTablePageSize, setTableState} from "./ConfigurationStorage";
 
 // Remembers a table with local data (Settings, Management): search, sort, filters and page until the browser tab
 // is closed, rows per page permanently. Use the returned values in MaterialTable:
 //   columns={tableState.columns([...])}  data={tableState.data(rows)}, then key={tableState.key}
 //   and options={{...tableState.options, filtering: tableState.filtering, ...}}  {...tableState.callbacks}
-//   and tableState.toggleFiltering in the filter action
+//   and tableState.filterIcon + tableState.toggleFiltering in the filter action
+// The filter works like in the data table: the icon is colored while some column is filtered, and turning the filter
+// row off clears the filters.
 export default function useTableState(tableKey) {
     // a table starts with the saved state; MaterialTable reads it only when it is created
     const saved = getTableState(tableKey);
@@ -13,6 +16,7 @@ export default function useTableState(tableKey) {
     const [pageSize, setPageSize] = useState(() => getTablePageSize(tableKey));
     const page = useRef(saved.page || 0);
     const tableVersion = useRef(0);
+    const [filtered, setFiltered] = useState(() => isFiltered(saved.filters));
 
     const save = (changes) => setTableState(tableKey, changes);
 
@@ -22,9 +26,19 @@ export default function useTableState(tableKey) {
     }
 
     const toggleFiltering = () => {
-        save({filtering: !filtering});
+        if (filtering) {
+            // off: the filters are cleared; a new table (key) starts without them (columns() reads the saved state)
+            save({filtering: false, filters: {}});
+            setFiltered(false);
+            savePage(0);
+            tableVersion.current += 1;
+        } else {
+            save({filtering: true});
+        }
         setFiltering(!filtering);
     }
+
+    const filterIcon = () => React.createElement(FilterList, filtering && filtered ? {color: 'secondary'} : {});
 
     const columns = (tableColumns) => tableColumns.map((column, index) => {
         let result = column;
@@ -48,6 +62,7 @@ export default function useTableState(tableKey) {
     return {
         filtering,
         toggleFiltering,
+        filterIcon,
         columns,
         data,
         // getters: read after data(rows) in the same render
@@ -75,6 +90,7 @@ export default function useTableState(tableKey) {
                 const filters = {};
                 appliedFilters.forEach(filter => filters[filter.column.field] = filter.value);
                 save({filters: filters});
+                setFiltered(isFiltered(filters));
                 savePage(0);
             },
             onPageChange: newPage => savePage(newPage),
@@ -85,3 +101,7 @@ export default function useTableState(tableKey) {
         }
     };
 }
+
+// a filter with a value: text, a non-empty list (lookup), true/false (boolean)
+const isFiltered = (filters) => filters != null && Object.values(filters).some(value =>
+    value != null && value !== '' && !(Array.isArray(value) && value.length === 0));

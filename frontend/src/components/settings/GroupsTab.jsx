@@ -3,7 +3,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
-import {FilterList, Refresh} from "@mui/icons-material";
+import {Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {
     getDeleteOptions,
@@ -143,7 +143,7 @@ export default function GroupsTab() {
                         onClick: () => fetchGroups()
                     },
                     {
-                        icon: () => <FilterList/>,
+                        icon: tableState.filterIcon,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: tableState.toggleFiltering

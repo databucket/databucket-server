@@ -21,7 +21,7 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {FilterList, Refresh} from "@mui/icons-material";
+import {Refresh} from "@mui/icons-material";
 import {useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import RolesContext from "../../context/roles/RolesContext";
@@ -140,7 +140,7 @@ export default function UsersTab() {
                         onClick: () => fetchUsers()
                     },
                     {
-                        icon: () => <FilterList/>,
+                        icon: tableState.filterIcon,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: tableState.toggleFiltering

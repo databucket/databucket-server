@@ -22,7 +22,6 @@ import {
     validateItem
 } from "../../utils/JsonHelper";
 import {
-    FilterList,
     Refresh,
     VpnKey as ResetPasswordIcon
 } from "@mui/icons-material";
@@ -168,7 +167,7 @@ export default function UsersTab() {
                         onClick: () => fetchUsers()
                     },
                     {
-                        icon: FilterList,
+                        icon: tableState.filterIcon,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: tableState.toggleFiltering

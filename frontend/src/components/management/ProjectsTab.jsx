@@ -20,7 +20,7 @@ import {
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
-import {DeleteSweep, FilterList, ImportExport, Refresh} from "@mui/icons-material";
+import {DeleteSweep, ImportExport, Refresh} from "@mui/icons-material";
 import {Menu, MenuItem, useTheme} from "@mui/material";
 import {handleErrors} from "../../utils/FetchHelper";
 import ProjectsContext from "../../context/projects/ProjectsContext";
@@ -208,7 +208,7 @@ export default function ProjectsTab() {
                         onClick: () => fetchProjects()
                     },
                     {
-                        icon: () => <FilterList/>,
+                        icon: tableState.filterIcon,
                         tooltip: 'Enable/disable filter',
                         isFreeAction: true,
                         onClick: tableState.toggleFiltering
