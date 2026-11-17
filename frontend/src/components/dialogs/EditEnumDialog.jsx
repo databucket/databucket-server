@@ -12,20 +12,15 @@ import {
     useTheme
 } from '@mui/material';
 import {
-    ArrowDropDown,
-    ArrowDropUp,
     Close as CloseIcon,
     MoreHoriz,
-    SortByAlpha
+    UnfoldMore
 } from '@mui/icons-material';
 import {
     getDialogTableHeight,
-    getPageSizeOptionsOnDialog,
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor,
-    moveDown,
     movedRow,
-    moveUp,
     removeRow,
     replaceRow,
     sortedRows,
@@ -35,7 +30,6 @@ import MaterialTable from '@material-table/core';
 import PropTypes from 'prop-types';
 import EditIconDialog from "./SelectIconDialog";
 import {MessageBox} from "../utils/MessageBox";
-import {getLastPageSizeOnDialog, setLastPageSizeOnDialog} from "../../utils/ConfigurationStorage";
 import StyledIcon from "../utils/StyledIcon";
 import DraggableBodyRow from "../utils/DraggableBodyRow";
 
@@ -96,8 +90,6 @@ export default function EditEnumDialog(props) {
         {open: false, severity: 'error', title: '', message: ''});
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(props.items != null ? props.items : []);
-    // the rows per page of the dialogs, remembered
-    const [pageSize, setPageSize] = useState(getLastPageSizeOnDialog);
     // the Sort menu: sorts the items for good (the order of the list in the data); opened at the position of the
     // button, because material-table renders its actions again and the button element itself doesn't stay
     const [sortMenuPosition, setSortMenuPosition] = useState(null);
@@ -196,15 +188,9 @@ export default function EditEnumDialog(props) {
                         tableRef={tableRef}
                         columns={getColumns()}
                         data={data}
-                        onRowsPerPageChange={size => {
-                            setPageSize(size);
-                            setLastPageSizeOnDialog(size);
-                        }}
                         options={{
-                            paging: true,
-                            pageSize: pageSize,
-                            paginationType: 'stepped',
-                            pageSizeOptions: getPageSizeOptionsOnDialog(),
+                            // one list without pages, so that any item can be dragged anywhere
+                            paging: false,
                             actionsColumnIndex: -1,
                             selection: false,
                             filtering: false,
@@ -252,27 +238,12 @@ export default function EditEnumDialog(props) {
                         }}
                         actions={[
                             {
-                                icon: () => <SortByAlpha/>,
+                                icon: () => <UnfoldMore/>,
                                 tooltip: 'Sort items',
                                 isFreeAction: true,
                                 disabled: data.length < 2,
                                 onClick: openSortMenu
-                            },
-                            rowData => ({
-                                icon: () => <ArrowDropDown/>,
-                                tooltip: 'Move down',
-                                onClick: (event, rowData) => setData(
-                                    moveDown(data, rowData.tableData.id)),
-                                disabled: (rowData.tableData.id === data.length
-                                    - 1)
-                            }),
-                            rowData => ({
-                                icon: () => <ArrowDropUp/>,
-                                tooltip: 'Move up',
-                                onClick: (event, rowData) => setData(
-                                    moveUp(data, rowData.tableData.id)),
-                                disabled: (rowData.tableData.id === 0)
-                            })
+                            }
                         ]}
                     />
                     <Menu

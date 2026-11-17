@@ -5,7 +5,8 @@ import {useTheme} from '@mui/material';
 // The position (in the data) of the row being dragged; one drag at a time, so shared by all the rows
 let draggedIndex = null;
 
-// A row of a material-table that can be dragged onto another row to move it there (besides the Move up/down arrows).
+// A row of a material-table that can be dragged onto another row to move it there (the order of enum items, columns,
+// properties, task actions).
 // Use: components={{Row: props => <DraggableBodyRow {...props} onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>}}
 // Native HTML drag and drop: material-table passes the other props on to the <tr>. The row isn't draggable while a row
 // is edited (the inputs need the mouse).

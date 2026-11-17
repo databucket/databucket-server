@@ -211,10 +211,6 @@ export const getUserIcon = (rowData) => {
     }
 }
 
-export const moveUp = (dataCollection, itemId) => {
-    return swappedArray(dataCollection, itemId, itemId - 1);
-}
-
 // A row edited or removed in a table whose rows are kept in a state: material-table 6 passes copies of the rows (with
 // tableData) and leaves the objects of the state as they are, so the row is found by its position (tableData.index)
 const withoutTableData = ({tableData, ...row}) => row;
@@ -223,10 +219,6 @@ export const replaceRow = (rows, oldData, newData) =>
     rows.map((row, index) => index === oldData.tableData.index ? withoutTableData(newData) : row);
 
 export const removeRow = (rows, oldData) => rows.filter((row, index) => index !== oldData.tableData.index);
-
-export const moveDown = (dataCollection, itemId) => {
-    return swappedArray(dataCollection, itemId, itemId + 1);
-}
 
 // Rows sorted for good by a text field: natural order ("item2" before "item10"), letters with diacritics in place, a
 // stable sort (rows with the same value keep their order)
@@ -246,16 +238,9 @@ export const movedRow = (rows, from, to) => {
     return newRows;
 }
 
-// Columns of a table whose rows have an order of their own (Move up/down, dragging): the headers don't sort, because
-// that would only sort the view, while the arrows and dragging move the rows in the data (options.sorting is not
-// enough in material-table 6)
+// Columns of a table whose rows have an order of their own (dragging): the headers don't sort, because that would only
+// sort the view, while dragging moves the rows in the data (options.sorting is not enough in material-table 6)
 export const withoutHeaderSorting = columns => columns.map(column => ({...column, sorting: false}));
-
-function swappedArray(arr, index1, index2) {
-    const newArr = [...arr];
-    [newArr[index1], newArr[index2]] = [newArr[index2], newArr[index1]];
-    return newArr;
-}
 
 export const getTableHeight = () => {
     // Total Height - Appbar (72) - Toolbar (64) - Footer (52)
