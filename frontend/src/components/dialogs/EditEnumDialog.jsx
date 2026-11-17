@@ -2,6 +2,7 @@ import React, {createRef, useState} from 'react';
 import {
     Button,
     Dialog,
+    DialogActions,
     DialogContent as MuiDialogContent,
     DialogTitle as MuiDialogTitle,
     IconButton,
@@ -9,6 +10,7 @@ import {
     MenuItem,
     styled,
     Tooltip,
+    Typography,
     useTheme
 } from '@mui/material';
 import {
@@ -258,6 +260,13 @@ export default function EditEnumDialog(props) {
                         <MenuItem onClick={() => sortItems('text', true)}>Text: Z → A</MenuItem>
                     </Menu>
                 </DialogContent>
+                {/* the footer closes the list (no pagination any more); the height of the former pagination, which
+                    getDialogTableHeight leaves for it */}
+                <DialogActions sx={{minHeight: 52, justifyContent: 'flex-start', px: 2}}>
+                    <Typography variant='body2' color='text.secondary'>
+                        {data.length === 1 ? '1 item' : `${data.length} items`}
+                    </Typography>
+                </DialogActions>
             </Dialog>
             <MessageBox
                 config={messageBox}
