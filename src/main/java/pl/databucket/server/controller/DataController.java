@@ -425,6 +425,10 @@ public class DataController {
             @RequestParam(required = false, defaultValue = "1") Integer limit,
             @Parameter(description = SORT, example = "random")
             @RequestParam(required = false, defaultValue = "id") String sort,
+            @Parameter(description = "Whether to count the free rows still matching the rules ('available'). Counting "
+                    + "reads all of them, which takes time when many rows match: false reserves without counting (no "
+                    + "'available' in the response). A limit of 0 always counts.", example = "false")
+            @RequestParam(required = false, defaultValue = "true") boolean count,
             @Parameter(description = API_VERSION)
             @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules", required = true)
@@ -456,8 +460,10 @@ public class DataController {
                 else
                     response.setReserved(0);
 
-                // all free rows, also in a bucket with protected data (where the user sees only their own rows)
-                response.setAvailable(dataService.countFreeData(bucket, queryRule));
+                // all free rows, also in a bucket with protected data (where the user sees only their own rows);
+                // skipped on request, as it reads every matching row (limit 0 is the request for the count)
+                if (count || limit == 0)
+                    response.setAvailable(dataService.countFreeData(bucket, queryRule));
 
                 if (dataIds != null && dataIds.size() > 0) {
                     List<DataDTO> dataDTOList = dataService.getData(user, bucket, dataIds);
