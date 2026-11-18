@@ -25,8 +25,9 @@ public class ReserveDataResponse {
     @Schema(description = "Number of items reserved", example = "1")
     private int reserved;
 
-    @Schema(description = "Number of free data rows matching the rules, after the reservation (all free rows, also in a bucket with protected data)", example = "10")
-    private long available;
+    @Schema(description = "Number of free data rows matching the rules, after the reservation (all free rows, also in a "
+            + "bucket with protected data); left out when the request has count=false", example = "10")
+    private Long available;
 
     @Schema(description = "Set when no free data matches the rules", example = "No data matches the rules!")
     private String message;
