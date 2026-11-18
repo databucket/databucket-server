@@ -7,4 +7,3 @@ frontend/node_modules/*
 build/*
 !build/libs
 src/main/resources/static/*
-e2e/*
