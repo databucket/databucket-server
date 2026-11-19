@@ -77,13 +77,16 @@ public final class LogicSql {
     private final Map<String, Object> params;
     private final String prefix;
     private final Fields fields;
+    // the indexed properties of the bucket (path -> text or number), see PropertyIndex
+    private final Map<String, String> indexed;
     private int counter;
 
-    private LogicSql(String currentUser, Map<String, Object> params, String prefix, Fields fields) {
+    private LogicSql(String currentUser, Map<String, Object> params, String prefix, Fields fields, Map<String, String> indexed) {
         this.currentUser = currentUser;
         this.params = params;
         this.prefix = prefix;
         this.fields = fields;
+        this.indexed = indexed;
     }
 
     /**
@@ -94,14 +97,28 @@ public final class LogicSql {
      * @return the condition, or null for no logic
      */
     public static String toSql(Object logic, String currentUser, Map<String, Object> params, String prefix) throws InvalidRuleException {
-        return toSql(logic, currentUser, params, prefix, Fields.DATA);
+        return toSql(logic, currentUser, params, prefix, Fields.DATA, Map.of());
+    }
+
+    /**
+     * The condition on the data rows of a bucket with indexed properties: their paths are written as literals and
+     * their rules as the expressions of the indexes ({@link PropertyIndex}).
+     */
+    public static String toSql(Object logic, String currentUser, Map<String, Object> params, String prefix,
+                               Map<String, String> indexed) throws InvalidRuleException {
+        return toSql(logic, currentUser, params, prefix, Fields.DATA, indexed);
     }
 
     /** The condition on the table the fields describe, e.g. {@link Fields#HISTORY}. */
     public static String toSql(Object logic, String currentUser, Map<String, Object> params, String prefix, Fields fields) throws InvalidRuleException {
+        return toSql(logic, currentUser, params, prefix, fields, Map.of());
+    }
+
+    private static String toSql(Object logic, String currentUser, Map<String, Object> params, String prefix, Fields fields,
+                                Map<String, String> indexed) throws InvalidRuleException {
         if (logic == null || (logic instanceof Map<?, ?> map && map.isEmpty()))
             return null;
-        return new LogicSql(currentUser, params, prefix, fields).node(logic);
+        return new LogicSql(currentUser, params, prefix, fields, indexed == null ? Map.of() : indexed).node(logic);
     }
 
     // ---- operands
@@ -303,10 +320,9 @@ public final class LogicSql {
                 String json = json(property);
                 return "(CASE WHEN jsonb_typeof(" + json + ") = 'boolean' THEN (" + json + ")::boolean END)";
             }
-            if (value instanceof Number) {
-                String json = json(property);
-                return "(CASE WHEN jsonb_typeof(" + json + ") = 'number' THEN (" + json + ")::numeric END)";
-            }
+            if (value instanceof Number)
+                // the same expression as the index of a number property (PropertyIndex)
+                return PropertyIndex.numberExpression(path(property.path()));
             if (property.asTimestamp() || date(value) != null) {
                 String text = text(property);
                 return "(CASE WHEN " + text + " ~ '^\\d{4}-\\d{2}-\\d{2}' THEN (" + text + ")::timestamp END)";
@@ -365,8 +381,12 @@ public final class LogicSql {
                 return "FALSE";
             if (left instanceof Column column)
                 return "(" + column.name() + " IN (" + param(list) + "))";
-            if (left instanceof Property property)
+            if (left instanceof Property property) {
+                // an indexed text property: compared as text, so that the index is used
+                if ("text".equals(indexed.get(property.path())) && list.stream().allMatch(v -> v instanceof String))
+                    return "(" + text(property) + " IN (" + param(list) + ") AND jsonb_typeof(" + json(property) + ") = 'string')";
                 return "(" + jsonParam(list) + " @> " + json(property) + ")";
+            }
             throw new InvalidRuleException("'in' doesn't take a property function on the left");
         }
 
@@ -391,6 +411,8 @@ public final class LogicSql {
     // ---- SQL pieces
 
     private String path(String path) {
+        if (indexed.containsKey(path))
+            return PropertyIndex.pathLiteral(path);
         List<String> elements = new ArrayList<>();
         for (String node : path.substring(2).split("\\."))
             elements.add("CAST(" + param(node) + " AS text)");
@@ -398,11 +420,11 @@ public final class LogicSql {
     }
 
     private String json(Property property) {
-        return "(properties #> " + path(property.path()) + ")";
+        return PropertyIndex.jsonExpression(path(property.path()));
     }
 
     private String text(Property property) {
-        return "(properties #>> " + path(property.path()) + ")";
+        return PropertyIndex.textExpression(path(property.path()));
     }
 
     private String expression(Operand operand) throws InvalidRuleException {

@@ -29,6 +29,7 @@ class BucketServiceSpec extends Specification {
         setField(bucketService, "bucketRepository", bucketRepository)
         setField(bucketService, "groupRepository", groupRepository)
         setField(bucketService, "jdbcTemplate", namedJdbcTemplate)
+        setField(bucketService, "bucketIndexService", Mock(BucketIndexService))
         setField(bucketService, "modelMapper", new ApplicationConfiguration().modelMapper())
         namedJdbcTemplate.getJdbcTemplate() >> jdbcTemplate
     }

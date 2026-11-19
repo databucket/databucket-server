@@ -1,5 +1,6 @@
 package pl.databucket.server.mcp;
 
+import pl.databucket.server.dto.IndexedPropertyDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,8 @@ public class McpBucketInfoService {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record BucketDescription(String name, String description, boolean history, boolean protectedData,
-                                    String dataClass, String dataClassDescription, List<Field> fields, List<TagInfo> tags) {
+                                    String dataClass, String dataClassDescription, List<Field> fields, List<TagInfo> tags,
+                                    List<IndexedPropertyDto> indexedProperties) {
     }
 
     @Transactional(readOnly = true)
@@ -101,6 +103,7 @@ public class McpBucketInfoService {
 
         return new BucketDescription(bucket.getName(), bucket.getDescription(), bucket.isHistory(), bucket.isProtectedData(),
                 dataClass != null ? dataClass.getName() : null, dataClass != null ? dataClass.getDescription() : null,
-                fields, tags);
+                fields, tags, bucket.getIndexedProperties() == null || bucket.getIndexedProperties().isEmpty()
+                        ? null : bucket.getIndexedProperties());
     }
 }

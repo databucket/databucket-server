@@ -173,7 +173,7 @@ public class DataService {
 
         Query queryCount = queryRule.applyTo(new Query(bucket.getTableName())
                 .select(COL.COUNT)
-                .from(), paramMap);
+                .from(), paramMap, bucket.getIndexedPaths());
 
         long count = jdbcTemplate.queryForObject(queryCount.toString(logger, paramMap), paramMap, Long.TYPE);
         Map<ResultField, Object> result = new HashMap<>();
@@ -182,7 +182,7 @@ public class DataService {
         if (limit > 0) {
             Query queryData = queryRule.applyTo(new Query(bucket.getTableName())
                     .selectData(columns, paramMap)
-                    .from(), paramMap)
+                    .from(), paramMap, bucket.getIndexedPaths())
                     .orderBy(sort, paramMap)
                     .limitPage(paramMap, limit, page);
 
@@ -237,7 +237,7 @@ public class DataService {
         Query query = queryRule.applyTo(new Query(bucket.getTableName())
                 .update()
                 .set(paramMap)
-                .removeAndSetProperties(!properties, dataModifyDto, paramMap), paramMap);
+                .removeAndSetProperties(!properties, dataModifyDto, paramMap), paramMap, bucket.getIndexedPaths());
 
         int count = this.jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
         AuditLog.log("data.modify", "bucket={} count={}", bucket.getName(), count);
@@ -251,7 +251,7 @@ public class DataService {
 
         Query selectQuery = queryRule.applyTo(new Query(bucket.getTableName())
                 .select(COL.DATA_ID)
-                .from(), paramMap)
+                .from(), paramMap, bucket.getIndexedPaths())
                 .orderBy(sort, paramMap)
                 .limitPage(paramMap, limit, 1)
                 .forUpdateSkipLocked();
@@ -302,7 +302,7 @@ public class DataService {
         queryRule.require(COL.RESERVED, Operator.equal, false);
         Query query = queryRule.applyTo(new Query(bucket.getTableName())
                 .select(COL.COUNT)
-                .from(), paramMap);
+                .from(), paramMap, bucket.getIndexedPaths());
         Long count = jdbcTemplate.queryForObject(query.toString(logger, paramMap), paramMap, Long.class);
         return count != null ? count : 0;
     }
@@ -332,7 +332,7 @@ public class DataService {
 
         Query query = queryRule.applyTo(new Query(bucket.getTableName())
                 .delete()
-                .from(), paramMap);
+                .from(), paramMap, bucket.getIndexedPaths());
 
         int count = jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
         AuditLog.log("data.delete", "bucket={} count={}", bucket.getName(), count);
@@ -448,7 +448,7 @@ public class DataService {
 
         Query selectQuery = queryRule.applyTo(new Query(bucket.getTableName())
                 .select(COL.DATA_ID)
-                .from(), paramMap);
+                .from(), paramMap, bucket.getIndexedPaths());
 
         List<Long> listOfIds = jdbcTemplate.queryForList(selectQuery.toString(logger, paramMap), paramMap, Long.class);
         if (listOfIds.size() > 0) {

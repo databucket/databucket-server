@@ -70,7 +70,7 @@ public class DataHistorySearchService {
         if (protectedRows)
             dataFilter.require(COL.RESERVED_BY, Operator.equal, user.getUsername());
         if (protectedRows || !dataFilter.isEmpty()) {
-            Query rows = dataFilter.applyTo(new Query(bucket.getTableName()).select(COL.DATA_ID).from(), paramMap);
+            Query rows = dataFilter.applyTo(new Query(bucket.getTableName()).select(COL.DATA_ID).from(), paramMap, bucket.getIndexedPaths());
             where.add("(" + COL.DATA_ID + " IN (" + rows.toString(logger, paramMap) + "))");
         }
 

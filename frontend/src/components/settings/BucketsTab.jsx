@@ -45,6 +45,7 @@ import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
 import StyledIcon from "../utils/StyledIcon";
+import EditIndexedPropertiesDialog from "../dialogs/EditIndexedPropertiesDialog";
 
 const EditComponent = props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>;
 
@@ -69,7 +70,7 @@ export default function BucketsTab() {
     const {teams, fetchTeams} = teamsContext;
     const svgContext = useContext(SvgContext);
     const {svgs, fetchSvgs} = svgContext;
-    const changeableFields = ['name', 'icon', 'history', 'protectedData', 'overviewVisible', 'historyLimit', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
+    const changeableFields = ['name', 'icon', 'history', 'protectedData', 'overviewVisible', 'historyLimit', 'indexedProperties', 'description', 'groupsIds', 'usersIds', 'classId', 'roleId', 'teamsIds'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -165,8 +166,16 @@ export default function BucketsTab() {
                     {title: 'Collect data history', field: 'history', type: 'boolean'},
                     // the latest history entries kept for each data row, older ones are removed every night; empty: all
                     {title: <Tooltip title="The latest history entries kept for each data row; older ones are removed every night (the entry of the creation of the row stays). Empty: all."><span>Limit data history</span></Tooltip>,
-                        field: 'historyLimit', type: 'numeric',
+                        // the title is an element: without a text placeholder the field shows [object Object]
+                        field: 'historyLimit', type: 'numeric', editPlaceholder: 'All',
                         validate: rowData => rowData.historyLimit == null || rowData.historyLimit === '' || rowData.historyLimit >= 1},
+                    // a database index for each, so that rules on them are fast in a big bucket
+                    {title: <Tooltip title="Properties with a database index, so that rules on them are fast in a big bucket (at most 5)."><span>Indexed properties</span></Tooltip>,
+                        field: 'indexedProperties', filtering: false, searchable: false, sorting: false,
+                        render: rowData => (rowData.indexedProperties || []).map(p => p.path).join(', '),
+                        editComponent: props => <EditIndexedPropertiesDialog rowData={props.rowData}
+                                                                             classes={classes != null ? classes : []}
+                                                                             onChange={props.onChange}/>},
                     // listed on the Overview page also for users without access, who can ask for it
                     {title: 'Visible in Overview', field: 'overviewVisible', type: 'boolean', initialEditValue: true},
                     getColumnUsers(users, roles, 'Access for users'),

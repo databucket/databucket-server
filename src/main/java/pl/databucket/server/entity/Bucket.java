@@ -4,10 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.TenantId;
+import org.hibernate.type.SqlTypes;
 import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.dto.IconDto;
+import pl.databucket.server.dto.IndexedPropertyDto;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,6 +68,11 @@ public class Bucket extends Auditable<String> {
     @Column(name = "history_limit")
     private Integer historyLimit;
 
+    // properties with a database index on the data table (BucketIndexService); null or empty: none
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "indexed_properties", columnDefinition = "jsonb")
+    private List<IndexedPropertyDto> indexedProperties;
+
     @ManyToMany(mappedBy = "buckets")
     private Set<Group> groups;
 
@@ -114,6 +124,15 @@ public class Bucket extends Auditable<String> {
 
     public String getTableName() {
         return String.format("x-bucket-%d", id);
+    }
+
+    /** The indexed properties: path -> type (text or number). */
+    public Map<String, String> getIndexedPaths() {
+        Map<String, String> paths = new java.util.LinkedHashMap<>();
+        if (indexedProperties != null)
+            for (IndexedPropertyDto property : indexedProperties)
+                paths.put(property.getPath(), property.getType());
+        return paths;
     }
 
     public String getTableHistoryName() {

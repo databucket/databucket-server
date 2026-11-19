@@ -34,7 +34,7 @@ public final class LogicFilter {
         if (searchRules.getConditions() != null && !searchRules.getConditions().isEmpty())
             filter.logic.add(ConditionsToLogic.convert(searchRules.getConditions()));
         // fail now, not when the query is built
-        filter.where(new java.util.HashMap<>());
+        filter.where(new java.util.HashMap<>(), Map.of());
         return filter;
     }
 
@@ -50,17 +50,22 @@ public final class LogicFilter {
 
     /** Adds the WHERE clause to the query; its values go into the parameters. */
     public Query applyTo(Query query, Map<String, Object> paramMap) {
+        return applyTo(query, paramMap, Map.of());
+    }
+
+    /** As {@link #applyTo(Query, Map)} on a bucket with indexed properties (path -> text or number), see PropertyIndex. */
+    public Query applyTo(Query query, Map<String, Object> paramMap, Map<String, String> indexed) {
         try {
-            return query.whereSql(where(paramMap));
+            return query.whereSql(where(paramMap, indexed));
         } catch (InvalidRuleException e) {
             // checked in of(); the server's own conditions are always valid
             throw new IllegalStateException(e);
         }
     }
 
-    private String where(Map<String, Object> paramMap) throws InvalidRuleException {
+    private String where(Map<String, Object> paramMap, Map<String, String> indexed) throws InvalidRuleException {
         List<String> parts = new ArrayList<>();
-        String sql = LogicSql.toSql(logic.isEmpty() ? null : Map.of("and", logic), currentUser, paramMap, "lg");
+        String sql = LogicSql.toSql(logic.isEmpty() ? null : Map.of("and", logic), currentUser, paramMap, "lg", indexed);
         if (sql != null)
             parts.add(sql);
         for (int i = 0; i < required.size(); i++)

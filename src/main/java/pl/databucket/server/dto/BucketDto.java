@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -32,6 +33,10 @@ public class BucketDto {
     // the latest history entries kept for each data row, null: all
     @Min(1)
     private Integer historyLimit;
+    // properties with a database index (at most 5), see IndexedPropertyDto
+    @Valid
+    @Size(max = 5, message = "at most 5 indexed properties")
+    private List<IndexedPropertyDto> indexedProperties;
     private Short roleId;
 
     private String createdBy;
