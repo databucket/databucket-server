@@ -145,6 +145,15 @@ public class DataService {
     }
 
     public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, LogicFilter queryRule, Integer page, Integer limit, String sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException {
+        return getData(user, bucket, inColumns, queryRule, page, limit, sort, true);
+    }
+
+    /**
+     * One page of the data rows matching the rules. With count, also the number of all matching rows (TOTAL), which
+     * reads every one of them: slow when many rows match, so a client that knows it already (the next page of the same
+     * rules) skips it. A limit of 0 is the request for the count, so it always counts.
+     */
+    public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, LogicFilter queryRule, Integer page, Integer limit, String sort, boolean count) throws ItemNotFoundException, UnknownColumnException, UnexpectedException {
 
         List<CustomColumnDto> columns = null;
         Map<String, Object> paramMap = new HashMap<>();
@@ -171,13 +180,14 @@ public class DataService {
         if (bucket.isProtectedData() && !user.isAdminUser())
             queryRule.require(COL.RESERVED_BY, Operator.equal, user.getUsername());
 
-        Query queryCount = queryRule.applyTo(new Query(bucket.getTableName())
-                .select(COL.COUNT)
-                .from(), paramMap, bucket.getIndexedPaths());
-
-        long count = jdbcTemplate.queryForObject(queryCount.toString(logger, paramMap), paramMap, Long.TYPE);
         Map<ResultField, Object> result = new HashMap<>();
-        result.put(ResultField.TOTAL, count);
+        if (count || limit <= 0) {
+            Query queryCount = queryRule.applyTo(new Query(bucket.getTableName())
+                    .select(COL.COUNT)
+                    .from(), paramMap, bucket.getIndexedPaths());
+            long total = jdbcTemplate.queryForObject(queryCount.toString(logger, paramMap), paramMap, Long.TYPE);
+            result.put(ResultField.TOTAL, total);
+        }
 
         if (limit > 0) {
             Query queryData = queryRule.applyTo(new Query(bucket.getTableName())
