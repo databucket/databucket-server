@@ -20,7 +20,6 @@ import pl.databucket.server.dto.DataDTO;
 import pl.databucket.server.dto.DataModifyDTO;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
-import pl.databucket.server.exception.ConditionNotAllowedException;
 import pl.databucket.server.exception.DataNotFoundException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.UnexpectedException;
@@ -28,6 +27,7 @@ import pl.databucket.server.exception.UnknownColumnException;
 import pl.databucket.server.logging.AuditLog;
 import pl.databucket.server.mapper.DataRowMapper;
 import pl.databucket.server.service.ServiceUtils;
+import pl.databucket.server.service.data.filter.LogicFilter;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -51,7 +51,7 @@ public class DataService {
     }
 
 
-    public DataDTO createData(User user, Bucket bucket, DataCreateDTO dataCreateDto) throws JsonProcessingException, UnexpectedException, ItemNotFoundException, UnknownColumnException, ConditionNotAllowedException, SQLException {
+    public DataDTO createData(User user, Bucket bucket, DataCreateDTO dataCreateDto) throws JsonProcessingException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException {
 
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
         if (dataCreateDto.getTagId() != null)
@@ -109,17 +109,16 @@ public class DataService {
         AuditLog.log("data.create", "bucket={} count={}", bucket.getName(), dataList.size());
     }
 
-    public DataDTO getData(User user, Bucket bucket, long id) throws UnknownColumnException, ConditionNotAllowedException {
+    public DataDTO getData(User user, Bucket bucket, long id) throws UnknownColumnException {
         return getData(bucket, id, bucket.isProtectedData() && !user.isAdminUser() ? user.getUsername() : null);
     }
 
     // owner: only a row reserved by this user, or null for any row
-    private DataDTO getData(Bucket bucket, long id, String owner) throws UnknownColumnException, ConditionNotAllowedException {
-        List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition(COL.DATA_ID, Operator.equal, id));
-
+    private DataDTO getData(Bucket bucket, long id, String owner) throws UnknownColumnException {
+        Map<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put(COL.DATA_ID, id);
         if (owner != null)
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, owner));
+            conditions.put(COL.RESERVED_BY, owner);
 
         Map<String, Object> paramMap = new HashMap<>();
         Query queryData = new Query(bucket.getTableName())
@@ -130,12 +129,11 @@ public class DataService {
         return jdbcTemplate.queryForObject(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
     }
 
-    public List<DataDTO> getData(User user, Bucket bucket, List<Long> ids) throws UnknownColumnException, ConditionNotAllowedException {
-        List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition(COL.DATA_ID, Operator.in, ids));
-
+    public List<DataDTO> getData(User user, Bucket bucket, List<Long> ids) throws UnknownColumnException {
+        Map<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put(COL.DATA_ID, ids);
         if (bucket.isProtectedData() && !user.isAdminUser())
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+            conditions.put(COL.RESERVED_BY, user.getUsername());
 
         Map<String, Object> paramMap = new HashMap<>();
         Query queryData = new Query(bucket.getTableName())
@@ -146,7 +144,7 @@ public class DataService {
         return jdbcTemplate.query(queryData.toString(logger, paramMap), paramMap, new DataRowMapper());
     }
 
-    public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, DataFilter queryRule, Integer page, Integer limit, String sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException, ConditionNotAllowedException {
+    public Map<ResultField, Object> getData(User user, Bucket bucket, Optional<List<CustomColumnDto>> inColumns, LogicFilter queryRule, Integer page, Integer limit, String sort) throws ItemNotFoundException, UnknownColumnException, UnexpectedException {
 
         List<CustomColumnDto> columns = null;
         Map<String, Object> paramMap = new HashMap<>();
@@ -201,15 +199,7 @@ public class DataService {
         return result;
     }
 
-    public String getQuery(QueryRule queryRule) throws UnknownColumnException, ConditionNotAllowedException {
-        Map<String, Object> paramMap = new HashMap<>();
-        Query selectQuery = queryRule.applyTo(new Query("bucket")
-                .select(COL.COUNT)
-                .from(), paramMap);
-        return selectQuery.toString(logger, paramMap);
-    }
-
-    public int modifyData(User user, Bucket bucket, Optional<List<Long>> dataIdArray, DataModifyDTO dataModifyDto, DataFilter queryRule) throws IOException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException, ConditionNotAllowedException {
+    public int modifyData(User user, Bucket bucket, Optional<List<Long>> dataIdArray, DataModifyDTO dataModifyDto, LogicFilter queryRule) throws IOException, UnexpectedException, ItemNotFoundException, UnknownColumnException, SQLException {
 
         if (dataIdArray.isPresent()) {
             queryRule.require(COL.DATA_ID, Operator.in, dataIdArray.get());
@@ -254,7 +244,7 @@ public class DataService {
         return count;
     }
 
-    public List<Long> reserveData(User user, Bucket bucket, DataFilter queryRule, Integer limit, String sort, String targetOwnerUsername) throws UnknownColumnException, ConditionNotAllowedException, UnexpectedException {
+    public List<Long> reserveData(User user, Bucket bucket, LogicFilter queryRule, Integer limit, String sort, String targetOwnerUsername) throws UnknownColumnException, UnexpectedException {
 
         Map<String, Object> paramMap = new HashMap<>();
         queryRule.require(COL.RESERVED, Operator.equal, false);
@@ -273,8 +263,6 @@ public class DataService {
             dataIds = transactionTemplate.execute(paramTransactionStatus -> {
                 List<Long> listOfIds = jdbcTemplate.queryForList(selectQuery.toString(logger, paramMap), paramMap, Long.class);
                 if (listOfIds.size() > 0) {
-                    Condition condition = new Condition(COL.DATA_ID, Operator.in, listOfIds);
-
                     Map<String, Object> updateNamedParams = new HashMap<>();
                     updateNamedParams.put(COL.RESERVED_BY, targetOwnerUsername);
                     updateNamedParams.put(COL.MODIFIED_BY, user.getUsername());
@@ -285,9 +273,9 @@ public class DataService {
                     try {
                         updateQuery.update()
                                 .set(updateNamedParams)
-                                .where(condition, updateNamedParams);
-                    } catch (UnknownColumnException | ConditionNotAllowedException e) {
-                        e.printStackTrace();
+                                .where(COL.DATA_ID, listOfIds, updateNamedParams);
+                    } catch (UnknownColumnException e) {
+                        throw new IllegalStateException(e);
                     }
 
                     jdbcTemplate.update(updateQuery.toString(logger, updateNamedParams), updateNamedParams);
@@ -309,7 +297,7 @@ public class DataService {
      * them, so they are counted also in a bucket with protected data, where the user sees only the rows reserved by
      * them.
      */
-    public long countFreeData(Bucket bucket, DataFilter queryRule) throws UnknownColumnException, ConditionNotAllowedException {
+    public long countFreeData(Bucket bucket, LogicFilter queryRule) throws UnknownColumnException {
         Map<String, Object> paramMap = new HashMap<>();
         queryRule.require(COL.RESERVED, Operator.equal, false);
         Query query = queryRule.applyTo(new Query(bucket.getTableName())
@@ -319,13 +307,12 @@ public class DataService {
         return count != null ? count : 0;
     }
 
-    public int deleteDataByIds(User user, Bucket bucket, List<Long> dataIds) throws UnknownColumnException, ConditionNotAllowedException {
+    public int deleteDataByIds(User user, Bucket bucket, List<Long> dataIds) throws UnknownColumnException {
         Map<String, Object> paramMap = new HashMap<>();
-        List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition(COL.DATA_ID, Operator.in, dataIds));
-
+        Map<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put(COL.DATA_ID, dataIds);
         if (bucket.isProtectedData() && !user.isAdminUser())
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+            conditions.put(COL.RESERVED_BY, user.getUsername());
 
         Query query = new Query(bucket.getTableName())
                 .delete()
@@ -337,7 +324,7 @@ public class DataService {
         return count;
     }
 
-    public int deleteDataByRules(User user, Bucket bucket, DataFilter queryRule) throws UnknownColumnException, ConditionNotAllowedException {
+    public int deleteDataByRules(User user, Bucket bucket, LogicFilter queryRule) throws UnknownColumnException {
         Map<String, Object> paramMap = new HashMap<>();
 
         if (bucket.isProtectedData() && !user.isAdminUser())
@@ -357,11 +344,11 @@ public class DataService {
      * only a row reserved by the user (the history keeps the whole properties of every version, so it is protected
      * as the data). Also false for a row that doesn't exist.
      */
-    public boolean canSeeData(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException {
-        List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition(COL.DATA_ID, Operator.equal, dataId));
+    public boolean canSeeData(User user, Bucket bucket, Long dataId) throws UnknownColumnException {
+        Map<String, Object> conditions = new LinkedHashMap<>();
+        conditions.put(COL.DATA_ID, dataId);
         if (bucket.isProtectedData() && !user.isAdminUser())
-            conditions.add(new Condition(COL.RESERVED_BY, Operator.equal, user.getUsername()));
+            conditions.put(COL.RESERVED_BY, user.getUsername());
 
         Map<String, Object> paramMap = new HashMap<>();
         Query query = new Query(bucket.getTableName())
@@ -372,19 +359,17 @@ public class DataService {
         return count != null && count > 0;
     }
 
-    public List<Map<String, Object>> getDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException, DataNotFoundException {
+    public List<Map<String, Object>> getDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, DataNotFoundException {
         if (!canSeeData(user, bucket, dataId))
             throw new DataNotFoundException(bucket.getName(), dataId);
 
         Map<String, Object> paramMap = new HashMap<>();
 
         String[] columns = {COL.ID, COL.TAG_ID, COL.RESERVED, COL.PROPERTIES + " is not null as \"" + COL.PROPERTIES + "\"", COL.MODIFIED_AT, COL.MODIFIED_BY};
-        Condition condition = new Condition(COL.DATA_ID, Operator.equal, dataId);
-
         Query query = new Query(bucket.getTableHistoryName())
                 .select(columns)
                 .from()
-                .where(condition, paramMap)
+                .where(COL.DATA_ID, dataId, paramMap)
                 .orderBy(COL.MODIFIED_AT, true);
 
         List<Map<String, Object>> result = jdbcTemplate.queryForList(query.toString(logger, paramMap), paramMap);
@@ -413,17 +398,17 @@ public class DataService {
         return result;
     }
 
-    public List<Map<String, Object>> getDataHistoryProperties(User user, Bucket bucket, Long dataId, List<Long> ids) throws UnexpectedException, UnknownColumnException, ConditionNotAllowedException, DataNotFoundException {
+    public List<Map<String, Object>> getDataHistoryProperties(User user, Bucket bucket, Long dataId, List<Long> ids) throws UnexpectedException, UnknownColumnException, DataNotFoundException {
         if (!canSeeData(user, bucket, dataId))
             throw new DataNotFoundException(bucket.getName(), dataId);
 
-        List<Condition> conditions = new ArrayList<>();
+        Map<String, Object> conditions = new LinkedHashMap<>();
         Map<String, Object> namedParameters = new HashMap<>();
 
         String[] columns = {COL.ID, COL.PROPERTIES + "::varchar"};
 
-        conditions.add(new Condition(COL.DATA_ID, Operator.equal, dataId));
-        conditions.add(new Condition(COL.ID, Operator.in, ids));
+        conditions.put(COL.DATA_ID, dataId);
+        conditions.put(COL.ID, ids);
 
         Query query = new Query(bucket.getTableHistoryName())
                 .select(columns)
@@ -440,7 +425,7 @@ public class DataService {
      * Removes the history of one data row; the row must be visible to the user (see {@link #canSeeData}), otherwise
      * DataNotFoundException as for a missing row.
      */
-    public int clearDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, ConditionNotAllowedException, DataNotFoundException {
+    public int clearDataHistory(User user, Bucket bucket, Long dataId) throws UnknownColumnException, DataNotFoundException {
         if (!canSeeData(user, bucket, dataId))
             throw new DataNotFoundException(bucket.getName(), dataId);
 
@@ -448,14 +433,14 @@ public class DataService {
         Query query = new Query(bucket.getTableHistoryName())
                 .delete()
                 .from()
-                .where(new Condition(COL.DATA_ID, Operator.equal, dataId), paramMap);
+                .where(COL.DATA_ID, dataId, paramMap);
 
         int count = jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
         AuditLog.log("data.history-clear", "bucket={} id={} count={}", bucket.getName(), dataId, count);
         return count;
     }
 
-    public int clearDataHistory(User user, Bucket bucket, DataFilter queryRule) throws UnknownColumnException, ConditionNotAllowedException {
+    public int clearDataHistory(User user, Bucket bucket, LogicFilter queryRule) throws UnknownColumnException {
         Map<String, Object> paramMap = new HashMap<>();
 
         if (bucket.isProtectedData() && !user.isAdminUser())
@@ -467,11 +452,10 @@ public class DataService {
 
         List<Long> listOfIds = jdbcTemplate.queryForList(selectQuery.toString(logger, paramMap), paramMap, Long.class);
         if (listOfIds.size() > 0) {
-            Condition condition = new Condition(COL.DATA_ID, Operator.in, listOfIds);
             Query query = new Query(bucket.getTableHistoryName())
                     .delete()
                     .from()
-                    .where(condition, paramMap);
+                    .where(COL.DATA_ID, listOfIds, paramMap);
 
             jdbcTemplate.update(query.toString(logger, paramMap), paramMap);
             AuditLog.log("data.history-clear", "bucket={} count={}", bucket.getName(), listOfIds.size());

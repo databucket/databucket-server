@@ -10,11 +10,10 @@ import org.springframework.stereotype.Service;
 import pl.databucket.server.dto.DataHistoryEntryDTO;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
-import pl.databucket.server.exception.ConditionNotAllowedException;
 import pl.databucket.server.exception.InvalidRuleException;
 import pl.databucket.server.exception.UnknownColumnException;
-import pl.databucket.server.service.data.v2.LogicFilter;
-import pl.databucket.server.service.data.v2.LogicSql;
+import pl.databucket.server.service.data.filter.LogicFilter;
+import pl.databucket.server.service.data.filter.LogicSql;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class DataHistorySearchService {
      */
     public Result search(User user, Bucket bucket, LogicFilter dataFilter, Object historyLogic, int page, int limit,
                          String sort, boolean withProperties)
-            throws InvalidRuleException, UnknownColumnException, ConditionNotAllowedException {
+            throws InvalidRuleException, UnknownColumnException {
 
         Map<String, Object> paramMap = new HashMap<>();
         List<String> where = new ArrayList<>();

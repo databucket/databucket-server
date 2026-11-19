@@ -6,13 +6,8 @@ import org.slf4j.Logger;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import pl.databucket.server.dto.CustomColumnDto;
 import pl.databucket.server.dto.DataModifyDTO;
-import pl.databucket.server.exception.ConditionNotAllowedException;
 import pl.databucket.server.exception.UnknownColumnException;
 
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -154,250 +149,39 @@ public class Query {
         return this;
     }
 
-    public Query where(QueryRule queryRule, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
-        String rules = generateQueryRulesString("n", queryRule, paramMap);
-        if (rules.length() > 3) // could be () if no rules
-            query += " WHERE " + rules;
-        return this;
-    }
-
-    /** A WHERE condition built by API version 2 ({@link pl.databucket.server.service.data.v2.LogicSql}); null for none. */
+    /** A WHERE condition built by {@link pl.databucket.server.service.data.filter.LogicSql}; null for none. */
     public Query whereSql(String condition) {
         if (condition != null && !condition.isBlank())
             query += " WHERE " + condition;
         return this;
     }
 
-    public Query where(Condition condition, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
-        if (condition != null) {
-            query += " WHERE " + generateConditionString("n", condition, paramMap);
-        }
-        return this;
-    }
-
-    public Query where(List<Condition> conditions, Map<String, Object> paramMap) throws UnknownColumnException, ConditionNotAllowedException {
-        if (conditions != null) {
-            if (conditions.size() > 1) {
-                String condStr = "";
-                for (int i = 0; i < conditions.size(); i++) {
-                    condStr += generateConditionString("n" + i, conditions.get(i), paramMap) + " and ";
-                }
-                query += " WHERE " + condStr.substring(0, condStr.length() - " and ".length());
-            } else if (conditions.size() > 0)
-                where(conditions.get(0), paramMap);
-        }
-        return this;
-    }
-
-    private String getConditionStringValue(String uniqueName, SourceType sourceType, Object value, Map<String, Object> paramMap) throws UnknownColumnException {
-        if (sourceType.equals(SourceType.s_function)) {
-            String sValue = (String) value;
-            if (sValue.startsWith("$.")) {
-                int lastDot = sValue.lastIndexOf('.');
-                String fName = sValue.substring(0, lastDot);
-                String functionName = sValue.substring(lastDot + 1);
-                switch (functionName) {
-                    case "length()":
-                        return "jsonb_array_length(properties #> " + jsonPathArray(fName, paramMap) + ")";
-                    case "isNotNull()":
-                        return "(properties #>> " + jsonPathArray(fName, paramMap) + " is not null)";
-                    case "isNull()":
-                        return "(properties #>> " + jsonPathArray(fName, paramMap) + " is null)";
-                    case "notExists()":
-                        return "(properties #> " + jsonPathArray(fName, paramMap) + " is null)";
-                    case "exists()":
-                        return "(properties #> " + jsonPathArray(fName, paramMap) + " is not null)";
-                    default:
-                        throw new UnknownColumnException(sValue);
-                }
-            } else
-                return sValue; // SQL given with the "#func:" prefix in the rules
-        } else if (sourceType.equals(SourceType.s_property)) {
-            String sValue = (String) value;
-            if (sValue.startsWith("$."))
-                return "properties #> " + jsonPathArray(sValue, paramMap);
-            else
-                throw new UnknownColumnException(sValue);
-        } else if (sourceType.equals(SourceType.s_field)) {
-            return checkColumn((String) value);
-        } else if (sourceType.equals(SourceType.s_const)) {
+    /**
+     * A WHERE condition of the server's own: columns of the code (never names from the client) equal to the values,
+     * or one of them for a collection, combined with AND. The values are parameters (w0, w1, ...).
+     */
+    public Query where(Map<String, Object> columnValues, Map<String, Object> paramMap) throws UnknownColumnException {
+        List<String> parts = new ArrayList<>();
+        int i = 0;
+        for (Map.Entry<String, Object> entry : columnValues.entrySet()) {
+            String column = checkColumn(entry.getKey());
+            Object value = entry.getValue();
+            String name = "w" + i++;
             if (value == null)
-                return "null";
-
-            if (value instanceof String) {
-                Timestamp date = isValidDate((String) value);
-                if (date != null)
-                    paramMap.put(uniqueName, date);
-                else
-                    paramMap.put(uniqueName, value);
-            } else
-                paramMap.put(uniqueName, value);
-
-            return ":" + uniqueName;
-        }
-
-        return null;
-    }
-
-    // JSON array of the value(s) as a jsonb parameter
-    private static String jsonbArrayParam(String uniqueName, Object value, Map<String, Object> paramMap) {
-        Collection<?> values = value instanceof Collection ? (Collection<?>) value : Collections.singletonList(value);
-        paramMap.put(uniqueName, mapper.valueToTree(values).toString());
-        return "CAST(:" + uniqueName + " AS jsonb)";
-    }
-
-    private String generateQueryRulesString(String uniqueName, QueryRule queryRule, Map<String, Object> paramMap) throws ConditionNotAllowedException, UnknownColumnException {
-        List<String> allConditions = new ArrayList<>();
-
-        if (queryRule.getConditions().size() > 0)
-            if (queryRule.getConditions().size() > 1)
-                for (int i = 0; i < queryRule.getConditions().size(); i++)
-                    allConditions.add(generateConditionString(uniqueName + i, queryRule.getConditions().get(i), paramMap));
+                parts.add(column + " IS NULL");
+            else if (value instanceof Collection<?> values && values.isEmpty())
+                parts.add("FALSE");
             else {
-                if (queryRule.getOperator().equals(Operator.not))
-                    allConditions.add("not(" + generateConditionString(uniqueName + 0, queryRule.getConditions().get(0), paramMap) + ")");
-                else
-                    allConditions.add(generateConditionString(uniqueName + 0, queryRule.getConditions().get(0), paramMap));
-            }
-
-        if (queryRule.getStrRules().size() > 0)
-            allConditions.addAll(queryRule.getStrRules());
-
-        if (queryRule.getQueryRules().size() > 0) {
-            if (queryRule.getQueryRules().size() > 1) {
-                List<String> qrConditions = new ArrayList<>();
-                for (int i = 0; i < queryRule.getQueryRules().size(); i++) {
-                    QueryRule qr = queryRule.getQueryRules().get(i);
-                    qrConditions.add(generateQueryRulesString(uniqueName + i, qr, paramMap));
-                }
-                allConditions.add("(" + String.join(" " + queryRule.getOperator().toString() + " ", qrConditions) + ")");
-            } else {
-                QueryRule qr = queryRule.getQueryRules().get(0);
-                if (queryRule.getOperator().equals(Operator.not))
-                    allConditions.add("not(" + generateQueryRulesString(uniqueName + 0, qr, paramMap) + ")");
-                else
-                    allConditions.add(generateQueryRulesString(uniqueName + 0, qr, paramMap));
+                paramMap.put(name, value);
+                parts.add(column + (value instanceof Collection ? " IN (:" + name + ")" : " = :" + name));
             }
         }
-
-        return "(" + String.join(" " + queryRule.getOperator().toString() + " ", allConditions) + ")";
+        return whereSql(String.join(" AND ", parts));
     }
 
-    private String generateConditionString(String uniqueName, Condition condition, Map<String, Object> paramMap) throws ConditionNotAllowedException, UnknownColumnException {
-        String sFormat = "%s %s %s";
-        String v1;
-        String op;
-        String v2;
-
-        if (condition.getOperator().equals(Operator.in) || condition.getOperator().equals(Operator.notIn)) {
-
-            if (condition.getOperator().equals(Operator.notIn))
-                sFormat = "NOT(%s %s (%s))";
-            else
-                sFormat = "%s %s (%s)";
-
-            // eg.: $.textValue in $.textArray
-            if (condition.getLeftSource().equals(SourceType.s_property) && condition.getRightSource().equals(SourceType.s_property)) {
-                throw new ConditionNotAllowedException(condition);
-
-                // eg.: 5 in $.jsonArray   >>> v1 @> '[v2]'
-            } else if (condition.getRightSource().equals(SourceType.s_property)) {
-                // COALESCE - avoid situation when missing property used in the condition
-                v1 = "COALESCE(properties #> " + jsonPathArray(condition.getRightValue().toString(), paramMap) + ", '[]'::jsonb)";
-                op = "@>";
-                v2 = jsonbArrayParam(uniqueName + "l", condition.getLeftValue(), paramMap);
-
-                // eg.: $.prop in [1, 2, 3]   >>> v1 in 'v2
-            } else if (condition.getLeftSource().equals(SourceType.s_property)) {
-                v1 = jsonbArrayParam(uniqueName + "r", condition.getRightValue(), paramMap);
-                op = "@>";
-                v2 = "(properties #> " + jsonPathArray(condition.getLeftValue().toString(), paramMap) + ")";
-
-                // property not used in this condition
-            } else {
-                v1 = getConditionStringValue(uniqueName + "1", condition.getLeftSource(), condition.getLeftValue(), paramMap);
-                op = Operator.in.toString();
-                v2 = getConditionStringValue(uniqueName + "2", condition.getRightSource(), condition.getRightValue(), paramMap);
-            }
-        }
-
-        // LIKE, NOT LIKE, SIMILAR TO, NOT SIMILAR TO, MATCHES, NOT MATCH operator
-        else if (condition.getOperator().equals(Operator.like)
-                || condition.getOperator().equals(Operator.notLike)
-                || condition.getOperator().equals(Operator.similarTo)
-                || condition.getOperator().equals(Operator.notSimilarTo)
-                || condition.getOperator().equals(Operator.matchesCI)
-                || condition.getOperator().equals(Operator.notMatchCI)
-                || condition.getOperator().equals(Operator.matchesCS)
-                || condition.getOperator().equals(Operator.notMatchCS)) {
-
-            if (condition.getLeftSource().equals(SourceType.s_property))
-                v1 = "properties #>> " + jsonPathArray((String) condition.getLeftValue(), paramMap);
-            else
-                v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::varchar";
-
-            op = condition.getOperator().toString();
-
-            if (condition.getRightSource().equals(SourceType.s_property))
-                v2 = "properties #>> " + jsonPathArray((String) condition.getRightValue(), paramMap);
-            else
-                v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "" + condition.getRightValue(), paramMap);
-
-        } else {
-            boolean convertToDateTime = false;
-            if (condition.getLeftSource().equals(SourceType.s_property)) {
-                if (condition.getRightValue() == null)
-                    v1 = getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap);
-                else if (condition.getRightValue() instanceof Integer)
-                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::int";
-                else if (condition.getRightValue() instanceof Float)
-                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::float";
-                else if (condition.getRightValue() instanceof Boolean)
-                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap) + ")::bool";
-                else if (isValidDate((String) condition.getRightValue()) != null) {
-                    convertToDateTime = true;
-                    String leftValue = ((String) condition.getLeftValue()).replace("::timestamp", ""); // in case using optional cast
-                    v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text::timestamp";
-                } else {
-                    String leftValue = (String) condition.getLeftValue();
-                    if (leftValue.endsWith("::timestamp")) {
-                        leftValue = leftValue.substring(0, leftValue.indexOf("::timestamp"));
-                        v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text::timestamp";
-                    } else
-                        v1 = "(" + getConditionStringValue(uniqueName + "l", condition.getLeftSource(), leftValue, paramMap) + ")::text";
-                }
-            } else if (condition.getLeftSource().equals(SourceType.s_function)) {
-                String leftValue = (String) condition.getLeftValue();
-                // without "$." it is SQL given with the "#func:" prefix in the rules
-                v1 = "(" + (leftValue.startsWith("$.") ? getProperty(leftValue, true, paramMap) : leftValue) + ")";
-            } else
-                v1 = getConditionStringValue(uniqueName + "l", condition.getLeftSource(), condition.getLeftValue(), paramMap);
-
-            op = condition.getOperator().toString();
-
-            if (condition.getLeftSource().equals(SourceType.s_property)) {
-                if (condition.getRightValue() == null)
-                    v2 = null;
-                else if (convertToDateTime) {
-                    Timestamp timestamp = isValidDate((String) condition.getRightValue());
-                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), timestamp, paramMap);
-                } else if (condition.getRightValue() instanceof String && condition.getRightSource() != SourceType.s_function)
-                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), "\"" + condition.getRightValue() + "\"", paramMap);
-                else
-                    v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), condition.getRightValue(), paramMap);
-            } else
-                v2 = getConditionStringValue(uniqueName + "r", condition.getRightSource(), condition.getRightValue(), paramMap);
-
-            // SQL allows only NULL, TRUE, FALSE or UNKNOWN after IS, not a parameter or an expression; IS [NOT] DISTINCT
-            // FROM compares any values, and treats null as a value, just like IS
-            boolean nullValue = v2 == null || v2.equalsIgnoreCase("null");
-            if (!nullValue && condition.getOperator().equals(Operator.is))
-                op = "is not distinct from";
-            else if (!nullValue && condition.getOperator().equals(Operator.isNot))
-                op = "is distinct from";
-        }
-
-        return String.format(sFormat, v1, op, v2);
+    /** As {@link #where(Map, Map)} for one column. */
+    public Query where(String column, Object value, Map<String, Object> paramMap) throws UnknownColumnException {
+        return where(Collections.singletonMap(column, value), paramMap);
     }
 
     // "$.path" or "$.path.function()"; asText returns the property as text, otherwise as jsonb
@@ -442,16 +226,6 @@ public class Query {
             return column;
         else
             throw new UnknownColumnException(column);
-    }
-
-    private Timestamp isValidDate(String inDate) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormat.setLenient(false);
-        try {
-            return new Timestamp(dateFormat.parse(inDate.trim()).getTime());
-        } catch (ParseException pe) {
-            return null;
-        }
     }
 
     public Query orderBy(String sort, Map<String, Object> paramMap) throws UnknownColumnException {

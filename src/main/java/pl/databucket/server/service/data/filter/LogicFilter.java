@@ -1,7 +1,6 @@
-package pl.databucket.server.service.data.v2;
+package pl.databucket.server.service.data.filter;
 
 import pl.databucket.server.exception.InvalidRuleException;
-import pl.databucket.server.service.data.DataFilter;
 import pl.databucket.server.service.data.Operator;
 import pl.databucket.server.service.data.Query;
 import pl.databucket.server.service.data.SearchRules;
@@ -12,10 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * API version 2 filter: the 'logic' (JsonLogic) and the 'rules' of the request (converted to JsonLogic), both
- * translated by {@link LogicSql}. The old 'conditions' and rules given as SQL text are refused.
+ * The filter of a data request: which rows of a bucket table an operation reads, reserves, changes or removes. The
+ * 'logic' (JsonLogic), the 'rules' and the 'conditions' of the request (both converted to JsonLogic) are combined
+ * with "and" and translated by {@link LogicSql}. Rules given as SQL text are refused.
  */
-public final class LogicFilter implements DataFilter {
+public final class LogicFilter {
 
     private final String currentUser;
     private final List<Object> logic = new ArrayList<>();
@@ -26,29 +26,29 @@ public final class LogicFilter implements DataFilter {
     }
 
     public static LogicFilter of(String currentUser, SearchRules searchRules) throws InvalidRuleException {
-        if (searchRules.getConditions() != null && !searchRules.getConditions().isEmpty())
-            throw new InvalidRuleException("'conditions' are not supported with the header Databucket-Api-Version: 2; use 'rules' or 'logic'.");
         LogicFilter filter = new LogicFilter(currentUser);
         if (searchRules.getLogic() != null && !searchRules.getLogic().isEmpty())
             filter.logic.add(searchRules.getLogic());
         if (searchRules.getRules() != null && !searchRules.getRules().isEmpty())
             filter.logic.add(RulesToLogic.convert(searchRules.getRules()));
+        if (searchRules.getConditions() != null && !searchRules.getConditions().isEmpty())
+            filter.logic.add(ConditionsToLogic.convert(searchRules.getConditions()));
         // fail now, not when the query is built
         filter.where(new java.util.HashMap<>());
         return filter;
     }
 
-    /** Whether the request has any rule or logic (modifying and removing by rules need one). */
+    /** Whether the request has no logic, rules or conditions (modifying and removing by rules need one). */
     public boolean isEmpty() {
         return logic.isEmpty();
     }
 
-    @Override
+    /** A condition the server adds on a column of the table (e.g. the rows of the user), combined with AND. */
     public void require(String column, Operator operator, Object value) {
         required.add(new Object[]{column, operator, value});
     }
 
-    @Override
+    /** Adds the WHERE clause to the query; its values go into the parameters. */
     public Query applyTo(Query query, Map<String, Object> paramMap) {
         try {
             return query.whereSql(where(paramMap));

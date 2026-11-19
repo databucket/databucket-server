@@ -1,4 +1,4 @@
-package pl.databucket.server.service.data.v2
+package pl.databucket.server.service.data.filter
 
 import pl.databucket.server.exception.InvalidRuleException
 import spock.lang.Specification
