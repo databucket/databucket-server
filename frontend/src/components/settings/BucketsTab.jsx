@@ -4,7 +4,7 @@ import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
 import {Refresh} from "@mui/icons-material";
-import {Tooltip, useTheme} from "@mui/material";
+import {Box, LinearProgress, Tooltip, Typography, useTheme} from "@mui/material";
 import {
     getDeleteOptions,
     getPageSizeOptions,
@@ -18,6 +18,7 @@ import {handleErrors} from "../../utils/FetchHelper";
 import {
     arraysEquals,
     convertNullValuesInObject,
+    getArrayLengthStr,
     isItemChanged,
     validateItem
 } from "../../utils/JsonHelper";
@@ -55,6 +56,8 @@ export default function BucketsTab() {
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [confirmRemove, setConfirmRemove] = useState({open: false, id: 0, name: ''});
+    // the name of the bucket whose indexes are being built: saving it waits for CREATE/DROP INDEX CONCURRENTLY
+    const [buildingIndexes, setBuildingIndexes] = useState(null);
     const tableState = useTableState(getProjectTableKey('settings-buckets'));
     const rolesContext = useContext(RolesContext);
     const {roles, fetchRoles} = rolesContext;
@@ -141,7 +144,16 @@ export default function BucketsTab() {
 
 
     return (
-        <div onDoubleClick={selectCellText}>
+        <div onDoubleClick={selectCellText} style={{position: 'relative'}}>
+            {/* above the loading overlay of the table */}
+            {buildingIndexes != null &&
+                <Box sx={{position: 'absolute', inset: 0, zIndex: 20, pointerEvents: 'none'}}>
+                    <LinearProgress color='secondary'/>
+                    <Typography variant='body1' align='center'
+                                sx={{position: 'absolute', top: 'calc(50% + 40px)', left: 0, right: 0}}>
+                        {`Building the indexes of ${buildingIndexes}...`}
+                    </Typography>
+                </Box>}
             <MaterialTable
                 title='Buckets'
                 tableRef={tableRef}
@@ -164,15 +176,16 @@ export default function BucketsTab() {
                     getColumnGroups(groups, 'Show in groups'),
                     {title: 'Protect orphaned data', field: 'protectedData', type: 'boolean'},
                     {title: 'Collect data history', field: 'history', type: 'boolean'},
-                    // the latest history entries kept for each data row, older ones are removed every night; empty: all
-                    {title: <Tooltip title="The latest history entries kept for each data row; older ones are removed every night (the entry of the creation of the row stays). Empty: all."><span>Limit data history</span></Tooltip>,
+                    // the latest history entries kept for each data row, older ones are removed every night; empty: no limit
+                    {title: <Tooltip title="The latest history entries kept for each data row; older ones are removed every night (the entry of the creation of the row stays). Empty: no limit."><span>Limit data history</span></Tooltip>,
                         // the title is an element: without a text placeholder the field shows [object Object]
-                        field: 'historyLimit', type: 'numeric', editPlaceholder: 'All',
+                        field: 'historyLimit', type: 'numeric', editPlaceholder: 'No limit',
+                        render: rowData => rowData.historyLimit == null || rowData.historyLimit === '' ? 'No limit' : rowData.historyLimit,
                         validate: rowData => rowData.historyLimit == null || rowData.historyLimit === '' || rowData.historyLimit >= 1},
                     // a database index for each, so that rules on them are fast in a big bucket
                     {title: <Tooltip title="Properties with a database index, so that rules on them are fast in a big bucket (at most 5)."><span>Indexed properties</span></Tooltip>,
                         field: 'indexedProperties', filtering: false, searchable: false, sorting: false,
-                        render: rowData => (rowData.indexedProperties || []).map(p => p.path).join(', '),
+                        render: rowData => getArrayLengthStr(rowData.indexedProperties),
                         editComponent: props => <EditIndexedPropertiesDialog rowData={props.rowData}
                                                                              classes={classes != null ? classes : []}
                                                                              onChange={props.onChange}/>},
@@ -284,12 +297,18 @@ export default function BucketsTab() {
                                 return;
                             }
 
+                            const indexesChanged = JSON.stringify(newData.indexedProperties || [])
+                                !== JSON.stringify(oldData.indexedProperties || []);
+                            if (indexesChanged)
+                                setBuildingIndexes(newData.name);
+
                             fetch(getBaseUrl('buckets'), getPutOptions(newData))
                                 .then(handleErrors)
                                 .catch(error => {
                                     setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
                                     reject();
                                 })
+                                .finally(() => setBuildingIndexes(null))
                                 .then((bucket) => {
                                     if (bucket != null) {
                                         editBucket(convertNullValuesInObject(bucket, getBucketMapper()));
