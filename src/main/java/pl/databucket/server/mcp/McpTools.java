@@ -100,7 +100,8 @@ public class McpTools {
 
     @McpTool(name = "describe_bucket", description = "Describes a bucket: the fields of its data class (title, "
             + "property path such as $.name, type, allowed values of an enum) and the tags its rows can have (id and "
-            + "name). Call it before searching or writing data, to use the right property paths and tag ids.",
+            + "name). Call it before searching or writing data, to use the right property paths and tag ids. "
+            + "indexedProperties are fast to search in a big bucket: prefer rules on them.",
             annotations = @McpTool.McpAnnotations(title = "Describe a bucket", readOnlyHint = true, destructiveHint = false,
                     idempotentHint = true, openWorldHint = false))
     public String describeBucket(

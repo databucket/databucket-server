@@ -31,7 +31,7 @@ export const getTeamMapper = () => {
 }
 
 export const getBucketMapper = () => {
-    return {description: '', groupsIds: [], usersIds: [], teamsIds: [], classId: 'none', roleId: 0};
+    return {description: '', groupsIds: [], usersIds: [], teamsIds: [], classId: 'none', roleId: 0, indexedProperties: []};
 }
 
 export const getClassMapper = () => {

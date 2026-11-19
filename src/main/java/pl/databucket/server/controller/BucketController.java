@@ -11,6 +11,7 @@ import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemAlreadyExistsException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
+import pl.databucket.server.service.BucketIndexService;
 import pl.databucket.server.service.BucketService;
 
 import jakarta.validation.Valid;
@@ -26,6 +27,9 @@ public class BucketController {
     @Autowired
     private BucketService bucketService;
 
+    @Autowired
+    private BucketIndexService bucketIndexService;
+
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(BucketController.class);
 
     @PostMapping
@@ -35,6 +39,8 @@ public class BucketController {
             return new ResponseEntity<>(bucketDto, HttpStatus.CREATED);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+        } catch (IllegalArgumentException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -56,13 +62,23 @@ public class BucketController {
     public ResponseEntity<?> modifyBucket(@Valid @RequestBody BucketDto bucketDto) {
         try {
             bucketDto = bucketService.modifyBucket(bucketDto);
-            return new ResponseEntity<>(bucketDto, HttpStatus.OK);
         } catch (ItemNotFoundException | ModifyByNullEntityIdException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
         } catch (ItemAlreadyExistsException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+        } catch (IllegalArgumentException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
+        }
+
+        // after the bucket is saved: CREATE/DROP INDEX CONCURRENTLY can't run in its transaction
+        try {
+            bucketIndexService.syncIndexes("x-bucket-" + bucketDto.getId(), bucketDto.getIndexedProperties());
+            return new ResponseEntity<>(bucketDto, HttpStatus.OK);
+        } catch (Exception e) {
+            return exceptionFormatter.customException("The bucket was saved, but changing the indexes of its properties failed"
+                    + " (save it again to retry): " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

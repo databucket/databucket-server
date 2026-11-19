@@ -66,11 +66,15 @@ public class BucketService {
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private BucketIndexService bucketIndexService;
+
     Logger logger = LoggerFactory.getLogger(BucketService.class);
 
     public BucketDto createBucket(BucketDto bucketDto) throws ItemAlreadyExistsException, ItemNotFoundException {
         if (bucketRepository.existsByNameAndDeleted(bucketDto.getName(), false))
             throw new ItemAlreadyExistsException(Bucket.class, bucketDto.getName());
+        BucketIndexService.check(bucketDto.getIndexedProperties());
 
         Bucket bucket = new Bucket();
         bucket.setName(bucketDto.getName());
@@ -79,6 +83,7 @@ public class BucketService {
         bucket.setProtectedData(bucketDto.isProtectedData());
         bucket.setOverviewVisible(bucketDto.isOverviewVisible());
         bucket.setHistoryLimit(bucketDto.getHistoryLimit());
+        bucket.setIndexedProperties(bucketDto.getIndexedProperties());
         if (bucketDto.getIcon() != null) {
             bucket.setIconName(bucketDto.getIcon().getName());
             bucket.setIconColor(bucketDto.getIcon().getColor());
@@ -164,6 +169,9 @@ public class BucketService {
         logger.debug(sql);
         jdbcTemplate.getJdbcTemplate().execute(sql);
 
+        // the indexed properties of the bucket: the table is empty, so in the transaction
+        bucketIndexService.createIndexes(bucket.getTableName(), bucket.getIndexedProperties());
+
         createBeforeDeleteTrigger(bucket);
 
         // Create after insert and after update triggers if history is enabled
@@ -208,6 +216,7 @@ public class BucketService {
         if (!bucket.getName().equals(bucketDto.getName()))
             if (bucketRepository.existsByNameAndDeleted(bucketDto.getName(), false))
                 throw new ItemAlreadyExistsException(Bucket.class, bucketDto.getName());
+        BucketIndexService.check(bucketDto.getIndexedProperties());
 
 
         bucket.setName(bucketDto.getName());
@@ -278,6 +287,8 @@ public class BucketService {
         bucket.setProtectedData(bucketDto.isProtectedData());
         bucket.setOverviewVisible(bucketDto.isOverviewVisible());
         bucket.setHistoryLimit(bucketDto.getHistoryLimit());
+        // the indexes follow after the transaction (BucketController -> BucketIndexService.syncIndexes)
+        bucket.setIndexedProperties(bucketDto.getIndexedProperties());
 
         if (bucketDto.getRoleId() != null) {
             Role role = roleRepository.getOne(bucketDto.getRoleId());
