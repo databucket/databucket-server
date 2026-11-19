@@ -10,9 +10,9 @@ import pl.databucket.server.exception.InvalidRuleException;
 import pl.databucket.server.exception.UnknownColumnException;
 import pl.databucket.server.response.GetDataHistoryResponse;
 import pl.databucket.server.service.data.DataHistorySearchService;
-import pl.databucket.server.service.data.v2.LogicFilter;
-import pl.databucket.server.service.data.v2.LogicSql;
-import pl.databucket.server.service.data.v2.RulesToLogic;
+import pl.databucket.server.service.data.filter.LogicFilter;
+import pl.databucket.server.service.data.filter.LogicSql;
+import pl.databucket.server.service.data.filter.RulesToLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,7 +30,6 @@ import pl.databucket.server.response.MessageResponse;
 import pl.databucket.server.service.BucketService;
 import pl.databucket.server.service.UserService;
 import pl.databucket.server.service.data.DataService;
-import pl.databucket.server.service.data.DataFilters;
 
 import java.util.List;
 
@@ -159,7 +158,6 @@ public class DataHistoryController {
     public ResponseEntity<?> clearHistory(
 //            @ApiParam(value="bucket name", required = true)
             @PathVariable String bucketName,
-            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @RequestBody DataRemoveDTO dataRemoveDTO) {
 
         if ((dataRemoveDTO.getConditions() == null || dataRemoveDTO.getConditions().size() == 0)
@@ -173,7 +171,7 @@ public class DataHistoryController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.clearDataHistory(user, bucket, DataFilters.of(user.getUsername(), dataRemoveDTO, apiVersion));
+                int count = dataService.clearDataHistory(user, bucket, LogicFilter.of(user.getUsername(), dataRemoveDTO));
                 return new ResponseEntity<>(new MessageResponse("Removed history on " + count + " data rows."), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
@@ -187,7 +185,7 @@ public class DataHistoryController {
     @Operation(summary = "Search the history", description = "History entries of a bucket, one page at a time: of the data "
             + "rows matching 'rules' / 'logic' (by their current state; without them all rows), filtered by "
             + "'historyRules' / 'historyLogic' on the fields of the entries (id, dataId, tagId, reserved, modifiedBy, "
-            + "modifiedAt). Only with the header " + DataFilters.VERSION_HEADER + ": 2.")
+            + "modifiedAt).")
     @PostMapping(value = "/bucket/{bucketName}/history/get", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchHistory(
             @PathVariable String bucketName,
@@ -199,12 +197,8 @@ public class DataHistoryController {
             @RequestParam(required = false, defaultValue = "id") String sort,
             @Parameter(description = "true: also the properties of each version (when they changed)")
             @RequestParam(required = false, defaultValue = "false") boolean properties,
-            @Parameter(description = "Must be 2")
-            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @RequestBody(required = false) DataHistoryGetDTO request) {
 
-        if (!"2".equals(apiVersion == null ? null : apiVersion.trim()))
-            return exceptionFormatter.customException("Searching the history needs the header " + DataFilters.VERSION_HEADER + ": 2", HttpStatus.BAD_REQUEST);
         if (page < 1 || limit < 0 || limit > DataHistorySearchService.MAX_LIMIT)
             return exceptionFormatter.customException("The page starts from 1 and the limit is 0.." + DataHistorySearchService.MAX_LIMIT, HttpStatus.BAD_REQUEST);
         DataHistoryGetDTO body = request != null ? request : new DataHistoryGetDTO();

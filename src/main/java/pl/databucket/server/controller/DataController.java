@@ -26,6 +26,7 @@ import pl.databucket.server.response.MessageResponse;
 import pl.databucket.server.response.ReserveDataResponse;
 import pl.databucket.server.service.BucketService;
 import pl.databucket.server.service.UserService;
+import pl.databucket.server.service.data.filter.LogicFilter;
 import pl.databucket.server.service.data.*;
 
 import java.util.List;
@@ -47,9 +48,6 @@ public class DataController {
     private static final String NOT_FOUND = "Not found - the bucket doesn't exist or the user has no access to it";
     private static final String INVALID_RULES = "Bad request - invalid rules, see https://github.com/databucket/databucket-server/wiki/Rules";
     private static final String LIMIT_GET = "Number of data rows per page. 0 returns only the total number of matching rows.";
-    private static final String API_VERSION = "API version: 2 checks the rules and translates them safely (no rules given as "
-            + "SQL text, no 'conditions'); without it (or 1) the old version 1, to be removed. "
-            + "See https://github.com/databucket/databucket-server/wiki/Rules";
     private static final String SORT = "Sort order: a field or property, e.g. id, desc(id), asc($.name), or random";
 
     private final ExceptionFormatter exceptionFormatter = new ExceptionFormatter(DataController.class);
@@ -159,8 +157,6 @@ public class DataController {
     public ResponseEntity<?> modifyData(
             @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = API_VERSION)
-            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @Parameter(description = IDS, example = "1,2,3", required = true)
             @PathVariable Optional<List<Long>> ids,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The changes", required = true)
@@ -173,7 +169,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, ids, dataModifyDTO, DataFilters.of(user.getUsername(), dataModifyDTO, apiVersion));
+                int count = dataService.modifyData(user, bucket, ids, dataModifyDTO, LogicFilter.of(user.getUsername(), dataModifyDTO));
                 return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
@@ -214,8 +210,6 @@ public class DataController {
     public ResponseEntity<?> modifyData(
             @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = API_VERSION)
-            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The changes and the rules", required = true)
             @RequestBody DataModifyDTO dataModifyDTO) {
 
@@ -231,7 +225,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.modifyData(user, bucket, Optional.empty(), dataModifyDTO, DataFilters.of(user.getUsername(), dataModifyDTO, apiVersion));
+                int count = dataService.modifyData(user, bucket, Optional.empty(), dataModifyDTO, LogicFilter.of(user.getUsername(), dataModifyDTO));
                 return new ResponseEntity<>(new MessageResponse("Modified " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
@@ -353,8 +347,6 @@ public class DataController {
             @RequestParam(required = false, defaultValue = "1") Integer limit,
             @Parameter(description = SORT, example = "desc(id)")
             @RequestParam(required = false, defaultValue = "id") String sort,
-            @Parameter(description = API_VERSION)
-            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules and, optionally, the columns", required = true)
             @RequestBody DataGetDTO dataGetDTO) {
 
@@ -372,7 +364,7 @@ public class DataController {
 
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                DataFilter queryRule = DataFilters.of(user.getUsername(), dataGetDTO, apiVersion);
+                LogicFilter queryRule = LogicFilter.of(user.getUsername(), dataGetDTO);
                 Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDTO.getColumns()), queryRule, page, limit, sort);
 
                 long total = (long) result.get(ResultField.TOTAL);
@@ -429,8 +421,6 @@ public class DataController {
                     + "reads all of them, which takes time when many rows match: false reserves without counting (no "
                     + "'available' in the response). A limit of 0 always counts.", example = "false")
             @RequestParam(required = false, defaultValue = "true") boolean count,
-            @Parameter(description = API_VERSION)
-            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules", required = true)
             @RequestBody DataReserveDTO dataReserveDTO) {
 
@@ -452,7 +442,7 @@ public class DataController {
                 if (user.isAdminUser() && dataReserveDTO.getTargetOwnerUsername() != null)
                     targetOwnerUsername = dataReserveDTO.getTargetOwnerUsername();
 
-                DataFilter queryRule = DataFilters.of(user.getUsername(), dataReserveDTO, apiVersion);
+                LogicFilter queryRule = LogicFilter.of(user.getUsername(), dataReserveDTO);
                 // limit 0: only counts the free rows
                 List<Long> dataIds = limit > 0 ? dataService.reserveData(user, bucket, queryRule, limit, sort, targetOwnerUsername) : null;
                 if (dataIds != null && dataIds.size() > 0)
@@ -509,8 +499,6 @@ public class DataController {
     public ResponseEntity<?> deleteData(
             @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
-            @Parameter(description = API_VERSION)
-            @RequestHeader(value = DataFilters.VERSION_HEADER, required = false) String apiVersion,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules", required = true)
             @RequestBody DataRemoveDTO dataRemoveDTO) {
 
@@ -526,7 +514,7 @@ public class DataController {
         try {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
-                int count = dataService.deleteDataByRules(user, bucket, DataFilters.of(user.getUsername(), dataRemoveDTO, apiVersion));
+                int count = dataService.deleteDataByRules(user, bucket, LogicFilter.of(user.getUsername(), dataRemoveDTO));
                 return new ResponseEntity<>(new MessageResponse("Removed " + count + " data row(s)"), HttpStatus.OK);
             } else
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);

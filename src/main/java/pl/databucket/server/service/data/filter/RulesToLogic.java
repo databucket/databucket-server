@@ -1,4 +1,4 @@
-package pl.databucket.server.service.data.v2;
+package pl.databucket.server.service.data.filter;
 
 import pl.databucket.server.exception.InvalidRuleException;
 
@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * API version 2: converts the 'rules' of a request into JsonLogic, the format of the rich filter, so both go through
+ * Converts the 'rules' of a request into JsonLogic, the format of the rich filter, so both go through
  * the same safe translation ({@link LogicSql}). Rules given as SQL text and the '#func:' prefix are refused.
  *
  * <pre>
@@ -34,7 +34,7 @@ public final class RulesToLogic {
             Map.entry("similar", "similar"), Map.entry("!similar", "!similar"),
             Map.entry("~", "~"), Map.entry("!~", "!~"), Map.entry("~*", "~*"), Map.entry("!~*", "!~*"));
 
-    static final String RAW_SQL = "Rules given as SQL text are not supported with the header Databucket-Api-Version: 2."
+    static final String RAW_SQL = "Rules given as SQL text are not supported."
             + " Write the rule as [left, operator, right], e.g. [\"$.name\", \"like\", \"A%\"].";
 
     private RulesToLogic() {

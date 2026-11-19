@@ -1,11 +1,9 @@
-package pl.databucket.server.service.data.v2
+package pl.databucket.server.service.data.filter
 
 import pl.databucket.server.dto.DataGetDTO
 import pl.databucket.server.exception.InvalidRuleException
-import pl.databucket.server.service.data.DataFilters
 import pl.databucket.server.service.data.Operator
 import pl.databucket.server.service.data.Query
-import pl.databucket.server.service.data.QueryRule
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -57,34 +55,9 @@ class RulesToLogicSpec extends Specification {
         "a rule of two items"   | [['$.a', '==']]                            || "3 items"
     }
 
-    def "should choose the version by the header"() {
-        given:
-        def dto = new DataGetDTO(rules: [['$.a', '==', 1]])
-
-        expect:
-        DataFilters.of("john", dto, null) instanceof QueryRule
-        DataFilters.of("john", dto, "1") instanceof QueryRule
-        DataFilters.of("john", dto, "2") instanceof LogicFilter
-
-        when:
-        DataFilters.of("john", dto, "3")
-
-        then:
-        thrown(InvalidRuleException)
-    }
-
-    def "should refuse the old conditions in version 2"() {
-        when:
-        DataFilters.of("john", new DataGetDTO(conditions: [[left_source: "field", left_value: "id", operator: "=", right_source: "const", right_value: 1]]), "2")
-
-        then:
-        def e = thrown(InvalidRuleException)
-        e.message.contains("conditions")
-    }
-
     def "should combine logic, rules and the server's conditions with AND"() {
         given:
-        def filter = DataFilters.of("john", new DataGetDTO(logic: ["==": [[var: "tagId"], 1]], rules: [['$.a', '==', 'x']]), "2")
+        def filter = LogicFilter.of("john", new DataGetDTO(logic: ["==": [[var: "tagId"], 1]], rules: [['$.a', '==', 'x']]))
         filter.require("reserved_by", Operator.equal, "john")
         def params = [:]
 

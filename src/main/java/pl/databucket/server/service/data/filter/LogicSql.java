@@ -1,4 +1,4 @@
-package pl.databucket.server.service.data.v2;
+package pl.databucket.server.service.data.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pl.databucket.server.exception.InvalidRuleException;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * API version 2: translates a JsonLogic filter into the WHERE condition of a bucket table.
+ * Translates a JsonLogic filter into the WHERE condition of a bucket table.
  * <p>
  * Nothing from the request becomes SQL text: values and the nodes of property paths are parameters, fields are
  * mapped from a fixed list, operators and functions come from fixed lists. Anything else is refused.
@@ -296,7 +296,7 @@ public final class LogicSql {
         return "(" + textOf(left) + " " + op + " " + textOf(right) + ")";
     }
 
-    /** The left side, cast to the type of the value it is compared with (as API version 1 did). */
+    /** The left side, cast to the type of the value it is compared with (as the first version of the API did). */
     private String typedLeft(Operand left, Object value) throws InvalidRuleException {
         if (left instanceof Property property) {
             if (value instanceof Boolean) {

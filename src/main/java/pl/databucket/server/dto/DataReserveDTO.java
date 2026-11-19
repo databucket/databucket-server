@@ -19,7 +19,7 @@ public class DataReserveDTO implements SearchRules {
 
     @Schema(
             hidden = true,
-            description = "Old filtering method - conditions",
+            description = "The oldest filter format, translated like the rules; use rules",
             example = "[{\"left_source\": \"field\", \"left_value\": \"data_id\", \"operator\": \"<\", \"right_source\": \"const\", \"right_value\": 100}, {\"left_source\": \"property\", \"left_value\": \"$.name\", \"operator\": \"like\", \"right_source\": \"const\", \"right_value\": \"Jo%\"}]"
     )
     private List<Map<String, Object>> conditions;

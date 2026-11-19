@@ -7,7 +7,6 @@ public class COL {
 	public static final String CREATED_BY = "created_by";
 	public static final String MODIFIED_AT = "modified_at";
 	public static final String MODIFIED_BY = "modified_by";
-	public static final String CONDITIONS = "conditions";
 	public static final String TAG_ID = "tag_id";
 	public static final String DATA_ID = "data_id";
 	public static final String RESERVED = "reserved";

@@ -22,9 +22,9 @@ import pl.databucket.server.service.data.DataHistorySearchService;
 import pl.databucket.server.service.data.DataService;
 import pl.databucket.server.service.data.ResultField;
 import pl.databucket.server.service.data.SearchRules;
-import pl.databucket.server.service.data.v2.LogicFilter;
-import pl.databucket.server.service.data.v2.LogicSql;
-import pl.databucket.server.service.data.v2.RulesToLogic;
+import pl.databucket.server.service.data.filter.LogicFilter;
+import pl.databucket.server.service.data.filter.LogicSql;
+import pl.databucket.server.service.data.filter.RulesToLogic;
 
 import java.util.ArrayList;
 import java.util.List;
