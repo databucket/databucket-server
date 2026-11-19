@@ -347,6 +347,11 @@ public class DataController {
             @RequestParam(required = false, defaultValue = "1") Integer limit,
             @Parameter(description = SORT, example = "desc(id)")
             @RequestParam(required = false, defaultValue = "id") String sort,
+            @Parameter(description = "Whether to count all the rows matching the rules ('total' and 'totalPages'). "
+                    + "Counting reads every matching row, which takes time when many rows match: false returns the page "
+                    + "without counting (no 'total' and 'totalPages' in the response), e.g. for the next page of the "
+                    + "same rules. A limit of 0 always counts.", example = "false")
+            @RequestParam(required = false, defaultValue = "true") boolean count,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The rules and, optionally, the columns", required = true)
             @RequestBody DataGetDTO dataGetDTO) {
 
@@ -365,12 +370,15 @@ public class DataController {
             User user = userService.getCurrentUser();
             if (bucketService.hasUserAccessToBucket(bucket, user)) {
                 LogicFilter queryRule = LogicFilter.of(user.getUsername(), dataGetDTO);
-                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDTO.getColumns()), queryRule, page, limit, sort);
+                Map<ResultField, Object> result = dataService.getData(user, bucket, Optional.ofNullable(dataGetDTO.getColumns()), queryRule, page, limit, sort, count);
 
-                long total = (long) result.get(ResultField.TOTAL);
-                response.setTotal(total);
-                if (limit > 0)
-                    response.setTotalPages((int) Math.ceil(total / (float) limit));
+                // not counted on request (count=false)
+                if (result.containsKey(ResultField.TOTAL)) {
+                    long total = (long) result.get(ResultField.TOTAL);
+                    response.setTotal(total);
+                    if (limit > 0)
+                        response.setTotalPages((int) Math.ceil(total / (float) limit));
+                }
                 if (result.containsKey(ResultField.DATA))
                     response.setData((List<DataDTO>) result.get(ResultField.DATA));
                 else

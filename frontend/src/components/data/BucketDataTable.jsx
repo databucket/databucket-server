@@ -1,4 +1,4 @@
-import React, {createContext, createRef, useContext, useEffect, useState} from 'react';
+import React, {createContext, createRef, useContext, useEffect, useRef, useState} from 'react';
 import MaterialTable, {MTableActions, MTableToolbar} from '@material-table/core';
 import {
     getDeleteOptions,
@@ -308,6 +308,8 @@ export default function BucketDataTable() {
     const [pageSize, setPageSize] = useState(getLastPageSize);
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [filtering, setFiltering] = useState(false);
+    // the number of rows matching the rules of the table, counted once for them: {key: bucket and rules, total}
+    const knownTotal = useRef(null);
     const accessContext = useContext(AccessContext);
     const {
         buckets,
@@ -818,6 +820,8 @@ export default function BucketDataTable() {
     }
 
     const reloadData = () => {
+        // the data may have changed (added, removed, reserved rows), so the next page is counted again
+        knownTotal.current = null;
         tableRef.current !== null && tableRef.current.onQueryChange();
     }
 
@@ -1141,7 +1145,19 @@ export default function BucketDataTable() {
                                 }
 
                                 const {url, payload} = getDataRequest(query, query.pageSize);
-                                const getPage = page => fetch(url + '&page=' + page, getPostOptions(payload)).then(handleErrors);
+                                // counting all the matching rows is slow for many of them: the next page of the same
+                                // rules uses the total counted before (see reloadData)
+                                const countKey = activeBucket.id + '|' + JSON.stringify(payload.logic);
+                                const known = knownTotal.current != null && knownTotal.current.key === countKey
+                                    ? knownTotal.current.total : null;
+                                const getPage = page => fetch(url + '&page=' + page + (known != null ? '&count=false' : ''),
+                                    getPostOptions(payload))
+                                    .then(handleErrors)
+                                    .then(result => {
+                                        const total = result.total != null ? result.total : known;
+                                        knownTotal.current = {key: countKey, total};
+                                        return {...result, total, totalPages: Math.ceil(total / query.pageSize)};
+                                    });
 
                                 let resultOk = true;
                                 getPage(page)
