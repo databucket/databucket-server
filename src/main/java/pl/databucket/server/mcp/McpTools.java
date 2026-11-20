@@ -25,6 +25,7 @@ import pl.databucket.server.service.data.SearchRules;
 import pl.databucket.server.service.data.filter.LogicFilter;
 import pl.databucket.server.service.data.filter.LogicSql;
 import pl.databucket.server.service.data.filter.RulesToLogic;
+import pl.databucket.server.service.data.generator.DataGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ import java.util.Optional;
 public class McpTools {
 
     static final int MAX_ROWS = 100;
+    static final int MAX_GENERATED = 10_000;
+    private static final int SAMPLE = 3;
     private static final String RULES = "Rules selecting the data rows, combined with 'and'; each rule is "
             + "[left, operator, right], e.g. [\"$.city\", \"==\", \"Paris\"], or {\"or\": [rule, ...]}, {\"and\": [...]}, "
             + "{\"!\": rule}. Left: a property path ($.name, $.address.city) or a field (id, tagId, owner, reserved, "
@@ -81,6 +84,9 @@ public class McpTools {
     }
 
     public record Count(int count, String message) {
+    }
+
+    public record Generated(int inserted, long firstN, long lastN, List<Map<String, Object>> sample, String message) {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -223,6 +229,58 @@ public class McpTools {
             return result;
         }));
         return json(inserted);
+    }
+
+    @McpTool(name = "generate_data", description = "Generates random data rows on the server and inserts them into "
+            + "a bucket: give a generator per property instead of writing the rows, up to " + MAX_GENERATED
+            + " rows per call. All rows or none. Returns the number of rows, the range of {n} used and a sample. "
+            + "Use the property paths and enum values from describe_bucket.",
+            annotations = @McpTool.McpAnnotations(title = "Generate data", readOnlyHint = false, destructiveHint = false,
+                    idempotentHint = false, openWorldHint = false))
+    public String generateData(
+            @McpToolParam(description = "Bucket name") String bucket,
+            @McpToolParam(description = "Property path -> generator, e.g. {\"$.firstName\": \"#{Name.firstName}\", "
+                    + "\"$.email\": \"user-{n}@example.com\", \"$.address.city\": \"#{Address.city}\", "
+                    + "\"$.phone\": \"#{numerify '###-###-###'}\", \"$.age\": {\"number\": [18, 90]}, "
+                    + "\"$.balance\": {\"number\": [0, 5000], \"decimals\": 2}, "
+                    + "\"$.status\": {\"oneOf\": [\"active\", \"blocked\"], \"weights\": [9, 1]}, "
+                    + "\"$.birthDate\": {\"date\": [\"1950-01-01\", \"2005-12-31\"]}, "
+                    + "\"$.lastLogin\": {\"datetime\": [\"2025-01-01\", \"2025-12-31T23:59:59Z\"]}, "
+                    + "\"$.type\": \"customer\"}. A text with #{...} is a Datafaker expression (providers such as "
+                    + "Name, Address, Internet, PhoneNumber, Company, Commerce, Finance, Lorem; numerify ###, "
+                    + "letterify ???, regexify); {n} in a text is the number of the row, unique; any other text, "
+                    + "number, boolean or null is the same in every row.")
+            Map<String, Object> fields,
+            @McpToolParam(description = "Number of rows, 1.." + MAX_GENERATED) Integer count,
+            @McpToolParam(description = "Tag id of the rows", required = false) Long tagId,
+            @McpToolParam(description = "true reserves the rows for the user", required = false) Boolean reserved,
+            @McpToolParam(description = "Language of the values, e.g. en (default), pl, de, fr-FR", required = false)
+            String locale,
+            @McpToolParam(description = "Seed: the same seed and fields give the same rows again", required = false)
+            Long seed,
+            @McpToolParam(description = "Number {n} of the first row. Default: after the last id of the bucket, so {n} "
+                    + "stays unique between calls", required = false) Long startN) throws Exception {
+        if (count == null || count < 1 || count > MAX_GENERATED)
+            throw new IllegalArgumentException("Give count 1.." + MAX_GENERATED + "; call again for more rows");
+        DataGenerator generator = DataGenerator.of(fields, locale, seed);
+        Access access = access(bucket);
+        long firstN = startN != null ? startN : dataService.lastDataId(access.bucket()) + 1;
+
+        List<Map<String, Object>> generated = generator.next(firstN, count);
+        List<DataCreateDTO> rows = new ArrayList<>(count);
+        for (Map<String, Object> properties : generated) {
+            DataCreateDTO row = new DataCreateDTO();
+            row.setProperties(properties);
+            row.setTagId(tagId);
+            row.setReserved(reserved);
+            rows.add(row);
+        }
+        withFriendlyErrors(() -> {
+            dataService.createData(access.user(), access.bucket(), rows);
+            return null;
+        });
+        return json(new Generated(count, firstN, firstN + count - 1, generated.subList(0, Math.min(SAMPLE, count)),
+                "Inserted " + count + " data row(s)"));
     }
 
     @McpTool(name = "update_data", description = "Changes data rows selected by ids or by rules: sets or removes "
