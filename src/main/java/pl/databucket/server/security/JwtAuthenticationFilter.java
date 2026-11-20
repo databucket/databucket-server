@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pl.databucket.server.exception.NoAccessToProjectException;
 import pl.databucket.server.logging.LogContext;
 import pl.databucket.server.service.UserService;
 
@@ -51,10 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                CustomUserDetails customUserDetails = (CustomUserDetails) userService.loadUserByUsername(username);
+                // checked on every request, as when signing in: a token lives for hours, the user or the project may
+                // have been disabled, expired or taken apart since
+                CustomUserDetails customUserDetails = userService.loadTokenUser(username, jwtTokenUtil.getProjectIdFromToken(authToken));
 
                 if (jwtTokenUtil.validateToken(authToken, customUserDetails)) {
-                    UsernamePasswordAuthenticationToken authentication = jwtTokenUtil.getAuthentication(authToken, customUserDetails);
+                    UsernamePasswordAuthenticationToken authentication = jwtTokenUtil.getAuthentication(customUserDetails);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     MDC.put(LogContext.USER, customUserDetails.getUsername());
@@ -63,6 +66,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (UsernameNotFoundException e) {
                 // The token is signed correctly but its user no longer exists: leave the request unauthenticated
                 logger.warn("Token for unknown user: " + username);
+            } catch (NoAccessToProjectException e) {
+                // The user or the project may not be used any more: unauthenticated (401), as a new sign-in is refused
+                logger.info("Token refused for " + username + ": " + e.getMessage());
             }
         }
 
