@@ -14,6 +14,7 @@ import pl.databucket.server.dto.DataDTO;
 import pl.databucket.server.dto.DataGetDTO;
 import pl.databucket.server.dto.DataHistoryEntryDTO;
 import pl.databucket.server.dto.DataModifyDTO;
+import pl.databucket.server.dto.IndexedPropertyDto;
 import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.User;
 import pl.databucket.server.service.BucketService;
@@ -62,10 +63,12 @@ public class McpTools {
     private final UserService userService;
     private final McpBucketInfoService bucketInfo;
     private final TransactionTemplate transactionTemplate;
+    private final McpBucketCreator bucketCreator;
 
     public McpTools(ObjectMapper objectMapper, DataService dataService, DataHistorySearchService historySearch,
                     BucketService bucketService, UserService userService, McpBucketInfoService bucketInfo,
-                    TransactionTemplate transactionTemplate) {
+                    TransactionTemplate transactionTemplate, McpBucketCreator bucketCreator) {
+        this.bucketCreator = bucketCreator;
         this.objectMapper = objectMapper;
         this.dataService = dataService;
         this.historySearch = historySearch;
@@ -84,6 +87,11 @@ public class McpTools {
     }
 
     public record Count(int count, String message) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public record CreatedBucket(McpBucketInfoService.BucketDescription bucket, String view, List<String> enums,
+                                List<String> skipped, String message) {
     }
 
     public record Generated(int inserted, long firstN, long lastN, List<Map<String, Object>> sample, String message) {
@@ -113,6 +121,47 @@ public class McpTools {
     public String describeBucket(
             @McpToolParam(description = "Bucket name, as returned by list_buckets") String bucket) throws JsonProcessingException {
         return json(bucketInfo.describeBucket(bucket));
+    }
+
+    @McpTool(name = "create_bucket", description = "Creates a new bucket ready to use: its data class with the fields "
+            + "(types, enums with their values), the bucket with the data and history tables, the columns and a view "
+            + "of the data table in the web application, all named after the bucket. Give an example row in 'sample' "
+            + "(the types are guessed from the values) and/or the fields in 'fields' (they win, by path). Needs the "
+            + "ADMIN role. Returns the bucket as describe_bucket does; fill it with generate_data or insert_data.",
+            annotations = @McpTool.McpAnnotations(title = "Create a bucket", readOnlyHint = false, destructiveHint = false,
+                    idempotentHint = false, openWorldHint = false))
+    public String createBucket(
+            @McpToolParam(description = "Name of the new bucket, 1..30 characters, unique in the project") String name,
+            @McpToolParam(description = "What the data is for", required = false) String description,
+            @McpToolParam(description = "An example row, e.g. {\"login\": \"anna\", \"age\": 34, \"active\": true, "
+                    + "\"birthDate\": \"1990-05-01\", \"address\": {\"city\": \"Paris\"}}: each value gives a field "
+                    + "(nested objects give paths such as $.address.city): a number -> numeric, true/false -> boolean, "
+                    + "yyyy-MM-dd -> date, an ISO time stamp -> datetime, HH:mm -> time, other -> string. Lists get no "
+                    + "field.", required = false) Map<String, Object> sample,
+            @McpToolParam(description = "The fields, or changes to the fields of the sample: [{\"path\": \"$.status\", "
+                    + "\"type\": \"enum\", \"values\": [\"active\", \"blocked\"]}, {\"path\": \"$.age\", \"title\": "
+                    + "\"Age\", \"type\": \"numeric\"}]. Types: string, numeric, boolean, date, datetime, time, enum "
+                    + "(with values). The title defaults to the path (postCode -> Post code).", required = false)
+            List<Map<String, Object>> fields,
+            @McpToolParam(description = "Keep the history of changes of each row. Default true.", required = false)
+            Boolean history,
+            @McpToolParam(description = "Protected data: users see only the rows they reserved (admins see all). "
+                    + "Default false.", required = false) Boolean protectedData,
+            @McpToolParam(description = "Up to 5 properties with a database index, for big buckets searched by them: "
+                    + "[{\"path\": \"$.login\", \"type\": \"text\"}, {\"path\": \"$.age\", \"type\": \"number\"}]",
+                    required = false) List<IndexedPropertyDto> indexedProperties,
+            @McpToolParam(description = "The lowest role that may use the bucket: AGENT (default: everyone in the "
+                    + "project, also AI agents), ROBOT, MEMBER or ADMIN", required = false) String access) throws Exception {
+        User user = userService.getCurrentUser();
+        if (!user.hasRoleAtLeast(Constants.ROLE_ADMIN))
+            throw new IllegalArgumentException("Creating a bucket needs the ADMIN role; the user's role is "
+                    + user.getTopRole().getName() + ". Ask an admin, or sign in as one.");
+        BucketSchema.Result schema = BucketSchema.of(sample, fields);
+        McpBucketCreator.Created created = bucketCreator.create(new McpBucketCreator.Request(name, description,
+                schema.fields(), history == null || history, Boolean.TRUE.equals(protectedData), indexedProperties, access));
+        return json(new CreatedBucket(bucketInfo.describeBucket(name.trim()), created.view(), created.enums(),
+                schema.skipped(), "Created the bucket '" + name.trim() + "' with the data class '" + created.dataClass()
+                + "' and the view '" + created.view() + "'. Fill it with generate_data."));
     }
 
     // ---------------------------------------------------------------- reading
