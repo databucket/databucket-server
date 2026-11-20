@@ -69,7 +69,8 @@ spring:
           Start with list_buckets, then describe_bucket to learn the property paths, enum values and tag ids of a
           bucket. Find rows with find_data; to use rows exclusively (e.g. a test account), reserve them with
           reserve_data and release them with release_data when done. To fill a bucket with many random rows, use
-          generate_data (a generator per property, the server makes the rows) instead of writing them with insert_data. Rules: a list of [left, operator, right],
+          generate_data (a generator per property, the server makes the rows) instead of writing them with insert_data.
+          An admin can make a new bucket with create_bucket (from an example row and/or a list of fields). Rules: a list of [left, operator, right],
           combined with 'and', e.g. [["$.status", "==", "active"], ["reserved", "==", false]]; nest with
           {"or": [...]}, {"and": [...]}, {"!": rule}. You act as the signed-in user, only in their project.
 
