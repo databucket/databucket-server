@@ -129,6 +129,16 @@ public class ProjectContentService {
         AuditLog.log("project.content-removed", "id={} buckets={}", projectId, buckets.size());
     }
 
+    /**
+     * Dropping a bucket table drops the triggers of its foreign key on "tags", which needs an ACCESS EXCLUSIVE lock on
+     * "tags". A transaction that read "tags" before (isEmpty) and then drops would wait for another one doing the same:
+     * two projects cleared or deleted at the same time ended in "deadlock detected". So the transactions that drop
+     * bucket tables take that lock first, before anything else, and run one after another.
+     */
+    public void lockForDroppingBuckets() {
+        jdbcTemplate.getJdbcTemplate().execute("LOCK TABLE tags IN ACCESS EXCLUSIVE MODE");
+    }
+
     private List<Long> bucketIds(int projectId, boolean withDeleted) {
         return jdbcTemplate.queryForList(BUCKETS + (withDeleted ? "" : " AND deleted = false"),
                 new MapSqlParameterSource("p", projectId), Long.class);
