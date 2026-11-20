@@ -232,24 +232,25 @@ public class TokenProvider implements Serializable {
         }
     }
 
-    UsernamePasswordAuthenticationToken getAuthentication(final String token, final CustomUserDetails customUserDetails) {
+    /** The project of a token (0: none, e.g. the management of a SUPER user or a pending password change). */
+    public Integer getProjectIdFromToken(final String token) {
         try {
-            final Claims claims = Jwts.parser()
+            return Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
-                    .getPayload();
-
-            customUserDetails.setProjectId(claims.get(PROJECT_ID, Integer.class));
-
-            final Collection<? extends GrantedAuthority> authorities =
-                    Arrays.stream(claims.get(AUTHORITIES_KEY, String.class).split(","))
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList());
-
-            return new UsernamePasswordAuthenticationToken(customUserDetails, "", authorities);
+                    .getPayload()
+                    .get(PROJECT_ID, Integer.class);
         } catch (JwtException e) {
             throw new IllegalArgumentException("Invalid JWT token", e);
         }
+    }
+
+    /**
+     * The authentication of a request: the user as checked for this request ({@code UserService.loadTokenUser}), with
+     * the user's current roles, so a role taken away applies at once, not when the token expires.
+     */
+    UsernamePasswordAuthenticationToken getAuthentication(final CustomUserDetails customUserDetails) {
+        return new UsernamePasswordAuthenticationToken(customUserDetails, "", customUserDetails.getAuthorities());
     }
 }

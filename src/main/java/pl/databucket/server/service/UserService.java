@@ -70,6 +70,41 @@ public class UserService implements UserDetailsService {
                 user.isSuperUser());
     }
 
+    /**
+     * The user of a request's token, checked as when signing in, because a token lives for hours: the user is enabled
+     * and not expired, and for a token of a project (projectId other than 0) the user is still assigned to it and
+     * the project is enabled and not expired. The roles are the current ones, not those written into the token.
+     *
+     * @throws UsernameNotFoundException  when the user doesn't exist (any more)
+     * @throws NoAccessToProjectException when the user or the project may not be used now (the message says why)
+     */
+    @Transactional(readOnly = true)
+    public CustomUserDetails loadTokenUser(String username, Integer projectId) throws NoAccessToProjectException {
+        User user = userRepository.findWithProjectsAndRolesByUsername(username);
+        if (user == null)
+            throw new UsernameNotFoundException("User not found: " + username);
+        if (!Boolean.TRUE.equals(user.getEnabled()))
+            throw new NoAccessToProjectException("The user is disabled!");
+        if (user.isExpired())
+            throw new NoAccessToProjectException("User access has expired!");
+
+        if (projectId != null && projectId != 0) {
+            Project project = user.getProjects().stream()
+                    .filter(item -> item.getId() == projectId)
+                    .findFirst()
+                    .orElseThrow(() -> new NoAccessToProjectException("The user is not assigned to given project!"));
+            if (!project.getEnabled())
+                throw new NoAccessToProjectException("The project is disabled!");
+            if (project.isExpired())
+                throw new NoAccessToProjectException("The project expired!");
+        }
+
+        CustomUserDetails details = new CustomUserDetails(user.getUsername(), user.getPassword(), getAuthority(user),
+                true, user.isSuperUser());
+        details.setProjectId(projectId);
+        return details;
+    }
+
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
