@@ -111,6 +111,7 @@ public class ManageProjectService {
 
     @Transactional
     public void deleteProject(int projectId) throws ItemNotFoundException, ProjectNotEmptyException {
+        projectContentService.lockForDroppingBuckets();
         Project project = projectRepository.findByIdAndDeleted(projectId, false);
 
         if (project == null)
@@ -149,6 +150,7 @@ public class ManageProjectService {
     // removes everything in the project except the project itself and its users
     @Transactional
     public void clearProject(int projectId) throws ItemNotFoundException {
+        projectContentService.lockForDroppingBuckets();
         Project project = projectRepository.findByIdAndDeleted(projectId, false);
         if (project == null)
             throw new ItemNotFoundException(Project.class, projectId);
