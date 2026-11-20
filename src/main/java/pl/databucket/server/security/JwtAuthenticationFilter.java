@@ -1,6 +1,7 @@
 package pl.databucket.server.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureException;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //                logger.info("The token is expired and not valid anymore.");
             } catch (SignatureException e) {
 //                logger.info("Authentication Failed. User name, password or token not valid.");
+            } catch (JwtException e) {
+                // any other token that isn't ours, e.g. an unsigned one ("alg": "none"): not signed in (401), not a 500
+                logger.warn("Token refused: " + e.getMessage());
             }
         }
 
