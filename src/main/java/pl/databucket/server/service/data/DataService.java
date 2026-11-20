@@ -317,6 +317,14 @@ public class DataService {
         return count != null ? count : 0;
     }
 
+    /** The last id given out in the bucket (also of rows removed since), 0 before the first row. */
+    public long lastDataId(Bucket bucket) {
+        Map<String, Object> paramMap = Map.of("table", "\"" + bucket.getTableName() + "\"");
+        Long id = jdbcTemplate.queryForObject("SELECT coalesce(pg_sequence_last_value(pg_get_serial_sequence(:table, '"
+                + COL.DATA_ID + "')), 0)", paramMap, Long.class);
+        return id != null ? id : 0;
+    }
+
     public int deleteDataByIds(User user, Bucket bucket, List<Long> dataIds) throws UnknownColumnException {
         Map<String, Object> paramMap = new HashMap<>();
         Map<String, Object> conditions = new LinkedHashMap<>();
