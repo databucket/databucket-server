@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.DataFilterDto;
 import pl.databucket.server.entity.DataFilter;
+import pl.databucket.server.exception.ItemAlreadyUsedException;
 import pl.databucket.server.exception.ExceptionFormatter;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
@@ -78,6 +79,9 @@ public class DataFilterController {
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (ItemAlreadyUsedException e) {
+            // used by views (columns) or by views and tasks (filters): as for classes and enums
+            return exceptionFormatter.customException(e, HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
