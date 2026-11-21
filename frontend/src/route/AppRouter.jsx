@@ -61,6 +61,10 @@ export const getManagementUsersPath = () => {
     return '/management/users';
 }
 
+export const getManagementAuditPath = () => {
+    return '/management/audit';
+}
+
 export const getManagementTemplatesPath = () => {
     return '/management/templates';
 }

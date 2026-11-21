@@ -22,6 +22,7 @@ import FiltersTab from "./FiltersTab";
 import ViewsTab from "./ViewsTab";
 import TasksTab from "./TasksTab";
 import SchedulesTab from "./SchedulesTab";
+import ActivityTab from "./ActivityTab";
 import {
     getSettingsTabsBackgroundColor,
     getSettingsTabsColor
@@ -78,7 +79,7 @@ export default function _ProjectSettingsTabs() {
     console.log('location.pathname:', location.pathname);
     console.log('getProjectSettingsPath():', getProjectSettingsPath());
 
-    const tabs = ['teams', 'users', 'classes', 'icons', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks', 'schedules', 'templates'];
+    const tabs = ['teams', 'users', 'classes', 'icons', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks', 'schedules', 'activity', 'templates'];
 
     const getTabsValue = (pathname) => {
         let value = pathname.split("/").pop();
@@ -139,6 +140,8 @@ export default function _ProjectSettingsTabs() {
                                to={`${getProjectSettingsPath()}/tasks`}/>
                     <StyledTab label="Schedules" value={tabs[12]} component={Link}
                                to={`${getProjectSettingsPath()}/schedules`}/>
+                    <StyledTab label="Activity" value={tabs[13]} component={Link}
+                               to={`${getProjectSettingsPath()}/activity`}/>
                 </Tabs>
             </div>
             <div className={classes.panel}>
@@ -159,6 +162,7 @@ export default function _ProjectSettingsTabs() {
                                 <Route path="views" element={<ViewsTab />} />
                                 <Route path="tasks" element={<TasksTab />} />
                                 <Route path="schedules" element={<SchedulesTab />} />
+                                <Route path="activity" element={<ActivityTab />} />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>
                         </SvgProvider>

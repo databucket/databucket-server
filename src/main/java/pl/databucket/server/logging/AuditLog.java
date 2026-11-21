@@ -19,7 +19,19 @@ public final class AuditLog {
     // p.d.s.a.data, the same as the access log of bucket data.
     private static final String LOGGER_PREFIX = "pl.databucket.server.operation.";
 
+    /** Also receives every operation (after the commit), e.g. to record some of them in the audit table. */
+    @FunctionalInterface
+    public interface Sink {
+        void accept(String action, String message, Object[] args);
+    }
+
+    private static volatile Sink sink;
+
     private AuditLog() {
+    }
+
+    public static void setSink(Sink newSink) {
+        sink = newSink;
     }
 
     public static void log(String action, String message, Object... args) {
@@ -43,5 +55,12 @@ public final class AuditLog {
         } finally {
             MDC.remove(LogContext.ACTION);
         }
+        Sink current = sink;
+        if (current != null)
+            try {
+                current.accept(action, message, args);
+            } catch (RuntimeException e) {
+                LoggerFactory.getLogger(AuditLog.class).warn("Failed to record {} in the audit table: {}", action, e.getMessage());
+            }
     }
 }

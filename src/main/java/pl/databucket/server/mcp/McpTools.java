@@ -32,6 +32,7 @@ import pl.databucket.server.dto.TaskRunDTO;
 import pl.databucket.server.exception.BucketNotFoundException;
 import pl.databucket.server.service.TaskAction;
 import pl.databucket.server.service.TaskRunService;
+import pl.databucket.server.audit.AuditService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,12 +72,14 @@ public class McpTools {
     private final McpBucketCreator bucketCreator;
     private final DataGenerateService generateService;
     private final TaskRunService taskRunService;
+    private final AuditService auditService;
 
     public McpTools(ObjectMapper objectMapper, DataService dataService, DataHistorySearchService historySearch,
                     BucketService bucketService, UserService userService, McpBucketInfoService bucketInfo,
                     TransactionTemplate transactionTemplate, McpBucketCreator bucketCreator,
-                    DataGenerateService generateService, TaskRunService taskRunService) {
+                    DataGenerateService generateService, TaskRunService taskRunService, AuditService auditService) {
         this.taskRunService = taskRunService;
+        this.auditService = auditService;
         this.bucketCreator = bucketCreator;
         this.generateService = generateService;
         this.objectMapper = objectMapper;
@@ -423,6 +426,53 @@ public class McpTools {
         } catch (TaskAction.InvalidTaskException | TaskRunService.ForbiddenTaskException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
+    }
+
+    // ---------------------------------------------------------------- activity
+
+    @McpTool(name = "get_activity", description = "Lists the changes of the project's settings, newest first: who "
+            + "created, changed or deleted which bucket, class, view, task, team, user..., with the properties before "
+            + "and after; also sign-ins, task runs and bulk data operations (action e.g. auth.signin, data.delete). "
+            + "Only for ADMIN or higher. Filters are optional.",
+            annotations = @McpTool.McpAnnotations(title = "Get activity", readOnlyHint = true, destructiveHint = false,
+                    idempotentHint = true, openWorldHint = false))
+    public String getActivity(
+            @McpToolParam(description = "Who made the change (user name)", required = false) String actor,
+            @McpToolParam(description = "The type of the object: Bucket, Class, Columns, Enum, Filter, Group, Icon, "
+                    + "Tag, Task, Schedule, Team, View, Project, User, Account (sign-ins), Data (bulk operations)",
+                    required = false) String type,
+            @McpToolParam(description = "CREATE, UPDATE, DELETE or an operation such as auth.signin, data.delete",
+                    required = false) String action,
+            @McpToolParam(description = "From: 2026-11-21T10:00:00Z or relative, e.g. @now-1d, @now-2h", required = false)
+            String from,
+            @McpToolParam(description = "To, as from", required = false) String to,
+            @McpToolParam(description = "Page number, from 1. Default 1.", required = false) Integer page,
+            @McpToolParam(description = "Events per page, 1.." + MAX_ROWS + ". Default 20.", required = false) Integer limit)
+            throws Exception {
+        User user = userService.getCurrentUser();
+        if (!user.hasRoleAtLeast(Constants.ROLE_ADMIN))
+            throw new IllegalArgumentException("The activity of the project needs the ADMIN role or higher; the user's role is "
+                    + user.getTopRole().getName());
+        Integer projectId = currentProject();
+        if (projectId == null)
+            throw new IllegalArgumentException("Sign in to a project");
+        int rows = limit != null ? limit : 20;
+        if (rows < 1 || rows > MAX_ROWS)
+            throw new IllegalArgumentException("The limit is 1.." + MAX_ROWS);
+        AuditService.Filter filter;
+        try {
+            filter = new AuditService.Filter(projectId, false, actor, type, action, AuditService.instant(from),
+                    AuditService.instant(to));
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new IllegalArgumentException("A date like 2026-11-21T10:00:00Z or @now-1d, not: " + e.getParsedString());
+        }
+        return json(auditService.search(filter, page != null ? page : 1, rows));
+    }
+
+    private static Integer currentProject() {
+        Object principal = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        return principal instanceof pl.databucket.server.security.CustomUserDetails details ? details.getProjectId() : null;
     }
 
     // ---------------------------------------------------------------- history
