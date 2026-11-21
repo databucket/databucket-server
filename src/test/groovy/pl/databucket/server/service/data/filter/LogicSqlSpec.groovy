@@ -79,6 +79,43 @@ class LogicSqlSpec extends Specification {
         params.lg0 == "john"
     }
 
+    @Unroll
+    def "should compare a date with #value, the moment the rule is read shifted by #shiftMs ms"() {
+        given:
+        long before = System.currentTimeMillis()
+
+        when:
+        def text = sql(["<": [[var: "modifiedAt"], value]])
+        long after = System.currentTimeMillis()
+
+        then:
+        text == "(modified_at < :lg0)"
+        params.lg0 instanceof java.sql.Timestamp
+        // the date format of the rules keeps milliseconds
+        params.lg0.time >= before + shiftMs - 1
+        params.lg0.time <= after + shiftMs + 1
+
+        where:
+        value        || shiftMs
+        "@now"       || 0L
+        "@now-30s"   || -30_000L
+        "@now-2h"    || -7_200_000L
+        "@now+1d"    || 86_400_000L
+        "@now-1w"    || -604_800_000L
+    }
+
+    def "should compare a date property with @now as a timestamp"() {
+        expect:
+        sql([">": [[var: '$.validUntil'], "@now"]]).contains("::timestamp")
+        params.lg1 instanceof java.sql.Timestamp
+    }
+
+    def "should leave a text that only starts like @now as it is"() {
+        expect:
+        sql(["==": [[var: '$.a'], "@nowhere"]]) == "((properties #>> ARRAY[CAST(:lg0 AS text)]) = :lg1)"
+        params.lg1 == "@nowhere"
+    }
+
     def "should find a field among values"() {
         expect:
         sql(["in": [[var: "tagId"], [1, 2]]]) == "(tag_id IN (:lg0))"

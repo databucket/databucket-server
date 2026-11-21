@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.databucket.server.dto.TaskDto;
 import pl.databucket.server.exception.ExceptionFormatter;
+import pl.databucket.server.exception.ItemAlreadyUsedException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.service.TaskService;
@@ -69,6 +70,9 @@ public class TaskController {
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         } catch (ItemNotFoundException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_FOUND);
+        } catch (ItemAlreadyUsedException e) {
+            // used by schedules: as for filters
+            return exceptionFormatter.customException(e, HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }

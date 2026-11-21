@@ -14,6 +14,7 @@ import pl.databucket.server.entity.User;
 import pl.databucket.server.repository.DataEnumRepository;
 import pl.databucket.server.repository.TagRepository;
 import pl.databucket.server.service.BucketService;
+import pl.databucket.server.service.TaskRunService;
 import pl.databucket.server.service.UserService;
 
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public class McpBucketInfoService {
     @Autowired
     private DataEnumRepository dataEnumRepository;
 
+    @Autowired
+    private TaskRunService taskRunService;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record BucketSummary(String name, String description, String dataClass, boolean history, boolean protectedData) {
     }
@@ -57,7 +61,12 @@ public class McpBucketInfoService {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record BucketDescription(String name, String description, boolean history, boolean protectedData,
                                     String dataClass, String dataClassDescription, List<Field> fields, List<TagInfo> tags,
-                                    List<IndexedPropertyDto> indexedProperties) {
+                                    List<IndexedPropertyDto> indexedProperties, List<TaskInfo> tasks) {
+    }
+
+    /** A saved task of the bucket, run with run_task; filter = the name of its filter (the rows it runs on). */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record TaskInfo(long id, String name, String description, String action, String filter) {
     }
 
     @Transactional(readOnly = true)
@@ -101,9 +110,17 @@ public class McpBucketInfoService {
                 .map(tag -> new TagInfo(tag.getId(), tag.getName(), tag.getDescription()))
                 .toList();
 
+        List<TaskInfo> tasks = taskRunService.tasksOf(bucket).stream()
+                .map(task -> new TaskInfo(task.getId(), task.getName(), task.getDescription(),
+                        task.getConfiguration() != null && task.getConfiguration().getActions() != null
+                                ? (String) task.getConfiguration().getActions().get("type") : null,
+                        task.getDataFilter() != null && !Boolean.TRUE.equals(task.getDataFilter().getDeleted())
+                                ? task.getDataFilter().getName() : null))
+                .toList();
+
         return new BucketDescription(bucket.getName(), bucket.getDescription(), bucket.isHistory(), bucket.isProtectedData(),
                 dataClass != null ? dataClass.getName() : null, dataClass != null ? dataClass.getDescription() : null,
                 fields, tags, bucket.getIndexedProperties() == null || bucket.getIndexedProperties().isEmpty()
-                        ? null : bucket.getIndexedProperties());
+                        ? null : bucket.getIndexedProperties(), tasks.isEmpty() ? null : tasks);
     }
 }

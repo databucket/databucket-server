@@ -1,5 +1,8 @@
 databucket:
   title: Databucket
+  # the scheduler queries PostgreSQL (FOR UPDATE SKIP LOCKED); not on H2
+  task-schedules:
+    enabled: false
 spring:
   datasource:
     url: jdbc:h2:mem:testdb

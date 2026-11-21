@@ -19,8 +19,9 @@ import java.util.Map;
 public class ProjectContentService {
 
     // the project's own tables, in an order the foreign keys allow deleting them in
-    // (views -> columns, filters; tasks -> filters; buckets, columns, filters -> classes)
+    // (schedules -> tasks, buckets; views -> columns, filters; tasks -> filters; buckets, columns, filters -> classes)
     private static final List<String[]> CONTENT = List.of(
+            new String[]{"task_schedules", "Schedules"},
             new String[]{"views", "Views"},
             new String[]{"tasks", "Tasks"},
             new String[]{"buckets", "Buckets"},
@@ -57,7 +58,8 @@ public class ProjectContentService {
             "DELETE FROM views_classes WHERE view_id IN (" + VIEWS + ") OR class_id IN (" + CLASSES + ")",
             "DELETE FROM views_teams WHERE view_id IN (" + VIEWS + ") OR team_id IN (" + TEAMS + ")",
             "DELETE FROM views_users WHERE view_id IN (" + VIEWS + ")",
-            "DELETE FROM users_teams WHERE team_id IN (" + TEAMS + ")"
+            "DELETE FROM users_teams WHERE team_id IN (" + TEAMS + ")",
+            "DELETE FROM task_schedule_runs WHERE project_id = :p"
     );
 
     @Autowired

@@ -28,6 +28,10 @@ import pl.databucket.server.service.data.filter.LogicSql;
 import pl.databucket.server.service.data.filter.RulesToLogic;
 import pl.databucket.server.service.data.generator.DataGenerateService;
 import pl.databucket.server.dto.DataGenerateDTO;
+import pl.databucket.server.dto.TaskRunDTO;
+import pl.databucket.server.exception.BucketNotFoundException;
+import pl.databucket.server.service.TaskAction;
+import pl.databucket.server.service.TaskRunService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +54,8 @@ public class McpTools {
             + "{\"!\": rule}. Left: a property path ($.name, $.address.city) or a field (id, tagId, owner, reserved, "
             + "createdBy, createdAt, modifiedBy, modifiedAt). Operators: ==, !=, >, >=, <, <=, in, !in (right: a list), "
             + "is, is not (right: null), like, !like (% and _), similar, !similar, ~, !~, ~*, !~* (regular expressions). "
-            + "Empty or missing: all rows.";
+            + "Values: \"@currentUser\" = the signed-in user; \"@now\", \"@now-2h\", \"@now+1d\" (s, m, h, d, w) = "
+            + "the current moment, e.g. [\"modifiedAt\", \"<\", \"@now-1d\"]. Empty or missing: all rows.";
     private static final String LOGIC = "Instead of or next to 'rules': a JsonLogic expression, e.g. "
             + "{\"and\": [{\"==\": [{\"var\": \"$.city\"}, \"Paris\"]}, {\">\": [{\"var\": \"$.age\"}, 30]}]}.";
     private static final String SORT = "Sort order: a field or property, asc/desc, e.g. id, desc(id), asc($.name); "
@@ -65,11 +70,13 @@ public class McpTools {
     private final TransactionTemplate transactionTemplate;
     private final McpBucketCreator bucketCreator;
     private final DataGenerateService generateService;
+    private final TaskRunService taskRunService;
 
     public McpTools(ObjectMapper objectMapper, DataService dataService, DataHistorySearchService historySearch,
                     BucketService bucketService, UserService userService, McpBucketInfoService bucketInfo,
                     TransactionTemplate transactionTemplate, McpBucketCreator bucketCreator,
-                    DataGenerateService generateService) {
+                    DataGenerateService generateService, TaskRunService taskRunService) {
+        this.taskRunService = taskRunService;
         this.bucketCreator = bucketCreator;
         this.generateService = generateService;
         this.objectMapper = objectMapper;
@@ -118,7 +125,8 @@ public class McpTools {
     @McpTool(name = "describe_bucket", description = "Describes a bucket: the fields of its data class (title, "
             + "property path such as $.name, type, allowed values of an enum) and the tags its rows can have (id and "
             + "name). Call it before searching or writing data, to use the right property paths and tag ids. "
-            + "indexedProperties are fast to search in a big bucket: prefer rules on them.",
+            + "indexedProperties are fast to search in a big bucket: prefer rules on them. tasks are the saved tasks "
+            + "of the bucket, run with run_task.",
             annotations = @McpTool.McpAnnotations(title = "Describe a bucket", readOnlyHint = true, destructiveHint = false,
                     idempotentHint = true, openWorldHint = false))
     public String describeBucket(
@@ -383,6 +391,38 @@ public class McpTools {
                 ? dataService.deleteDataByIds(access.user(), access.bucket(), ids)
                 : dataService.deleteDataByRules(access.user(), access.bucket(), filter(access.user(), rules, logic)));
         return json(new Count(count, "Removed " + count + " data row(s)"));
+    }
+
+    @McpTool(name = "run_task", description = "Runs a saved task of a bucket (see the tasks in describe_bucket): "
+            + "modify (sets the tag, the reservation or properties), remove (removes rows with their history, needs "
+            + "ROBOT or higher), clear history (needs ROBOT or higher) or reserve. It runs on the rows matching the "
+            + "task's filter and the given rules together; a task without a filter needs rules. Use preview=true "
+            + "first to see how many rows it would change. Returns the number of rows.",
+            annotations = @McpTool.McpAnnotations(title = "Run a task", readOnlyHint = false, destructiveHint = true,
+                    idempotentHint = false, openWorldHint = false))
+    public String runTask(
+            @McpToolParam(description = "Bucket name") String bucket,
+            @McpToolParam(description = "Task id or name, from describe_bucket") String task,
+            @McpToolParam(description = RULES + " Narrow the task's filter; required when the task has no filter.",
+                    required = false) List<Object> rules,
+            @McpToolParam(description = LOGIC, required = false) Map<String, Object> logic,
+            @McpToolParam(description = "true: change nothing, only count the rows the task would run on. Default false.",
+                    required = false) Boolean preview) throws Exception {
+        if (task == null || task.isBlank())
+            throw new IllegalArgumentException("Give the task id or name; see the tasks in describe_bucket");
+        TaskRunDTO request = new TaskRunDTO();
+        request.setRules(rules);
+        request.setLogic(isEmpty(logic) ? null : logic);
+        try {
+            return json(withFriendlyErrors(() -> taskRunService.run(bucket, task.trim(), request, Boolean.TRUE.equals(preview))));
+        } catch (BucketNotFoundException e) {
+            throw noBucket(bucket);
+        } catch (TaskRunService.TaskNotFoundException e) {
+            throw new IllegalArgumentException("The bucket '" + bucket + "' has no task '" + task
+                    + "'; see the tasks in describe_bucket");
+        } catch (TaskAction.InvalidTaskException | TaskRunService.ForbiddenTaskException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     // ---------------------------------------------------------------- history

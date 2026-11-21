@@ -9,6 +9,7 @@ import pl.databucket.server.entity.Bucket;
 import pl.databucket.server.entity.DataClass;
 import pl.databucket.server.entity.DataFilter;
 import pl.databucket.server.entity.Task;
+import pl.databucket.server.exception.ItemAlreadyUsedException;
 import pl.databucket.server.exception.ItemNotFoundException;
 import pl.databucket.server.exception.ModifyByNullEntityIdException;
 import pl.databucket.server.logging.AuditLog;
@@ -16,6 +17,9 @@ import pl.databucket.server.repository.BucketRepository;
 import pl.databucket.server.repository.DataClassRepository;
 import pl.databucket.server.repository.DataFilterRepository;
 import pl.databucket.server.repository.TaskRepository;
+import pl.databucket.server.repository.TaskScheduleRepository;
+import pl.databucket.server.entity.TaskSchedule;
+import java.util.Map;
 
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +44,9 @@ public class TaskService {
 
     @Autowired
     private DataFilterRepository dataFilterRepository;
+
+    @Autowired
+    private TaskScheduleRepository taskScheduleRepository;
 
 
     public TaskDto createTask(TaskDto taskDto) throws ItemNotFoundException {
@@ -129,11 +136,16 @@ public class TaskService {
         return taskDto;
     }
 
-    public void deleteTask(long taskId) throws ItemNotFoundException {
+    public void deleteTask(long taskId) throws ItemNotFoundException, ItemAlreadyUsedException {
         Task task = taskRepository.findByIdAndDeleted(taskId, false);
 
         if (task == null)
             throw new ItemNotFoundException(Task.class, taskId);
+
+        List<TaskSchedule> schedules = taskScheduleRepository.findAllByDeletedAndTask(false, task);
+        if (!schedules.isEmpty())
+            throw new ItemAlreadyUsedException("Task", task.getName(),
+                    Map.of("schedules", schedules.stream().map(TaskSchedule::getName).toList()).toString());
 
         task.setBuckets(null);
         task.setDataClasses(null);
