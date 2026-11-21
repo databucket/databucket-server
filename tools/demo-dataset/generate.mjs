@@ -34,8 +34,8 @@ const COLUMNS_USER = 7;
 const FIRST_OWN_COLUMNS = 12;   // columns of the user class from older versions of the generator, removed
 const FIRST_OWN_FILTER = 12;
 const FIRST_OWN_VIEW = 13;
-// the views of users: all features (ViewFeatures.js) but Removal (5) and Duplicate (11)
-const USER_FEATURES = [1, 2, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16];
+// the views of users: all features (ViewFeatures.js) but Removal (5) and Duplicate (11); 17 = Generate (3.20.0)
+const USER_FEATURES = [1, 2, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17];
 const USER_SORT = 'desc(id)';
 
 // --- random -------------------------------------------------------------------------------------------------
