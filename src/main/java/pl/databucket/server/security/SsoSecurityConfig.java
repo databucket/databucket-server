@@ -29,7 +29,7 @@ public class SsoSecurityConfig {
     public SecurityFilterChain ssoSecurityFilterChain(HttpSecurity http,
                                                       SsoClientRegistrationRepository clientRegistrationRepository,
                                                       SsoAuthenticationHandler ssoAuthenticationHandler,
-                                                      @Value("${jwt.secret}") String secret) throws Exception {
+                                                      @Value("${jwt.secret:}") String secret) throws Exception {
         SsoAuthorizationRequestCookieRepository authorizationRequestRepository = new SsoAuthorizationRequestCookieRepository(secret);
         http
                 .securityMatcher("/oauth2/**", "/login/oauth2/**")

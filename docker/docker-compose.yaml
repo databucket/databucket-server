@@ -62,6 +62,8 @@ services:
       SPRING_DATASOURCE_URL: ${DATABUCKET_DB_URL:-jdbc:postgresql://postgres:5432/databucket}
       SPRING_DATASOURCE_USERNAME: ${DATABUCKET_DB_USER:-databucket_user}
       SPRING_DATASOURCE_PASSWORD: ${DATABUCKET_DB_PASSWORD:-databucket_user}
+      # signs the sign-in tokens: this value is public, good only for trying Databucket on this machine
+      JWT_SECRET: ${DATABUCKET_JWT_SECRET:-docker-compose-local-only-public-value-change-it-0123}
       SSO_ENABLED: "true"
       SSO_PROVIDER: keycloak
       SSO_ISSUER_URI: http://auth.localhost/realms/databucket

@@ -1,6 +1,7 @@
+# Local development only (bootRun, the IDE): not packed into the jar (build.gradle), so an installation has to
+# configure its own database, mail and jwt.secret.
 jwt:
-  secret: SGVsbG9Yb3JsZFRoaXNJc015U2VjcmV0S2V5Rm9xSldUVG9rZW5zMTIzNDU2Nzg5MA==
-  secret.legacy: veryverysecret
+  secret: local-development-only-not-in-the-jar-never-use-it-anywhere
   expire.hours: 24
 
 server:

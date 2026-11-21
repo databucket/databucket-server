@@ -1,6 +1,5 @@
 jwt:
-  secret: SGVsbG9Yb3JsZFRoaXNJc015U2VjcmV0S2V5Rm9xSldUVG9rZW5zMTIzNDU2Nzg5MA==
-  secret.legacy: veryverysecret
+  secret: unit-tests-only-secret-of-at-least-32-characters-0123456789
   expire.hours: 24
 
 spring:
