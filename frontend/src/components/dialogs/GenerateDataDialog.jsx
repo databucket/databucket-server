@@ -63,12 +63,22 @@ const save = (bucket, settings) => {
     }
 }
 
+// inputs in the table cells look like plain text; hovering or editing one shows a background
+const cellInput = {
+    InputProps: {disableUnderline: true},
+    sx: {
+        '& .MuiInputBase-root': {px: 0.5, borderRadius: 0.5},
+        '& .MuiInputBase-root:hover, & .MuiInputBase-root.Mui-focused': {bgcolor: 'action.hover'}
+    }
+};
+
 // the settings of a generator, in one table cell (the header says what the columns are, placeholders what to type)
 const GeneratorInputs = ({row, onChange, disabled}) => {
     const field = (name, placeholder, props = {}) =>
         <TextField size="small" variant="standard" placeholder={placeholder} value={row[name] ?? ''}
                    disabled={disabled} inputProps={{'aria-label': placeholder}}
-                   onChange={e => onChange({...row, [name]: e.target.value})} {...props}/>;
+                   onChange={e => onChange({...row, [name]: e.target.value})} {...props}
+                   InputProps={cellInput.InputProps} sx={{...cellInput.sx, ...props.sx}}/>;
     const dash = <Typography variant="body2" color="textSecondary">–</Typography>;
     switch (row.kind) {
         case KIND_NUMBER:
@@ -230,12 +240,12 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
                                             : <Typography variant="body2" color="textSecondary">-</Typography>}
                                     </TableCell>
                                     <TableCell sx={cellSx}>
-                                        <TextField size="small" variant="standard" value={row.path} disabled={working}
+                                        <TextField size="small" variant="standard" value={row.path} disabled={working} {...cellInput}
                                                    fullWidth inputProps={{'aria-label': 'Property path'}}
                                                    onChange={e => changeRow(index, {...row, path: e.target.value})}/>
                                     </TableCell>
                                     <TableCell sx={cellSx}>
-                                        <TextField select size="small" variant="standard" value={row.kind} fullWidth
+                                        <TextField select size="small" variant="standard" value={row.kind} fullWidth {...cellInput}
                                                    disabled={working} inputProps={{'aria-label': 'Generator'}}
                                                    onChange={e => changeKind(index, e.target.value)}>
                                             {KINDS.map(k => <MenuItem key={k.value} value={k.value}>{k.label}</MenuItem>)}
