@@ -199,7 +199,7 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
     }
 
     return (
-        <Dialog open={open} onClose={close} maxWidth="md" fullWidth>
+        <Dialog open={open} onClose={close} maxWidth="lg" fullWidth>
             <DialogTitle>Generate data</DialogTitle>
             <DialogContent>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
@@ -214,7 +214,8 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
                     <Table size="small">
                         <TableHead>
                             <TableRow>
-                                <TableCell sx={{...cellSx, width: 190}}>Property</TableCell>
+                                <TableCell sx={{...cellSx, width: 140}}>Property name</TableCell>
+                                <TableCell sx={{...cellSx, width: 170}}>Property path</TableCell>
                                 <TableCell sx={{...cellSx, width: 150}}>Generator</TableCell>
                                 <TableCell sx={cellSx}>Settings</TableCell>
                                 <TableCell sx={{...cellSx, width: 40}}/>
@@ -224,10 +225,11 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
                             {rows.map((row, index) =>
                                 <TableRow key={index} hover>
                                     <TableCell sx={cellSx}>
-                                        {row.title != null &&
-                                            <Typography variant="caption" color="textSecondary" component="div">
-                                                {row.title}
-                                            </Typography>}
+                                        {row.title != null
+                                            ? row.title
+                                            : <Typography variant="body2" color="textSecondary">-</Typography>}
+                                    </TableCell>
+                                    <TableCell sx={cellSx}>
                                         <TextField size="small" variant="standard" value={row.path} disabled={working}
                                                    fullWidth inputProps={{'aria-label': 'Property path'}}
                                                    onChange={e => changeRow(index, {...row, path: e.target.value})}/>
