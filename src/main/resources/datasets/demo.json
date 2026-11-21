@@ -8189,7 +8189,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "sort": "desc(id)"
     },
@@ -8219,7 +8220,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "sort": "desc(id)"
     },
@@ -8249,7 +8251,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "sort": "desc(id)"
     },
@@ -8279,7 +8282,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "sort": "desc(id)"
     },
@@ -8309,7 +8313,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "sort": "desc(id)"
     },
@@ -8339,7 +8344,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "sort": "desc(id)"
     },
@@ -8486,7 +8492,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "description": "VIP accounts whose last payment failed",
       "sort": "desc(id)"
@@ -8516,7 +8523,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "description": "Company address in Poland",
       "sort": "desc(id)"
@@ -8546,7 +8554,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "description": "Taller than 190 cm, with glasses",
       "sort": "desc(id)"
@@ -8576,7 +8585,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "description": "Balance below zero",
       "sort": "desc(id)"
@@ -8606,7 +8616,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "description": "Account locked or suspended",
       "sort": "desc(id)"
@@ -8636,7 +8647,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "description": "Test accounts with the role ADMIN",
       "sort": "desc(id)"
@@ -8666,7 +8678,8 @@
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "description": "Premium or VIP, paying by card in EUR",
       "sort": "desc(id)"
