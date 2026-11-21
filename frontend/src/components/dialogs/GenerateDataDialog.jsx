@@ -211,7 +211,7 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
     return (
         <Dialog open={open} onClose={close} maxWidth="lg" fullWidth>
             <DialogTitle>Generate data</DialogTitle>
-            <DialogContent>
+            <DialogContent dividers>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
                     Random rows made by Databucket, a generator per property. A text may hold <b>{'{n}'}</b>, the
                     number of the row (unique, it continues after the last row of the bucket), and Datafaker
