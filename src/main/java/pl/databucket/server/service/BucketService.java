@@ -43,6 +43,9 @@ public class BucketService {
     private BucketRepository bucketRepository;
 
     @Autowired
+    private TaskScheduleRepository taskScheduleRepository;
+
+    @Autowired
     private GroupRepository groupRepository;
 
     @Autowired
@@ -323,6 +326,14 @@ public class BucketService {
         for (View view : bucket.getViews()) {
             view.getBuckets().remove(bucket);
             viewRepository.save(view);
+        }
+
+        // its schedules go with it
+        for (TaskSchedule schedule : taskScheduleRepository.findAllByDeletedAndBucket(false, bucket)) {
+            schedule.setDeleted(true);
+            schedule.setEnabled(false);
+            schedule.setNextRunAt(null);
+            taskScheduleRepository.save(schedule);
         }
 
         bucket.setDeleted(true);

@@ -25,7 +25,7 @@ import java.util.Set;
  * Variables ({"var": ...}): fields (id, tagId, owner, reserved, properties, createdBy, createdAt, modifiedBy,
  * modifiedAt), properties ($.a.b, or prop.$*a*b as the rich filter writes them), property functions
  * ($.a.length(), exists(), notExists(), isNull(), isNotNull(), isEmpty(), isNotEmpty()). "@currentUser" as a value
- * is the signed-in user.
+ * is the signed-in user, "@now" / "@now-2h" / "@now+1d" (s, m, h, d, w) the current moment, shifted.
  */
 public final class LogicSql {
 
@@ -148,8 +148,35 @@ public final class LogicSql {
         if ("@currentUser".equals(item))
             return new Value(currentUser);
         if (item instanceof List<?> list)
-            return new Value(list.stream().map(v -> "@currentUser".equals(v) ? currentUser : v).toList());
-        return new Value(item);
+            return new Value(list.stream().map(v -> "@currentUser".equals(v) ? currentUser : now(v)).toList());
+        return new Value(now(item));
+    }
+
+    private static final java.util.regex.Pattern NOW = java.util.regex.Pattern.compile("@now(?:([+-])(\\d{1,6})([smhdw]))?");
+
+    /**
+     * "@now", "@now-2h", "@now+1d" (units s, m, h, d, w): the moment the rule is read, as a date of the format the
+     * rules compare as dates (yyyy-MM-ddTHH:mm:ss.SSSZ, read back in the server's time zone like any date of a rule);
+     * any other value as it is.
+     */
+    static Object now(Object item) {
+        if (!(item instanceof String text) || !text.startsWith("@now"))
+            return item;
+        java.util.regex.Matcher matcher = NOW.matcher(text.trim());
+        if (!matcher.matches())
+            return item;
+        long millis = System.currentTimeMillis();
+        if (matcher.group(1) != null) {
+            long amount = Long.parseLong(matcher.group(2)) * switch (matcher.group(3)) {
+                case "s" -> 1000L;
+                case "m" -> 60_000L;
+                case "h" -> 3_600_000L;
+                case "d" -> 86_400_000L;
+                default -> 7 * 86_400_000L;
+            };
+            millis += "-".equals(matcher.group(1)) ? -amount : amount;
+        }
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new java.util.Date(millis));
     }
 
     private Operand variable(String var) throws InvalidRuleException {

@@ -31,6 +31,7 @@ import {
     getColumnClasses,
     getColumnDescription,
     getColumnFilter,
+    getColumnId,
     getColumnModifiedAt,
     getColumnModifiedBy,
     getColumnName
@@ -111,6 +112,8 @@ export default function TasksTab() {
                 title='Tasks'
                 tableRef={tableRef}
                 columns={tableState.columns([
+                    // the id runs the task from the API (POST /api/bucket/{bucket}/tasks/{id}/run)
+                    getColumnId(),
                     getColumnName("20%"),
                     getColumnDescription("20%"),
                     getColumnClass(classesLookup, 'Class support'),
