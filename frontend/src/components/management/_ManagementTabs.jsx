@@ -5,6 +5,7 @@ import {Link, Navigate, Route, Routes, useLocation} from "react-router-dom";
 import {
     getManagementProjectsPath,
     getManagementUsersPath,
+    getManagementAuditPath,
     getProjectDataPath
 } from "../../route/AppRouter";
 import {
@@ -24,12 +25,13 @@ import {CustomAppBar, CustomTabManagement} from "../common/CustomAppBar";
 
 const ProjectsTab = lazy(() => import("./ProjectsTab"));
 const UsersTab = lazy(() => import("./UsersTab"));
+const AuditLogTab = lazy(() => import("./AuditLogTab"));
 
 export default function _ManagementTabs() {
     document.title = 'Databucket';
 
     const location = useLocation();
-    const tabs = ['projects', 'users'];
+    const tabs = ['projects', 'users', 'audit'];
     const [logged, setLogged] = useState(hasToken());
 
     const getTabsValue = (pathname) => {
@@ -82,6 +84,7 @@ export default function _ManagementTabs() {
                         sx={{flex: 1}}>
                         <CustomTabManagement label="Projects" value={tabs[0]} component={Link} to={getManagementProjectsPath()}/>
                         <CustomTabManagement label="Users" value={tabs[1]} component={Link} to={getManagementUsersPath()}/>
+                        <CustomTabManagement label="Audit log" value={tabs[2]} component={Link} to={getManagementAuditPath()}/>
                     </Tabs>
                     <UserProfile onLogout={handleLogout}/>
                 </Toolbar>
@@ -93,6 +96,7 @@ export default function _ManagementTabs() {
                             <Routes>
                                 <Route path="projects" element={<ProjectsTab />} />
                                 <Route path="users" element={<UsersTab />} />
+                                <Route path="audit" element={<AuditLogTab />} />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>
                         </RolesProvider>

@@ -1,6 +1,8 @@
 databucket:
   title: Databucket
-  # the scheduler queries PostgreSQL (FOR UPDATE SKIP LOCKED); not on H2
+  # the audit writes jsonb and the scheduler queries PostgreSQL (FOR UPDATE SKIP LOCKED); not on H2
+  audit:
+    enabled: false
   task-schedules:
     enabled: false
 spring:

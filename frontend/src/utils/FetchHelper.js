@@ -2,13 +2,16 @@ import {logOut} from "./ConfigurationStorage";
 
 // API version 2 of the data endpoints: rules and logic translated safely (no SQL text); other endpoints ignore it
 export const API_VERSION_HEADER = {'Databucket-Api-Version': '2'};
+// marks the requests of the web application, e.g. "WEB" as the source of a change in Settings > Activity
+const CLIENT_HEADER = {'Databucket-Client': 'web'};
 
 export function fetchHelper(token) {
     if (token) {
         return {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',
-            ...API_VERSION_HEADER
+            ...API_VERSION_HEADER,
+            ...CLIENT_HEADER
         };
     } else {
         return {'Content-Type': 'application/json', ...API_VERSION_HEADER};
