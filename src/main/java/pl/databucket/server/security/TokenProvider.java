@@ -2,6 +2,7 @@ package pl.databucket.server.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,12 +37,18 @@ public class TokenProvider implements Serializable {
     static final String REQUESTED_PROJECTS = "req-p";
     static final String REQUESTED_MESSAGE = "req-m";
 
-    @Value("${jwt.secret}")
+    // no default: each installation sets its own (JwtSecretCheck)
+    @Value("${jwt.secret:}")
     private String signingKey;
 
     @Value("${jwt.expire.hours}")
     private long expireHours;
 
+
+    @PostConstruct
+    void checkSecret() {
+        JwtSecretCheck.verify(signingKey);
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(signingKey.getBytes(StandardCharsets.UTF_8));

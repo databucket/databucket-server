@@ -1,6 +1,6 @@
+# Local profile "testing" (H2, security autoconfiguration excluded): not packed into the jar (build.gradle).
 jwt:
-  secret: SGVsbG9Yb3JsZFRoaXNJc015U2VjcmV0S2V5Rm9xSldUVG9rZW5zMTIzNDU2Nzg5MA==
-  secret.legacy: veryverysecret
+  secret: local-testing-profile-only-not-in-the-jar-never-use-it-anywhere
   expire.hours: 24
 
 server:

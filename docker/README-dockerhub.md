@@ -56,7 +56,7 @@ volumes:
 `docker compose up`, open http://localhost:8080 and sign in as `super` / `super` - change this password right away
 (the user menu → Account). Then **Management → Projects**: create a project and import the **DEMO** dataset to look around.
 
-**Always set your own `JWT_SECRET`** - every Databucket started with the same secret accepts the same tokens.
+**`JWT_SECRET` is required**: Databucket doesn't start without its own secret of at least 32 characters (since 3.20.2). Whoever knows it can sign in as any user, so keep it secret and don't reuse the examples.
 
 ## Configuration
 

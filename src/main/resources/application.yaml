@@ -25,10 +25,20 @@ databucket:
   mcp:
     enabled: false
 
+# signs the sign-in tokens; no default - every installation sets its own, at least 32 characters (JWT_SECRET)
+jwt:
+  secret:
+  expire.hours: 24
+
 spring:
   application:
     # service.name in the ECS (JSON) logs
     name: databucket
+  # e-mails (sign-up, forgotten password, access requests): set the SMTP server of your company
+  mail:
+    host: localhost
+    port: 25
+    from: databucket@localhost
   jpa:
     generate-ddl: true
     hibernate.ddl-auto: update
@@ -75,6 +85,9 @@ spring:
           {"or": [...]}, {"and": [...]}, {"!": rule}. You act as the signed-in user, only in their project.
 
 server:
+  port: 8080
+  # the path of Databucket in its URL, e.g. /databucket
+  servlet.context-path: /
   # Behind the k8s ingress: take the client address, scheme and host from the X-Forwarded-* headers.
   # Tomcat trusts them only from internal addresses (10.x, 172.16-31.x, 192.168.x, loopback).
   forward-headers-strategy: native

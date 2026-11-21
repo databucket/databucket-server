@@ -36,6 +36,8 @@ jar {
 // from build/resources, but they must never get into the distributed jar
 bootJar {
     exclude '**/application-kslysz.yaml'
+    // the local profiles of development: their database, mail and jwt.secret are public; an installation sets its own
+    exclude '**/application-default.yaml', '**/application-testing.yaml'
 }
 
 dependencies {
