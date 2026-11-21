@@ -49,6 +49,7 @@ import {
     FEATURE_EXPORT,
     FEATURE_FILTER,
     FEATURE_HISTORY,
+    FEATURE_GENERATE,
     FEATURE_IMPORT,
     FEATURE_MODIFYING,
     FEATURE_REMOVAL,
@@ -102,6 +103,7 @@ import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
 import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 import ImportDataDialog from "../dialogs/ImportDataDialog";
+import GenerateDataDialog from "../dialogs/GenerateDataDialog";
 import {getStartOrder} from "../../utils/ViewSort";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
@@ -146,16 +148,19 @@ const ColumnsMenu = ({columns, onColumnsChanged, columnsArranged, onResetColumns
     );
 }
 
-// Export and import under one button, as a menu with their names (an icon alone doesn't say which way data goes)
-const ImportExportMenu = ({exportEnabled, onExport, importEnabled, onImport}) => {
+// Export, import and generating data under one button, as a menu with their names (an icon alone doesn't say which
+// way data goes); each item has its own view feature
+const ImportExportMenu = ({exportEnabled, onExport, importEnabled, onImport, generateEnabled, onGenerate}) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const choose = (action) => {
         setAnchorEl(null);
         action();
     }
+    const title = [importEnabled && 'Import', exportEnabled && 'Export', generateEnabled && 'Generate']
+        .filter(Boolean).join(' / ');
     return (
         <span>
-            <Tooltip title={exportEnabled && importEnabled ? 'Import / Export' : exportEnabled ? 'Export' : 'Import'}>
+            <Tooltip title={title}>
                 <IconButton color="inherit" onClick={event => setAnchorEl(event.currentTarget)}>
                     <ImportExport/>
                 </IconButton>
@@ -163,8 +168,9 @@ const ImportExportMenu = ({exportEnabled, onExport, importEnabled, onImport}) =>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
                 {exportEnabled && <MenuItem onClick={() => choose(() => onExport(false))}>Export CSV - current page</MenuItem>}
                 {exportEnabled && <MenuItem onClick={() => choose(() => onExport(true))}>Export CSV - all matching rows</MenuItem>}
-                {exportEnabled && importEnabled && <Divider/>}
+                {exportEnabled && (importEnabled || generateEnabled) && <Divider/>}
                 {importEnabled && <MenuItem onClick={() => choose(onImport)}>Import CSV…</MenuItem>}
+                {generateEnabled && <MenuItem onClick={() => choose(onGenerate)}>Generate data…</MenuItem>}
             </Menu>
         </span>
     );
@@ -227,7 +233,7 @@ const DataTableContext = createContext(null);
 // toolbar actions come with the columns, row actions without them
 const TableActions = (props) => {
     const {
-        columnsArranged, onResetColumns, exportEnabled, onExport, importEnabled, onImport, compactRowActions
+        columnsArranged, onResetColumns, exportEnabled, onExport, importEnabled, onImport, generateEnabled, onGenerate, compactRowActions
     } = useContext(DataTableContext);
     if (props.columns == null) {
         // a row being edited (its save and cancel actions) comes without "disabled", and keeps its buttons
@@ -249,9 +255,10 @@ const TableActions = (props) => {
                 columnsArranged={columnsArranged}
                 onResetColumns={onResetColumns}
             />
-            {(exportEnabled || importEnabled) &&
+            {(exportEnabled || importEnabled || generateEnabled) &&
                 <ImportExportMenu exportEnabled={exportEnabled} onExport={onExport}
-                                  importEnabled={importEnabled} onImport={onImport}/>}
+                                  importEnabled={importEnabled} onImport={onImport}
+                                  generateEnabled={generateEnabled} onGenerate={onGenerate}/>}
             <MTableActions {...props} actions={others}/>
         </div>
     );
@@ -338,6 +345,7 @@ export default function BucketDataTable() {
         open: false
     });
     const [importOpen, setImportOpen] = useState(false);
+    const [generateOpen, setGenerateOpen] = useState(false);
     // a confirmation of an action on the selected rows: {type: "delete" or "tag", rows}
     const [selectionDialog, setSelectionDialog] = useState(null);
     const [state, setState] = useState({
@@ -1120,6 +1128,8 @@ export default function BucketDataTable() {
                     onExport: exportRows,
                     importEnabled: isFeatureEnabled(FEATURE_IMPORT, state.activeView),
                     onImport: () => setImportOpen(true),
+                    generateEnabled: isFeatureEnabled(FEATURE_GENERATE, state.activeView),
+                    onGenerate: () => setGenerateOpen(true),
                     compactRowActions: isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView)
                 }}>
                 <div onDoubleClick={selectCellText}
@@ -1288,6 +1298,24 @@ export default function BucketDataTable() {
                             severity: 'success',
                             title: 'Import',
                             message: `Imported ${count} rows.`
+                        });
+                    }}
+                />
+
+                <GenerateDataDialog
+                    open={generateOpen}
+                    bucket={activeBucket}
+                    columns={state.tableColumns}
+                    tags={state.bucketTags}
+                    onClose={() => setGenerateOpen(false)}
+                    onGenerated={count => {
+                        setGenerateOpen(false);
+                        reloadData();
+                        setMessageBox({
+                            open: true,
+                            severity: 'success',
+                            title: 'Generate data',
+                            message: `Generated ${count} rows.`
                         });
                     }}
                 />

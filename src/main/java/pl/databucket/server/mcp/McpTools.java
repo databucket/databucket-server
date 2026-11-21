@@ -26,7 +26,8 @@ import pl.databucket.server.service.data.SearchRules;
 import pl.databucket.server.service.data.filter.LogicFilter;
 import pl.databucket.server.service.data.filter.LogicSql;
 import pl.databucket.server.service.data.filter.RulesToLogic;
-import pl.databucket.server.service.data.generator.DataGenerator;
+import pl.databucket.server.service.data.generator.DataGenerateService;
+import pl.databucket.server.dto.DataGenerateDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +44,7 @@ import java.util.Optional;
 public class McpTools {
 
     static final int MAX_ROWS = 100;
-    static final int MAX_GENERATED = 10_000;
-    private static final int SAMPLE = 3;
+    static final int MAX_GENERATED = DataGenerateService.MAX_ROWS;
     private static final String RULES = "Rules selecting the data rows, combined with 'and'; each rule is "
             + "[left, operator, right], e.g. [\"$.city\", \"==\", \"Paris\"], or {\"or\": [rule, ...]}, {\"and\": [...]}, "
             + "{\"!\": rule}. Left: a property path ($.name, $.address.city) or a field (id, tagId, owner, reserved, "
@@ -64,11 +64,14 @@ public class McpTools {
     private final McpBucketInfoService bucketInfo;
     private final TransactionTemplate transactionTemplate;
     private final McpBucketCreator bucketCreator;
+    private final DataGenerateService generateService;
 
     public McpTools(ObjectMapper objectMapper, DataService dataService, DataHistorySearchService historySearch,
                     BucketService bucketService, UserService userService, McpBucketInfoService bucketInfo,
-                    TransactionTemplate transactionTemplate, McpBucketCreator bucketCreator) {
+                    TransactionTemplate transactionTemplate, McpBucketCreator bucketCreator,
+                    DataGenerateService generateService) {
         this.bucketCreator = bucketCreator;
+        this.generateService = generateService;
         this.objectMapper = objectMapper;
         this.dataService = dataService;
         this.historySearch = historySearch;
@@ -309,27 +312,19 @@ public class McpTools {
             Long seed,
             @McpToolParam(description = "Number {n} of the first row. Default: after the last id of the bucket, so {n} "
                     + "stays unique between calls", required = false) Long startN) throws Exception {
-        if (count == null || count < 1 || count > MAX_GENERATED)
-            throw new IllegalArgumentException("Give count 1.." + MAX_GENERATED + "; call again for more rows");
-        DataGenerator generator = DataGenerator.of(fields, locale, seed);
+        DataGenerateDTO request = new DataGenerateDTO();
+        request.setFields(fields);
+        request.setCount(count);
+        request.setTagId(tagId);
+        request.setReserved(reserved);
+        request.setLocale(locale);
+        request.setSeed(seed);
+        request.setStartN(startN);
         Access access = access(bucket);
-        long firstN = startN != null ? startN : dataService.lastDataId(access.bucket()) + 1;
-
-        List<Map<String, Object>> generated = generator.next(firstN, count);
-        List<DataCreateDTO> rows = new ArrayList<>(count);
-        for (Map<String, Object> properties : generated) {
-            DataCreateDTO row = new DataCreateDTO();
-            row.setProperties(properties);
-            row.setTagId(tagId);
-            row.setReserved(reserved);
-            rows.add(row);
-        }
-        withFriendlyErrors(() -> {
-            dataService.createData(access.user(), access.bucket(), rows);
-            return null;
-        });
-        return json(new Generated(count, firstN, firstN + count - 1, generated.subList(0, Math.min(SAMPLE, count)),
-                "Inserted " + count + " data row(s)"));
+        DataGenerateService.Generated generated = withFriendlyErrors(() ->
+                generateService.generate(access.user(), access.bucket(), request));
+        return json(new Generated(generated.inserted(), generated.firstN(), generated.lastN(), generated.rows(),
+                "Inserted " + generated.inserted() + " data row(s)"));
     }
 
     @McpTool(name = "update_data", description = "Changes data rows selected by ids or by rules: sets or removes "

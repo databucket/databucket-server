@@ -14,6 +14,7 @@ export const FEATURE_EXPORT = 'Export';
 export const FEATURE_AVAILABLE_TAGS = 'Available tags';
 export const FEATURE_COMPACT_ROW_ACTIONS = 'Compact row actions';
 export const FEATURE_SELECTION = 'Selection';
+export const FEATURE_GENERATE = 'Generate';
 
 export const features = [
     {id: 1, name: FEATURE_SEARCH},
@@ -31,7 +32,8 @@ export const features = [
     {id: 13, name: FEATURE_RICH_FILTER},
     {id: 14, name: FEATURE_AVAILABLE_TAGS},
     {id: 15, name: FEATURE_COMPACT_ROW_ACTIONS},
-    {id: 16, name: FEATURE_SELECTION}
+    {id: 16, name: FEATURE_SELECTION},
+    {id: 17, name: FEATURE_GENERATE}
 ];
 
 export const isFeatureEnabled = (name, activeView) => {

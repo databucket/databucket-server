@@ -18,6 +18,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Generates the properties of data rows from a spec: a generator per property path. The spec is checked when the
@@ -38,6 +40,7 @@ import java.util.Set;
 public final class DataGenerator {
 
     public static final int MAX_FIELDS = 100;
+    static final String PROVIDERS_URL = "https://www.datafaker.net/documentation/providers/";
     static final int MAX_DECIMALS = 10;
     static final BigDecimal MAX_NUMBER = new BigDecimal("1e15");
     private static final Set<String> KINDS = Set.of("number", "oneOf", "date", "datetime");
@@ -115,7 +118,7 @@ public final class DataGenerator {
 
     private Generator generator(String name, Object value) {
         if (value instanceof String text)
-            return text(text);
+            return text(name, text);
         if (value == null || value instanceof Number || value instanceof Boolean)
             return n -> value;
         if (value instanceof Map<?, ?> map)
@@ -123,15 +126,36 @@ public final class DataGenerator {
         throw new IllegalArgumentException("Field '" + name + "': a list isn't a generator. " + EXAMPLES);
     }
 
-    private Generator text(String text) {
+    private Generator text(String name, String text) {
         boolean number = text.contains("{n}");
         boolean expression = text.contains("#{");
         if (!number && !expression)
             return n -> text;
+        if (expression && text.lastIndexOf('}') < text.lastIndexOf("#{"))
+            throw new IllegalArgumentException("Field '" + name + "': the expression " + text.substring(text.lastIndexOf("#{"))
+                    + " has no closing }, e.g. #{Name.firstName}");
         return n -> {
             String value = number ? text.replace("{n}", Long.toString(n)) : text;
-            return expression ? faker.expression(value) : value;
+            if (!expression)
+                return value;
+            try {
+                return faker.expression(value);
+            } catch (RuntimeException e) {
+                throw new IllegalArgumentException(unknownExpression(name, value, e));
+            }
         };
+    }
+
+    private static final Pattern UNRESOLVED = Pattern.compile("Unable to resolve (#\\{.*?}) directive");
+
+    // Datafaker's message names its internal context; say which expression it doesn't know and how to write one
+    private static String unknownExpression(String name, String text, RuntimeException e) {
+        Matcher unresolved = UNRESOLVED.matcher(String.valueOf(e.getMessage()));
+        String expression = unresolved.find() ? unresolved.group(1) : text;
+        return "Field '" + name + "': Datafaker doesn't know " + expression + ". Write a provider and its method, "
+                + "e.g. #{Name.firstName}, #{Address.city}, #{Internet.emailAddress}, #{PhoneNumber.cellPhone}, "
+                + "or a function with its argument, e.g. #{numerify '###-###'}, #{letterify '???'}; "
+                + "all providers: " + PROVIDERS_URL;
     }
 
     private Generator object(String name, Map<?, ?> map) {

@@ -123,15 +123,34 @@ class DataGeneratorSpec extends Specification {
         'bad datetime'       | ['$.a': [datetime: ['yesterday', '2024-12-31']]]       | 'ISO 8601'
     }
 
-    def "should say which field has a wrong expression"() {
+    @Unroll
+    def "should say which field has an expression Datafaker doesn't know: #text"() {
         given:
-        def generator = DataGenerator.of(['$.x': '#{NoSuchProvider.foo}'], null, null)
+        def generator = DataGenerator.of(['$.x': text], null, null)
 
         when:
-        generator.next(1)
+        generator.next(7)
 
         then:
         def e = thrown(IllegalArgumentException)
-        e.message.startsWith("Field '\$.x'")
+        e.message.startsWith("Field '\$.x': Datafaker doesn't know $unknown.")
+        e.message.contains('#{Name.firstName}')
+        e.message.contains(DataGenerator.PROVIDERS_URL)
+        !e.message.contains('FakerContext')
+
+        where:
+        text                         | unknown
+        '#{NoSuchProvider.foo}'      | '#{NoSuchProvider.foo}'
+        '#{Name.noSuchMethod}'       | '#{Name.noSuchMethod}'
+        'id-{n} #{Name.nope}'        | '#{Name.nope}'
+    }
+
+    def "should refuse an expression without its closing brace"() {
+        when:
+        DataGenerator.of(['$.x': 'user #{Name.firstName'], null, null)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == "Field '\$.x': the expression #{Name.firstName has no closing }, e.g. #{Name.firstName}"
     }
 }

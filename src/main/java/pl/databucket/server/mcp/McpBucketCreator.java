@@ -46,7 +46,7 @@ import java.util.stream.IntStream;
 public class McpBucketCreator {
 
     /** All the features of a view: search, details, creation, modifying, removal, history, tasks, reservation, ... */
-    private static final Short[] ALL_FEATURES = IntStream.rangeClosed(1, 16).mapToObj(i -> (short) i).toArray(Short[]::new);
+    private static final Short[] ALL_FEATURES = IntStream.rangeClosed(1, 17).mapToObj(i -> (short) i).toArray(Short[]::new);
 
     private final BucketService bucketService;
     private final DataClassService dataClassService;
