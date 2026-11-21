@@ -24,7 +24,7 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import {Add, DeleteOutline} from '@mui/icons-material';
+import {AddBox, DeleteOutline, SettingsBackupRestore} from '@mui/icons-material';
 import {getDataUrl} from "../../utils/UrlBuilder";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
@@ -220,7 +220,26 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
                     the same in every row.
                 </Typography>
 
-                <TableContainer sx={{mt: 2}}>
+                {/* the table's actions as icons on the right, as in the other tables */}
+                <Stack direction="row" alignItems="center" sx={{mt: 1}}>
+                    <Typography variant="subtitle1" sx={{flex: 1}}>Properties ({rows.length})</Typography>
+                    <Tooltip title="Propose from the columns of the view">
+                        <span>
+                            <IconButton color="inherit" disabled={working} onClick={reset}>
+                                <SettingsBackupRestore/>
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Add property">
+                        <span>
+                            <IconButton color="inherit" disabled={working}
+                                        onClick={() => setRows([...rows, emptyRow()])}>
+                                <AddBox/>
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                </Stack>
+                <TableContainer>
                     <Table size="small">
                         <TableHead>
                             <TableRow>
@@ -273,11 +292,6 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Stack direction="row" spacing={1} sx={{mt: 1}}>
-                    <Button size="small" startIcon={<Add/>} disabled={working}
-                            onClick={() => setRows([...rows, emptyRow()])}>Add property</Button>
-                    <Button size="small" disabled={working} onClick={reset}>Propose from the columns</Button>
-                </Stack>
 
                 <Stack direction="row" spacing={2} sx={{mt: 2}} flexWrap="wrap" useFlexGap alignItems="flex-end">
                     <TextField size="small" variant="standard" label="Rows" value={count} disabled={working}
