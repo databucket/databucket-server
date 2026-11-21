@@ -102,6 +102,7 @@ import TaskExecutionDialog from "../dialogs/TaskExecutionDialog";
 import RichFilterDialog from "../dialogs/RichFilterDialog";
 import AvailableTagsDialog from "../dialogs/AvailableTagsDialog";
 import ImportDataDialog from "../dialogs/ImportDataDialog";
+import GenerateDataDialog from "../dialogs/GenerateDataDialog";
 import {getStartOrder} from "../../utils/ViewSort";
 
 // declared as a global because of component bug: https://github.com/mbrn/material-table/issues/2432
@@ -147,7 +148,7 @@ const ColumnsMenu = ({columns, onColumnsChanged, columnsArranged, onResetColumns
 }
 
 // Export and import under one button, as a menu with their names (an icon alone doesn't say which way data goes)
-const ImportExportMenu = ({exportEnabled, onExport, importEnabled, onImport}) => {
+const ImportExportMenu = ({exportEnabled, onExport, importEnabled, onImport, onGenerate}) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const choose = (action) => {
         setAnchorEl(null);
@@ -165,6 +166,7 @@ const ImportExportMenu = ({exportEnabled, onExport, importEnabled, onImport}) =>
                 {exportEnabled && <MenuItem onClick={() => choose(() => onExport(true))}>Export CSV - all matching rows</MenuItem>}
                 {exportEnabled && importEnabled && <Divider/>}
                 {importEnabled && <MenuItem onClick={() => choose(onImport)}>Import CSV…</MenuItem>}
+                {importEnabled && <MenuItem onClick={() => choose(onGenerate)}>Generate data…</MenuItem>}
             </Menu>
         </span>
     );
@@ -227,7 +229,7 @@ const DataTableContext = createContext(null);
 // toolbar actions come with the columns, row actions without them
 const TableActions = (props) => {
     const {
-        columnsArranged, onResetColumns, exportEnabled, onExport, importEnabled, onImport, compactRowActions
+        columnsArranged, onResetColumns, exportEnabled, onExport, importEnabled, onImport, onGenerate, compactRowActions
     } = useContext(DataTableContext);
     if (props.columns == null) {
         // a row being edited (its save and cancel actions) comes without "disabled", and keeps its buttons
@@ -251,7 +253,8 @@ const TableActions = (props) => {
             />
             {(exportEnabled || importEnabled) &&
                 <ImportExportMenu exportEnabled={exportEnabled} onExport={onExport}
-                                  importEnabled={importEnabled} onImport={onImport}/>}
+                                  importEnabled={importEnabled} onImport={onImport}
+                                  onGenerate={onGenerate}/>}
             <MTableActions {...props} actions={others}/>
         </div>
     );
@@ -338,6 +341,7 @@ export default function BucketDataTable() {
         open: false
     });
     const [importOpen, setImportOpen] = useState(false);
+    const [generateOpen, setGenerateOpen] = useState(false);
     // a confirmation of an action on the selected rows: {type: "delete" or "tag", rows}
     const [selectionDialog, setSelectionDialog] = useState(null);
     const [state, setState] = useState({
@@ -1120,6 +1124,7 @@ export default function BucketDataTable() {
                     onExport: exportRows,
                     importEnabled: isFeatureEnabled(FEATURE_IMPORT, state.activeView),
                     onImport: () => setImportOpen(true),
+                    onGenerate: () => setGenerateOpen(true),
                     compactRowActions: isFeatureEnabled(FEATURE_COMPACT_ROW_ACTIONS, state.activeView)
                 }}>
                 <div onDoubleClick={selectCellText}
@@ -1288,6 +1293,24 @@ export default function BucketDataTable() {
                             severity: 'success',
                             title: 'Import',
                             message: `Imported ${count} rows.`
+                        });
+                    }}
+                />
+
+                <GenerateDataDialog
+                    open={generateOpen}
+                    bucket={activeBucket}
+                    columns={state.tableColumns}
+                    tags={state.bucketTags}
+                    onClose={() => setGenerateOpen(false)}
+                    onGenerated={count => {
+                        setGenerateOpen(false);
+                        reloadData();
+                        setMessageBox({
+                            open: true,
+                            severity: 'success',
+                            title: 'Generate data',
+                            message: `Generated ${count} rows.`
                         });
                     }}
                 />

@@ -28,6 +28,7 @@ import pl.databucket.server.service.BucketService;
 import pl.databucket.server.service.UserService;
 import pl.databucket.server.service.data.filter.LogicFilter;
 import pl.databucket.server.service.data.*;
+import pl.databucket.server.service.data.generator.DataGenerateService;
 
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,9 @@ public class DataController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DataGenerateService generateService;
 
 
     @PreAuthorize("hasRole('AGENT')")
@@ -129,6 +133,51 @@ public class DataController {
                 return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             return exceptionFormatter.customException(e, HttpStatus.NOT_ACCEPTABLE);
+        } catch (Exception e) {
+            return exceptionFormatter.defaultException(e);
+        }
+    }
+
+    @PreAuthorize("hasRole('AGENT')")
+    @Operation(summary = "Generate random data rows", description = "Generates up to "
+            + DataGenerateService.MAX_ROWS + " data rows on the server from a generator per property and inserts "
+            + "them in one batch (all rows or none). {n} in a text generator is the number of the row; by default it "
+            + "continues after the last id of the bucket, so it stays unique between calls. Returns the number of rows, "
+            + "the range of {n} and the first " + DataGenerateService.SAMPLE + " rows. With preview = true nothing is "
+            + "inserted and the first rows (at most " + DataGenerateService.PREVIEW_ROWS + ") are returned.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created - the rows are inserted",
+                    content = @Content(schema = @Schema(implementation = DataGenerateService.Generated.class))),
+            @ApiResponse(responseCode = "200", description = "OK - the preview, nothing inserted",
+                    content = @Content(schema = @Schema(implementation = DataGenerateService.Generated.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request - an invalid generator or count, or a tagId "
+                    + "that doesn't exist; the message says what to change"),
+            @ApiResponse(responseCode = "404", description = NOT_FOUND),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping(value = "/generate", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> generateData(
+            @Parameter(description = BUCKET_NAME, required = true)
+            @PathVariable String bucketName,
+            @Parameter(description = "True only generates the first rows, without inserting them")
+            @RequestParam(required = false, defaultValue = "false") boolean preview,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The generators and the number of rows",
+                    required = true)
+            @RequestBody DataGenerateDTO request) {
+
+        Bucket bucket = bucketService.getBucket(bucketName);
+        if (bucket == null)
+            return exceptionFormatter.customException(new BucketNotFoundException(bucketName), HttpStatus.NOT_FOUND);
+
+        try {
+            User user = userService.getCurrentUser();
+            if (!bucketService.hasUserAccessToBucket(bucket, user))
+                return exceptionFormatter.customException(new NoAccessToBucketException(bucketName), HttpStatus.NOT_FOUND);
+            if (preview)
+                return new ResponseEntity<>(generateService.preview(bucket, request), HttpStatus.OK);
+            return new ResponseEntity<>(generateService.generate(user, bucket, request), HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return exceptionFormatter.customException(e, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return exceptionFormatter.defaultException(e);
         }
