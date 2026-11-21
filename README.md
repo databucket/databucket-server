@@ -31,6 +31,7 @@ The screenshots show the DEMO dataset that comes with Databucket (Management →
 # Getting started with Databucket
 * First you can read about key features on [databucket.pl](https://databucket.pl)
 * Try it with Docker: `cd docker && docker compose up --build`, open http://databucket.localhost, sign in as `super` / `super` and import the DEMO dataset in Management → Projects.
+* Install it: the jar of a [release](https://github.com/databucket/databucket-server/releases/latest), or the Docker image [`databucket/databucket-server`](https://hub.docker.com/r/databucket/databucket-server) (amd64, arm64) - see [Installation](https://github.com/databucket/databucket-server/wiki/Installation#docker).
 * Next, you can dive deeper in the [Wiki page](https://github.com/databucket/databucket-server/wiki).
 
 # Clients
