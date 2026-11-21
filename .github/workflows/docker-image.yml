@@ -1,0 +1,89 @@
+# Publishes the Docker image of a release on Docker Hub (databucket/databucket-server), for amd64 and arm64.
+# The image is made from the jar attached to the GitHub release (docker/Dockerfile), so it holds exactly the released
+# build. Runs when a release is published; an existing release can be published again by hand (Run workflow).
+#
+# Secrets of the repository: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN (a personal access token of Docker Hub with the
+# scopes Read, Write, Delete; Delete is needed to update the description of the repository on Docker Hub).
+name: Docker image
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, e.g. v3.20.1"
+        required: true
+      latest:
+        description: "Also tag the image as latest"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: databucket/databucket-server
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+  LATEST: ${{ github.event_name == 'release' && !github.event.release.prerelease || github.event_name == 'workflow_dispatch' && inputs.latest }}
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the release
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Download the jar of the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p build/libs
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern 'databucket-server-*.jar' --dir build/libs
+          ls -l build/libs
+
+      - name: Image tags and labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}},value=${{ env.TAG }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.TAG }}
+            type=raw,value=latest,enable=${{ env.LATEST }}
+          labels: |
+            org.opencontainers.image.title=Databucket
+            org.opencontainers.image.description=Open-source test data management: store, share and reserve test data
+            org.opencontainers.image.url=https://databucket.pl
+            org.opencontainers.image.documentation=https://github.com/databucket/databucket-server/wiki
+            org.opencontainers.image.licenses=Apache-2.0
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Sign in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Description on Docker Hub
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.IMAGE }}
+          short-description: Open-source test data management - store, share and reserve test data
+          readme-filepath: docker/README-dockerhub.md
