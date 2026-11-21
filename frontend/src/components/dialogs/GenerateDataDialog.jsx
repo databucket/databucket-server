@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
     Alert,
-    Box,
     Button,
     Dialog,
     DialogActions,
@@ -15,6 +14,12 @@ import {
     Radio,
     RadioGroup,
     Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     TextField,
     Tooltip,
     Typography
@@ -58,29 +63,43 @@ const save = (bucket, settings) => {
     }
 }
 
+// the settings of a generator, in one table cell (the header says what the columns are, placeholders what to type)
 const GeneratorInputs = ({row, onChange, disabled}) => {
-    const field = (name, label, props = {}) =>
-        <TextField size="small" variant="standard" label={label} value={row[name] ?? ''} disabled={disabled}
+    const field = (name, placeholder, props = {}) =>
+        <TextField size="small" variant="standard" placeholder={placeholder} value={row[name] ?? ''}
+                   disabled={disabled} inputProps={{'aria-label': placeholder}}
                    onChange={e => onChange({...row, [name]: e.target.value})} {...props}/>;
+    const dash = <Typography variant="body2" color="textSecondary">–</Typography>;
     switch (row.kind) {
         case KIND_NUMBER:
-            return <>
-                {field('min', 'Min', {sx: {width: 90}})}
-                {field('max', 'Max', {sx: {width: 90}})}
-                {field('decimals', 'Decimals', {sx: {width: 70}})}
-            </>;
+            return <Stack direction="row" spacing={1} alignItems="center">
+                {field('min', 'min', {sx: {width: 70}})}
+                {dash}
+                {field('max', 'max', {sx: {width: 70}})}
+                <Typography variant="body2" color="textSecondary" sx={{pl: 1}}>decimals</Typography>
+                {field('decimals', 'decimals', {sx: {width: 40}})}
+            </Stack>;
         case KIND_ONE_OF:
-            return field('values', 'Values, separated with commas', {sx: {flexGrow: 1, minWidth: 200}});
+            return field('values', 'values, separated with commas', {fullWidth: true});
         case KIND_DATE:
         case KIND_DATETIME:
-            return <>
-                {field('from', 'From', {type: 'date', InputLabelProps: {shrink: true}, sx: {width: 140}})}
-                {field('to', 'To', {type: 'date', InputLabelProps: {shrink: true}, sx: {width: 140}})}
-            </>;
+            return <Stack direction="row" spacing={1} alignItems="center">
+                {field('from', 'from', {type: 'date', sx: {width: 135}})}
+                {dash}
+                {field('to', 'to', {type: 'date', sx: {width: 135}})}
+            </Stack>;
         default:
-            return field('text', 'Text, {n} or #{expression}', {sx: {flexGrow: 1, minWidth: 200}});
+            return field('text', 'text, {n} or #{expression}', {fullWidth: true});
     }
 }
+
+// a value of the preview by the path of a generator: "$.address.city" -> row.address.city
+const valueAt = (row, path) => {
+    const value = path.substring(2).split('.').reduce((obj, node) => obj != null ? obj[node] : undefined, row);
+    return value == null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value);
+}
+
+const cellSx = {py: 0.5, px: 1};
 
 // Generate data (the view's Import feature): random rows made on the server from a generator per property, inserted
 // in one request, all of them or none. The generators are proposed from the view's columns (types, enums, names).
@@ -191,32 +210,57 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
                     the same in every row.
                 </Typography>
 
-                <Stack spacing={1.5} sx={{mt: 2}}>
-                    {rows.map((row, index) =>
-                        <Stack key={index} direction="row" spacing={1} alignItems="flex-end" flexWrap="wrap" useFlexGap>
-                            <TextField size="small" variant="standard" label={row.title ?? 'Property'}
-                                       value={row.path} disabled={working} sx={{width: 170}}
-                                       onChange={e => changeRow(index, {...row, path: e.target.value})}/>
-                            <TextField select size="small" variant="standard" label="Generator" value={row.kind}
-                                       disabled={working} sx={{width: 140}}
-                                       onChange={e => changeKind(index, e.target.value)}>
-                                {KINDS.map(k => <MenuItem key={k.value} value={k.value}>{k.label}</MenuItem>)}
-                            </TextField>
-                            <GeneratorInputs row={row} disabled={working} onChange={r => changeRow(index, r)}/>
-                            <Tooltip title="Remove">
-                                <span>
-                                    <IconButton size="small" disabled={working}
-                                                onClick={() => {
-                                                    setRows(rows.filter((r, i) => i !== index));
-                                                    setPreview(null);
-                                                }}>
-                                        <DeleteOutline fontSize="small"/>
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
-                        </Stack>
-                    )}
-                </Stack>
+                <TableContainer sx={{mt: 2}}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{...cellSx, width: 190}}>Property</TableCell>
+                                <TableCell sx={{...cellSx, width: 150}}>Generator</TableCell>
+                                <TableCell sx={cellSx}>Settings</TableCell>
+                                <TableCell sx={{...cellSx, width: 40}}/>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows.map((row, index) =>
+                                <TableRow key={index} hover>
+                                    <TableCell sx={cellSx}>
+                                        {row.title != null &&
+                                            <Typography variant="caption" color="textSecondary" component="div">
+                                                {row.title}
+                                            </Typography>}
+                                        <TextField size="small" variant="standard" value={row.path} disabled={working}
+                                                   fullWidth inputProps={{'aria-label': 'Property path'}}
+                                                   onChange={e => changeRow(index, {...row, path: e.target.value})}/>
+                                    </TableCell>
+                                    <TableCell sx={cellSx}>
+                                        <TextField select size="small" variant="standard" value={row.kind} fullWidth
+                                                   disabled={working} inputProps={{'aria-label': 'Generator'}}
+                                                   onChange={e => changeKind(index, e.target.value)}>
+                                            {KINDS.map(k => <MenuItem key={k.value} value={k.value}>{k.label}</MenuItem>)}
+                                        </TextField>
+                                    </TableCell>
+                                    <TableCell sx={cellSx}>
+                                        <GeneratorInputs row={row} disabled={working}
+                                                         onChange={r => changeRow(index, r)}/>
+                                    </TableCell>
+                                    <TableCell sx={cellSx} align="right">
+                                        <Tooltip title="Remove">
+                                            <span>
+                                                <IconButton size="small" disabled={working}
+                                                            onClick={() => {
+                                                                setRows(rows.filter((r, i) => i !== index));
+                                                                setPreview(null);
+                                                            }}>
+                                                    <DeleteOutline fontSize="small"/>
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
                 <Stack direction="row" spacing={1} sx={{mt: 1}}>
                     <Button size="small" startIcon={<Add/>} disabled={working}
                             onClick={() => setRows([...rows, emptyRow()])}>Add property</Button>
@@ -260,12 +304,29 @@ export default function GenerateDataDialog({open, bucket, columns, tags, onClose
                 </RadioGroup>
 
                 {preview != null &&
-                    <Box component="pre" ref={previewRef} sx={{
-                        mt: 1, p: 1, maxHeight: 220, overflow: 'auto', fontSize: 12, borderRadius: 1,
-                        bgcolor: 'action.hover', whiteSpace: 'pre'
+                    <TableContainer ref={previewRef} sx={{
+                        mt: 1, maxHeight: 260, border: 1, borderColor: 'divider', borderRadius: 1
                     }}>
-                        {preview.map(r => JSON.stringify(r)).join('\n')}
-                    </Box>
+                        <Table size="small" stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    {rows.map((row, i) =>
+                                        <TableCell key={i} sx={{...cellSx, whiteSpace: 'nowrap'}}>
+                                            {row.title ?? row.path}
+                                        </TableCell>)}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {preview.map((data, r) =>
+                                    <TableRow key={r} hover>
+                                        {rows.map((row, i) =>
+                                            <TableCell key={i} sx={{...cellSx, whiteSpace: 'nowrap'}}>
+                                                {valueAt(data, row.path)}
+                                            </TableCell>)}
+                                    </TableRow>)}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 }
                 {working && <LinearProgress sx={{mt: 2}}/>}
                 {error != null && <Alert severity="error" sx={{mt: 2}}>{error}</Alert>}
