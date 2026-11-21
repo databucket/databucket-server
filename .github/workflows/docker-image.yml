@@ -31,10 +31,10 @@ jobs:
   image:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the release
+      # the ref of the event: the tag of a published release, the default branch when run by hand (an older tag may
+      # not have docker/README-dockerhub.md); the jar always comes from the release
+      - name: Check out
         uses: actions/checkout@v5
-        with:
-          ref: ${{ env.TAG }}
 
       - name: Download the jar of the release
         env:
