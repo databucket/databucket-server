@@ -1,6 +1,6 @@
 import React from 'react';
 import {IconButton, styled, Tab, Tabs} from '@mui/material';
-import {Link, Navigate, Route, Routes, useLocation} from "react-router-dom";
+import {Link, Route, Routes, useLocation} from "react-router-dom";
 import {
     getProjectDataPath,
     getProjectSettingsPath
@@ -162,7 +162,6 @@ export default function _ProjectSettingsTabs() {
                                 <Route path="views" element={<ViewsTab />} />
                                 <Route path="tasks" element={<TasksTab />} />
                                 <Route path="jobs" element={<JobsTab />} />
-                                <Route path="schedules" element={<Navigate to="../jobs" replace />} />
                                 <Route path="activity" element={<ActivityTab />} />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>

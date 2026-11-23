@@ -1,6 +1,6 @@
 -- Upgrade of a Databucket database used by 3.21.0 - 3.22.x to 3.23.0.
 --
--- From 3.23.0 a job (Settings > Jobs, formerly Schedules) may have no cron: it then runs only by its
+-- From 3.23.0 a job (Settings > Jobs) may have no cron: it then runs only by its
 -- keyword or by Run. The column task_schedules.cron was created NOT NULL; this script drops that
 -- constraint (the new keyword column is added at startup). Without it, saving a job without a cron fails.
 --
