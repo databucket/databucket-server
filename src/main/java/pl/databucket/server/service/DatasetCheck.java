@@ -61,6 +61,7 @@ public final class DatasetCheck {
         valid("Filter", d.getFilters(), DataFilterDto::getName);
         valid("View", d.getViews(), ViewDto::getName);
         valid("Task", d.getTasks(), TaskDto::getName);
+        valid("Job", d.getJobs(), DatasetJobDto::getName);
         valid("Icon", d.getIcons(), SvgDto::getName);
 
         Set<Short> teams = ids("teams", d.getTeams(), TeamDto::getId);
@@ -111,6 +112,17 @@ public final class DatasetCheck {
             // 0 means no tag
             if (actions != null && actions.get("tagId") instanceof Number tagId && tagId.longValue() != 0)
                 ref("Task " + t.getName(), "tag", tags, tagId.longValue());
+        }
+
+        // tasks need ids only when jobs refer to them (datasets before 3.24.1 may have tasks without one)
+        Set<Long> tasks = d.getJobs().isEmpty() ? Set.of() : ids("tasks", d.getTasks(), TaskDto::getId);
+        for (DatasetJobDto j : d.getJobs()) {
+            if (j.getTaskId() == null)
+                problems.add("Job " + j.getName() + ": no task");
+            if (j.getBucketId() == null)
+                problems.add("Job " + j.getName() + ": no bucket");
+            ref("Job " + j.getName(), "task", tasks, j.getTaskId());
+            ref("Job " + j.getName(), "bucket", buckets, j.getBucketId());
         }
 
         for (Map.Entry<String, List<DataCreateDTO>> rows : d.getData().entrySet()) {

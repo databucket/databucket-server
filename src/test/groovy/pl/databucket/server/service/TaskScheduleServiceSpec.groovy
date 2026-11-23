@@ -194,6 +194,33 @@ class TaskScheduleServiceSpec extends Specification {
         cron << [null, '', '  ']
     }
 
+    def "should import a job of a dataset disabled, without a preview"() {
+        given:
+        def task = new Task(); task.id = 3
+        def bucket = new Bucket(); bucket.id = 4; bucket.name = 'orders'
+        taskRepository.findByIdAndDeleted(3, false) >> task
+        bucketRepository.findByIdAndDeleted(4, false) >> bucket
+        scheduleRepository.save(_) >> { TaskSchedule saved -> saved }
+        def job = new pl.databucket.server.dto.DatasetJobDto(name: ' Clean ', taskId: 3, bucketId: 4,
+                rules: [["id", ">", 0]], cron: '0 2 * * *', timeZone: 'Europe/Warsaw', keyword: ' DEV  cleaning ')
+
+        when:
+        def saved = service.importJob(job)
+
+        then:
+        0 * taskRunService.run(*_)
+        saved.name == 'Clean'
+        saved.task.is(task)
+        saved.bucket.is(bucket)
+        saved.rules == [["id", ">", 0]]
+        saved.cron == '0 0 2 * * *'
+        saved.timeZone == 'Europe/Warsaw'
+        saved.keyword == 'DEV cleaning'
+        !saved.enabled
+        saved.nextRunAt == null
+        saved.runAs == 'robot1'
+    }
+
     def "should save a job with a cron: the next run set"() {
         given:
         def task = new Task()

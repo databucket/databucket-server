@@ -27,6 +27,9 @@ class DatasetExporterSpec extends Specification {
         TaskConfigDto taskConfig = new TaskConfigDto(actions: [tagId: 9, setTag: true], properties: [[enumId: 9], [enumId: 1]])
         dataset.tasks = [new TaskDto(id: 1L, filterId: 1L, classesIds: [9L] as Set, configuration: taskConfig)]
         dataset.data = [b: [new DataCreateDTO(tagId: 1L), new DataCreateDTO(tagId: 9L), new DataCreateDTO(tagId: null)]]
+        dataset.jobs = [new DatasetJobDto(name: "ok", taskId: 1L, bucketId: 1L),
+                        new DatasetJobDto(name: "no task", taskId: 9L, bucketId: 1L),
+                        new DatasetJobDto(name: "no bucket", taskId: 1L, bucketId: 9L)]
 
         when:
         DatasetExporter.removeMissingReferences(dataset)
@@ -58,5 +61,8 @@ class DatasetExporterSpec extends Specification {
         dataset.tasks[0].configuration.actions.tagId == 0
         dataset.tasks[0].configuration.properties*.enumId == [null, 1]
         dataset.data.b*.tagId == [1L, null, null]
+
+        and: "a job without its task or bucket is left out"
+        dataset.jobs*.name == ["ok"]
     }
 }

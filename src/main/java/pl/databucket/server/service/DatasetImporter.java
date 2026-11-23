@@ -38,6 +38,7 @@ public class DatasetImporter {
     @Autowired private TaskService taskService;
     @Autowired private DataService dataService;
     @Autowired private SvgService svgService;
+    @Autowired private TaskScheduleService taskScheduleService;
     @Autowired private DatasetHistoryMaker datasetHistoryMaker;
     @Autowired private UserRepository userRepository;
     @Autowired private RoleRepository roleRepository;
@@ -45,7 +46,7 @@ public class DatasetImporter {
     @Autowired private BCryptPasswordEncoder passwordEncoder;
 
     // the new ids of the dataset's objects, by the ids in the dataset
-    private static class Ids {
+    static class Ids {
         final Map<Short, Short> teams = new HashMap<>();
         final Map<Integer, Integer> enums = new HashMap<>();
         final Map<Long, Long> classes = new HashMap<>();
@@ -54,6 +55,7 @@ public class DatasetImporter {
         final Map<Long, Long> tags = new HashMap<>();
         final Map<Long, Long> columns = new HashMap<>();
         final Map<Long, Long> filters = new HashMap<>();
+        final Map<Long, Long> tasks = new HashMap<>();
     }
 
     @Transactional
@@ -156,6 +158,7 @@ public class DatasetImporter {
         }
 
         for (TaskDto task : dataset.getTasks()) {
+            Long taskId = task.getId();
             task.setId(null);
             task.setClassId(map(ids.classes, task.getClassId()));
             task.setFilterId(map(ids.filters, task.getFilterId()));
@@ -168,7 +171,9 @@ public class DatasetImporter {
                 if (actions != null && actions.get("tagId") instanceof Number tagId && tagId.longValue() > 0)
                     actions.put("tagId", map(ids.tags, tagId.longValue()));
             }
-            taskService.createTask(task);
+            Long newTaskId = taskService.createTask(task).getId();
+            if (taskId != null)
+                ids.tasks.put(taskId, newTaskId);
         }
 
         int rows = 0;
@@ -187,6 +192,14 @@ public class DatasetImporter {
 
         if (dataset.getHistory() != null)
             datasetHistoryMaker.makeHistory(dataset.getHistory(), bucketsWithData, ids.tags, user.getUsername());
+
+        // disabled: the cron runs a job as the admin who saved it, so an admin of the project enables it
+        for (DatasetJobDto job : dataset.getJobs()) {
+            job.setTaskId(map(ids.tasks, job.getTaskId()));
+            job.setBucketId(map(ids.buckets, job.getBucketId()));
+            job.setRules(mapRuleTagIds(ids, job.getRules()));
+            taskScheduleService.importJob(job);
+        }
         return rows;
     }
 
@@ -268,6 +281,28 @@ public class DatasetImporter {
             } else
                 list.forEach(item -> mapTagIds(ids, item));
         }
+    }
+
+    // tags in the rules of a job: ["tagId", "==", 1], ["tagId", "in", [1, 4]], also inside {"or": [...]}, {"!": rule}
+    @SuppressWarnings("unchecked")
+    static List<Object> mapRuleTagIds(Ids ids, List<Object> rules) {
+        return rules == null ? null : (List<Object>) mapRule(ids, rules);
+    }
+
+    private static Object mapRule(Ids ids, Object node) {
+        if (node instanceof List<?> list) {
+            if (list.size() == 3 && "tagId".equals(list.get(0)))
+                return new ArrayList<>(List.of(list.get(0), list.get(1), mapTagValues(ids, list.get(2))));
+            List<Object> mapped = new ArrayList<>();
+            list.forEach(item -> mapped.add(mapRule(ids, item)));
+            return mapped;
+        }
+        if (node instanceof Map<?, ?> map) {
+            Map<String, Object> mapped = new LinkedHashMap<>();
+            map.forEach((key, value) -> mapped.put(String.valueOf(key), mapRule(ids, value)));
+            return mapped;
+        }
+        return node;
     }
 
     private static Object mapTagValues(Ids ids, Object value) {
