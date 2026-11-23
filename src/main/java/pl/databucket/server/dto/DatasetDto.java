@@ -33,7 +33,7 @@ public class DatasetDto {
     private List<DataFilterDto> filters = new ArrayList<>();
     private List<ViewDto> views = new ArrayList<>();
     private List<TaskDto> tasks = new ArrayList<>();
-    // the jobs (Settings > Jobs, since 3.25.0), imported disabled
+    // the jobs (Settings > Jobs, since 3.24.1), imported disabled
     private List<DatasetJobDto> jobs = new ArrayList<>();
     // the icons uploaded to the project (Settings > Icons); the objects keep a copy of the icon they use
     private List<SvgDto> icons = new ArrayList<>();

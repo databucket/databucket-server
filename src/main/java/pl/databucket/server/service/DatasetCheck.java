@@ -114,7 +114,7 @@ public final class DatasetCheck {
                 ref("Task " + t.getName(), "tag", tags, tagId.longValue());
         }
 
-        // tasks need ids only when jobs refer to them (datasets before 3.25.0 may have tasks without one)
+        // tasks need ids only when jobs refer to them (datasets before 3.24.1 may have tasks without one)
         Set<Long> tasks = d.getJobs().isEmpty() ? Set.of() : ids("tasks", d.getTasks(), TaskDto::getId);
         for (DatasetJobDto j : d.getJobs()) {
             if (j.getTaskId() == null)
