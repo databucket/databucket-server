@@ -18,7 +18,10 @@ import pl.databucket.server.service.TaskAction;
 import pl.databucket.server.service.TaskRunService;
 import pl.databucket.server.service.TaskScheduleService;
 
-/** Settings > Schedules (the web application); running a task from outside: TaskRunController. */
+/**
+ * Settings > Jobs (the web application); running a task from outside: TaskRunController, the jobs of a keyword:
+ * JobKeywordController.
+ */
 @Hidden
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/task-schedules")

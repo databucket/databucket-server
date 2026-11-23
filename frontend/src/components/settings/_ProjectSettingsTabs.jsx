@@ -1,6 +1,6 @@
 import React from 'react';
 import {IconButton, styled, Tab, Tabs} from '@mui/material';
-import {Link, Route, Routes, useLocation} from "react-router-dom";
+import {Link, Navigate, Route, Routes, useLocation} from "react-router-dom";
 import {
     getProjectDataPath,
     getProjectSettingsPath
@@ -21,7 +21,7 @@ import EnumsTab from "./EnumsTab";
 import FiltersTab from "./FiltersTab";
 import ViewsTab from "./ViewsTab";
 import TasksTab from "./TasksTab";
-import SchedulesTab from "./SchedulesTab";
+import JobsTab from "./JobsTab";
 import ActivityTab from "./ActivityTab";
 import {
     getSettingsTabsBackgroundColor,
@@ -79,7 +79,7 @@ export default function _ProjectSettingsTabs() {
     console.log('location.pathname:', location.pathname);
     console.log('getProjectSettingsPath():', getProjectSettingsPath());
 
-    const tabs = ['teams', 'users', 'classes', 'icons', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks', 'schedules', 'activity', 'templates'];
+    const tabs = ['teams', 'users', 'classes', 'icons', 'enums', 'groups', 'buckets', 'tags', 'columns', 'filters', 'views', 'tasks', 'jobs', 'activity', 'templates'];
 
     const getTabsValue = (pathname) => {
         let value = pathname.split("/").pop();
@@ -138,8 +138,8 @@ export default function _ProjectSettingsTabs() {
                                to={`${getProjectSettingsPath()}/views`}/>
                     <StyledTab label="Tasks" value={tabs[11]} component={Link}
                                to={`${getProjectSettingsPath()}/tasks`}/>
-                    <StyledTab label="Schedules" value={tabs[12]} component={Link}
-                               to={`${getProjectSettingsPath()}/schedules`}/>
+                    <StyledTab label="Jobs" value={tabs[12]} component={Link}
+                               to={`${getProjectSettingsPath()}/jobs`}/>
                     <StyledTab label="Activity" value={tabs[13]} component={Link}
                                to={`${getProjectSettingsPath()}/activity`}/>
                 </Tabs>
@@ -161,7 +161,8 @@ export default function _ProjectSettingsTabs() {
                                 <Route path="filters" element={<FiltersTab />} />
                                 <Route path="views" element={<ViewsTab />} />
                                 <Route path="tasks" element={<TasksTab />} />
-                                <Route path="schedules" element={<SchedulesTab />} />
+                                <Route path="jobs" element={<JobsTab />} />
+                                <Route path="schedules" element={<Navigate to="../jobs" replace />} />
                                 <Route path="activity" element={<ActivityTab />} />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>

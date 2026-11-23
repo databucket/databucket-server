@@ -8,7 +8,7 @@ import pl.databucket.server.configuration.Constants;
 
 import java.time.Instant;
 
-/** One run of a schedule (by the scheduler or "Run now"); written by TaskScheduleRunner with plain SQL. */
+/** One run of a job (by cron, Run or its keyword); written by TaskScheduleRunner with plain SQL. */
 @Getter
 @Setter
 @Entity
@@ -33,10 +33,11 @@ public class TaskScheduleRun {
     @Column(name = "duration_ms", nullable = false)
     private long durationMs;
 
-    // SCHEDULE or MANUAL
+    // SCHEDULE (cron), MANUAL (Run) or KEYWORD
     @Column(name = "run_trigger", nullable = false, length = 10)
     private String trigger;
 
+    // who it ran as: the job's runAs for the cron, else the caller
     @Column(name = "run_as", length = Constants.USERNAME_MAX)
     private String runAs;
 

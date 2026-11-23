@@ -33,7 +33,7 @@ public final class AuditActions {
         if (type == null)
             return null;
         Map<String, Object> details = details(message, args);
-        Object name = first(details, "name", "user", "bucket", "table", "email", "identity");
+        Object name = first(details, "name", "user", "bucket", "table", "email", "identity", "keyword");
         Integer projectId = action.startsWith("project.") ? number(details.get("id"))
                 : action.startsWith("auth.") && details.containsKey("project") ? number(details.get("project")) : null;
         return new Action(type, name != null ? String.valueOf(name) : null, projectId, details);
@@ -49,7 +49,7 @@ public final class AuditActions {
             case "data.create" -> message.contains("count=") ? "Data" : null;
             case "data.delete", "data.history-clear", "data.history-limit" -> "Data";
             case "task.run" -> "SCHEDULER".equals(source) ? null : "Task";
-            case "task.schedule-disabled" -> "Schedule";
+            case "task.schedule-disabled", "task.keyword-run" -> "Schedule";
             case "project.clear", "project.dataset-import", "project.dataset-export" -> "Project";
             case "audit.cleanup" -> "Audit";
             default -> null;

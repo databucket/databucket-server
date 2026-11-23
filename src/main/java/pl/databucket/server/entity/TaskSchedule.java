@@ -12,15 +12,18 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Runs a task on a bucket on a schedule (cron), as the user who saved it last (runAs). The due schedules of all
- * projects are picked by TaskScheduleRunner with plain SQL (SELECT ... FOR UPDATE SKIP LOCKED), so each run happens
- * once also with several instances; the last* fields and the runs are written there too.
+ * A job (Settings > Jobs): runs a task on a bucket by cron, as the user who saved it last (runAs), by its keyword
+ * (all the jobs of the keyword, by id, as the caller) or by Run (as the caller). No cron and no keyword: only Run.
+ * The due jobs of all projects are picked by TaskScheduleRunner with plain SQL (SELECT ... FOR UPDATE SKIP LOCKED), so
+ * each cron run happens once also with several instances; the last* fields and the runs are written there too.
  */
 @Getter
 @Setter
 @Entity
 @Table(name = "task_schedules")
 public class TaskSchedule extends Auditable<String> {
+
+    public static final int KEYWORD_MAX = 50;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_schedule_generator")
@@ -51,16 +54,22 @@ public class TaskSchedule extends Auditable<String> {
     @Column(columnDefinition = "jsonb")
     private List<Object> rules;
 
-    // 6 fields (second minute hour day month weekday), as Spring's CronExpression
-    @Column(nullable = false, length = 100)
+    // 6 fields (second minute hour day month weekday), as Spring's CronExpression; null = not run by cron
+    @Column(length = 100)
     private String cron;
+
+    // runs the job together with the other jobs of the same keyword (compared trimmed, ignoring case); null = none
+    @Column(length = KEYWORD_MAX)
+    private String keyword;
 
     @Column(name = "time_zone", nullable = false, length = 50)
     private String timeZone;
 
+    // the cron only: Run and the keyword run a disabled job too
     @Column(nullable = false)
     private boolean enabled;
 
+    // the user the cron runs as (who saved the job last); Run and the keyword run as the caller
     @Column(name = "run_as", nullable = false, length = Constants.USERNAME_MAX)
     private String runAs;
 

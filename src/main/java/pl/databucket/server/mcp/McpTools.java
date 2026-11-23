@@ -32,6 +32,7 @@ import pl.databucket.server.dto.TaskRunDTO;
 import pl.databucket.server.exception.BucketNotFoundException;
 import pl.databucket.server.service.TaskAction;
 import pl.databucket.server.service.TaskRunService;
+import pl.databucket.server.service.TaskScheduleService;
 import pl.databucket.server.audit.AuditService;
 
 import java.util.ArrayList;
@@ -73,11 +74,14 @@ public class McpTools {
     private final DataGenerateService generateService;
     private final TaskRunService taskRunService;
     private final AuditService auditService;
+    private final TaskScheduleService scheduleService;
 
     public McpTools(ObjectMapper objectMapper, DataService dataService, DataHistorySearchService historySearch,
                     BucketService bucketService, UserService userService, McpBucketInfoService bucketInfo,
                     TransactionTemplate transactionTemplate, McpBucketCreator bucketCreator,
-                    DataGenerateService generateService, TaskRunService taskRunService, AuditService auditService) {
+                    DataGenerateService generateService, TaskRunService taskRunService, AuditService auditService,
+                    TaskScheduleService scheduleService) {
+        this.scheduleService = scheduleService;
         this.taskRunService = taskRunService;
         this.auditService = auditService;
         this.bucketCreator = bucketCreator;
@@ -424,6 +428,29 @@ public class McpTools {
             throw new IllegalArgumentException("The bucket '" + bucket + "' has no task '" + task
                     + "'; see the tasks in describe_bucket");
         } catch (TaskAction.InvalidTaskException | TaskRunService.ForbiddenTaskException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
+    @McpTool(name = "run_jobs", description = "Runs all the jobs (Settings > Jobs) with the given keyword, e.g. "
+            + "'DEV cleaning', one after another by id: each runs its saved task on its bucket with its rules, as the "
+            + "user. A failed job doesn't stop the others; the result lists each job's status and rows. Needs ROBOT or "
+            + "higher. Use preview=true first to see how many rows each job would run on. An unknown keyword: the "
+            + "error lists the keywords there are.",
+            annotations = @McpTool.McpAnnotations(title = "Run the jobs of a keyword", readOnlyHint = false,
+                    destructiveHint = true, idempotentHint = false, openWorldHint = false))
+    public String runJobs(
+            @McpToolParam(description = "The keyword of the jobs, compared ignoring case") String keyword,
+            @McpToolParam(description = "true: change nothing, only count the rows each job would run on. Default false.",
+                    required = false) Boolean preview) throws Exception {
+        User user = userService.getCurrentUser();
+        if (!user.hasRoleAtLeast(Constants.ROLE_ROBOT))
+            throw new IllegalArgumentException("Running jobs needs the ROBOT role or higher; the user's role is "
+                    + user.getTopRole().getName());
+        try {
+            return json(scheduleService.runKeyword(keyword, Boolean.TRUE.equals(preview)));
+        } catch (TaskScheduleService.InvalidScheduleException | TaskScheduleService.KeywordNotFoundException
+                 | TaskScheduleService.KeywordRunningException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
     }

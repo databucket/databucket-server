@@ -27,12 +27,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Runs task schedules: picks the due ones of all projects (plain SQL, outside the project filter), moves each one's
- * next run forward in the same transaction (SELECT ... FOR UPDATE SKIP LOCKED: with several instances each schedule is
- * taken by one of them) and then runs its task as the user who saved it, in its project - the same security context a
- * request with that user's token gets, so the access checks, the roles and the project filter apply as usual. Every
- * run is recorded (task_schedule_runs, the last* fields of the schedule); after max-failures failed runs in a row the
- * schedule is disabled.
+ * Runs jobs (task schedules). The cron: picks the due ones of all projects (plain SQL, outside the project filter),
+ * moves each one's next run forward in the same transaction (SELECT ... FOR UPDATE SKIP LOCKED: with several instances
+ * each job is taken by one of them) and then runs its task as the user who saved it, in its project - the same
+ * security context a request with that user's token gets, so the access checks, the roles and the project filter
+ * apply as usual. Run and the keyword run the task as the caller (the request's security context). Every run is
+ * recorded (task_schedule_runs with who it ran as, the last* fields of the job); after max-failures failed cron runs
+ * in a row the job is disabled (failures of Run and the keyword don't count: the caller sees them).
  */
 @Service
 public class TaskScheduleRunner {
@@ -41,6 +42,7 @@ public class TaskScheduleRunner {
     public static final String ERROR = "ERROR";
     public static final String SCHEDULE = "SCHEDULE";
     public static final String MANUAL = "MANUAL";
+    public static final String KEYWORD = "KEYWORD";
 
     private static final Logger logger = LoggerFactory.getLogger(TaskScheduleRunner.class);
     private static final int MESSAGE_MAX = 1000;
@@ -90,7 +92,7 @@ public class TaskScheduleRunner {
             for (Long id : claimed) {
                 Schedule schedule = load(id);
                 if (schedule != null) {
-                    run(schedule, SCHEDULE);
+                    run(schedule, SCHEDULE, null);
                     ran++;
                 }
             }
@@ -98,12 +100,32 @@ public class TaskScheduleRunner {
         return ran;
     }
 
-    /** "Run now": runs the schedule at once, as its run-as user, whether enabled or not. */
-    public Outcome runNow(long scheduleId) {
+    /**
+     * Runs the job at once, as the caller (in the current security context), whether enabled or not.
+     *
+     * @param trigger MANUAL (Run) or KEYWORD
+     */
+    public Outcome runAsCaller(long scheduleId, String trigger, String caller) {
         Schedule schedule = load(scheduleId);
         if (schedule == null)
-            return new Outcome(ERROR, null, "The schedule doesn't exist");
-        return run(schedule, MANUAL);
+            return new Outcome(ERROR, null, "The job doesn't exist");
+        return run(schedule, trigger, caller);
+    }
+
+    /** The preview of a job as the caller: the rows it would run on; nothing is changed or recorded. */
+    public Outcome preview(long scheduleId) {
+        Schedule schedule = load(scheduleId);
+        if (schedule == null)
+            return new Outcome(ERROR, null, "The job doesn't exist");
+        try {
+            TaskRunResponse preview = taskRunService.run(schedule.bucketName(), String.valueOf(schedule.taskId()),
+                    rulesOf(schedule), true);
+            if (tooMany(preview))
+                return new Outcome(ERROR, preview.count(), tooManyMessage(preview));
+            return new Outcome(OK, preview.count(), preview.message());
+        } catch (Exception e) {
+            return new Outcome(ERROR, null, message(e));
+        }
     }
 
     // the due schedules, with their next run moved forward (from now: runs missed while the server was down are made
@@ -157,12 +179,20 @@ public class TaskScheduleRunner {
                 (String) row.get("cron"), (String) row.get("time_zone"), (String) row.get("run_as"));
     }
 
-    Outcome run(Schedule schedule, String trigger) {
+    /**
+     * Runs the job and records the run.
+     *
+     * @param caller the user it runs as, in the current security context (Run, keyword); null = the cron: as the
+     *               job's runAs, in a security context made for it
+     */
+    Outcome run(Schedule schedule, String trigger, String caller) {
         Instant started = Instant.now();
         Outcome outcome;
+        String ranAs = caller != null ? caller : schedule.runAs();
         SecurityContext previous = SecurityContextHolder.getContext();
         try {
-            SecurityContextHolder.setContext(contextOf(schedule));
+            if (caller == null)
+                SecurityContextHolder.setContext(contextOf(schedule));
             outcome = execute(schedule);
         } catch (Exception e) {
             outcome = new Outcome(ERROR, null, message(e));
@@ -170,12 +200,12 @@ public class TaskScheduleRunner {
             SecurityContextHolder.setContext(previous);
         }
         try {
-            record(schedule, trigger, started, outcome);
+            record(schedule, trigger, ranAs, started, outcome);
         } catch (RuntimeException e) {
             logger.warn("Failed to record the run of the schedule {}: {}", schedule.id(), e.getMessage());
         }
-        AuditLog.log("task.schedule-run", "id={} name={} trigger={} status={} count={}", schedule.id(), schedule.name(),
-                trigger, outcome.status(), outcome.count());
+        AuditLog.log("task.schedule-run", "id={} name={} trigger={} user={} status={} count={}", schedule.id(),
+                schedule.name(), trigger, ranAs, outcome.status(), outcome.count());
         return outcome;
     }
 
@@ -189,18 +219,31 @@ public class TaskScheduleRunner {
     }
 
     private Outcome execute(Schedule schedule) throws Exception {
-        TaskRunDTO rules = new TaskRunDTO();
-        rules.setRules(schedule.rules());
+        TaskRunDTO rules = rulesOf(schedule);
         String taskRef = String.valueOf(schedule.taskId());
         TaskRunResponse preview = taskRunService.run(schedule.bucketName(), taskRef, rules, true);
-        if (!"reserve".equals(preview.action()) && preview.count() > maxRows)
-            return new Outcome(ERROR, null, "The task would run on " + preview.count() + " data rows, more than "
-                    + maxRows + " (databucket.task-schedules.max-rows); narrow the rules");
+        if (tooMany(preview))
+            return new Outcome(ERROR, null, tooManyMessage(preview));
         TaskRunResponse response = taskRunService.run(schedule.bucketName(), taskRef, rules, false);
         return new Outcome(OK, response.count(), response.message());
     }
 
-    private void record(Schedule schedule, String trigger, Instant started, Outcome outcome) {
+    private static TaskRunDTO rulesOf(Schedule schedule) {
+        TaskRunDTO rules = new TaskRunDTO();
+        rules.setRules(schedule.rules());
+        return rules;
+    }
+
+    private boolean tooMany(TaskRunResponse preview) {
+        return !"reserve".equals(preview.action()) && preview.count() > maxRows;
+    }
+
+    private String tooManyMessage(TaskRunResponse preview) {
+        return "The task would run on " + preview.count() + " data rows, more than " + maxRows
+                + " (databucket.task-schedules.max-rows); narrow the rules";
+    }
+
+    private void record(Schedule schedule, String trigger, String ranAs, Instant started, Outcome outcome) {
         long duration = Instant.now().toEpochMilli() - started.toEpochMilli();
         transactionTemplate.executeWithoutResult(status -> {
             MapSqlParameterSource params = new MapSqlParameterSource("id", schedule.id())
@@ -208,7 +251,7 @@ public class TaskScheduleRunner {
                     .addValue("started", Timestamp.from(started))
                     .addValue("duration", duration)
                     .addValue("trigger", trigger)
-                    .addValue("runAs", schedule.runAs())
+                    .addValue("runAs", ranAs)
                     .addValue("status", outcome.status())
                     .addValue("count", outcome.count())
                     .addValue("message", truncate(outcome.message()))
@@ -236,7 +279,8 @@ public class TaskScheduleRunner {
                     AuditLog.log("task.schedule-disabled", "id={} name={} failures={}", schedule.id(), schedule.name(), failures);
                 }
             } else {
-                // a run that worked resets the count; "Run now" leaves the count of the scheduler's failures as it is
+                // a run that worked resets the count; a failed Run or keyword run leaves the count of the cron's
+                // failures as it is
                 jdbcTemplate.update("UPDATE task_schedules SET last_run_at = :started, last_status = :status,"
                         + " last_count = :count, last_message = :message"
                         + (OK.equals(outcome.status()) ? ", failures = 0" : "")

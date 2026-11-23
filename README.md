@@ -63,6 +63,8 @@ psql -h <host> -U <user> -d <database> -f upgrade/3.7.0.sql
   the emails and adds the unique constraint; when several users share an email it lists them and changes nothing.
 * **3.7.3** — indexes on the tables of existing buckets (data by tag and reservation, history by data row) and
   the tag of a history entry as bigint. Run it while Databucket is stopped: changing the type rewrites the history tables.
+* **3.23.0** — a job (Settings → Jobs, formerly Schedules) may have no cron. The script drops the NOT NULL constraint
+  of `task_schedules.cron` (needed only for databases used by 3.21.0 or later).
 
 # Contribution rules
 

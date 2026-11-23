@@ -1,7 +1,7 @@
 import MaterialTable from '@material-table/core';
 import React, {useCallback, useContext, useEffect, useState} from "react";
-import {Box, TextField, Tooltip, useTheme} from "@mui/material";
-import {History as HistoryIcon, PlayArrow, Refresh} from "@mui/icons-material";
+import {Autocomplete, Box, TextField, Tooltip, useTheme} from "@mui/material";
+import {History as HistoryIcon, PlayArrow, PlaylistPlay, Refresh} from "@mui/icons-material";
 import {getProjectTableKey} from "../../utils/ConfigurationStorage";
 import useTableState from "../../utils/TableState";
 import {selectCellText} from "../../utils/TableCellSelect";
@@ -29,6 +29,7 @@ import {getBaseUrl} from "../../utils/UrlBuilder";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import TasksContext from "../../context/tasks/TasksContext";
 import ScheduleRunsDialog, {StatusIcon} from "../dialogs/ScheduleRunsDialog";
+import RunKeywordDialog from "../dialogs/RunKeywordDialog";
 
 const RULES_PLACEHOLDER = '[["modifiedAt", "<", "@now-1d"]]';
 
@@ -45,21 +46,33 @@ const formatDate = value => value != null ? new Date(value).toLocaleString() : '
 // the rules of a row: a list while shown, the text while edited
 const rulesText = rules => rules == null ? '' : typeof rules === 'string' ? rules : JSON.stringify(rules);
 
+// the keywords of the jobs, each once (ignoring case), sorted
+const keywordsOf = jobs => {
+    const byLower = new Map();
+    (jobs || []).forEach(job => {
+        if (job.keyword && !byLower.has(job.keyword.toLowerCase()))
+            byLower.set(job.keyword.toLowerCase(), job.keyword);
+    });
+    return [...byLower.values()].sort((a, b) => a.localeCompare(b));
+};
+
 /**
- * Task schedules: a saved task run on a bucket by cron, as the admin who saved the schedule (Run as). Saving checks the
- * schedule as it will run (the task of the bucket, the rules, the access) on the server.
+ * Jobs: a saved task run on a bucket by cron (as the admin who saved the job: Cron runs as), by its keyword (all the
+ * jobs of the keyword, as the caller) or by Run (as the caller). No cron and no keyword: only Run. Saving checks the
+ * job as it will run (the task of the bucket, the rules, the access) on the server.
  */
-export default function SchedulesTab() {
+export default function JobsTab() {
 
     const theme = useTheme();
     const tableRef = React.createRef();
     const [messageBox, setMessageBox] = useState({open: false, severity: 'error', title: '', message: ''});
     const [schedules, setSchedules] = useState(null);
     const [historyOf, setHistoryOf] = useState(null);
+    const [keywordOpen, setKeywordOpen] = useState(false);
     const tableState = useTableState(getProjectTableKey('settings-schedules'));
     const {buckets, fetchBuckets} = useContext(BucketsContext);
     const {tasks, fetchTasks} = useContext(TasksContext);
-    const changeableFields = ['name', 'description', 'taskId', 'bucketId', 'rules', 'cron', 'timeZone', 'enabled'];
+    const changeableFields = ['name', 'description', 'taskId', 'bucketId', 'rules', 'cron', 'keyword', 'timeZone', 'enabled'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -105,7 +118,7 @@ export default function SchedulesTab() {
             id: row.id, name: row.name, description: row.description,
             taskId: row.taskId != null ? Number(row.taskId) : null,
             bucketId: row.bucketId != null ? Number(row.bucketId) : null,
-            rules, cron: row.cron, timeZone: row.timeZone, enabled: row.enabled === true
+            rules, cron: row.cron, keyword: row.keyword, timeZone: row.timeZone, enabled: row.enabled === true
         };
     };
 
@@ -159,7 +172,7 @@ export default function SchedulesTab() {
     return (
         <div onDoubleClick={selectCellText}>
             <MaterialTable
-                title='Schedules'
+                title='Jobs'
                 tableRef={tableRef}
                 columns={tableState.columns([
                     getColumnName(),
@@ -182,17 +195,31 @@ export default function SchedulesTab() {
                         )
                     },
                     {
-                        title: 'Cron', field: 'cron', filtering: false, initialEditValue: '0 2 * * *',
+                        title: 'Cron', field: 'cron', filtering: false,
                         editComponent: props => (
                             <TextField variant='standard' placeholder='0 2 * * *' value={props.value || ''}
-                                       helperText='minute hour day month weekday'
+                                       helperText='minute hour day month weekday; empty = no cron'
                                        onChange={e => props.onChange(e.target.value)}
                                        InputProps={{style: {fontFamily: 'monospace'}}}/>
                         )
                     },
+                    {
+                        title: 'Keyword', field: 'keyword',
+                        editComponent: props => (
+                            <Autocomplete
+                                freeSolo
+                                options={keywordsOf(schedules)}
+                                inputValue={props.value || ''}
+                                onInputChange={(event, value) => props.onChange(value)}
+                                renderInput={params => <TextField {...params} variant='standard'
+                                                                  placeholder='DEV cleaning'
+                                                                  sx={{minWidth: 160}}/>}
+                            />
+                        )
+                    },
                     {title: 'Time zone', field: 'timeZone', filtering: false, initialEditValue: browserTimeZone()},
                     {...getColumnEnabled(), initialEditValue: true},
-                    {title: 'Run as', field: 'runAs', editable: 'never'},
+                    {title: 'Cron runs as', field: 'runAs', editable: 'never'},
                     {
                         title: 'Next run', field: 'nextRunAt', editable: 'never', filtering: false,
                         render: rowData => formatDate(rowData.nextRunAt)
@@ -253,13 +280,19 @@ export default function SchedulesTab() {
                         onClick: tableState.toggleFiltering
                     },
                     {
+                        icon: () => <PlaylistPlay/>,
+                        tooltip: 'Run keyword',
+                        isFreeAction: true,
+                        onClick: () => setKeywordOpen(true)
+                    },
+                    {
                         icon: () => <PlayArrow/>,
-                        tooltip: 'Run now',
+                        tooltip: 'Run',
                         onClick: (event, rowData) => runNow(rowData)
                     },
                     {
                         icon: () => <HistoryIcon/>,
-                        tooltip: 'History',
+                        tooltip: 'Executions',
                         onClick: (event, rowData) => setHistoryOf(rowData)
                     }
                 ]}
@@ -280,6 +313,8 @@ export default function SchedulesTab() {
                 }}
             />
             <ScheduleRunsDialog schedule={historyOf} onClose={() => setHistoryOf(null)}/>
+            <RunKeywordDialog open={keywordOpen} keywords={keywordsOf(schedules)}
+                              onClose={() => setKeywordOpen(false)} onRun={fetchSchedules}/>
             <MessageBox
                 config={messageBox}
                 onClose={() => setMessageBox({...messageBox, open: false})}

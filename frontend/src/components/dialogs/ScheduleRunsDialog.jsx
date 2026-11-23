@@ -31,7 +31,9 @@ export const StatusIcon = ({status}) => status === 'OK'
 
 const formatDuration = ms => ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`;
 
-/** The latest runs of a schedule, the newest first (Settings > Schedules > History). */
+const TRIGGERS = {SCHEDULE: 'Cron', MANUAL: 'Run', KEYWORD: 'Keyword'};
+
+/** The latest runs of a job, the newest first (Settings > Jobs > Executions). */
 export default function ScheduleRunsDialog(props) {
     const {schedule} = props;
     const [runs, setRuns] = useState(null);
@@ -50,11 +52,11 @@ export default function ScheduleRunsDialog(props) {
 
     return (
         <Dialog open={schedule != null} onClose={props.onClose} fullWidth maxWidth='lg'>
-            <DialogTitle>{`History of "${schedule != null ? schedule.name : ''}"`}</DialogTitle>
+            <DialogTitle>{`Executions of "${schedule != null ? schedule.name : ''}"`}</DialogTitle>
             <DialogContent dividers sx={{height: '50vh', p: 0}}>
                 {error != null && <Typography color='error' sx={{p: 2}}>{error}</Typography>}
                 {runs != null && runs.length === 0 &&
-                    <Typography color='text.secondary' sx={{p: 2}}>The schedule hasn't run yet.</Typography>}
+                    <Typography color='text.secondary' sx={{p: 2}}>The job hasn't run yet.</Typography>}
                 {runs != null && runs.length > 0 &&
                     <TableContainer sx={{maxHeight: '100%'}}>
                         <Table size="small" stickyHeader>
@@ -62,7 +64,7 @@ export default function ScheduleRunsDialog(props) {
                                 <TableRow>
                                     <TableCell>Started</TableCell>
                                     <TableCell>Trigger</TableCell>
-                                    <TableCell>Run as</TableCell>
+                                    <TableCell>Run by</TableCell>
                                     <TableCell>Status</TableCell>
                                     <TableCell align='right'>Rows</TableCell>
                                     <TableCell align='right'>Duration</TableCell>
@@ -73,7 +75,7 @@ export default function ScheduleRunsDialog(props) {
                                 {runs.map(run => (
                                     <TableRow key={run.id} hover>
                                         <TableCell sx={{whiteSpace: 'nowrap'}}>{new Date(run.startedAt).toLocaleString()}</TableCell>
-                                        <TableCell>{run.trigger === 'MANUAL' ? 'Run now' : 'Schedule'}</TableCell>
+                                        <TableCell>{TRIGGERS[run.trigger] || run.trigger}</TableCell>
                                         <TableCell>{run.runAs}</TableCell>
                                         <TableCell>
                                             <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
