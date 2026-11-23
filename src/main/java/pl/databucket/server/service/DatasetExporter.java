@@ -37,6 +37,7 @@ public class DatasetExporter {
     @Autowired private ViewService viewService;
     @Autowired private TaskService taskService;
     @Autowired private SvgService svgService;
+    @Autowired private TaskScheduleService taskScheduleService;
     @Autowired private ModelMapper modelMapper;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private NamedParameterJdbcTemplate jdbcTemplate;
@@ -58,6 +59,8 @@ public class DatasetExporter {
         dataset.setFilters(mapAll(dataFilterService.getFilters(), DataFilterDto.class));
         dataset.setViews(viewService.getViews());
         dataset.setTasks(taskService.getTasks());
+        dataset.setJobs(taskScheduleService.getSchedules().stream().map(DatasetJobDto::of)
+                .collect(Collectors.toCollection(ArrayList::new)));
         dataset.setIcons(mapAll(svgService.getSvgList(), SvgDto.class));
 
         // the bucket ids come from the project's buckets above; the table names are built from them
@@ -165,6 +168,10 @@ public class DatasetExporter {
                     actions.put("tagId", 0);
             }
         });
+
+        // a job can't be without its task and bucket
+        Set<Long> tasks = ids(dataset.getTasks(), TaskDto::getId);
+        dataset.getJobs().removeIf(job -> !tasks.contains(job.getTaskId()) || !buckets.contains(job.getBucketId()));
 
         dataset.getData().values().forEach(rows -> rows.forEach(row -> row.setTagId(known(tags, row.getTagId()))));
     }

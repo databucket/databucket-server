@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import pl.databucket.server.dto.DatasetJobDto;
 import pl.databucket.server.dto.JobKeywordRunResponse;
 import pl.databucket.server.dto.TaskRunDTO;
 import pl.databucket.server.dto.TaskScheduleDto;
@@ -118,6 +119,35 @@ public class TaskScheduleService {
         scheduleRepository.save(schedule);
         jdbcTemplate.update("DELETE FROM task_schedule_runs WHERE schedule_id = :id", new MapSqlParameterSource("id", id));
         AuditLog.log("task.schedule-delete", "id={} name={}", id, schedule.getName());
+    }
+
+    /**
+     * A job of a dataset, in the current project: saved as it is (no preview: the data of the project may not be
+     * there yet) and disabled, run as the importing user until an admin saves it.
+     */
+    public TaskSchedule importJob(DatasetJobDto job) throws Exception {
+        Task task = taskRepository.findByIdAndDeleted(job.getTaskId(), false);
+        if (task == null)
+            throw new ItemNotFoundException(Task.class, job.getTaskId());
+        Bucket bucket = bucketRepository.findByIdAndDeleted(job.getBucketId(), false);
+        if (bucket == null)
+            throw new ItemNotFoundException(Bucket.class, job.getBucketId());
+        String keyword = keyword(job.getKeyword());
+        if (keyword != null && keyword.length() > TaskSchedule.KEYWORD_MAX)
+            throw new InvalidScheduleException("The keyword is longer than " + TaskSchedule.KEYWORD_MAX + " characters");
+        TaskSchedule schedule = new TaskSchedule();
+        schedule.setName(job.getName().trim());
+        schedule.setDescription(job.getDescription());
+        schedule.setTask(task);
+        schedule.setBucket(bucket);
+        schedule.setRules(job.getRules() == null || job.getRules().isEmpty() ? null : job.getRules());
+        schedule.setCron(job.getCron() == null || job.getCron().isBlank() ? null : ScheduleCron.normalize(job.getCron()));
+        schedule.setTimeZone(ScheduleCron.zone(job.getTimeZone()).getId());
+        schedule.setKeyword(keyword);
+        schedule.setRunAs(userService.getCurrentUser().getUsername());
+        schedule.setEnabled(false);
+        schedule.setNextRunAt(null);
+        return scheduleRepository.save(schedule);
     }
 
     /** The latest runs of the schedule, the newest first. */

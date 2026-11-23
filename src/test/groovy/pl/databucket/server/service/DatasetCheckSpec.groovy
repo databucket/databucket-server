@@ -118,4 +118,33 @@ class DatasetCheckSpec extends Specification {
                 "History change 3: changes nothing"
         ]
     }
+
+    def "should check the jobs: their task and bucket in the dataset, a name"() {
+        given:
+        DatasetDto dataset = new DatasetDto(name: "X")
+        dataset.buckets = [new BucketDto(id: 1L, name: "orders")]
+        dataset.tasks = [new TaskDto(id: 5L, name: "clean")]
+        dataset.jobs = [new DatasetJobDto(name: "ok", taskId: 5L, bucketId: 1L, keyword: "DEV cleaning"),
+                        new DatasetJobDto(name: "wrong", taskId: 9L, bucketId: 2L),
+                        new DatasetJobDto(name: "", taskId: 5L)]
+
+        when:
+        def problems = DatasetCheck.problems(dataset, validator)
+
+        then:
+        problems.any { it.startsWith("Job wrong") && it.contains("task") }
+        problems.any { it.startsWith("Job wrong") && it.contains("bucket") }
+        problems.contains("Job : no bucket")
+        problems.any { it.startsWith("Job : name") }
+        !problems.any { it.startsWith("Job ok") }
+    }
+
+    def "should not require task ids in a dataset without jobs"() {
+        given:
+        DatasetDto dataset = new DatasetDto(name: "X")
+        dataset.tasks = [new TaskDto(name: "no id")]
+
+        expect:
+        DatasetCheck.problems(dataset, validator).isEmpty()
+    }
 }
