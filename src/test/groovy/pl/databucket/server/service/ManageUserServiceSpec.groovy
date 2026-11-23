@@ -1,7 +1,8 @@
 package pl.databucket.server.service
 
-import pl.databucket.server.configuration.ApplicationConfiguration
 import pl.databucket.server.dto.ManageUserDtoRequest
+import pl.databucket.server.entity.Project
+import pl.databucket.server.entity.Role
 import pl.databucket.server.entity.User
 import pl.databucket.server.exception.ItemAlreadyExistsException
 import pl.databucket.server.repository.ProjectRepository
@@ -29,7 +30,52 @@ class ManageUserServiceSpec extends Specification {
         setField(manageUserService, "userRepository", userRepository)
         setField(manageUserService, "roleRepository", roleRepository)
         setField(manageUserService, "projectRepository", projectRepository)
-        setField(manageUserService, "modelMapper", new ApplicationConfiguration().modelMapper())
+    }
+
+    // ==================== getUsers Tests ====================
+
+    def "should list the users with their top role and projects, loaded in one query"() {
+        given: "a user with two roles (from before 3.12.0) and two projects"
+        def member = new Role(); member.id = 3 as short; member.name = "MEMBER"
+        def admin = new Role(); admin.id = 2 as short; admin.name = "ADMIN"
+        def p1 = new Project(); p1.id = 10
+        def p2 = new Project(); p2.id = 11
+        def user = new User()
+        user.id = 7; user.username = "anna"; user.email = "anna@example.com"; user.description = "QA"
+        user.enabled = true; user.roles = [member, admin] as Set; user.projects = [p1, p2] as Set
+        user.createdBy = "super"; user.modifiedBy = "admin"
+
+        when:
+        def users = manageUserService.getUsers()
+
+        then:
+        1 * userRepository.findAllWithProjectsAndRolesByOrderById() >> [user]
+        0 * userRepository.findAllByOrderById()
+        users.size() == 1
+        with(users[0]) {
+            id == 7
+            username == "anna"
+            email == "anna@example.com"
+            description == "QA"
+            enabled
+            rolesIds == [2 as short] as Set
+            projectsIds == [10, 11] as Set
+            createdBy == "super"
+            modifiedBy == "admin"
+        }
+    }
+
+    def "should list a user without roles and projects with null ids"() {
+        given:
+        def user = new User(); user.id = 8; user.username = "robot"; user.roles = [] as Set; user.projects = [] as Set
+
+        when:
+        def users = manageUserService.getUsers()
+
+        then:
+        1 * userRepository.findAllWithProjectsAndRolesByOrderById() >> [user]
+        users[0].rolesIds == null
+        users[0].projectsIds == null
     }
 
     // ==================== createUser Tests ====================
