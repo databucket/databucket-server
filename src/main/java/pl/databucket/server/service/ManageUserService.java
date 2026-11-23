@@ -1,6 +1,5 @@
 package pl.databucket.server.service;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -59,14 +58,12 @@ public class ManageUserService {
     private AppProperties appProperties;
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     private RegistrationService registrationService;
 
     @Transactional(readOnly = true)
     public List<ManageUserDtoResponse> getUsers() {
-        return userRepository.findAllByOrderById().stream().map(this::toDto).collect(Collectors.toList());
+        return userRepository.findAllWithProjectsAndRolesByOrderById().stream().map(ManageUserService::toDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -309,7 +306,21 @@ public class ManageUserService {
         AuditLog.log("auth.temp-password", "id={} name={}", user.getId(), user.getUsername());
     }
 
-    private ManageUserDtoResponse toDto(User user) {
-        return modelMapper.map(user, ManageUserDtoResponse.class);
+    // by hand: ModelMapper (reflection per object) took most of the time of a list of thousands of users
+    static ManageUserDtoResponse toDto(User user) {
+        ManageUserDtoResponse dto = new ManageUserDtoResponse();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setDescription(user.getDescription());
+        dto.setEmail(user.getEmail());
+        dto.setEnabled(user.getEnabled());
+        dto.setExpirationDate(user.getExpirationDate());
+        dto.setRolesIds(user.getRolesIds());
+        dto.setProjectsIds(user.getProjectsIds());
+        dto.setCreatedBy(user.getCreatedBy());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setModifiedBy(user.getModifiedBy());
+        dto.setModifiedAt(user.getModifiedAt());
+        return dto;
     }
 }
