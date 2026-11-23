@@ -3,9 +3,51 @@ import {
     MuiConfig,
     Utils as QbUtils
 } from '@react-awesome-query-builder/mui';
-import React from "react";
-import {styled, Typography} from "@mui/material";
+import React, {useState} from "react";
+import {Box, IconButton, styled, TextField, Tooltip, Typography} from "@mui/material";
+import {Event as CalendarIcon, Update as RelativeIcon} from "@mui/icons-material";
 import './../styles/query-builder-styles.css';
+import {isRelative, isValidRelative, withRelativeDateFormats} from "../../utils/RelativeDate";
+
+/**
+ * The date or datetime widget of the query builder with a switch to a relative date (@now-2h): a filter like "modified
+ * more than 2 hours ago" then stays valid instead of holding a fixed date.
+ */
+const RelativeDateWidget = ({widgetProps, base, ctx}) => {
+    const {value, setValue, readonly} = widgetProps;
+    const [relative, setRelative] = useState(isRelative(value));
+
+    const toggle = () => {
+        setValue(relative ? undefined : '@now-1d');
+        setRelative(!relative);
+    };
+
+    const invalid = relative && value != null && value !== '' && !isValidRelative(value);
+
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+            {relative
+                ? <TextField variant='standard' size='small' value={value || ''} disabled={readonly}
+                             placeholder='@now-2h' error={invalid} sx={{width: 120}}
+                             inputProps={{style: {fontFamily: 'monospace'}}}
+                             title='@now, @now-2h, @now+1d (s, m, h, d, w)'
+                             onChange={e => setValue(e.target.value)}/>
+                : base.factory(widgetProps, ctx)}
+            {!readonly &&
+                <Tooltip title={relative ? 'Pick a date' : 'Relative to now, e.g. @now-2h'}>
+                    <IconButton size='small' onClick={toggle} aria-label={relative ? 'Pick a date' : 'Relative date'}>
+                        {relative ? <CalendarIcon fontSize='small'/> : <RelativeIcon fontSize='small'/>}
+                    </IconButton>
+                </Tooltip>}
+        </Box>
+    );
+};
+
+// the date widget of the config with a relative date allowed (formats, export, import: RelativeDate.js)
+const withRelativeDate = base => ({
+    ...withRelativeDateFormats(base),
+    factory: (props, ctx) => <RelativeDateWidget widgetProps={props} base={base} ctx={ctx}/>
+});
 
 export const getInitialTree = (loadedInitLogic, tree, config) => {
     if (tree && Object.keys(tree).length > 0) {
@@ -74,6 +116,11 @@ export const createConfig = (propFields, tags, users, enums, currentTheme) => {
 
     return {
         ...MuiConfig,
+        widgets: {
+            ...MuiConfig.widgets,
+            date: withRelativeDate(MuiConfig.widgets.date),
+            datetime: withRelativeDate(MuiConfig.widgets.datetime)
+        },
         fields: fields,
         settings: {
             ...MuiConfig.settings,
