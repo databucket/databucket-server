@@ -24,16 +24,16 @@ databucket:
     # events older than this are removed every night (cleanup-cron); 0 = kept for ever
     retention-days: 365
     cleanup-cron: "0 45 2 * * *"
-  # Task schedules (Settings > Schedules): a saved task run on a bucket by cron, as the admin who saved the schedule.
-  # The due schedules are looked for every poll-interval; each runs once also with several instances.
+  # Jobs (Settings > Jobs): a saved task run on a bucket by cron (as the admin who saved the job), by its keyword or by
+  # Run (as the caller). The due jobs are looked for every poll-interval; each runs once also with several instances.
   task-schedules:
     enabled: true
     poll-interval: 60s
     # a run that would change more rows fails instead (reserving takes at most its number of rows anyway)
     max-rows: 10000
-    # consecutive failed runs after which the schedule is disabled
+    # consecutive failed cron runs after which the job is disabled
     max-failures: 5
-    # runs kept per schedule (Settings > Schedules > History)
+    # runs kept per job (Settings > Jobs > History)
     history-size: 100
   # MCP server for AI agents (Claude, Cursor, Copilot, ...) at <databucket url>/mcp (streamable HTTP, stateless).
   # An agent signs in like an API client: the header "Authorization: Bearer <token>" with a token from
@@ -99,7 +99,8 @@ spring:
           generate_data (a generator per property, the server makes the rows) instead of writing them with insert_data.
           An admin can make a new bucket with create_bucket (from an example row and/or a list of fields).
           The tasks saved in the project (describe_bucket lists those of a bucket) run with run_task; use
-          preview=true first. An admin can see who changed the project's settings with get_activity. Rules: a list of [left, operator, right],
+          preview=true first. Jobs grouped under a keyword (e.g. 'DEV cleaning') run together with run_jobs.
+          An admin can see who changed the project's settings with get_activity. Rules: a list of [left, operator, right],
           combined with 'and', e.g. [["$.status", "==", "active"], ["reserved", "==", false]]; nest with
           {"or": [...]}, {"and": [...]}, {"!": rule}. You act as the signed-in user, only in their project.
 

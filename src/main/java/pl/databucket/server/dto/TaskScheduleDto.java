@@ -22,6 +22,8 @@ public class TaskScheduleDto {
     private Long bucketId;
     private List<Object> rules;
     private String cron;
+    @Size(max = pl.databucket.server.entity.TaskSchedule.KEYWORD_MAX)
+    private String keyword;
     private String timeZone;
     private boolean enabled;
 
