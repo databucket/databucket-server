@@ -466,7 +466,7 @@ public class McpTools {
     public String getActivity(
             @McpToolParam(description = "Who made the change (user name)", required = false) String actor,
             @McpToolParam(description = "The type of the object: Bucket, Class, Columns, Enum, Filter, Group, Icon, "
-                    + "Tag, Task, Schedule, Team, View, Project, User, Account (sign-ins), Data (bulk operations)",
+                    + "Tag, Task, Job, Team, View, Project, User, Account (sign-ins), Data (bulk operations)",
                     required = false) String type,
             @McpToolParam(description = "CREATE, UPDATE, DELETE or an operation such as auth.signin, data.delete",
                     required = false) String action,

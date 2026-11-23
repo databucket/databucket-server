@@ -32,7 +32,7 @@ class AuditActionsSpec extends Specification {
         "data.delete"              | "bucket={} count={}"                          | ["orders", 3]                || "Data"
         "data.history-clear"       | "bucket={} count={}"                          | ["orders", 3]                || "Data"
         "task.run"                 | "id={} name={} bucket={} action={} count={}"  | [3, "trash", "orders", "modify", 5] || "Task"
-        "task.keyword-run"         | "keyword={} jobs={} ok={} errors={}"          | ["DEV cleaning", 3, 2, 1]    || "Schedule"
+        "task.keyword-run"         | "keyword={} jobs={} ok={} errors={}"          | ["DEV cleaning", 3, 2, 1]    || "Job"
         "project.clear"            | "id={} name={}"                               | [15, "Acme Shop"]            || "Project"
         "bucket.index-create"      | "table={} index={} path={} type={} ms={}"     | ["x-bucket-1", "i", '$.a', "text", 5] || "Bucket"
         "bucket.create"            | "id={} name={}"                               | [1, "orders"]                || null

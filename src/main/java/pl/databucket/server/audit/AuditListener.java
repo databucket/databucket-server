@@ -37,7 +37,7 @@ public class AuditListener implements PostInsertEventListener, PostUpdateEventLi
             Map.entry(Bucket.class, "Bucket"), Map.entry(DataClass.class, "Class"),
             Map.entry(DataColumns.class, "Columns"), Map.entry(DataEnum.class, "Enum"),
             Map.entry(DataFilter.class, "Filter"), Map.entry(Group.class, "Group"), Map.entry(Svg.class, "Icon"),
-            Map.entry(Tag.class, "Tag"), Map.entry(Task.class, "Task"), Map.entry(TaskSchedule.class, "Schedule"),
+            Map.entry(Tag.class, "Tag"), Map.entry(Task.class, "Task"), Map.entry(TaskSchedule.class, "Job"),
             Map.entry(Team.class, "Team"), Map.entry(View.class, "View"), Map.entry(Project.class, "Project"),
             Map.entry(User.class, "User"));
 

@@ -100,7 +100,7 @@ public class TaskScheduleService {
 
     public TaskScheduleDto modifySchedule(TaskScheduleDto dto) throws Exception {
         if (dto.getId() == null)
-            throw new InvalidScheduleException("The id of the schedule is missing");
+            throw new InvalidScheduleException("The id of the job is missing");
         TaskSchedule schedule = find(dto.getId());
         apply(schedule, dto);
         TaskSchedule saved = scheduleRepository.save(schedule);

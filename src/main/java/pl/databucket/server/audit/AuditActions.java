@@ -49,7 +49,7 @@ public final class AuditActions {
             case "data.create" -> message.contains("count=") ? "Data" : null;
             case "data.delete", "data.history-clear", "data.history-limit" -> "Data";
             case "task.run" -> "SCHEDULER".equals(source) ? null : "Task";
-            case "task.schedule-disabled", "task.keyword-run" -> "Schedule";
+            case "task.schedule-disabled", "task.keyword-run" -> "Job";
             case "project.clear", "project.dataset-import", "project.dataset-export" -> "Project";
             case "audit.cleanup" -> "Audit";
             default -> null;
