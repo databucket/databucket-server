@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'pl.databucket'
-version = '3.24.1'
+version = '3.24.2'
 
 java {
     toolchain {
