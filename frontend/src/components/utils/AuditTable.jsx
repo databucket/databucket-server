@@ -25,7 +25,12 @@ import {
 import {FileDownload, Refresh} from '@mui/icons-material';
 import {exportCsv} from "../../utils/CsvExport";
 import {getBaseUrl} from "../../utils/UrlBuilder";
-import {getGetOptions, getSettingsTableHeight} from "../../utils/MaterialTableHelper";
+import {useTheme} from '@mui/material/styles';
+import {
+    getGetOptions,
+    getSettingsTableHeight,
+    getTableHeaderBackgroundColor
+} from "../../utils/MaterialTableHelper";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "./MessageBox";
 
@@ -34,7 +39,9 @@ AuditTable.propTypes = {
     endpoint: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     // Management: a column and a filter of the project
-    projects: PropTypes.array
+    projects: PropTypes.array,
+    // the height of the whole component (toolbar + table + pagination)
+    height: PropTypes.string
 };
 
 const ACTION_COLORS = {CREATE: 'success', UPDATE: 'info', DELETE: 'error'};
@@ -67,6 +74,7 @@ const toInstant = local => local ? new Date(local).toISOString() : null;
  * by who, the type of the object, the action and the period; a row opens its changes, property by property.
  */
 export default function AuditTable(props) {
+    const theme = useTheme();
     const [filter, setFilter] = useState({actor: ALL, type: ALL, action: ALL, project: ALL, from: '', to: ''});
     const [paging, setPaging] = useState({page: 0, limit: 50});
     const [result, setResult] = useState({total: 0, events: []});
@@ -146,8 +154,8 @@ export default function AuditTable(props) {
         : null;
 
     return (
-        <Box sx={{display: 'flex', flexDirection: 'column', height: getSettingsTableHeight()}}>
-            <Toolbar sx={{gap: 2, flexWrap: 'wrap', alignItems: 'flex-end', py: 1}}>
+        <Box sx={{display: 'flex', flexDirection: 'column', height: props.height || getSettingsTableHeight()}}>
+            <Toolbar sx={{gap: 2, flexWrap: 'wrap', alignItems: 'flex-end', pt: 2, pb: 2.5}}>
                 <Typography variant='h6' sx={{mr: 2}}>{props.title}</Typography>
                 {projectOptions != null && select('project', 'Project', projectOptions, 180)}
                 {select('actor', 'Who', facets.actors)}
@@ -173,7 +181,7 @@ export default function AuditTable(props) {
             </Toolbar>
             <TableContainer sx={{flex: 1}}>
                 <Table size='small' stickyHeader>
-                    <TableHead>
+                    <TableHead sx={{'& .MuiTableCell-head': {backgroundColor: getTableHeaderBackgroundColor(theme)}}}>
                         <TableRow>
                             <TableCell>When</TableCell>
                             {projectOptions != null && <TableCell>Project</TableCell>}

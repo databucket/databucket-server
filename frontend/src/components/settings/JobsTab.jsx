@@ -30,8 +30,7 @@ import BucketsContext from "../../context/buckets/BucketsContext";
 import TasksContext from "../../context/tasks/TasksContext";
 import ScheduleRunsDialog, {StatusIcon} from "../dialogs/ScheduleRunsDialog";
 import RunKeywordDialog from "../dialogs/RunKeywordDialog";
-
-const RULES_PLACEHOLDER = '[["modifiedAt", "<", "@now-1d"]]';
+import EditJobRulesDialog, {RULES_PLACEHOLDER} from "../dialogs/EditJobRulesDialog";
 
 const browserTimeZone = () => {
     try {
@@ -43,7 +42,7 @@ const browserTimeZone = () => {
 
 const formatDate = value => value != null ? new Date(value).toLocaleString() : '';
 
-// the rules of a row: a list while shown, the text while edited
+// the rules of a row as text (a list; the dialog has already checked them)
 const rulesText = rules => rules == null ? '' : typeof rules === 'string' ? rules : JSON.stringify(rules);
 
 // the keywords of the jobs, each once (ignoring case), sorted
@@ -181,18 +180,10 @@ export default function JobsTab() {
                     {title: 'Bucket', field: 'bucketId', lookup: lookup(buckets)},
                     {
                         title: 'Rules', field: 'rules', sorting: false, filtering: false,
-                        render: rowData => (
-                            <Box component='code' sx={{fontFamily: 'monospace', fontSize: '0.8rem'}}>
-                                {rulesText(rowData.rules)}
-                            </Box>
-                        ),
-                        editComponent: props => (
-                            <TextField variant='standard' fullWidth multiline maxRows={4}
-                                       placeholder={RULES_PLACEHOLDER}
-                                       value={rulesText(props.value)}
-                                       onChange={e => props.onChange(e.target.value)}
-                                       InputProps={{style: {fontFamily: 'monospace', fontSize: '0.8rem'}}}/>
-                        )
+                        // the number of conditions, the rules in the tooltip; edited in a dialog
+                        render: rowData => <EditJobRulesDialog rules={rowData.rules}/>,
+                        editComponent: props => <EditJobRulesDialog rules={props.value} onChange={props.onChange}/>
+
                     },
                     {
                         title: 'Cron', field: 'cron', filtering: false,
