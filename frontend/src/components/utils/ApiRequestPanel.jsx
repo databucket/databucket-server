@@ -9,12 +9,11 @@ import "brace/theme/monokai";
 import {logicToRules} from "../../utils/LogicToRules";
 import {getDataUrl} from "../../utils/UrlBuilder";
 import {getPostOptions} from "../../utils/MaterialTableHelper";
-import {API_VERSION_HEADER, handleErrors} from "../../utils/FetchHelper";
+import {handleErrors} from "../../utils/FetchHelper";
 
 const HEADERS = {
     'Authorization': 'Bearer $TOKEN',
-    'Content-Type': 'application/json',
-    ...API_VERSION_HEADER
+    'Content-Type': 'application/json'
 };
 
 // a value on one line, with a space after the commas: ["$.a", "in", [1, 2]]
