@@ -81,7 +81,7 @@ export default function JobsTab() {
     const {tags, fetchTags} = useContext(TagsContext);
     const {users, fetchUsers} = useContext(UsersContext);
     const {enums, fetchEnums} = useContext(EnumsContext);
-    const changeableFields = ['name', 'description', 'taskId', 'bucketId', 'rules', 'cron', 'keyword', 'timeZone', 'enabled'];
+    const changeableFields = ['name', 'description', 'taskId', 'bucketId', 'rules', 'properties', 'cron', 'keyword', 'timeZone', 'enabled'];
     const fieldsSpecification = {
         name: {title: 'Name', check: ['notEmpty', 'min1', 'max30']},
         description: {title: 'Description', check: ['max250']}
@@ -132,7 +132,7 @@ export default function JobsTab() {
         const bucket = (buckets || []).find(item => item.id === Number(bucketId));
         const dataClass = bucket != null ? getClassById(classes, bucket.classId) : null;
         return {
-            properties: dataClass?.configuration || [],
+            classProperties: dataClass?.configuration || [],
             tags: bucket != null ? getBucketTags(bucket, tags || []) : [],
             users: users || [],
             enums: enums || []
@@ -160,7 +160,7 @@ export default function JobsTab() {
             id: row.id, name: row.name, description: row.description,
             taskId: row.taskId != null ? Number(row.taskId) : null,
             bucketId: row.bucketId != null ? Number(row.bucketId) : null,
-            rules, cron: row.cron, keyword: row.keyword, timeZone: row.timeZone, enabled: row.enabled === true
+            rules, properties: row.properties || null, cron: row.cron, keyword: row.keyword, timeZone: row.timeZone, enabled: row.enabled === true
         };
     };
 
@@ -225,8 +225,14 @@ export default function JobsTab() {
                         title: 'Rules', field: 'rules', sorting: false, filtering: false,
                         // the number of conditions, the rules in the tooltip; edited in a dialog
                         render: rowData => <EditJobRulesDialog rules={rowData.rules}/>,
-                        editComponent: props => <EditJobRulesDialog rules={props.value} onChange={props.onChange}
-                                                                   {...builderProps(props.rowData.bucketId)}/>
+                        editComponent: props => (
+                            <EditJobRulesDialog
+                                rules={props.value}
+                                properties={props.rowData.properties}
+                                onChange={({rules, properties}) =>
+                                    props.onRowDataChange({...props.rowData, rules, properties})}
+                                {...builderProps(props.rowData.bucketId)}/>
+                        )
 
                     },
                     {

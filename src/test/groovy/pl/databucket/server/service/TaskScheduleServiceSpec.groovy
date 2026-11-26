@@ -194,6 +194,28 @@ class TaskScheduleServiceSpec extends Specification {
         cron << [null, '', '  ']
     }
 
+    def "should keep the properties of the rules builder: #given -> #expected"() {
+        given:
+        def task = new Task(); task.id = 3
+        def bucket = new Bucket(); bucket.id = 4; bucket.name = 'orders'
+        taskRepository.findByIdAndDeleted(3, false) >> task
+        bucketRepository.findByIdAndDeleted(4, false) >> bucket
+        scheduleRepository.save(_) >> { TaskSchedule saved -> saved }
+        def dto = new TaskScheduleDto(name: 'Clean orders', taskId: 3, bucketId: 4, properties: given)
+
+        when:
+        def saved = service.createSchedule(dto)
+
+        then:
+        saved.properties == expected
+
+        where:
+        given                                                              || expected
+        null                                                               || null
+        []                                                                 || null
+        [[uuid: 'u1', path: '$.city', title: 'City', type: 'string']]      || [[uuid: 'u1', path: '$.city', title: 'City', type: 'string']]
+    }
+
     def "should import a job of a dataset disabled, without a preview"() {
         given:
         def task = new Task(); task.id = 3

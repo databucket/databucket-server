@@ -8,6 +8,7 @@ import pl.databucket.server.configuration.Constants;
 import pl.databucket.server.entity.TaskSchedule;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A job of a dataset (Settings > Jobs): its task and bucket by their ids in the dataset. Imported disabled: the cron
@@ -26,6 +27,8 @@ public class DatasetJobDto {
     private Long bucketId;
     // rules narrowing the filter of the task, in the "rules" format of the API
     private List<Object> rules;
+    // the properties of the rules builder in the GUI
+    private List<Map<String, Object>> properties;
     private String cron;
     private String timeZone;
     @Size(max = TaskSchedule.KEYWORD_MAX)
@@ -38,6 +41,7 @@ public class DatasetJobDto {
         job.setTaskId(schedule.getTaskId());
         job.setBucketId(schedule.getBucketId());
         job.setRules(schedule.getRules());
+        job.setProperties(schedule.getProperties());
         job.setCron(schedule.getCron());
         job.setTimeZone(schedule.getTimeZone());
         job.setKeyword(schedule.getKeyword());

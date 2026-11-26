@@ -10,6 +10,7 @@ import pl.databucket.server.configuration.Constants;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A job (Settings > Jobs): runs a task on a bucket by cron, as the user who saved it last (runAs), by its keyword
@@ -53,6 +54,12 @@ public class TaskSchedule extends Auditable<String> {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private List<Object> rules;
+
+    // the properties of the rules builder in the GUI besides those of the bucket's class (as in a filter); not used
+    // when the job runs
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<Map<String, Object>> properties;
 
     // 6 fields (second minute hour day month weekday), as Spring's CronExpression; null = not run by cron
     @Column(length = 100)

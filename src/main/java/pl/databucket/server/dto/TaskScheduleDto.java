@@ -8,6 +8,7 @@ import pl.databucket.server.configuration.Constants;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -21,6 +22,8 @@ public class TaskScheduleDto {
     private Long taskId;
     private Long bucketId;
     private List<Object> rules;
+    // the properties of the rules builder in the GUI (path, title, type...), besides those of the bucket's class
+    private List<Map<String, Object>> properties;
     private String cron;
     @Size(max = pl.databucket.server.entity.TaskSchedule.KEYWORD_MAX)
     private String keyword;
