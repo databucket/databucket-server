@@ -5,7 +5,7 @@ import {
     getGetOptions,
     getPageSizeOptionsOnDialog,
     getPostOptions,
-    getPutOptions,
+    getPatchOptions,
     getTableHeaderBackgroundColor,
     getTableHeight,
     getTableRowBackgroundColor,
@@ -607,7 +607,7 @@ export default function BucketDataTable() {
         if (changed) {
             let resultOk = true;
             fetch(getDataByIdUrl(activeBucket, dataRow.id),
-                getPutOptions({properties: dataRow.properties}))
+                getPatchOptions({properties: dataRow.properties}))
                 .then(handleErrors)
                 .catch(error => {
                     setMessageBox({
@@ -953,7 +953,7 @@ export default function BucketDataTable() {
                 tooltip: 'Reserve',
                 position: 'toolbarOnSelect',
                 // the server reserves only the rows that are not reserved yet
-                onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: true}), 'Reserved',
+                onClick: (event, rows) => changeSelected(rows, getPatchOptions({reserved: true}), 'Reserved',
                     (count, selected) => count === selected ? `Reserved ${count} data row(s)`
                         : `Reserved ${count} of ${selected} data rows, the others are already reserved`)
             });
@@ -961,7 +961,7 @@ export default function BucketDataTable() {
                 icon: LockOpen,
                 tooltip: 'Release',
                 position: 'toolbarOnSelect',
-                onClick: (event, rows) => changeSelected(rows, getPutOptions({reserved: false}), 'Released')
+                onClick: (event, rows) => changeSelected(rows, getPatchOptions({reserved: false}), 'Released')
             });
         }
         if (isFeatureEnabled(FEATURE_REMOVAL, view))
@@ -980,7 +980,7 @@ export default function BucketDataTable() {
         if (type === 'delete')
             changeSelected(rows, getDeleteOptions(), 'Deleted');
         else
-            changeSelected(rows, getPutOptions({tagId}), 'Tag set');
+            changeSelected(rows, getPatchOptions({tagId}), 'Tag set');
     }
 
     const getActions = () => {
@@ -1035,7 +1035,7 @@ export default function BucketDataTable() {
             let resultOk = true;
             if (Object.keys(payload).length > 0) {
                 fetch(getDataByIdUrl(activeBucket, getRowDataId(newData)),
-                    getPutOptions(payload))
+                    getPatchOptions(payload))
                     .then(handleErrors)
                     .catch(error => {
                         setMessageBox({
