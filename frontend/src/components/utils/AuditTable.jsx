@@ -10,6 +10,8 @@ import {
     DialogTitle,
     IconButton,
     MenuItem,
+    Popover,
+    Stack,
     Table,
     TableBody,
     TableCell,
@@ -22,7 +24,7 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import {FileDownload, Refresh} from '@mui/icons-material';
+import {DateRange, FileDownload, FilterList, Refresh} from '@mui/icons-material';
 import {exportCsv} from "../../utils/CsvExport";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import {useTheme} from '@mui/material/styles';
@@ -69,13 +71,45 @@ const show = value => {
 // a date input value (local time) -> ISO instant
 const toInstant = local => local ? new Date(local).toISOString() : null;
 
+// a Date as the value of a datetime-local input (local time, minutes)
+const toLocalInput = date => {
+    const pad = n => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+// a datetime-local value shown short, in the locale of the browser
+const showLocal = local => new Date(local).toLocaleString(undefined, {dateStyle: 'short', timeStyle: 'short'});
+
+const PERIODS = [['Last hour', 1], ['Last 24 hours', 24], ['Last 7 days', 24 * 7], ['Last 30 days', 24 * 30]];
+
+// the filter row is shown or not, per table and browser (as in the other tables)
+const filteringKey = endpoint => `audit-table-filtering-${endpoint}`;
+const savedFiltering = endpoint => {
+    try {
+        return localStorage.getItem(filteringKey(endpoint)) === 'true';
+    } catch (e) {
+        return false;
+    }
+};
+const saveFiltering = (endpoint, value) => {
+    try {
+        localStorage.setItem(filteringKey(endpoint), String(value));
+    } catch (e) {
+        // only a convenience
+    }
+};
+
+const EMPTY_FILTER = {actor: ALL, type: ALL, action: ALL, project: ALL, from: '', to: ''};
+
 /**
  * The changes of the settings (Settings > Activity) or of everything (Management > Audit log): newest first, filtered
  * by who, the type of the object, the action and the period; a row opens its changes, property by property.
  */
 export default function AuditTable(props) {
     const theme = useTheme();
-    const [filter, setFilter] = useState({actor: ALL, type: ALL, action: ALL, project: ALL, from: '', to: ''});
+    const [filter, setFilter] = useState(EMPTY_FILTER);
+    const [filtering, setFiltering] = useState(() => savedFiltering(props.endpoint));
+    const [periodAnchor, setPeriodAnchor] = useState(null);
     const [paging, setPaging] = useState({page: 0, limit: 50});
     const [result, setResult] = useState({total: 0, events: []});
     const [facets, setFacets] = useState({actors: [], types: [], actions: [], retentionDays: 0});
@@ -138,8 +172,21 @@ export default function AuditTable(props) {
         setPaging({...paging, page: 0});
     };
 
-    const select = (name, label, options, width = 150) => (
-        <TextField select size='small' variant='standard' label={label} value={filter[name]} sx={{width}}
+    // turning the filter row off clears the filters, as in the other tables
+    const toggleFiltering = () => {
+        if (filtering) {
+            setFilter(EMPTY_FILTER);
+            setPaging({...paging, page: 0});
+        }
+        saveFiltering(props.endpoint, !filtering);
+        setFiltering(!filtering);
+    };
+
+    const filtered = Object.keys(EMPTY_FILTER).some(key => filter[key] !== EMPTY_FILTER[key]);
+
+    const select = (name, options, width = 130) => (
+        <TextField select size='small' variant='standard' value={filter[name]} sx={{width, display: 'block'}}
+                   SelectProps={{displayEmpty: true}}
                    onChange={e => change(name, e.target.value)}>
             <MenuItem value={ALL}><em>All</em></MenuItem>
             {options.map(option => typeof option === 'object'
@@ -153,20 +200,49 @@ export default function AuditTable(props) {
             ...props.projects.map(p => ({value: String(p.id), label: p.name}))]
         : null;
 
+    const setPeriod = (from, to) => {
+        setFilter({...filter, from, to});
+        setPaging({...paging, page: 0});
+    };
+
+    // the period: a button in the When column, From and To (and a few periods) in a popup
+    const periodText = filter.from || filter.to
+        ? `${filter.from ? showLocal(filter.from) : '…'} – ${filter.to ? showLocal(filter.to) : '…'}`
+        : 'Any time';
+    const periodFilter = (
+        <>
+            <Button size='small' color={filter.from || filter.to ? 'secondary' : 'inherit'} startIcon={<DateRange/>}
+                    onClick={e => setPeriodAnchor(e.currentTarget)}
+                    sx={{display: 'flex', textTransform: 'none', px: 0, minWidth: 0, whiteSpace: 'nowrap',
+                        fontWeight: 'normal'}}>
+                {periodText}
+            </Button>
+            <Popover open={periodAnchor != null} anchorEl={periodAnchor} onClose={() => setPeriodAnchor(null)}
+                     anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}>
+                <Stack spacing={2} sx={{p: 2, width: 260}}>
+                    <TextField type='datetime-local' size='small' label='From' InputLabelProps={{shrink: true}}
+                               value={filter.from} onChange={e => change('from', e.target.value)}/>
+                    <TextField type='datetime-local' size='small' label='To' InputLabelProps={{shrink: true}}
+                               value={filter.to} onChange={e => change('to', e.target.value)}/>
+                    <Stack direction='row' sx={{flexWrap: 'wrap', gap: 1}}>
+                        {PERIODS.map(([label, hours]) => (
+                            <Chip key={label} size='small' variant='outlined' label={label}
+                                  onClick={() => setPeriod(toLocalInput(new Date(Date.now() - hours * 3600000)), '')}/>
+                        ))}
+                    </Stack>
+                    <Stack direction='row' sx={{justifyContent: 'flex-end', gap: 1}}>
+                        <Button size='small' color='inherit' onClick={() => setPeriod('', '')}>Clear</Button>
+                        <Button size='small' variant='contained' onClick={() => setPeriodAnchor(null)}>Close</Button>
+                    </Stack>
+                </Stack>
+            </Popover>
+        </>
+    );
+
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', height: props.height || getSettingsTableHeight()}}>
-            <Toolbar sx={{gap: 2, flexWrap: 'wrap', alignItems: 'flex-end', pt: 2, pb: 2.5}}>
-                <Typography variant='h6' sx={{mr: 6}}>{props.title}</Typography>
-                {projectOptions != null && select('project', 'Project', projectOptions, 180)}
-                {select('actor', 'Who', facets.actors)}
-                {select('type', 'Object', facets.types)}
-                {select('action', 'Action', facets.actions || [], 170)}
-                <TextField type='datetime-local' size='small' variant='standard' label='From'
-                           InputLabelProps={{shrink: true}} value={filter.from}
-                           onChange={e => change('from', e.target.value)}/>
-                <TextField type='datetime-local' size='small' variant='standard' label='To'
-                           InputLabelProps={{shrink: true}} value={filter.to}
-                           onChange={e => change('to', e.target.value)}/>
+            <Toolbar sx={{gap: 1, alignItems: 'center'}}>
+                <Typography variant='h6'>{props.title}</Typography>
                 <Box sx={{flex: 1}}/>
                 {facets.retentionDays > 0 &&
                     <Typography variant='caption' color='text.secondary'>
@@ -178,17 +254,23 @@ export default function AuditTable(props) {
                 <Tooltip title='Refresh'>
                     <IconButton onClick={() => { load(); loadFacets(); }}><Refresh/></IconButton>
                 </Tooltip>
+                <Tooltip title='Filter'>
+                    <IconButton onClick={toggleFiltering}>
+                        <FilterList color={filtering && filtered ? 'secondary' : 'inherit'}/>
+                    </IconButton>
+                </Tooltip>
             </Toolbar>
             <TableContainer sx={{flex: 1}}>
                 <Table size='small' stickyHeader>
                     <TableHead sx={{'& .MuiTableCell-head': {backgroundColor: getTableHeaderBackgroundColor(theme)}}}>
-                        <TableRow>
-                            <TableCell>When</TableCell>
-                            {projectOptions != null && <TableCell>Project</TableCell>}
-                            <TableCell>Who</TableCell>
+                        <TableRow sx={{'& .MuiTableCell-head': {verticalAlign: 'top'}}}>
+                            <TableCell>When{filtering && periodFilter}</TableCell>
+                            {projectOptions != null &&
+                                <TableCell>Project{filtering && select('project', projectOptions, 150)}</TableCell>}
+                            <TableCell>Who{filtering && select('actor', facets.actors)}</TableCell>
                             <TableCell>Source</TableCell>
-                            <TableCell>Action</TableCell>
-                            <TableCell>Object</TableCell>
+                            <TableCell>Action{filtering && select('action', facets.actions || [], 150)}</TableCell>
+                            <TableCell>Object{filtering && select('type', facets.types)}</TableCell>
                             <TableCell>Name</TableCell>
                             <TableCell>Changed</TableCell>
                         </TableRow>
