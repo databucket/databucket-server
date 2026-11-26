@@ -1009,7 +1009,9 @@ export default function BucketDataTable() {
         return actions;
     }
 
+    // the table reloads the page after an added, changed or deleted row: the total is counted again (see reloadData)
     const onRowAddAction = (newData) => new Promise((resolve, reject) => {
+        knownTotal.current = null;
         let resultOk = true;
         fetch(getDataUrl(activeBucket),
             getPostOptions(convertDataBeforeAdd(state.tableColumns, newData)))
@@ -1061,6 +1063,7 @@ export default function BucketDataTable() {
         });
 
     const onRowDeleteAction = (oldData) => new Promise((resolve, reject) => {
+        knownTotal.current = null;
         let resultOk = true;
         fetch(getDataByIdUrl(activeBucket, getRowDataId(oldData)),
             getDeleteOptions())
