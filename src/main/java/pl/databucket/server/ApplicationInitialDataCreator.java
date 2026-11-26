@@ -1,5 +1,7 @@
 package pl.databucket.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -14,9 +16,12 @@ import pl.databucket.server.repository.UserRepository;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 public class ApplicationInitialDataCreator implements ApplicationRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationInitialDataCreator.class);
 
     @Autowired
     private UserRepository userRepository;
