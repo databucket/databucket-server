@@ -303,15 +303,14 @@ export default function EditJobRulesDialog(props) {
                 </DialogTitle>
                 <DialogContent dividers ref={dialogContentRef}
                                sx={{p: 0, height: '62vh', display: 'flex', flexDirection: 'column'}}>
-                    <Typography variant='body2' color='text.secondary' sx={{px: 2, pt: 1}}>
-                        {tab === RULES && 'The rows of the task filter AND these rules. Dates also relative: @now,'
-                            + ' @now-2h (s, m, h, d, w). No conditions = no extra rules.'}
-                        {tab === PROPERTIES && 'The properties of the Rules tab: those of the class of the job\'s'
-                            + ' bucket, add or change them here.'}
-                        {tab === JSON_TAB && 'The rows of the task filter AND these rules: a list of rules'
-                            + ' [left, operator, right], groups as {"or": [...]}; dates also relative: @now-2h.'
-                            + ' Empty = no extra rules.'}
-                    </Typography>
+                    {tab !== PROPERTIES &&
+                        <Typography variant='body2' color='text.secondary' sx={{px: 2, pt: 1}}>
+                            {tab === RULES && 'The rows of the task filter AND these rules. Dates also relative:'
+                                + ' @now, @now-2h (s, m, h, d, w). No conditions = no extra rules.'}
+                            {tab === JSON_TAB && 'The rows of the task filter AND these rules: a list of rules'
+                                + ' [left, operator, right], groups as {"or": [...]}; dates also relative: @now-2h.'
+                                + ' Empty = no extra rules.'}
+                        </Typography>}
                     {note != null && <Alert severity='info' sx={{mx: 2, mt: 1}}>{note}</Alert>}
                     {error != null && <Alert severity='error' sx={{mx: 2, mt: 1}}>{error}</Alert>}
                     {tab === RULES && builder != null &&
