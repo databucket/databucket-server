@@ -156,7 +156,7 @@ export default function AuditTable(props) {
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', height: props.height || getSettingsTableHeight()}}>
             <Toolbar sx={{gap: 2, flexWrap: 'wrap', alignItems: 'flex-end', pt: 2, pb: 2.5}}>
-                <Typography variant='h6' sx={{mr: 2}}>{props.title}</Typography>
+                <Typography variant='h6' sx={{mr: 6}}>{props.title}</Typography>
                 {projectOptions != null && select('project', 'Project', projectOptions, 180)}
                 {select('actor', 'Who', facets.actors)}
                 {select('type', 'Object', facets.types)}
