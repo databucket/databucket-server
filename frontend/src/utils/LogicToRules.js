@@ -32,7 +32,7 @@ class Unsupported extends Error {
 
 // In the rules format the server reads a text starting with "$" or equal to a field name as a property or a field
 // on either side of a rule (["$.a", "==", "$.b"] compares two properties), so such a value can't be a constant there.
-const FIELDS = ['id', 'tagId', 'owner', 'reserved', 'properties', 'createdBy', 'createdAt', 'modifiedBy', 'modifiedAt'];
+export const FIELDS = ['id', 'tagId', 'owner', 'reserved', 'properties', 'createdBy', 'createdAt', 'modifiedBy', 'modifiedAt'];
 
 const readAsVariable = value => typeof value === 'string' && (value.startsWith('$') || FIELDS.includes(value));
 

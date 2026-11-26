@@ -198,6 +198,7 @@ public class DatasetImporter {
             job.setTaskId(map(ids.tasks, job.getTaskId()));
             job.setBucketId(map(ids.buckets, job.getBucketId()));
             job.setRules(mapRuleTagIds(ids, job.getRules()));
+            mapEnums(ids, job.getProperties());
             taskScheduleService.importJob(job);
         }
         return rows;
@@ -251,7 +252,7 @@ public class DatasetImporter {
         return keys == null ? null : keys.stream().map(id -> map(ids, id)).collect(Collectors.toSet());
     }
 
-    // class properties copied into columns, filters and tasks carry the enum of the property
+    // class properties copied into columns, filters, tasks and jobs carry the enum of the property
     private static void mapEnums(Ids ids, List<Map<String, Object>> properties) {
         if (properties == null)
             return;

@@ -21,6 +21,7 @@ const TABLE_COLUMNS = 'table-columns';
 const DATA_DETAILS_DIALOG_SIZE = 'data-details-dialog-size';
 const DATA_FILTER_DIALOG_SIZE = 'data-filter-dialog-size';
 const TASK_EXECUTION_DIALOG_SIZE = 'task-execution-dialog-size';
+const JOB_RULES_DIALOG_SIZE = 'job-rules-dialog-size';
 
 export const logOut = () => {
     clearUsername();
@@ -362,6 +363,23 @@ export const getDataFilterDialogSize = () => {
 
 export const setDataFilterDialogSize = (size) => {
     localStorage.setItem(DATA_FILTER_DIALOG_SIZE, size);
+}
+
+// the window of the rules of a job (Settings > Jobs): md or lg
+export const getJobRulesDialogSize = () => {
+    try {
+        return localStorage.getItem(JOB_RULES_DIALOG_SIZE) === 'lg' ? 'lg' : 'md';
+    } catch (e) {
+        return 'md';
+    }
+}
+
+export const setJobRulesDialogSize = (size) => {
+    try {
+        localStorage.setItem(JOB_RULES_DIALOG_SIZE, size);
+    } catch (e) {
+        // the size is only a convenience
+    }
 }
 
 export const getTaskExecutionDialogSize = () => {

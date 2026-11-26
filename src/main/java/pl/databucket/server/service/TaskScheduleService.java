@@ -141,6 +141,7 @@ public class TaskScheduleService {
         schedule.setTask(task);
         schedule.setBucket(bucket);
         schedule.setRules(job.getRules() == null || job.getRules().isEmpty() ? null : job.getRules());
+        schedule.setProperties(emptyAsNull(job.getProperties()));
         schedule.setCron(job.getCron() == null || job.getCron().isBlank() ? null : ScheduleCron.normalize(job.getCron()));
         schedule.setTimeZone(ScheduleCron.zone(job.getTimeZone()).getId());
         schedule.setKeyword(keyword);
@@ -271,6 +272,7 @@ public class TaskScheduleService {
         schedule.setTask(task);
         schedule.setBucket(bucket);
         schedule.setRules(rules);
+        schedule.setProperties(emptyAsNull(dto.getProperties()));
         schedule.setCron(cron);
         schedule.setKeyword(keyword);
         schedule.setTimeZone(timeZone);
@@ -282,6 +284,10 @@ public class TaskScheduleService {
         schedule.setNextRunAt(dto.isEnabled() && cron != null ? ScheduleCron.next(cron, timeZone, Instant.now()) : null);
     }
 
+    private static List<Map<String, Object>> emptyAsNull(List<Map<String, Object>> properties) {
+        return properties == null || properties.isEmpty() ? null : properties;
+    }
+
     static TaskScheduleDto toDto(TaskSchedule schedule) {
         TaskScheduleDto dto = new TaskScheduleDto();
         dto.setId(schedule.getId());
@@ -290,6 +296,7 @@ public class TaskScheduleService {
         dto.setTaskId(schedule.getTask() != null ? schedule.getTask().getId() : null);
         dto.setBucketId(schedule.getBucket() != null ? schedule.getBucket().getId() : null);
         dto.setRules(schedule.getRules());
+        dto.setProperties(schedule.getProperties());
         dto.setCron(schedule.getCron());
         dto.setKeyword(schedule.getKeyword());
         dto.setTimeZone(schedule.getTimeZone());
