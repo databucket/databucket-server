@@ -202,7 +202,7 @@ public class DataController {
             @ApiResponse(responseCode = "406", description = "Not acceptable - the tagId doesn't exist, or a property to change is empty"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
             @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
@@ -255,7 +255,7 @@ public class DataController {
             @ApiResponse(responseCode = "406", description = "Not acceptable - no rules, the tagId doesn't exist, or a property to change is empty"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> modifyData(
             @Parameter(description = BUCKET_NAME, required = true)
             @PathVariable String bucketName,
@@ -292,6 +292,34 @@ public class DataController {
         }
     }
 
+
+    // PUT: the method of the modifications before 3.26.0, kept for the clients and scripts that use it
+
+    @PreAuthorize("hasRole('AGENT')")
+    @Operation(summary = "Modify data rows by ids (PUT)", deprecated = true,
+            description = "The same as PATCH /api/bucket/{bucketName}/{ids}, kept for older clients: use PATCH.")
+    @PutMapping(value = {"/{ids}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> modifyDataByPut(
+            @Parameter(description = BUCKET_NAME, required = true)
+            @PathVariable String bucketName,
+            @Parameter(description = IDS, example = "1,2,3", required = true)
+            @PathVariable Optional<List<Long>> ids,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The changes", required = true)
+            @RequestBody DataModifyDTO dataModifyDTO) {
+        return modifyData(bucketName, ids, dataModifyDTO);
+    }
+
+    @PreAuthorize("hasRole('AGENT')")
+    @Operation(summary = "Modify data rows by rules (PUT)", deprecated = true,
+            description = "The same as PATCH /api/bucket/{bucketName}, kept for older clients: use PATCH.")
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> modifyDataByPut(
+            @Parameter(description = BUCKET_NAME, required = true)
+            @PathVariable String bucketName,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The changes and the rules", required = true)
+            @RequestBody DataModifyDTO dataModifyDTO) {
+        return modifyData(bucketName, dataModifyDTO);
+    }
 
     @Operation(summary = "Get data rows by ids", description = "Returns the data rows with the given ids. "
             + "For a single id that exists the response is one object, otherwise a list (ids that don't exist are skipped).")

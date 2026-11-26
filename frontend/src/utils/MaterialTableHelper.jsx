@@ -65,6 +65,15 @@ export const getPutOptions = (payload) => {
     });
 }
 
+// a partial change (the data rows: only the given items change)
+export const getPatchOptions = (payload) => {
+    return ({
+        method: 'PATCH',
+        body: reverseMapping(payload),
+        headers: fetchHelper(getToken())
+    });
+}
+
 export const getDeleteOptions = (payload) => {
     if (payload != null) {
         return ({

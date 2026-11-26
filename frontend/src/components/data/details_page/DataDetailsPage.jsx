@@ -3,7 +3,7 @@ import {createTagLookup} from "../../../utils/JsonHelper";
 import {
     getBodyHeight,
     getGetOptions,
-    getPutOptions,
+    getPatchOptions,
     getTableHeaderBackgroundColor,
     getTableRowBackgroundColor
 } from "../../../utils/MaterialTableHelper";
@@ -110,7 +110,7 @@ export default function DataDetailsPage() {
 
     const handleSave = () => {
         let resultOk = true;
-        fetch(getDataByIdUrl2(inputParams.bucketName, inputParams.dataId), getPutOptions({properties: state.changedProperties}))
+        fetch(getDataByIdUrl2(inputParams.bucketName, inputParams.dataId), getPatchOptions({properties: state.changedProperties}))
             .then(handleErrors)
             .catch(error => {
                 setMessageBox({open: true, severity: 'error', title: 'Error', message: error});

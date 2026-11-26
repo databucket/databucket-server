@@ -20,7 +20,7 @@ import PropTypes from "prop-types";
 import {
     getDeleteOptions,
     getPostOptions,
-    getPutOptions
+    getPatchOptions
 } from "../../utils/MaterialTableHelper";
 import {MessageBox} from "../utils/MessageBox";
 import TaskActions, {isReserveValid, reserveActions} from "../utils/TaskActions";
@@ -325,7 +325,7 @@ export default function TaskExecutionDialog(props) {
             case 'clear history':
                 return {method: 'DELETE', url: getClearDataHistoryByRulesUrl(props.bucket), extra: {}};
             case 'modify':
-                return {method: 'PUT', url: getDataUrl(props.bucket), extra: getModifyChanges()};
+                return {method: 'PATCH', url: getDataUrl(props.bucket), extra: getModifyChanges()};
             default:
                 return {method: 'POST', url: `${getDataUrl(props.bucket)}/get?limit=10`, extra: {}};
         }
@@ -401,7 +401,7 @@ export default function TaskExecutionDialog(props) {
 
             if (Object.keys(changes).length > 0) {
                 setState({...state, processing: true});
-                fetch(getDataUrl(props.bucket), getPutOptions(payload))
+                fetch(getDataUrl(props.bucket), getPatchOptions(payload))
                     .then(handleErrors)
                     .catch(error => {
                         setMessageBox({open: true, severity: 'error', title: 'Error', message: error});
