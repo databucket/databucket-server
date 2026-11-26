@@ -15,7 +15,7 @@ import {
     Typography,
     useTheme
 } from '@mui/material';
-import {MoreHoriz} from '@mui/icons-material';
+import {Close as CloseIcon, MoreHoriz} from '@mui/icons-material';
 import {Query, Utils as QbUtils} from '@react-awesome-query-builder/mui';
 import {JsonEditor as Editor} from 'jsoneditor-react18';
 import ace from 'brace';
@@ -300,6 +300,10 @@ export default function EditJobRulesDialog(props) {
                             </IconButton>
                         </span>
                     </Tooltip>
+                    <IconButton aria-label='Close' color='inherit' onClick={() => setOpen(false)}
+                                sx={{ml: '20px'}}>
+                        <CloseIcon/>
+                    </IconButton>
                 </DialogTitle>
                 <DialogContent dividers ref={dialogContentRef}
                                sx={{p: 0, height: '62vh', display: 'flex', flexDirection: 'column'}}>
