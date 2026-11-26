@@ -37,6 +37,7 @@ import Ajv from 'ajv';
 import ace from 'brace';
 import 'brace/mode/json';
 import "brace/theme/monokai";
+import TableContainer from "../utils/TableContainer";
 
 const PREFIX = 'DataDetailsDialog';
 
@@ -365,7 +366,7 @@ export default function DataDetailsDialog(props) {
                     })
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
             />
             <DialogContent

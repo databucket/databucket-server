@@ -38,6 +38,7 @@ import {getTagMapper} from "../../utils/NullValueMappers";
 import ClassesContext from "../../context/classes/ClassesContext";
 import TagsContext from "../../context/tags/TagsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import TableContainer from "../utils/TableContainer";
 
 export default function TagsTab() {
 
@@ -113,7 +114,7 @@ export default function TagsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

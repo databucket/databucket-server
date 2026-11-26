@@ -49,6 +49,7 @@ import SelectMultiViewFeaturesLookup
     from "../lookup/SelectMultiViewFeaturesLookup";
 import CloneIcon from "@mui/icons-material/ViewStream";
 import {describeViewSort, formatViewSort, getSortableColumns, parseViewSort} from "../../utils/ViewSort";
+import TableContainer from "../utils/TableContainer";
 
 // the default sort of a view: one of the sortable columns of its columns definition and a direction; none = by id
 const ViewSortEditor = ({value, sortableColumns, onChange}) => {
@@ -215,7 +216,7 @@ export default function ViewsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

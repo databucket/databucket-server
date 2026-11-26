@@ -36,6 +36,7 @@ import {getManageUserMapper} from "../../utils/NullValueMappers";
 import SelectTeamsDialog from "../dialogs/SelectTeamsDialog";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import TableContainer from "../utils/TableContainer";
 
 export default function UsersTab() {
 
@@ -130,7 +131,7 @@ export default function UsersTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

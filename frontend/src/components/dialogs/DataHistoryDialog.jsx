@@ -26,6 +26,7 @@ import {
 import {getClearDataHistoryByIdUrl} from "../../utils/UrlBuilder";
 import {handleErrors} from "../../utils/FetchHelper";
 import {MessageBox} from "../utils/MessageBox";
+import TableContainer from "../utils/TableContainer";
 
 const PREFIX = 'DataHistoryDialog';
 
@@ -189,7 +190,7 @@ export default function DataHistoryDialog(props) {
                         headerStyle: { position: 'sticky', top: 0, backgroundColor: getTableHeaderBackgroundColor(theme), zIndex: 2 }
                     }}
                     components={{
-                        Container: props => <div {...props} />
+                        Container: TableContainer
                     }}
                 />
                 <MessageBox

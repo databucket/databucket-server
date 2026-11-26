@@ -28,6 +28,7 @@ import {
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
 import {parseCustomSvg, prepareSvgIcon} from "../utils/SvgHelper";
+import TableContainer from "../utils/TableContainer";
 
 export default function SvgTab() {
 
@@ -128,7 +129,7 @@ export default function SvgTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

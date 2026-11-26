@@ -29,6 +29,7 @@ import {
     setLastPageSizeOnDialog
 } from "../../utils/ConfigurationStorage";
 import PropTypes from 'prop-types';
+import TableContainer from "./TableContainer";
 
 const PREFIX = 'SelectSingleDialog';
 
@@ -198,7 +199,7 @@ export default function SelectSingleDialog(props) {
                             })
                         }}
                         components={{
-                            Container: props => <div {...props} />
+                            Container: TableContainer
                         }}
                     />
                 </DialogContent>

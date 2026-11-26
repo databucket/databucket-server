@@ -46,6 +46,7 @@ import TaskEditConfigDialog, {
 } from "../dialogs/TaskEditConfigDialog";
 import FiltersContext from "../../context/filters/FiltersContext";
 import TagsContext from "../../context/tags/TagsContext";
+import TableContainer from "../utils/TableContainer";
 
 export default function TasksTab() {
 
@@ -176,7 +177,7 @@ export default function TasksTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

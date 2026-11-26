@@ -34,6 +34,7 @@ import {getEnumMapper} from "../../utils/NullValueMappers";
 import EditEnumDialog from "../dialogs/EditEnumDialog";
 import EnumsContext from "../../context/enums/EnumsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import TableContainer from "../utils/TableContainer";
 
 const EditEnumComponent = props => (
     <EditEnumDialog
@@ -113,7 +114,7 @@ export default function EnumsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

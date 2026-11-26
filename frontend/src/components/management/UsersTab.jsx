@@ -45,6 +45,7 @@ import {
 } from "../utils/StandardColumns";
 import {getManageUserMapper} from "../../utils/NullValueMappers";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import TableContainer from "../utils/TableContainer";
 
 const editRolesComponent = (roles) => props =>
     <SelectRoleLookup rowData={props.rowData} roles={roles} onChange={props.onChange}/>;
@@ -150,7 +151,7 @@ export default function UsersTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     rowData => ({

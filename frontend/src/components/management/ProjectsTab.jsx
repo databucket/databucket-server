@@ -42,6 +42,7 @@ import {getManageProjectMapper} from "../../utils/NullValueMappers";
 import ProjectContentDialog from "./ProjectContentDialog";
 import DatasetImportDialog from "./DatasetImportDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import TableContainer from "../utils/TableContainer";
 
 // The table puts its Edit and Delete after the other row actions; here the order is
 // Edit | Import / Export dataset | Clear project | Delete
@@ -197,7 +198,7 @@ export default function ProjectsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />,
+                    Container: TableContainer,
                     Actions: RowActions
                 }}
                 actions={[

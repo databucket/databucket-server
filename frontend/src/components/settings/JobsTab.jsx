@@ -37,6 +37,7 @@ import UsersContext from "../../context/users/UsersContext";
 import EnumsContext from "../../context/enums/EnumsContext";
 import {getBucketTags} from "../data/BucketDataTableHelper";
 import {getClassById} from "../../utils/JsonHelper";
+import TableContainer from "../utils/TableContainer";
 
 const browserTimeZone = () => {
     try {
@@ -305,7 +306,7 @@ export default function JobsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

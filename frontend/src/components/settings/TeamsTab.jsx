@@ -39,6 +39,7 @@ import {getBaseUrl} from "../../utils/UrlBuilder";
 import BucketsContext from "../../context/buckets/BucketsContext";
 import ViewsContext from "../../context/views/ViewsContext";
 import GroupsContext from "../../context/groups/GroupsContext";
+import TableContainer from "../utils/TableContainer";
 
 export default function TeamsTab() {
 
@@ -119,7 +120,7 @@ export default function TeamsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

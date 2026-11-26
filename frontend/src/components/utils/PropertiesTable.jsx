@@ -20,6 +20,7 @@ import {
 import {useTheme} from "@mui/material";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
+import TableContainer from "./TableContainer";
 
 PropertiesTable.propTypes = {
     data: PropTypes.array.isRequired,
@@ -159,7 +160,7 @@ export default function PropertiesTable(props) {
                     })
                 }}
                 components={{
-                    Container: props => <div {...props} />,
+                    Container: TableContainer,
                     Row: props => <DraggableBodyRow {...props}
                                                     onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                 }}
