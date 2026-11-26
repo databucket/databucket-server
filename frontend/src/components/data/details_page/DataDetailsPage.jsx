@@ -34,6 +34,7 @@ import 'brace/mode/json';
 import "brace/theme/monokai";
 import {Close as CloseIcon} from "@mui/icons-material";
 import {setPathname} from "../../../utils/ConfigurationStorage";
+import TableContainer from "../../utils/TableContainer";
 // import "brace/theme/eclipse";
 
 const ajv = new Ajv({allErrors: true, verbose: true});
@@ -210,7 +211,7 @@ export default function DataDetailsPage() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
             />
             <Editor

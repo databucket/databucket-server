@@ -24,6 +24,7 @@ import {
 } from "../../utils/ConfigurationStorage";
 import {setSelectionItemsByIds} from "../../utils/JsonHelper";
 import PropTypes from 'prop-types';
+import TableContainer from "./TableContainer";
 
 const PREFIX = 'SelectMultiDialog';
 
@@ -192,7 +193,7 @@ export default function SelectMultiDialog(props) {
                             rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                         }}
                         components={{
-                            Container: props => <div {...props} />
+                            Container: TableContainer
                         }}
                     />
                 </DialogContent>

@@ -47,6 +47,7 @@ import {getBaseUrl} from "../../utils/UrlBuilder";
 import SvgContext from "../../context/svgs/SvgContext";
 import StyledIcon from "../utils/StyledIcon";
 import EditIndexedPropertiesDialog from "../dialogs/EditIndexedPropertiesDialog";
+import TableContainer from "../utils/TableContainer";
 
 const EditComponent = props => <SelectIconDialog icon={props.value} onChange={props.onChange}/>;
 
@@ -224,7 +225,7 @@ export default function BucketsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

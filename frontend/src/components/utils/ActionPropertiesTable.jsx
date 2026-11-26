@@ -22,6 +22,7 @@ import {useTheme} from "@mui/material";
 import {MessageBox} from "./MessageBox";
 import PropTypes from "prop-types";
 import moment from 'moment';
+import TableContainer from "./TableContainer";
 
 ActionPropertiesTable.propTypes = {
     data: PropTypes.array,
@@ -276,7 +277,7 @@ export default function ActionPropertiesTable(props) {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />,
+                    Container: TableContainer,
                     Row: props => <DraggableBodyRow {...props}
                                                     onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                 }}

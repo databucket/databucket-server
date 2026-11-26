@@ -35,6 +35,7 @@ import {getClassMapper} from "../../utils/NullValueMappers";
 import EditClassFieldsDialog from "../dialogs/EditClassFieldsDialog";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import EnumsContext from "../../context/enums/EnumsContext";
+import TableContainer from "../utils/TableContainer";
 
 export default function ClassesTab() {
 
@@ -117,7 +118,7 @@ export default function ClassesTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

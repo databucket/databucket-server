@@ -40,6 +40,7 @@ import RolesContext from "../../context/roles/RolesContext";
 import {getGroupMapper} from "../../utils/NullValueMappers";
 import TeamsContext from "../../context/teams/TeamsContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
+import TableContainer from "../utils/TableContainer";
 
 export default function GroupsTab() {
 
@@ -133,7 +134,7 @@ export default function GroupsTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

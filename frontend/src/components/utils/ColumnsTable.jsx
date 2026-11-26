@@ -25,6 +25,7 @@ import {MessageBox} from "./MessageBox";
 import SelectSingleFieldLookup, {
     commonFields
 } from "../lookup/SelectSingleFieldLookup";
+import TableContainer from "./TableContainer";
 
 export default function ColumnsTable(props) {
 
@@ -169,7 +170,7 @@ export default function ColumnsTable(props) {
                     })
                 }}
                 components={{
-                    Container: props => <div {...props} />,
+                    Container: TableContainer,
                     Row: props => <DraggableBodyRow {...props}
                                                     onMoveRow={(from, to) => setData(movedRow(columns, from, to))}/>
                 }}

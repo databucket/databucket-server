@@ -34,6 +34,7 @@ import EditIconDialog from "./SelectIconDialog";
 import {MessageBox} from "../utils/MessageBox";
 import StyledIcon from "../utils/StyledIcon";
 import DraggableBodyRow from "../utils/DraggableBodyRow";
+import TableContainer from "../utils/TableContainer";
 
 const PREFIX = 'EditEnumDialog';
 
@@ -209,7 +210,7 @@ export default function EditEnumDialog(props) {
                             })
                         }}
                         components={{
-                            Container: props => <div {...props} />,
+                            Container: TableContainer,
                             Row: props => <DraggableBodyRow {...props}
                                                             onMoveRow={(from, to) => setData(movedRow(data, from, to))}/>
                         }}

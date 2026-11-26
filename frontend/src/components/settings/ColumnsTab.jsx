@@ -38,6 +38,7 @@ import EditColumnsDialog from "../dialogs/EditColumnsDialog";
 import CloneIcon from '@mui/icons-material/ViewStream'
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import ClassesContext from "../../context/classes/ClassesContext";
+import TableContainer from "../utils/TableContainer";
 
 export default function ColumnsTab() {
 
@@ -160,7 +161,7 @@ export default function ColumnsTab() {
                     })
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {

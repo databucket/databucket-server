@@ -43,6 +43,7 @@ import TagsContext from "../../context/tags/TagsContext";
 import UsersContext from "../../context/users/UsersContext";
 import {getBaseUrl} from "../../utils/UrlBuilder";
 import EnumsContext from "../../context/enums/EnumsContext";
+import TableContainer from "../utils/TableContainer";
 
 export default function FiltersTab() {
 
@@ -161,7 +162,7 @@ export default function FiltersTab() {
                     rowStyle: rowData => ({backgroundColor: getTableRowBackgroundColor(rowData, theme)})
                 }}
                 components={{
-                    Container: props => <div {...props} />
+                    Container: TableContainer
                 }}
                 actions={[
                     {
